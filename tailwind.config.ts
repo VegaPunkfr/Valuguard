@@ -219,13 +219,13 @@ const config: Config = {
     function ({ addComponents }: { addComponents: (components: Record<string, Record<string, string>>) => void }) {
       addComponents({
         ".glass-panel": {
-          "@apply vg-glass-panel": {},
+          "@apply vg-glass-panel": "",
         },
         ".glass-kpi": {
-          "@apply vg-glass-kpi": {},
+          "@apply vg-glass-kpi": "",
         },
         ".glass-navbar": {
-          "@apply vg-glass-navbar": {},
+          "@apply vg-glass-navbar": "",
         },
       });
     },
