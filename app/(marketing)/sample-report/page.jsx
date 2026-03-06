@@ -131,10 +131,10 @@ export default function SampleReport(){
         <div style={Object.assign({},gl,{padding:20,marginBottom:14})}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
             <div>
-              <p style={{fontSize:9,fontFamily:MO,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",color:A,marginBottom:6}}>{t("sample.header")}</p>
-              <h1 style={{fontSize:22,fontWeight:800,marginBottom:4}}>{COMPANY.name}</h1>
-              <p style={{fontSize:11,color:T2}}>{COMPANY.industry} · {COMPANY.headcount} employees · {COMPANY.tools} SaaS tools</p>
-              <p style={{fontSize:10,color:T3,marginTop:2}}>Audit period: {COMPANY.period}</p>
+              <p style={{fontSize:11,fontFamily:MO,fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",color:A,marginBottom:8}}>{t("sample.header")}</p>
+              <h1 style={{fontSize:28,fontWeight:800,marginBottom:6}}>{COMPANY.name}</h1>
+              <p style={{fontSize:14,color:T2}}>{COMPANY.industry} · {COMPANY.headcount} employees · {COMPANY.tools} SaaS tools</p>
+              <p style={{fontSize:12,color:T3,marginTop:4}}>Audit period: {COMPANY.period}</p>
             </div>
             <div style={{textAlign:"right"}}>
               <Gauge score={SCORE.health} label={t("sample.healthscore")} t={t}/>
@@ -143,10 +143,10 @@ export default function SampleReport(){
         </div>
 
         {/* TABS */}
-        <div style={Object.assign({},gl,{padding:"4px",marginBottom:14,display:"flex",gap:2})}>
+        <div style={Object.assign({},gl,{padding:"5px",marginBottom:14,display:"flex",gap:3})}>
           {tabs.map(function(tb){
             var active=tab===tb[0];
-            return(<button key={tb[0]} onClick={function(){setTab(tb[0]);}} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"none",fontSize:10,fontWeight:600,fontFamily:MO,letterSpacing:".03em",background:active?A:"transparent",color:active?"#fff":T2,cursor:"pointer",transition:"all 0.12s"}}>{tb[1]}</button>);
+            return(<button key={tb[0]} onClick={function(){setTab(tb[0]);}} style={{flex:1,padding:"12px 16px",borderRadius:8,border:"none",fontSize:14,fontWeight:700,fontFamily:MO,letterSpacing:".03em",background:active?A:"transparent",color:active?"#fff":T2,cursor:"pointer",transition:"all 0.12s"}}>{tb[1]}</button>);
           })}
         </div>
 
@@ -160,26 +160,26 @@ export default function SampleReport(){
               {l:t("sample.kpi.entropy"),v:SCORE.kappa.toFixed(3),c:SCORE.kappa>0.15?OR:AH,s:t("sample.kpi.drag")},
               {l:t("sample.kpi.peer"),v:"P"+SCORE.peerPct,c:RD,s:t("sample.kpi.vspeer")},
             ].map(function(k){return(
-              <div key={k.l} style={Object.assign({},gl,{padding:14,textAlign:"center"})}>
-                <p style={{fontSize:8,color:T3,textTransform:"uppercase",letterSpacing:".08em",marginBottom:5}}>{k.l}</p>
-                <p style={{fontFamily:MO,fontSize:22,fontWeight:800,color:k.c,lineHeight:1}}>{k.v}</p>
-                <p style={{fontSize:8,color:T3,marginTop:4}}>{k.s}</p>
+              <div key={k.l} style={Object.assign({},gl,{padding:18,textAlign:"center"})}>
+                <p style={{fontSize:11,fontWeight:700,color:T3,textTransform:"uppercase",letterSpacing:".1em",marginBottom:8}}>{k.l}</p>
+                <p style={{fontFamily:MO,fontSize:36,fontWeight:800,color:k.c,lineHeight:1}}>{k.v}</p>
+                <p style={{fontSize:12,color:T3,marginTop:6,fontWeight:500}}>{k.s}</p>
               </div>
             );})}
           </div>
 
           {/* Category Breakdown */}
-          <div style={Object.assign({},gl,{padding:16})}>
-            <p style={{fontSize:9,fontFamily:MO,fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:T3,marginBottom:12}}>{t("sample.breakdown")}</p>
+          <div style={Object.assign({},gl,{padding:20})}>
+            <p style={{fontSize:12,fontFamily:MO,fontWeight:700,letterSpacing:".15em",textTransform:"uppercase",color:A,marginBottom:16}}>{t("sample.breakdown")}</p>
             {CATEGORIES.map(function(cat){
               var w=cat.leak>0?(cat.leak/cat.spend)*100:0;
               return(
-                <div key={cat.name} style={{marginBottom:12}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
-                    <span style={{fontSize:12,fontWeight:600,color:T1}}>{cat.name}</span>
-                    <div style={{display:"flex",gap:12,alignItems:"baseline"}}>
-                      <span style={{fontSize:10,color:T3}}>{t("sample.spend")}: <span style={{fontFamily:MO,color:T2}}>{fc(cat.spend)}/mo</span></span>
-                      <span style={{fontFamily:MO,fontSize:12,fontWeight:700,color:RD}}>{t("sample.leak")}: {fc(cat.leak)}/mo ({cat.pct}%)</span>
+                <div key={cat.name} style={{marginBottom:16}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
+                    <span style={{fontSize:16,fontWeight:600,color:T1}}>{cat.name}</span>
+                    <div style={{display:"flex",gap:14,alignItems:"baseline"}}>
+                      <span style={{fontSize:13,color:T3}}>{t("sample.spend")}: <span style={{fontFamily:MO,color:T2}}>{fc(cat.spend)}/mo</span></span>
+                      <span style={{fontFamily:MO,fontSize:15,fontWeight:700,color:RD}}>{t("sample.leak")}: {fc(cat.leak)}/mo ({cat.pct}%)</span>
                     </div>
                   </div>
                   <div style={{height:6,borderRadius:3,background:"#121728",overflow:"hidden",position:"relative"}}>
@@ -193,8 +193,8 @@ export default function SampleReport(){
 
           {/* Executive Summary */}
           <div style={Object.assign({},gl,{padding:16})}>
-            <p style={{fontSize:9,fontFamily:MO,fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:T3,marginBottom:8}}>{t("sample.executive")}</p>
-            <p style={{fontSize:13,color:T2,lineHeight:1.6}}>
+            <p style={{fontSize:12,fontFamily:MO,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:A,marginBottom:10}}>{t("sample.executive")}</p>
+            <p style={{fontSize:15,color:T2,lineHeight:1.7}}>
               {t("sample.exec.p1")} <strong style={{color:T1}}>{fc(COMPANY.monthlyIT)}/{t("sample.mo")}</strong> {t("sample.exec.p2")} {COMPANY.tools} {t("sample.exec.p3")}
               {t("sample.exec.p4")} <strong style={{color:RD}}>{fc(SCORE.ghostTax)}/{t("sample.yr")}</strong> {t("sample.exec.p5")} ({SCORE.leakPct}% {t("sample.kpi.ofspend")}).
               {t("sample.exec.p6")} κ={SCORE.kappa} {t("sample.exec.p7")} P{SCORE.peerPct}.
@@ -205,18 +205,18 @@ export default function SampleReport(){
 
         {/* ANOMALIES TAB */}
         {tab==="anomalies"&&(<div style={Object.assign({},gl,{padding:16})}>
-          <p style={{fontSize:13,fontWeight:600,marginBottom:12}}>{ANOMALIES.length} {t("sample.anomalies.detected")} {COMPANY.tools} {t("sample.anomalies.tools")}</p>
-          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          <p style={{fontSize:16,fontWeight:700,marginBottom:14}}>{ANOMALIES.length} {t("sample.anomalies.detected")} {COMPANY.tools} {t("sample.anomalies.tools")}</p>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {ANOMALIES.map(function(a){return(
-              <div key={a.id} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:8,background:sevBg[a.sev],border:"1px solid "+sevCol[a.sev]+"14"}}>
-                <span style={{fontSize:8,fontFamily:MO,fontWeight:600,padding:"3px 7px",borderRadius:4,background:sevCol[a.sev]+"18",border:"1px solid "+sevCol[a.sev]+"30",color:sevCol[a.sev],textTransform:"uppercase",letterSpacing:".04em",flexShrink:0}}>{a.sev}</span>
+              <div key={a.id} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",borderRadius:8,background:sevBg[a.sev],border:"1px solid "+sevCol[a.sev]+"14"}}>
+                <span style={{fontSize:10,fontFamily:MO,fontWeight:700,padding:"4px 10px",borderRadius:5,background:sevCol[a.sev]+"18",border:"1px solid "+sevCol[a.sev]+"30",color:sevCol[a.sev],textTransform:"uppercase",letterSpacing:".04em",flexShrink:0}}>{a.sev}</span>
                 <div style={{flex:1}}>
-                  <p style={{fontSize:12,fontWeight:600,color:T1,marginBottom:2}}>{a.title}</p>
-                  <p style={{fontSize:10,color:T3}}>{a.vendor} · {a.type}</p>
+                  <p style={{fontSize:14,fontWeight:600,color:T1,marginBottom:3}}>{a.title}</p>
+                  <p style={{fontSize:12,color:T3}}>{a.vendor} · {a.type}</p>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
-                  <p style={{fontFamily:MO,fontSize:14,fontWeight:800,color:sevCol[a.sev]}}>{fc(a.impactMo)}<span style={{fontSize:8}}>/{t("sample.mo")}</span></p>
-                  <p style={{fontSize:8,color:T3}}>{fc(a.impactYr)}/{t("sample.yr")}</p>
+                  <p style={{fontFamily:MO,fontSize:18,fontWeight:800,color:sevCol[a.sev]}}>{fc(a.impactMo)}<span style={{fontSize:11}}>/{t("sample.mo")}</span></p>
+                  <p style={{fontSize:10,color:T3}}>{fc(a.impactYr)}/{t("sample.yr")}</p>
                 </div>
               </div>
             );})}
@@ -225,32 +225,32 @@ export default function SampleReport(){
 
         {/* ACTIONS TAB */}
         {tab==="actions"&&(<div style={Object.assign({},gl,{padding:16})}>
-          <p style={{fontSize:9,fontFamily:MO,fontWeight:600,letterSpacing:".12em",textTransform:"uppercase",color:A,marginBottom:6}}>{t("sample.recovery.label")}</p>
-          <p style={{fontSize:16,fontWeight:700,marginBottom:14}}>{RECS.length} {t("sample.recovery.actions")}. {fc(totalRecoverable,true)} {t("sample.recovery.recoverable")}.</p>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <p style={{fontSize:11,fontFamily:MO,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:A,marginBottom:8}}>{t("sample.recovery.label")}</p>
+          <p style={{fontSize:18,fontWeight:700,marginBottom:16}}>{RECS.length} {t("sample.recovery.actions")}. {fc(totalRecoverable,true)} {t("sample.recovery.recoverable")}.</p>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {RECS.map(function(r){
               var efCol=r.effortKey==="sample.effort.easy"?TL:OR;
               return(
-                <div key={r.rank} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:8,background:"rgba(0,0,0,0.12)",border:"1px solid rgba(36,48,78,0.14)"}}>
-                  <div style={{width:30,height:30,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(59,130,246,0.08)",border:"1px solid rgba(59,130,246,0.18)",fontFamily:MO,fontSize:13,fontWeight:800,color:A,flexShrink:0}}>{r.rank}</div>
+                <div key={r.rank} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",borderRadius:8,background:"rgba(0,0,0,0.12)",border:"1px solid rgba(36,48,78,0.14)"}}>
+                  <div style={{width:36,height:36,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(59,130,246,0.08)",border:"1px solid rgba(59,130,246,0.18)",fontFamily:MO,fontSize:16,fontWeight:800,color:A,flexShrink:0}}>{r.rank}</div>
                   <div style={{flex:1}}>
-                    <p style={{fontSize:13,fontWeight:600,color:T1,marginBottom:3}}>{r.title}</p>
-                    <div style={{display:"flex",gap:6}}>
-                      <span style={{fontSize:8,fontFamily:MO,padding:"2px 6px",borderRadius:3,background:efCol+"12",border:"1px solid "+efCol+"22",color:efCol}}>{r.effort}</span>
-                      <span style={{fontSize:9,color:T3}}>~{r.days} {t("sample.days")}</span>
+                    <p style={{fontSize:15,fontWeight:600,color:T1,marginBottom:4}}>{r.title}</p>
+                    <div style={{display:"flex",gap:8}}>
+                      <span style={{fontSize:10,fontFamily:MO,padding:"3px 8px",borderRadius:4,background:efCol+"12",border:"1px solid "+efCol+"22",color:efCol}}>{r.effort}</span>
+                      <span style={{fontSize:11,color:T3}}>~{r.days} {t("sample.days")}</span>
                     </div>
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
-                    <p style={{fontFamily:MO,fontSize:16,fontWeight:800,color:TL}}>{fc(r.savings,true)}</p>
-                    <p style={{fontSize:8,color:T3}}>{t("sample.recovery.peryear")}</p>
+                    <p style={{fontFamily:MO,fontSize:20,fontWeight:800,color:TL}}>{fc(r.savings,true)}</p>
+                    <p style={{fontSize:10,color:T3}}>{t("sample.recovery.peryear")}</p>
                   </div>
                 </div>
               );
             })}
           </div>
           <div style={{marginTop:14,padding:"10px 14px",borderRadius:7,background:"rgba(52,211,153,0.04)",border:"1px solid rgba(52,211,153,0.12)",display:"flex",justifyContent:"space-between"}}>
-            <span style={{fontSize:11,color:T2}}>{t("sample.recovery.total")}</span>
-            <span style={{fontFamily:MO,fontSize:16,fontWeight:800,color:TL}}>{fc(totalRecoverable)}/{t("sample.yr")}</span>
+            <span style={{fontSize:14,fontWeight:600,color:T2}}>{t("sample.recovery.total")}</span>
+            <span style={{fontFamily:MO,fontSize:22,fontWeight:800,color:TL}}>{fc(totalRecoverable)}/{t("sample.yr")}</span>
           </div>
         </div>)}
 
@@ -273,8 +273,8 @@ export default function SampleReport(){
 
         {/* BOTTOM CTA */}
         <div style={Object.assign({},gl,{padding:22,marginTop:14,textAlign:"center"})}>
-          <p style={{fontSize:14,fontWeight:700,marginBottom:6}}>{t("sample.cta.title1")} <span style={{color:TL}}>{t("sample.cta.title2")}</span></p>
-          <p style={{fontSize:12,color:T2,marginBottom:16,lineHeight:1.5,maxWidth:400,margin:"0 auto 16px"}}>
+          <p style={{fontSize:20,fontWeight:700,marginBottom:8}}>{t("sample.cta.title1")} <span style={{color:TL}}>{t("sample.cta.title2")}</span></p>
+          <p style={{fontSize:14,color:T2,marginBottom:16,lineHeight:1.5,maxWidth:400,margin:"0 auto 16px"}}>
             {t("sample.cta.sub")}
           </p>
           <a href="/estimator" style={{display:"inline-block",padding:"13px 26px",borderRadius:8,background:TL,color:V,fontSize:12,fontWeight:800,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>
