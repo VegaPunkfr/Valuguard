@@ -1,11 +1,7 @@
 "use client";
 import { useState } from "react";
 
-/*  VALUGUARD — TRUST FOOTER (US 2026)
-    Mandatory legal links + trust signals for US CFO audience.
-    SOC2 Readiness, Privacy Policy, Terms of Service.
-    Drop-in at bottom of every page.
-    100% US English. Zero French. */
+/*  VALUGUARD — FOOTER DE CONFIANCE (FR 2026) */
 
 var V = "#060912";
 var A = "#3b82f6";
@@ -21,32 +17,31 @@ var SA = "system-ui,-apple-system,sans-serif";
 var YEAR = new Date().getFullYear();
 
 var PRODUCT_LINKS = [
-  { label: "Ghost Tax Audit", href: "/en-us/estimator" },
-  { label: "Methodology", href: "/en-us/methodology" },
-  { label: "Sample Report", href: "/en-us/sample-report" },
-  { label: "Pricing", href: "/en-us/pricing" },
+  { label: "Audit Ghost Tax", href: "/estimator" },
+  { label: "M\u00e9thodologie", href: "/methodology" },
+  { label: "Exemple de rapport", href: "/sample-report" },
+  { label: "Tarifs", href: "/#pricing" },
 ];
 
 var TRUST_LINKS = [
-  { label: "Security Vault", href: "/en-us/security-vault" },
-  { label: "SOC2 Readiness", href: "/en-us/security-vault#soc2" },
-  { label: "Privacy Policy", href: "/en-us/privacy" },
-  { label: "Terms of Service", href: "/en-us/terms" },
+  { label: "Coffre-fort S\u00e9curit\u00e9", href: "/security-vault" },
+  { label: "Architecture SOC2", href: "/security-vault" },
+  { label: "Politique de confidentialit\u00e9", href: "/security-vault" },
+  { label: "Conditions d'utilisation", href: "/security-vault" },
 ];
 
 var RESOURCE_LINKS = [
-  { label: "FinOps Glossary", href: "/en-us/glossary" },
-  { label: "Leak Patterns Library", href: "/en-us/leak-patterns" },
-  { label: "ROI Calculator", href: "/en-us/roi-report" },
-  { label: "Blog", href: "/en-us/blog" },
+  { label: "Analyse Peer-Gap", href: "/peer-gap" },
+  { label: "Rapport ROI", href: "/roi-report" },
+  { label: "Estimateur", href: "/estimator" },
 ];
 
 var BADGES = [
-  { icon: "🛡", text: "SOC2 Type II Ready" },
-  { icon: "🔐", text: "Zero-Knowledge Audit" },
-  { icon: "🇺🇸", text: "US Data Residency" },
-  { icon: "⏱", text: "30-Day Auto-Delete" },
-  { icon: "🔒", text: "AES-256 Encryption" },
+  { icon: "\u{1F6E1}", text: "SOC2 Type II Ready" },
+  { icon: "\u{1F510}", text: "Audit Zero-Knowledge" },
+  { icon: "\u{1F1EA}\u{1F1FA}", text: "H\u00e9bergement EU" },
+  { icon: "\u23F1", text: "Purge auto 30 jours" },
+  { icon: "\u{1F512}", text: "Chiffrement AES-256" },
 ];
 
 function FooterColumn(props) {
@@ -107,8 +102,8 @@ export default function TrustFooter() {
             fontSize: 11, color: T3, marginTop: 8,
             maxWidth: 220, lineHeight: 1.55,
           }}>
-            AI Spend Leak Monitor. We reveal where money leaks,
-            how much it costs, and what to fix first.
+            Moniteur de fuites IT & IA. Nous r&eacute;v&eacute;lons o&ugrave; l'argent fuit,
+            combien cela co&ucirc;te, et quoi corriger en priorit&eacute;.
           </p>
           <p style={{
             fontSize: 10, color: T3, marginTop: 10,
@@ -118,9 +113,9 @@ export default function TrustFooter() {
           </p>
         </div>
 
-        <FooterColumn title="Product" links={PRODUCT_LINKS} />
-        <FooterColumn title="Trust & Legal" links={TRUST_LINKS} />
-        <FooterColumn title="Resources" links={RESOURCE_LINKS} />
+        <FooterColumn title="Produit" links={PRODUCT_LINKS} />
+        <FooterColumn title="Confiance" links={TRUST_LINKS} />
+        <FooterColumn title="Ressources" links={RESOURCE_LINKS} />
       </div>
 
       {/* ── Trust shield bar ─────────────────── */}
@@ -151,7 +146,7 @@ export default function TrustFooter() {
         </div>
 
         <p style={{ fontSize: 8, color: T3, fontFamily: MO }}>
-          © {YEAR} Valuguard Inc. All rights reserved. Delaware, USA.
+          &copy; {YEAR} Valuguard SAS. Tous droits r&eacute;serv&eacute;s.
         </p>
       </div>
     </footer>

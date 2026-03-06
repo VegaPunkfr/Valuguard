@@ -18,11 +18,11 @@ const fontMono = JetBrains_Mono({
 /* ─── Constants ─────────────────────────────────────── */
 const SITE_URL = "https://valuguard.com";
 const SITE_NAME = "Valuguard";
-const TITLE = "Valuguard — Expose Your AI Ghost Tax | SaaS Spend Leak Monitor";
+const TITLE = "Valuguard — Exposez votre Taxe Fant\u00f4me IA | Moniteur de fuites SaaS";
 const DESCRIPTION =
-  "Valuguard detects where your SaaS, Cloud, and AI budget leaks. " +
-  "12 leak types. Deterministic engine. Zero system access required. " +
-  "Average ROI: 18x. Recover $100k+ per year.";
+  "Valuguard d\u00e9tecte o\u00f9 fuient vos budgets SaaS, Cloud et IA. " +
+  "12 types de fuites. Moteur d\u00e9terministe. Aucun acc\u00e8s syst\u00e8me requis. " +
+  "ROI moyen : 18x. R\u00e9cup\u00e9rez 100k\u20ac+ par an.";
 
 /* ─── Metadata (merged from layout-meta.js) ─────────── */
 export const metadata: Metadata = {
@@ -51,13 +51,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
     languages: {
-      "en-US": `${SITE_URL}/en-us`,
-      "x-default": `${SITE_URL}/en-us`,
+      "fr-FR": SITE_URL,
+      "x-default": SITE_URL,
     },
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "fr_FR",
     url: SITE_URL,
     siteName: SITE_NAME,
     title: TITLE,
@@ -131,7 +131,7 @@ const organizationJsonLd = {
     "@type": "ContactPoint",
     email: "audits@valuguard.com",
     contactType: "sales",
-    availableLanguage: "English",
+    availableLanguage: "French",
   },
   sameAs: [],
 };
@@ -148,8 +148,8 @@ const softwareJsonLd = {
   offers: {
     "@type": "Offer",
     price: "990",
-    priceCurrency: "USD",
-    description: "Ghost Tax Audit — one-time diagnostic",
+    priceCurrency: "EUR",
+    description: "Audit Ghost Tax — diagnostic unique",
   },
   featureList: [
     "12-type anomaly detection",
@@ -184,7 +184,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
         style={{ background: "#060912" }}

@@ -106,6 +106,9 @@ export default function SampleReport(){
     <div style={{minHeight:"100vh",background:V,fontFamily:SA,color:T1,padding:"20px 14px 48px"}}>
       <div style={{maxWidth:820,margin:"0 auto"}}>
 
+        {/* RETOUR */}
+        <div style={{marginBottom:14}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)"}}>{"\u2190"} Retour</a></div>
+
         {/* WATERMARK */}
         <div style={{textAlign:"center",padding:"10px",marginBottom:16,borderRadius:8,background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.18)"}}>
           <p style={{fontSize:10,fontFamily:MO,fontWeight:600,color:OR,letterSpacing:".08em"}}>⚠ SAMPLE REPORT — FICTIONAL DATA — FOR DEMONSTRATION ONLY</p>
@@ -261,7 +264,7 @@ export default function SampleReport(){
           <p style={{fontSize:12,color:T2,marginBottom:16,lineHeight:1.5,maxWidth:400,margin:"0 auto 16px"}}>
             Your actual Ghost Tax Audit analyzes YOUR billing data with the same engine, methodology, and precision shown above.
           </p>
-          <a href="/en-us/estimator" style={{display:"inline-block",padding:"13px 26px",borderRadius:8,background:TL,color:V,fontSize:12,fontWeight:800,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>
+          <a href="/estimator" style={{display:"inline-block",padding:"13px 26px",borderRadius:8,background:TL,color:V,fontSize:12,fontWeight:800,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>
             EXPOSE MY GHOST TAX — $990
           </a>
         </div>

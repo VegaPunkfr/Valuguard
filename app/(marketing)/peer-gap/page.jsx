@@ -325,6 +325,9 @@ export default function PeerGapAnalysis() {
     <div style={{ minHeight: "100vh", background: V, fontFamily: SA, color: T1, padding: "24px 14px 48px" }}>
       <div style={{ maxWidth: 880, margin: "0 auto" }}>
 
+        {/* ── RETOUR ─────────────────────────────── */}
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Retour</a></div>
+
         {/* ── HEADER ──────────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>

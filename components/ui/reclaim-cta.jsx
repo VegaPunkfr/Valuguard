@@ -121,7 +121,7 @@ export default function ReclaimCta({ diagnosticData }) {
       utm_source: null,
       utm_medium: null,
       utm_campaign: null,
-      locale: "en-us",
+      locale: "fr-fr",
     };
 
     fetch("/api/vault/persist", {
@@ -162,23 +162,23 @@ export default function ReclaimCta({ diagnosticData }) {
     return (
       <div style={Object.assign({}, gl, { padding: 24, textAlign: "center" })}>
         <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 5 }}>
-          RECOVERABLE GHOST TAX
+          TAXE FANT&Ocirc;ME R&Eacute;CUP&Eacute;RABLE
         </p>
         <p style={{ fontFamily: MO, fontSize: 34, fontWeight: 800, color: TL, lineHeight: 1, letterSpacing: "-.02em", marginBottom: 4 }}>
           {fmt(recoverable)}
           <span style={{ fontSize: 14, color: T3, fontWeight: 400 }}>/yr</span>
         </p>
         <p style={{ fontSize: 10, color: T3, marginBottom: 18 }}>
-          Conservative 60% recovery of your estimated Ghost Tax.
+          R&eacute;cup&eacute;ration conservatrice de 60% de votre Taxe Fant&ocirc;me estim&eacute;e.
         </p>
         <button
           onClick={function() { setPhase("input"); }}
           style={{ padding: "14px 32px", borderRadius: 8, border: "none", background: TL, color: V, fontSize: 13, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", cursor: "pointer", transition: "all 0.15s" }}
         >
-          RECLAIM {fmt(recoverable, true)} NOW
+          R&Eacute;CUP&Eacute;RER {fmt(recoverable, true)} MAINTENANT
         </button>
         <p style={{ fontSize: 8, color: T3, marginTop: 10 }}>
-          Zero-Knowledge protocol. Data stays in-browser until you opt in.
+          Protocole Zero-Knowledge. Vos donn&eacute;es restent dans votre navigateur jusqu'&agrave; votre consentement.
         </p>
       </div>
     );
@@ -190,15 +190,15 @@ export default function ReclaimCta({ diagnosticData }) {
       <div style={Object.assign({}, gl, { padding: 28, textAlign: "center", borderColor: "rgba(52,211,153,0.25)" })}>
         <div style={{ fontSize: 36, marginBottom: 12 }}>🔐</div>
         <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".14em", textTransform: "uppercase", color: TL, marginBottom: 8 }}>
-          VAULT SECURED
+          COFFRE-FORT S&Eacute;CURIS&Eacute;
         </p>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: T1, lineHeight: 1.2, marginBottom: 8 }}>
-          Your {fmt(recoverable, true)} Recovery Protocol is active.
+          Votre protocole de r&eacute;cup&eacute;ration de {fmt(recoverable, true)} est actif.
         </h2>
         <p style={{ fontSize: 13, color: T2, lineHeight: 1.6, maxWidth: 440, margin: "0 auto 16px" }}>
-          Our team will reach out within 4 hours to finalize the audit scope.
-          Check your email at <strong style={{ color: T1 }}>{email}</strong> for
-          the Executive Summary PDF link.
+          Notre &eacute;quipe vous contactera sous 4 heures pour finaliser le p&eacute;rim&egrave;tre de l'audit.
+          V&eacute;rifiez votre email &agrave; <strong style={{ color: T1 }}>{email}</strong> pour
+          le lien du r&eacute;sum&eacute; ex&eacute;cutif PDF.
         </p>
 
         {/* Vault ID badge */}
@@ -228,12 +228,12 @@ export default function ReclaimCta({ diagnosticData }) {
 
         {/* What happens next */}
         <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 8, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.15)", textAlign: "left", maxWidth: 400, margin: "20px auto 0" }}>
-          <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: A, marginBottom: 8 }}>WHAT HAPPENS NEXT</p>
+          <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: A, marginBottom: 8 }}>PROCHAINES &Eacute;TAPES</p>
           {[
-            { time: "Now", action: "Your diagnostic is securely stored in your Vault" },
-            { time: "4 hours", action: "A recovery specialist reviews your profile" },
-            { time: "24 hours", action: "You receive a tailored audit scope + proposal" },
-            { time: "48 hours", action: "Full Ghost Tax report delivered after data upload" },
+            { time: "Maintenant", action: "Votre diagnostic est stock\u00e9 dans votre Coffre-fort" },
+            { time: "4 heures", action: "Un sp\u00e9cialiste analyse votre profil" },
+            { time: "24 heures", action: "Vous recevez une proposition d'audit personnalis\u00e9e" },
+            { time: "48 heures", action: "Rapport Ghost Tax complet livr\u00e9 apr\u00e8s import des donn\u00e9es" },
           ].map(function(step) {
             return (
               <div key={step.time} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
@@ -252,7 +252,7 @@ export default function ReclaimCta({ diagnosticData }) {
     return (
       <div style={Object.assign({}, gl, { padding: 24, textAlign: "center", borderColor: "rgba(239,68,68,0.20)" })}>
         <p style={{ fontSize: 16, fontWeight: 700, color: RD, marginBottom: 8 }}>
-          {retryAfter > 0 ? "⏱ Rate Limited" : "⚠ Submission Failed"}
+          {retryAfter > 0 ? "\u23F1 Limite atteinte" : "\u26A0 \u00c9chec de soumission"}
         </p>
         <p style={{ fontSize: 13, color: T2, marginBottom: 16, lineHeight: 1.5 }}>
           {errorMsg}
@@ -261,7 +261,7 @@ export default function ReclaimCta({ diagnosticData }) {
           onClick={function() { setPhase("input"); setErrorMsg(""); setRetryAfter(0); }}
           style={{ padding: "11px 24px", borderRadius: 8, border: "none", background: A, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", cursor: "pointer" }}
         >
-          TRY AGAIN
+          R&Eacute;ESSAYER
         </button>
       </div>
     );
@@ -274,13 +274,13 @@ export default function ReclaimCta({ diagnosticData }) {
     <div style={Object.assign({}, gl, { padding: 24 })}>
       <div style={{ textAlign: "center", marginBottom: 16 }}>
         <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 4 }}>
-          SECURE YOUR RECOVERY
+          S&Eacute;CURISEZ VOTRE R&Eacute;CUP&Eacute;RATION
         </p>
         <p style={{ fontSize: 16, fontWeight: 700, color: T1, marginBottom: 4 }}>
-          Claim your {fmt(recoverable, true)}/yr Ghost Tax recovery
+          R&eacute;clamez votre r&eacute;cup&eacute;ration de {fmt(recoverable, true)}/an de Taxe Fant&ocirc;me
         </p>
         <p style={{ fontSize: 12, color: T2, lineHeight: 1.5 }}>
-          Your diagnostic data will be encrypted and stored in your personal Vault.
+          Vos donn&eacute;es de diagnostic seront chiffr&eacute;es et stock&eacute;es dans votre Coffre-fort personnel.
         </p>
       </div>
 
@@ -294,9 +294,9 @@ export default function ReclaimCta({ diagnosticData }) {
       {/* Form fields */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
         {[
-          { key: "name", label: "Your Name", value: name, set: setName, ph: "Jane Smith", type: "text", required: false },
-          { key: "email", label: "Work Email", value: email, set: setEmail, ph: "jane@company.com", type: "email", required: true },
-          { key: "company", label: "Company", value: company, set: setCompany, ph: "Acme Corp", type: "text", required: true },
+          { key: "name", label: "Votre nom", value: name, set: setName, ph: "Jean Dupont", type: "text", required: false },
+          { key: "email", label: "Email professionnel", value: email, set: setEmail, ph: "jean@entreprise.com", type: "email", required: true },
+          { key: "company", label: "Entreprise", value: company, set: setCompany, ph: "Mon Entreprise", type: "text", required: true },
         ].map(function(f) {
           var hasError = errorField === (f.key === "name" ? "contact_name" : f.key === "company" ? "company_name" : f.key);
           return (
@@ -344,20 +344,20 @@ export default function ReclaimCta({ diagnosticData }) {
         {isSubmitting ? (
           <>
             <Spinner />
-            <span>Securing your vault...</span>
+            <span>S&eacute;curisation en cours...</span>
           </>
         ) : canSubmit ? (
-          "🔐 RECLAIM " + fmt(recoverable, true) + " — SECURE MY VAULT"
+          "\u{1F510} R\u00c9CUP\u00c9RER " + fmt(recoverable, true) + " \u2014 S\u00c9CURISER MON COFFRE"
         ) : (
-          "Enter email and company to continue"
+          "Entrez votre email et entreprise pour continuer"
         )}
       </button>
 
       {/* Privacy note */}
       <p style={{ fontSize: 8, color: T3, textAlign: "center", marginTop: 10, lineHeight: 1.4 }}>
-        By submitting, you consent to Valuguard securely storing your diagnostic data.
-        AES-256 encrypted. US-hosted (Virginia). Auto-deleted in 30 days.
-        Zero-Knowledge protocol — we never access your source systems.
+        En soumettant, vous consentez au stockage s&eacute;curis&eacute; de vos donn&eacute;es de diagnostic par Valuguard.
+        Chiffrement AES-256. H&eacute;bergement EU. Suppression automatique sous 30 jours.
+        Protocole Zero-Knowledge &mdash; nous n'acc&eacute;dons jamais &agrave; vos syst&egrave;mes sources.
       </p>
     </div>
   );

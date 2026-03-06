@@ -3,9 +3,8 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 
-/*  VALUGUARD COCKPIT — US MARKET 2026 (FINAL)
-    Ghost Tax Estimator + Peer-Gap + Board Report + Trust Signals
-    100% USD · SOC2 Readiness · Zero-Knowledge Audit */
+/*  VALUGUARD COCKPIT — FR 2026
+    Estimateur Ghost Tax + Peer-Gap + Rapport Board + Signaux de confiance */
 
 // ═════════════════ TOKENS ═════════════════
 const C = {
@@ -339,11 +338,14 @@ export default function Cockpit() {
     <div style={{ minHeight: "100vh", background: C.void, fontFamily: SA, color: C.t1, padding: "20px 14px 40px" }}>
       <div style={{ maxWidth: 660, margin: "0 auto" }}>
 
+        {/* ── RETOUR ────────────────────────────── */}
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: C.t2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: `1px solid ${C.bdr}`, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Retour</a></div>
+
         {/* ── HEADER BAR ────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ fontSize: 11, fontFamily: MO, fontWeight: 700, letterSpacing: ".06em", color: C.accent }}>VALUGUARD</span>
-            <span style={{ fontSize: 8, color: C.t3, fontFamily: MO, padding: "2px 5px", borderRadius: 3, border: `1px solid ${C.bdr}` }}>US 2026</span>
+            <span style={{ fontSize: 8, color: C.t3, fontFamily: MO, padding: "2px 5px", borderRadius: 3, border: `1px solid ${C.bdr}` }}>FR 2026</span>
           </div>
           <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 8, background: "rgba(11,14,24,.5)", border: `1px solid ${C.bdr}` }}>
             {[["entropy", "Ghost Tax"], ["peergap", "Peer Gap"], ["report", "Board Report"]].map(([k, l]) => {
