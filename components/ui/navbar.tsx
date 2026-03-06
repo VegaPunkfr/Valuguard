@@ -79,7 +79,7 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  style={{ fontSize: 12, color: T2, textDecoration: "none", fontWeight: 500, transition: "color 0.15s" }}
+                  style={{ fontSize: 14, color: T2, textDecoration: "none", fontWeight: 500, transition: "color 0.15s" }}
                   onMouseEnter={function (e) { (e.target as HTMLElement).style.color = T1; }}
                   onMouseLeave={function (e) { (e.target as HTMLElement).style.color = T2; }}
                 >
@@ -91,8 +91,8 @@ export default function Navbar() {
             <a
               href="/estimator"
               style={{
-                fontSize: 11, fontWeight: 700, color: "#fff", background: A,
-                padding: "8px 18px", borderRadius: 7, textDecoration: "none",
+                fontSize: 13, fontWeight: 700, color: "#fff", background: A,
+                padding: "10px 20px", borderRadius: 7, textDecoration: "none",
                 letterSpacing: ".03em", transition: "opacity 0.15s",
               }}
               onMouseEnter={function (e) { (e.target as HTMLElement).style.opacity = "0.85"; }}

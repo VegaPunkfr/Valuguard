@@ -56,7 +56,7 @@ function Section(props: { delay?: number; style?: React.CSSProperties; children:
 
 function Label(props: { children: React.ReactNode }) {
   return (
-    <span style={{ display: "block", fontSize: 10, fontWeight: 600, fontFamily: MO, letterSpacing: ".14em", textTransform: "uppercase", color: A, marginBottom: 10 }}>
+    <span style={{ display: "block", fontSize: 15, fontWeight: 800, fontFamily: MO, letterSpacing: ".25em", textTransform: "uppercase", color: A, marginBottom: 14 }}>
       {props.children}
     </span>
   );
@@ -86,19 +86,19 @@ function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; form
     <Section>
       <div style={Object.assign({}, gl, { padding: 28 })}>
         <Label>{t("est.widget.title")}</Label>
-        <p style={{ fontSize: 12, color: T2, marginBottom: 20 }}>{t("est.widget.sub")}</p>
+        <p style={{ fontSize: 16, color: T2, marginBottom: 20, lineHeight: 1.6 }}>{t("est.widget.sub")}</p>
 
         {/* Sliders */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
           <div>
-            <label style={{ display: "block", fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.employees")}</label>
+            <label style={{ display: "block", fontSize: 12, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.employees")}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input type="range" min={10} max={500} step={10} value={employees} onChange={(e) => setEmployees(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
               <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 40, textAlign: "right" }}>{employees}</span>
             </div>
           </div>
           <div>
-            <label style={{ display: "block", fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.budget")}</label>
+            <label style={{ display: "block", fontSize: 12, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.budget")}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input type="range" min={50000} max={2000000} step={10000} value={budget} onChange={(e) => setBudget(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
               <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 70, textAlign: "right" }}>{formatCurrency(budget, true)}</span>
@@ -109,31 +109,31 @@ function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; form
         {/* Results */}
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(239,68,68,0.12)", textAlign: "center" }}>
-            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.exposure")}</p>
+            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.exposure")}</p>
             <p style={{ fontFamily: MO, fontSize: 42, fontWeight: 800, color: "#ef4444", lineHeight: 1, letterSpacing: "-.02em" }}>
               {formatCurrency(result.exposure)}
             </p>
           </div>
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.tension")}</p>
+            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.tension")}</p>
             <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: tensionColor, lineHeight: 1 }}>{result.tension}</p>
-            <p style={{ fontSize: 8, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", color: tensionColor, marginTop: 4 }}>{tensionLabel}</p>
+            <p style={{ fontSize: 11, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", color: tensionColor, marginTop: 4 }}>{tensionLabel}</p>
           </div>
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.window")}</p>
+            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.window")}</p>
             <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>{result.window}</p>
-            <p style={{ fontSize: 8, fontFamily: MO, color: T3, marginTop: 4 }}>{t("est.widget.window.val")}</p>
+            <p style={{ fontSize: 11, fontFamily: MO, color: T3, marginTop: 4 }}>{t("est.widget.window.val")}</p>
           </div>
         </div>
 
         {/* Corrective Levers */}
         <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: T3, marginBottom: 8 }}>{t("est.widget.levers")}</p>
+          <p style={{ fontSize: 13, fontFamily: MO, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: T3, marginBottom: 8 }}>{t("est.widget.levers")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {leverKeys.slice(0, result.leverCount).map((key, i) => (
               <div key={key} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.08)" }}>
-                <span style={{ fontFamily: MO, fontSize: 10, fontWeight: 700, color: A, minWidth: 16 }}>0{i + 1}</span>
-                <span style={{ fontSize: 11, color: T2 }}>{t(key)}</span>
+                <span style={{ fontFamily: MO, fontSize: 13, fontWeight: 700, color: A, minWidth: 16 }}>0{i + 1}</span>
+                <span style={{ fontSize: 14, color: T2 }}>{t(key)}</span>
               </div>
             ))}
           </div>
@@ -141,10 +141,10 @@ function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; form
 
         {/* CTA */}
         <div style={{ textAlign: "center" }}>
-          <a href="/estimator" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 8, background: TL, color: V, fontSize: 13, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
+          <a href="/estimator" style={{ display: "inline-block", padding: "16px 36px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
             {t("est.widget.cta")} &rarr;
           </a>
-          <p style={{ fontSize: 9, color: T3, marginTop: 8 }}>{t("est.widget.micro")}</p>
+          <p style={{ fontSize: 12, color: T3, marginTop: 8 }}>{t("est.widget.micro")}</p>
         </div>
       </div>
     </Section>
@@ -213,22 +213,22 @@ export default function LandingPage() {
 
         {/* ═══════ 1. HERO ═══════ */}
         <Section style={{ textAlign: "center", paddingTop: 56, paddingBottom: 48 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 800, letterSpacing: ".25em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 20 }}>
             {t("hero.badge")}
           </p>
-          <h1 style={{ fontSize: "clamp(38px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-.03em", marginBottom: 16, maxWidth: 700, margin: "0 auto 16px" }}>
+          <h1 style={{ fontSize: "clamp(44px, 7vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-.035em", marginBottom: 20, maxWidth: 760, margin: "0 auto 20px" }}>
             {t("hero.title1")}
             <br />
             <span style={{ color: AH }}>{t("hero.title2")}</span>
           </h1>
-          <p style={{ fontSize: 16, color: T2, maxWidth: 560, margin: "0 auto 28px", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 20, color: T2, maxWidth: 580, margin: "0 auto 32px", lineHeight: 1.6 }}>
             {t("hero.sub")}
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-            <a href="/estimator" style={{ display: "inline-block", padding: "14px 28px", borderRadius: 8, background: TL, color: V, fontSize: 13, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
+            <a href="/estimator" style={{ display: "inline-block", padding: "16px 32px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
               {t("hero.cta1")} &rarr;
             </a>
-            <a href="/sample-report" style={{ display: "inline-block", padding: "14px 24px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 13, fontWeight: 500, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
+            <a href="/sample-report" style={{ display: "inline-block", padding: "16px 28px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 15, fontWeight: 500, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
               {t("hero.cta2")}
             </a>
           </div>
@@ -249,13 +249,13 @@ export default function LandingPage() {
               ].map(function (item) {
                 return (
                   <div key={item.label} style={{ padding: 16, borderRadius: 9, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-                    <p style={{ fontFamily: MO, fontSize: 22, fontWeight: 800, color: item.color, marginBottom: 6 }}>{item.amt}</p>
-                    <p style={{ fontSize: 11, color: T2, lineHeight: 1.4 }}>{item.label}</p>
+                    <p style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: item.color, marginBottom: 8 }}>{item.amt}</p>
+                    <p style={{ fontSize: 15, color: T2, lineHeight: 1.5 }}>{item.label}</p>
                   </div>
                 );
               })}
             </div>
-            <p style={{ fontSize: 12, color: T3, textAlign: "center", marginTop: 16, fontFamily: MO }}>
+            <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 16, fontFamily: MO }}>
               {t("problem.source")}
             </p>
           </div>
@@ -278,7 +278,7 @@ export default function LandingPage() {
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
               {t("proc.title")}
             </h2>
-            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
               {t("proc.sub")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
@@ -302,8 +302,8 @@ export default function LandingPage() {
                     <div style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: "rgba(59,130,246,0.08)", position: "absolute", top: 8, right: 12 }}>
                       0{i + 1}
                     </div>
-                    <h3 style={{ fontSize: 12, fontWeight: 700, color: T1, marginBottom: 4 }}>{t(key)}</h3>
-                    <p style={{ fontSize: 10, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 4 }}>{t(key)}</h3>
+                    <p style={{ fontSize: 13, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
                   </motion.div>
                 );
               })}
@@ -318,7 +318,7 @@ export default function LandingPage() {
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
               {t("fi.title")}
             </h2>
-            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
               {t("fi.sub")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
@@ -330,12 +330,12 @@ export default function LandingPage() {
                 return (
                   <div key={m.label} style={{ padding: 20, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
                     <p style={{ fontFamily: MO, fontSize: 36, fontWeight: 800, color: m.color, lineHeight: 1, marginBottom: 8 }}>{m.value}</p>
-                    <p style={{ fontSize: 12, color: T2, lineHeight: 1.4 }}>{m.label}</p>
+                    <p style={{ fontSize: 15, color: T2, lineHeight: 1.5 }}>{m.label}</p>
                   </div>
                 );
               })}
             </div>
-            <p style={{ fontSize: 10, color: T3, textAlign: "center", marginTop: 14, fontFamily: MO }}>
+            <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 14, fontFamily: MO }}>
               {t("fi.source")}
             </p>
           </div>
@@ -349,7 +349,7 @@ export default function LandingPage() {
           <div id="pricing" style={{ textAlign: "center", marginBottom: 24 }}>
             <Label>{t("price.label")}</Label>
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8 }}>{t("price.title")}</h2>
-            <p style={{ fontSize: 13, color: T2, maxWidth: 560, margin: "0 auto", lineHeight: 1.6 }}>{t("price.sub")}</p>
+            <p style={{ fontSize: 17, color: T2, maxWidth: 580, margin: "0 auto", lineHeight: 1.6 }}>{t("price.sub")}</p>
           </div>
 
           {/* Process progression bar */}
@@ -404,17 +404,17 @@ export default function LandingPage() {
                   <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontFamily: MO, fontWeight: 700, padding: "3px 10px", borderRadius: 4, background: tier.highlight ? TL : isPremium ? A : "rgba(36,48,78,0.5)", color: tier.highlight ? V : isPremium ? "#fff" : T2, letterSpacing: ".06em", textTransform: "uppercase", whiteSpace: "nowrap" as const }}>
                     {tier.badge}
                   </div>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 8, marginTop: 4 }}>{tier.name}</h3>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: T1, marginBottom: 8, marginTop: 4 }}>{tier.name}</h3>
                   <div style={{ marginBottom: 10 }}>
                     <span style={{ fontFamily: MO, fontSize: isPremium ? 18 : 28, fontWeight: 800, color: tier.highlight ? TL : AH, letterSpacing: isPremium ? ".02em" : "-.02em" }}>{tier.price}</span>
                     {tier.period && <span style={{ fontSize: 12, color: T3, marginLeft: 2 }}>{tier.period}</span>}
                   </div>
-                  <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, marginBottom: 16 }}>{tier.desc}</p>
+                  <p style={{ fontSize: 14, color: T2, lineHeight: 1.6, marginBottom: 16 }}>{tier.desc}</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16, flex: 1 }}>
                     {tier.features.map(function (f) {
                       return (
-                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T2 }}>
-                          <CheckCircle size={13} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: T2 }}>
+                          <CheckCircle size={15} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                           {f}
                         </div>
                       );
@@ -423,7 +423,7 @@ export default function LandingPage() {
 
                   {/* ROI proof line */}
                   <div style={{ padding: "8px 10px", borderRadius: 6, background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 14 }}>
-                    <p style={{ fontSize: 9, fontFamily: MO, color: TL, letterSpacing: ".04em", textAlign: "center" }}>{tier.roi}</p>
+                    <p style={{ fontSize: 12, fontFamily: MO, color: TL, letterSpacing: ".04em", textAlign: "center" }}>{tier.roi}</p>
                   </div>
 
                   <a
@@ -432,7 +432,7 @@ export default function LandingPage() {
                       display: "block", width: "100%", padding: "11px", borderRadius: 7, border: "none",
                       background: tier.highlight ? TL : isPremium ? "rgba(59,130,246,0.12)" : "rgba(59,130,246,0.08)",
                       color: tier.highlight ? V : AH,
-                      fontSize: 11, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
+                      fontSize: 13, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
                       cursor: "pointer", textDecoration: "none", textAlign: "center",
                       transition: "opacity 0.15s",
                       boxSizing: "border-box",
@@ -444,7 +444,7 @@ export default function LandingPage() {
               );
             })}
           </div>
-          <p style={{ fontSize: 10, color: T3, textAlign: "center", marginTop: 14 }}>
+          <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 14 }}>
             {t("price.note")}
           </p>
         </Section>
@@ -456,21 +456,21 @@ export default function LandingPage() {
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
               {t("sr.title")}
             </h2>
-            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
               {t("sr.sub")}
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
               {["sr.i1", "sr.i2", "sr.i3"].map(function (key) {
                 return (
-                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 8, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)" }}>
-                    <CheckCircle size={16} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: T2 }}>{t(key)}</span>
+                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderRadius: 8, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)" }}>
+                    <CheckCircle size={18} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 16, color: T2 }}>{t(key)}</span>
                   </div>
                 );
               })}
             </div>
             <div style={{ textAlign: "center" }}>
-              <a href="/sample-report" style={{ display: "inline-block", padding: "12px 28px", borderRadius: 8, border: "1px solid " + BD, color: AH, fontSize: 13, fontWeight: 700, letterSpacing: ".04em", textDecoration: "none", transition: "border-color 0.15s" }}>
+              <a href="/sample-report" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 8, border: "1px solid " + BD, color: AH, fontSize: 15, fontWeight: 700, letterSpacing: ".04em", textDecoration: "none", transition: "border-color 0.15s" }}>
                 {t("sr.cta")} &rarr;
               </a>
             </div>
@@ -502,8 +502,8 @@ export default function LandingPage() {
                   >
                     <div style={{ color: A, flexShrink: 0, marginTop: 2 }}>{SEC_ICONS[i]}</div>
                     <div>
-                      <h3 style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 2 }}>{t(key)}</h3>
-                      <p style={{ fontSize: 11, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
+                      <h3 style={{ fontSize: 16, fontWeight: 700, color: T1, marginBottom: 3 }}>{t(key)}</h3>
+                      <p style={{ fontSize: 14, color: T2, lineHeight: 1.55 }}>{t(key + ".desc")}</p>
                     </div>
                   </div>
                 );
@@ -522,7 +522,7 @@ export default function LandingPage() {
             <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 12 }}>
               {["ea.l1", "ea.l2", "ea.l3"].map(function (key) {
                 return (
-                  <p key={key} style={{ fontSize: 14, color: T2, lineHeight: 1.6 }}>
+                  <p key={key} style={{ fontSize: 18, color: T2, lineHeight: 1.65 }}>
                     {t(key)}
                   </p>
                 );
@@ -534,20 +534,20 @@ export default function LandingPage() {
         {/* ═══════ 12. FINAL CTA ═══════ */}
         <Section>
           <div style={Object.assign({}, gl, { padding: 32, textAlign: "center" as const })}>
-            <p style={{ fontSize: 10, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 8 }}>
+            <p style={{ fontSize: 14, fontFamily: MO, fontWeight: 800, letterSpacing: ".2em", textTransform: "uppercase", color: RD, marginBottom: 10 }}>
               {t("cta.urgency")}
             </p>
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, marginBottom: 8 }}>
               {t("cta.title1")} <span style={{ color: TL }}>{t("cta.title2")}</span>
             </h2>
-            <p style={{ fontSize: 14, color: T2, maxWidth: 480, margin: "0 auto 20px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 17, color: T2, maxWidth: 500, margin: "0 auto 24px", lineHeight: 1.6 }}>
               {t("cta.sub")}
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-              <a id="audit" href="/estimator" style={{ display: "inline-block", padding: "14px 28px", borderRadius: 8, background: TL, color: V, fontSize: 13, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
+              <a id="audit" href="/estimator" style={{ display: "inline-block", padding: "16px 32px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
                 {t("cta.primary")}
               </a>
-              <a href="mailto:audits@valuguard.com" style={{ display: "inline-block", padding: "14px 22px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 13, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
+              <a href="mailto:audits@valuguard.com" style={{ display: "inline-block", padding: "16px 26px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 15, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
                 {t("cta.secondary")}
               </a>
             </div>
@@ -558,8 +558,8 @@ export default function LandingPage() {
         <footer style={{ borderTop: "1px solid " + BD, padding: "32px 0", marginTop: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24 }}>
             <div>
-              <span style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: A, letterSpacing: ".06em" }}>VALUGUARD</span>
-              <p style={{ fontSize: 11, color: T3, marginTop: 6, maxWidth: 240, lineHeight: 1.5 }}>
+              <span style={{ fontSize: 14, fontFamily: MO, fontWeight: 700, color: A, letterSpacing: ".06em" }}>VALUGUARD</span>
+              <p style={{ fontSize: 13, color: T3, marginTop: 6, maxWidth: 260, lineHeight: 1.55 }}>
                 {t("footer.desc")}
               </p>
             </div>

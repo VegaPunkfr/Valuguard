@@ -88,13 +88,13 @@ export default function ControlPlaneSection({ t }: Props) {
         <span
           style={{
             display: "block",
-            fontSize: 9,
-            fontWeight: 600,
+            fontSize: 15,
+            fontWeight: 800,
             fontFamily: MO,
-            letterSpacing: ".14em",
+            letterSpacing: ".25em",
             textTransform: "uppercase",
             color: A,
-            marginBottom: 10,
+            marginBottom: 14,
           }}
         >
           {t("cp.label")}
@@ -102,7 +102,7 @@ export default function ControlPlaneSection({ t }: Props) {
         <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, color: T1, marginBottom: 12, lineHeight: 1.15 }}>
           {t("cp.title")}
         </h2>
-        <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
           {t("cp.sub")}
         </p>
 
@@ -137,10 +137,10 @@ export default function ControlPlaneSection({ t }: Props) {
                 {step.num}
               </div>
               <div style={{ color: A, marginBottom: 10 }}>{step.icon}</div>
-              <h3 style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 4 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: T1, marginBottom: 4 }}>
                 {step.title}
               </h3>
-              <p style={{ fontSize: 11, color: T2, lineHeight: 1.5 }}>{step.desc}</p>
+              <p style={{ fontSize: 14, color: T2, lineHeight: 1.55 }}>{step.desc}</p>
             </motion.div>
           ))}
         </div>
