@@ -84,9 +84,11 @@ export const metadata: Metadata = {
     images: [`${SITE_URL}/og/valuguard-og-us.png`],
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
   robots: {
     index: true,
