@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 import { useI18n, PRICES } from "@/lib/i18n";
@@ -67,6 +67,98 @@ const DETECT_ICONS = ["\u{1F47B}", "\u{1F504}", "\u{1F4D0}", "\u{1F3F4}", "\u{1F
 const LOGOS = ["Stripe", "Datadog", "Notion", "HubSpot", "Figma", "Vercel", "Snowflake", "Okta"];
 
 // (testimonials are now i18n-driven inside the component)
+
+// ── Estimator Widget (PDF Section 2 — Instant Leak & ROI) ──
+function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; formatCurrency: (n: number, compact?: boolean) => string }) {
+  const [employees, setEmployees] = useState(120);
+  const [budget, setBudget] = useState(480000);
+
+  const result = useMemo(() => {
+    const monthly = budget / 12;
+    const kappa = employees <= 50 ? 0 : 0.04 * Math.log(employees / 50);
+    const baseLeakPct = 0.15 + kappa * 0.6;
+    const exposure = Math.round(monthly * baseLeakPct * 12);
+    const tensionRaw = Math.min(99, Math.round(30 + kappa * 200 + (budget > 600000 ? 15 : 0)));
+    const window = Math.max(20, Math.round(90 - tensionRaw * 0.5));
+    const leverCount = tensionRaw >= 60 ? 5 : tensionRaw >= 40 ? 4 : 3;
+    return { exposure, tension: tensionRaw, window, leverCount };
+  }, [employees, budget]);
+
+  const tensionColor = result.tension >= 60 ? "#ef4444" : result.tension >= 40 ? "#f59e0b" : result.tension >= 25 ? "#60a5fa" : "#34d399";
+  const tensionLabel = result.tension >= 60 ? t("est.widget.tension.critical") : result.tension >= 40 ? t("est.widget.tension.elevated") : result.tension >= 25 ? t("est.widget.tension.moderate") : t("est.widget.tension.low");
+  const leverKeys = ["est.widget.lever1", "est.widget.lever2", "est.widget.lever3", "est.widget.lever4", "est.widget.lever5"];
+
+  return (
+    <Section>
+      <div style={Object.assign({}, gl, { padding: 28 })}>
+        <Label>{t("est.widget.title")}</Label>
+        <p style={{ fontSize: 12, color: T2, marginBottom: 20 }}>{t("est.widget.sub")}</p>
+
+        {/* Sliders */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.employees")}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input type="range" min={10} max={500} step={10} value={employees} onChange={(e) => setEmployees(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
+              <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 40, textAlign: "right" }}>{employees}</span>
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.budget")}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input type="range" min={50000} max={2000000} step={10000} value={budget} onChange={(e) => setBudget(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
+              <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 70, textAlign: "right" }}>{formatCurrency(budget, true)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+          {/* Exposure — biggest, per PDF Section 7 hierarchy */}
+          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(239,68,68,0.12)", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.exposure")}</p>
+            <p style={{ fontFamily: MO, fontSize: 42, fontWeight: 800, color: "#ef4444", lineHeight: 1, letterSpacing: "-.02em" }}>
+              {formatCurrency(result.exposure)}
+            </p>
+          </div>
+          {/* Tension Index */}
+          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.tension")}</p>
+            <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: tensionColor, lineHeight: 1 }}>{result.tension}</p>
+            <p style={{ fontSize: 8, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", color: tensionColor, marginTop: 4 }}>{tensionLabel}</p>
+          </div>
+          {/* Corrective Window */}
+          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
+            <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.window")}</p>
+            <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>{result.window}</p>
+            <p style={{ fontSize: 8, fontFamily: MO, color: T3, marginTop: 4 }}>{t("est.widget.window.val")}</p>
+          </div>
+        </div>
+
+        {/* Corrective Levers */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: T3, marginBottom: 8 }}>{t("est.widget.levers")}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {leverKeys.slice(0, result.leverCount).map((key, i) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.08)" }}>
+                <span style={{ fontFamily: MO, fontSize: 10, fontWeight: 700, color: A, minWidth: 16 }}>0{i + 1}</span>
+                <span style={{ fontSize: 11, color: T2 }}>{t(key)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div style={{ textAlign: "center" }}>
+          <a href="/estimator" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 8, background: TL, color: V, fontSize: 13, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
+            {t("est.widget.cta")} &rarr;
+          </a>
+          <p style={{ fontSize: 9, color: T3, marginTop: 8 }}>{t("est.widget.micro")}</p>
+        </div>
+      </div>
+    </Section>
+  );
+}
 
 // ══════════════════════════════════════════════════
 // MAIN
@@ -332,6 +424,9 @@ export default function LandingPage() {
             })}
           </div>
         </Section>
+
+        {/* ═══════ INSTANT ESTIMATOR ═══════ */}
+        <EstimatorWidget t={t} formatCurrency={formatCurrency} />
 
         {/* ═══════ PRICING ═══════ */}
         <Section>
