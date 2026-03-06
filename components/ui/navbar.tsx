@@ -47,9 +47,9 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "/methodology", label: t("nav.methodology") },
-    { href: "/methodology#cfg", label: t("nav.technology") },
-    { href: "#pricing", label: t("nav.pricing") },
+    { href: "/#methodology", label: t("nav.methodology") },
+    { href: "/#technology", label: t("nav.technology") },
+    { href: "/#pricing", label: t("nav.pricing") },
     { href: "/security-vault", label: t("nav.security") },
     { href: "/sample-report", label: t("nav.example") },
   ];

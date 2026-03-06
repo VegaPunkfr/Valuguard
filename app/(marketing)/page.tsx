@@ -262,10 +262,14 @@ export default function LandingPage() {
         </Section>
 
         {/* ═══════ 3. AUDIT FRAMEWORK ═══════ */}
-        <ControlPlaneSection t={t} />
+        <div id="methodology">
+          <ControlPlaneSection t={t} />
+        </div>
 
         {/* ═══════ 4. CAUSAL FINANCIAL GRAPH ═══════ */}
-        <CausalGraphSection t={t} />
+        <div id="technology">
+          <CausalGraphSection t={t} />
+        </div>
 
         {/* ═══════ 5. PROCESS ═══════ */}
         <Section>
