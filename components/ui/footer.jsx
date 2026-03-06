@@ -1,11 +1,9 @@
 "use client";
-import { useState } from "react";
 
-/*  VALUGUARD — FOOTER DE CONFIANCE (FR 2026) */
+import { useI18n } from "@/lib/i18n";
 
 var V = "#060912";
 var A = "#3b82f6";
-var AH = "#60a5fa";
 var T1 = "#e0e6f2";
 var T2 = "#8d9bb5";
 var T3 = "#55637d";
@@ -13,36 +11,6 @@ var TL = "#34d399";
 var BD = "rgba(36,48,78,0.32)";
 var MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
 var SA = "system-ui,-apple-system,sans-serif";
-
-var YEAR = new Date().getFullYear();
-
-var PRODUCT_LINKS = [
-  { label: "Audit Ghost Tax", href: "/estimator" },
-  { label: "M\u00e9thodologie", href: "/methodology" },
-  { label: "Exemple de rapport", href: "/sample-report" },
-  { label: "Tarifs", href: "/#pricing" },
-];
-
-var TRUST_LINKS = [
-  { label: "Coffre-fort S\u00e9curit\u00e9", href: "/security-vault" },
-  { label: "Architecture SOC2", href: "/security-vault" },
-  { label: "Politique de confidentialit\u00e9", href: "/security-vault" },
-  { label: "Conditions d'utilisation", href: "/security-vault" },
-];
-
-var RESOURCE_LINKS = [
-  { label: "Analyse Peer-Gap", href: "/peer-gap" },
-  { label: "Rapport ROI", href: "/roi-report" },
-  { label: "Estimateur", href: "/estimator" },
-];
-
-var BADGES = [
-  { icon: "\u{1F6E1}", text: "SOC2 Type II Ready" },
-  { icon: "\u{1F510}", text: "Audit Zero-Knowledge" },
-  { icon: "\u{1F1EA}\u{1F1FA}", text: "H\u00e9bergement EU" },
-  { icon: "\u23F1", text: "Purge auto 30 jours" },
-  { icon: "\u{1F512}", text: "Chiffrement AES-256" },
-];
 
 function FooterColumn(props) {
   return (
@@ -76,6 +44,36 @@ function FooterColumn(props) {
 }
 
 export default function TrustFooter() {
+  var { t } = useI18n();
+
+  var PRODUCT_LINKS = [
+    { label: t("footer.link.audit"), href: "/estimator" },
+    { label: t("footer.link.methodology"), href: "/methodology" },
+    { label: t("footer.link.sample"), href: "/sample-report" },
+    { label: t("footer.link.pricing"), href: "/#pricing" },
+  ];
+
+  var TRUST_LINKS = [
+    { label: t("footer.link.vault"), href: "/security-vault" },
+    { label: t("footer.link.soc2"), href: "/security-vault" },
+    { label: t("footer.link.privacy"), href: "/security-vault" },
+    { label: t("footer.link.terms"), href: "/security-vault" },
+  ];
+
+  var RESOURCE_LINKS = [
+    { label: t("footer.link.peergap"), href: "/peer-gap" },
+    { label: t("footer.link.roi"), href: "/roi-report" },
+    { label: t("footer.link.estimator"), href: "/estimator" },
+  ];
+
+  var BADGES = [
+    { icon: "\u{1F6E1}", text: t("footer.badge1") },
+    { icon: "\u{1F510}", text: t("footer.badge2") },
+    { icon: "\u{1F1FA}\u{1F1F8}", text: t("footer.badge3") },
+    { icon: "\u23F1", text: t("footer.badge4") },
+    { icon: "\u{1F512}", text: "AES-256" },
+  ];
+
   return (
     <footer style={{
       borderTop: "1px solid " + BD,
@@ -83,14 +81,12 @@ export default function TrustFooter() {
       fontFamily: SA,
       color: T1,
     }}>
-      {/* ── Main grid ────────────────────────── */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
         gap: 32,
         marginBottom: 28,
       }}>
-        {/* Brand column */}
         <div>
           <span style={{
             fontSize: 13, fontFamily: MO, fontWeight: 700,
@@ -102,8 +98,7 @@ export default function TrustFooter() {
             fontSize: 11, color: T3, marginTop: 8,
             maxWidth: 220, lineHeight: 1.55,
           }}>
-            Moniteur de fuites IT & IA. Nous r&eacute;v&eacute;lons o&ugrave; l'argent fuit,
-            combien cela co&ucirc;te, et quoi corriger en priorit&eacute;.
+            {t("footer.desc")}
           </p>
           <p style={{
             fontSize: 10, color: T3, marginTop: 10,
@@ -113,12 +108,11 @@ export default function TrustFooter() {
           </p>
         </div>
 
-        <FooterColumn title="Produit" links={PRODUCT_LINKS} />
-        <FooterColumn title="Confiance" links={TRUST_LINKS} />
-        <FooterColumn title="Ressources" links={RESOURCE_LINKS} />
+        <FooterColumn title={t("footer.product")} links={PRODUCT_LINKS} />
+        <FooterColumn title={t("footer.trust")} links={TRUST_LINKS} />
+        <FooterColumn title={t("footer.resources")} links={RESOURCE_LINKS} />
       </div>
 
-      {/* ── Trust shield bar ─────────────────── */}
       <div style={{
         display: "flex",
         justifyContent: "space-between",
@@ -146,7 +140,7 @@ export default function TrustFooter() {
         </div>
 
         <p style={{ fontSize: 8, color: T3, fontFamily: MO }}>
-          &copy; {YEAR} Valuguard SAS. Tous droits r&eacute;serv&eacute;s.
+          {t("footer.copyright")}
         </p>
       </div>
     </footer>

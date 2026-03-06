@@ -172,7 +172,7 @@ export default function SecurityVault() {
       <div style={{ maxWidth: 1020, margin: "0 auto" }}>
 
         {/* ── RETOUR ─────────────────────────────── */}
-        <div style={{ paddingTop: 16 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Retour</a></div>
+        <div style={{ paddingTop: 16 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
 
         {/* ── HERO ──────────────────────────────── */}
         <header style={{ textAlign: "center", padding: "36px 0 40px" }}>

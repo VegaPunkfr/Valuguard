@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { I18nProvider } from "@/lib/i18n";
+import Navbar from "@/components/ui/navbar";
 
 /* ─── Fonts ─────────────────────────────────────────── */
 const fontSans = Inter({
@@ -18,11 +20,11 @@ const fontMono = JetBrains_Mono({
 /* ─── Constants ─────────────────────────────────────── */
 const SITE_URL = "https://valuguard.com";
 const SITE_NAME = "Valuguard";
-const TITLE = "Valuguard — Exposez votre Taxe Fant\u00f4me IA | Moniteur de fuites SaaS";
+const TITLE = "Valuguard \u2014 Expose Your AI Ghost Tax | SaaS Spend Leak Monitor";
 const DESCRIPTION =
-  "Valuguard d\u00e9tecte o\u00f9 fuient vos budgets SaaS, Cloud et IA. " +
-  "12 types de fuites. Moteur d\u00e9terministe. Aucun acc\u00e8s syst\u00e8me requis. " +
-  "ROI moyen : 18x. R\u00e9cup\u00e9rez 100k\u20ac+ par an.";
+  "Valuguard detects where your SaaS, Cloud, and AI budget leaks. " +
+  "12 leak types. Deterministic engine. Zero system access required. " +
+  "Average ROI: 18x. Recover $100k+ per year.";
 
 /* ─── Metadata (merged from layout-meta.js) ─────────── */
 export const metadata: Metadata = {
@@ -51,13 +53,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
     languages: {
-      "fr-FR": SITE_URL,
+      "en-US": SITE_URL,
+      "fr-FR": `${SITE_URL}/fr`,
+      "de-DE": `${SITE_URL}/de`,
       "x-default": SITE_URL,
     },
   },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: "en_US",
     url: SITE_URL,
     siteName: SITE_NAME,
     title: TITLE,
@@ -131,7 +135,7 @@ const organizationJsonLd = {
     "@type": "ContactPoint",
     email: "audits@valuguard.com",
     contactType: "sales",
-    availableLanguage: "French",
+    availableLanguage: ["English", "French", "German"],
   },
   sameAs: [],
 };
@@ -148,8 +152,8 @@ const softwareJsonLd = {
   offers: {
     "@type": "Offer",
     price: "990",
-    priceCurrency: "EUR",
-    description: "Audit Ghost Tax — diagnostic unique",
+    priceCurrency: "USD",
+    description: "Ghost Tax Audit \u2014 one-time diagnostic",
   },
   featureList: [
     "12-type anomaly detection",
@@ -184,13 +188,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
         style={{ background: "#060912" }}
       >
         <JsonLdScripts />
-        {children}
+        <I18nProvider>
+          <Navbar />
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

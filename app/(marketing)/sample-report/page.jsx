@@ -107,7 +107,7 @@ export default function SampleReport(){
       <div style={{maxWidth:820,margin:"0 auto"}}>
 
         {/* RETOUR */}
-        <div style={{marginBottom:14}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)"}}>{"\u2190"} Retour</a></div>
+        <div style={{marginBottom:14}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)"}}>{"\u2190"} Back</a></div>
 
         {/* WATERMARK */}
         <div style={{textAlign:"center",padding:"10px",marginBottom:16,borderRadius:8,background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.18)"}}>

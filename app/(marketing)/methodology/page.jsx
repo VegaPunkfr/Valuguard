@@ -31,9 +31,9 @@ return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 </div>);}
 export default function Methodology(){return(
 <div style={{minHeight:"100vh",background:V,fontFamily:SA,color:T1,padding:"0 14px 64px"}}><div style={{maxWidth:1020,margin:"0 auto"}}>
-<div style={{paddingTop:16}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)",transition:"color 0.15s"}}>{"\u2190"} Retour</a></div>
+<div style={{paddingTop:16}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)",transition:"color 0.15s"}}>{"\u2190"} Back</a></div>
 <header style={{textAlign:"center",padding:"36px 0 40px"}}>
-<p style={{fontSize:9,fontWeight:600,letterSpacing:".16em",textTransform:"uppercase",color:A,fontFamily:MO,marginBottom:14}}>M&Eacute;THODOLOGIE QUANTITATIVE</p>
+<p style={{fontSize:9,fontWeight:600,letterSpacing:".16em",textTransform:"uppercase",color:A,fontFamily:MO,marginBottom:14}}>QUANTITATIVE METHODOLOGY</p>
 <h1 style={{fontSize:"clamp(26px,4vw,40px)",fontWeight:800,lineHeight:1.1,letterSpacing:"-.025em",marginBottom:14}}>12 leak types. <span style={{color:A}}>1 engine.</span> <span style={{color:RD}}>0 blind spots.</span></h1>
 <p style={{fontSize:15,color:T2,maxWidth:540,margin:"0 auto",lineHeight:1.6}}>A deterministic, explainable, and verifiable engine. We publish our thresholds, formulas, and limitations.</p>
 <div style={{display:"flex",justifyContent:"center",gap:10,marginTop:20,flexWrap:"wrap"}}>{["Deterministic","Zero ML V1","Explainable","Open Methodology"].map(function(b){return <span key={b} style={{fontSize:9,fontWeight:600,fontFamily:MO,letterSpacing:".06em",textTransform:"uppercase",padding:"4px 10px",borderRadius:5,background:"rgba(59,130,246,0.06)",border:"1px solid rgba(59,130,246,0.18)",color:AH}}>{b}</span>;})}</div>

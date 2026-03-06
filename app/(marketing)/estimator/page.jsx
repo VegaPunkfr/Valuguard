@@ -339,7 +339,7 @@ export default function Cockpit() {
       <div style={{ maxWidth: 660, margin: "0 auto" }}>
 
         {/* ── RETOUR ────────────────────────────── */}
-        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: C.t2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: `1px solid ${C.bdr}`, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Retour</a></div>
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: C.t2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: `1px solid ${C.bdr}`, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
 
         {/* ── HEADER BAR ────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>

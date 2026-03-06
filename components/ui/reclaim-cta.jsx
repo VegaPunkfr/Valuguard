@@ -12,9 +12,8 @@
  * Usage in any parent component:
  *   <ReclaimCta diagnosticData={results} />
  *
- * 100% USD. Zero French. Production-ready.
+ * Production-ready. i18n via useI18n().
  */
-"use client";
 
 import { useState, useCallback } from "react";
 
@@ -121,7 +120,7 @@ export default function ReclaimCta({ diagnosticData }) {
       utm_source: null,
       utm_medium: null,
       utm_campaign: null,
-      locale: "fr-fr",
+      locale: "en-us",
     };
 
     fetch("/api/vault/persist", {

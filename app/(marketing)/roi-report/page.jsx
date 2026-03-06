@@ -174,7 +174,7 @@ export default function BoardReport() {
       <div style={{ maxWidth: 780, margin: "0 auto" }}>
 
         {/* ── RETOUR ─────────────────────────────── */}
-        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: "#8d9bb5", textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(36,48,78,0.32)", background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Retour</a></div>
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: "#8d9bb5", textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(36,48,78,0.32)", background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
 
         {/* ── HEADER ──────────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
