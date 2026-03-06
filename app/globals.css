@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*  ════════════════════════════════════════════════════
+    VALUGUARD — GLOBAL STYLESHEET (US 2026 FINAL)
+    
+    1. TEXTURE & DEPTH : Noise grain + radial halos
+    2. CINÉMATIQUE     : CountUp keyframes
+    3. UNIFICATION     : Zinc palette standardized
+    4. PRINT AUTHORITY  : Ctrl+P board-ready output
+    5. BASE RESETS      : Smooth scroll, selection, focus
+    ════════════════════════════════════════════════════ */
+
+
+/* ── 1. ZINC PALETTE (unified grays) ─────────────── */
+
+:root {
+  --zinc-950: #060912;
+  --zinc-900: #0b0e18;
+  --zinc-850: #0f1220;
+  --zinc-800: #161b2c;
+  --zinc-700: #1e2640;
+  --zinc-600: #2a3454;
+  --zinc-500: #55637d;
+  --zinc-400: #8d9bb5;
+  --zinc-300: #b4bdd0;
+  --zinc-200: #d0d7e2;
+  --zinc-100: #e0e6f2;
+  --zinc-50:  #f0f2f7;
+
+  --accent:   #3b82f6;
+  --accent-hi:#60a5fa;
+  --teal:     #34d399;
+  --red:      #ef4444;
+  --orange:   #f59e0b;
+  --green:    #22c55e;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+
+  --mono: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+
+/* ── 2. BASE RESETS ──────────────────────────────── */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--zinc-950);
+  color: var(--zinc-100);
+  font-family: var(--sans);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.30);
+  color: var(--zinc-50);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+}
+
+
+/* ── 3. NOISE GRAIN TEXTURE ──────────────────────── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+
+/* ── 4. RADIAL HALO GLOWS ────────────────────────── */
+
+.vg-halo-top {
+  position: relative;
+}
+
+.vg-halo-top::after {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(59, 130, 246, 0.06) 0%,
+    rgba(59, 130, 246, 0.02) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vg-halo-teal::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  right: -100px;
+  width: 500px;
+  height: 350px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(52, 211, 153, 0.04) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vg-halo-red::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: -80px;
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(239, 68, 68, 0.04) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ── 5. COUNTUP + REVEAL ANIMATIONS ──────────────── */
+
+@keyframes vg-countup {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes vg-fade-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vg-scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes vg-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes vg-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.25); }
+  50%      { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+}
+
+.vg-countup    { animation: vg-countup  0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+.vg-fade-in    { animation: vg-fade-in  0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+.vg-scale-in   { animation: vg-scale-in 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.vg-bar-grow   { animation: vg-bar-grow 0.8s cubic-bezier(0.16,1,0.3,1) forwards; transform-origin: left; }
+.vg-pulse-glow { animation: vg-pulse-glow 2s ease-in-out infinite; }
+
+/* Stagger delays (apply via className: vg-delay-1, vg-delay-2, etc.) */
+.vg-delay-1 { animation-delay: 100ms; }
+.vg-delay-2 { animation-delay: 200ms; }
+.vg-delay-3 { animation-delay: 300ms; }
+.vg-delay-4 { animation-delay: 400ms; }
+.vg-delay-5 { animation-delay: 500ms; }
+
+
+/* ── 6. SCROLLBAR (thin, zinc-matched) ───────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--zinc-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--zinc-700);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--zinc-600);
+}
+
+
+/* ── 7. PRINT STYLESHEET ─────────────────────────── */
+
+@media print {
+  /* Strip all visual chrome */
+  body::before,
+  nav,
+  footer,
+  button,
+  input,
+  select,
+  .vg-halo-top::after,
+  .vg-halo-teal::after,
+  .vg-halo-red::after,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* White background for ink efficiency */
+  html, body {
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  * {
+    background: transparent !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: #ccc !important;
+  }
+
+  /* Preserve link URLs */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript"]::after {
+    content: "";
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1.5cm 2cm;
+    size: letter;
+  }
+
+  /* Ensure KPI values stay bold */
+  [style*="fontFamily"] {
+    font-family: 'Courier New', monospace !important;
+    font-weight: bold !important;
+  }
+
+  /* Header for printed pages */
+  body::after {
+    content: "VALUGUARD — Confidential Ghost Tax Report — valuguard.com";
+    display: block;
+    text-align: center;
+    font-size: 8pt;
+    color: #999;
+    margin-top: 24pt;
+    padding-top: 8pt;
+    border-top: 0.5pt solid #ccc;
+  }
+
+  /* Avoid page breaks inside cards */
+  [style*="borderRadius"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
