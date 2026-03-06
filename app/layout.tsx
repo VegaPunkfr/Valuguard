@@ -20,11 +20,10 @@ const fontMono = JetBrains_Mono({
 /* ─── Constants ─────────────────────────────────────── */
 const SITE_URL = "https://valuguard.com";
 const SITE_NAME = "Valuguard";
-const TITLE = "Valuguard \u2014 Expose Your AI Ghost Tax | SaaS Spend Leak Monitor";
+const TITLE = "ValuGuard \u2014 AI Financial Control Plane for SaaS & AI Spend";
 const DESCRIPTION =
-  "Valuguard detects where your SaaS, Cloud, and AI budget leaks. " +
-  "12 leak types. Deterministic engine. Zero system access required. " +
-  "Average ROI: 18x. Recover $100k+ per year.";
+  "Detect hidden SaaS, AI and cloud spend using a proprietary Causal Financial Graph. " +
+  "Deterministic detection. Causal explanation. Corrective protocol in 48h.";
 
 /* ─── Metadata (merged from layout-meta.js) ─────────── */
 export const metadata: Metadata = {

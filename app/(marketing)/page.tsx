@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle } from "lucide-react";
-import { useI18n, PRICES } from "@/lib/i18n";
+import { motion } from "framer-motion";
+import { CheckCircle, Shield, Lock, Server, Globe, Trash2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import ControlPlaneSection from "@/components/ControlPlaneSection";
+import CausalGraphSection from "@/components/CausalGraphSection";
 
 /*  VALUGUARD — LANDING PAGE (i18n: EN/FR/DE)
     Navbar is in layout.tsx (global sticky).
-    Framer Motion scroll reveals. Social proof. Testimonials.
-    Pricing: $990 audit, $490/mo essentials, $990/mo guardian. */
+    12-section CFO-grade structure. */
 
 const V = "#060912";
 const A = "#3b82f6";
@@ -55,18 +56,11 @@ function Section(props: { delay?: number; style?: React.CSSProperties; children:
 
 function Label(props: { children: React.ReactNode }) {
   return (
-    <span style={{ display: "block", fontSize: 9, fontWeight: 600, fontFamily: MO, letterSpacing: ".14em", textTransform: "uppercase", color: A, marginBottom: 10 }}>
+    <span style={{ display: "block", fontSize: 10, fontWeight: 600, fontFamily: MO, letterSpacing: ".14em", textTransform: "uppercase", color: A, marginBottom: 10 }}>
       {props.children}
     </span>
   );
 }
-
-const DETECT_ICONS = ["\u{1F47B}", "\u{1F504}", "\u{1F4D0}", "\u{1F3F4}", "\u{1F916}", "\u{1F4C9}"];
-
-// ── Social proof logos (greyed, subtle) ────────────
-const LOGOS = ["Stripe", "Datadog", "Notion", "HubSpot", "Figma", "Vercel", "Snowflake", "Okta"];
-
-// (testimonials are now i18n-driven inside the component)
 
 // ── Estimator Widget (PDF Section 2 — Instant Leak & ROI) ──
 function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; formatCurrency: (n: number, compact?: boolean) => string }) {
@@ -114,20 +108,17 @@ function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; form
 
         {/* Results */}
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
-          {/* Exposure — biggest, per PDF Section 7 hierarchy */}
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(239,68,68,0.12)", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.exposure")}</p>
             <p style={{ fontFamily: MO, fontSize: 42, fontWeight: 800, color: "#ef4444", lineHeight: 1, letterSpacing: "-.02em" }}>
               {formatCurrency(result.exposure)}
             </p>
           </div>
-          {/* Tension Index */}
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.tension")}</p>
             <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: tensionColor, lineHeight: 1 }}>{result.tension}</p>
             <p style={{ fontSize: 8, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", color: tensionColor, marginTop: 4 }}>{tensionLabel}</p>
           </div>
-          {/* Corrective Window */}
           <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
             <p style={{ fontSize: 9, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.window")}</p>
             <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>{result.window}</p>
@@ -160,99 +151,75 @@ function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; form
   );
 }
 
+const SEC_ICONS = [
+  <Shield key="s" size={20} />,
+  <Lock key="l" size={20} />,
+  <Server key="sv" size={20} />,
+  <Globe key="g" size={20} />,
+  <Trash2 key="t" size={20} />,
+];
+
 // ══════════════════════════════════════════════════
 // MAIN
 // ══════════════════════════════════════════════════
 export default function LandingPage() {
-  const [openFaq, setOpenFaq] = useState(-1);
   const { t, formatCurrency } = useI18n();
-
-  const TESTIMONIALS = [
-    { quote: t("testimonials.1.quote"), name: t("testimonials.1.name"), role: t("testimonials.1.role"), company: t("testimonials.1.company") },
-    { quote: t("testimonials.2.quote"), name: t("testimonials.2.name"), role: t("testimonials.2.role"), company: t("testimonials.2.company") },
-    { quote: t("testimonials.3.quote"), name: t("testimonials.3.name"), role: t("testimonials.3.role"), company: t("testimonials.3.company") },
-  ];
-
-  const DETECTIONS = [
-    { icon: DETECT_ICONS[0], title: t("detect.t1"), desc: t("detect.d1") },
-    { icon: DETECT_ICONS[1], title: t("detect.t2"), desc: t("detect.d2") },
-    { icon: DETECT_ICONS[2], title: t("detect.t3"), desc: t("detect.d3") },
-    { icon: DETECT_ICONS[3], title: t("detect.t4"), desc: t("detect.d4") },
-    { icon: DETECT_ICONS[4], title: t("detect.t5"), desc: t("detect.d5") },
-    { icon: DETECT_ICONS[5], title: t("detect.t6"), desc: t("detect.d6") },
-  ];
-
-  const STEPS = [
-    { num: "01", title: t("how.s1"), desc: t("how.s1d"), time: t("time.5min") },
-    { num: "02", title: t("how.s2"), desc: t("how.s2d"), time: t("time.2min") },
-    { num: "03", title: t("how.s3"), desc: t("how.s3d"), time: t("time.48h") },
-    { num: "04", title: t("how.s4"), desc: t("how.s4d"), time: t("time.instant") },
-  ];
 
   const PRICING = [
     {
-      name: t("price.audit.name"),
-      price: formatCurrency(PRICES.audit),
+      name: t("price.diag.name"),
+      price: t("price.diag.price"),
       period: t("price.period.onetime"),
-      desc: t("price.audit.desc"),
-      features: [t("price.audit.f1"), t("price.audit.f2"), t("price.audit.f3"), t("price.audit.f4"), t("price.audit.f5")],
-      cta: t("price.audit.cta"),
+      desc: t("price.diag.desc"),
+      features: [t("price.diag.f1"), t("price.diag.f2"), t("price.diag.f3"), t("price.diag.f4"), t("price.diag.f5")],
+      cta: t("price.diag.cta"),
       href: "/estimator",
       highlight: false,
+      badge: t("price.diag.badge"),
+      roi: t("price.diag.roi"),
+      tier: "entry" as const,
     },
     {
-      name: t("price.essentials.name"),
-      price: formatCurrency(PRICES.essentials),
-      period: t("price.period.monthly"),
-      desc: t("price.essentials.desc"),
-      features: [t("price.essentials.f1"), t("price.essentials.f2"), t("price.essentials.f3"), t("price.essentials.f4"), t("price.essentials.f5")],
-      cta: t("price.essentials.cta"),
-      href: "/estimator",
-      highlight: false,
-    },
-    {
-      name: t("price.guardian.name"),
-      price: formatCurrency(PRICES.guardian),
-      period: t("price.period.monthly"),
-      desc: t("price.guardian.desc"),
-      features: [t("price.guardian.f1"), t("price.guardian.f2"), t("price.guardian.f3"), t("price.guardian.f4"), t("price.guardian.f5"), t("price.guardian.f6"), t("price.guardian.f7")],
-      cta: t("price.guardian.cta"),
-      href: "mailto:sales@valuguard.com",
+      name: t("price.protocol.name"),
+      price: t("price.protocol.price"),
+      period: "",
+      desc: t("price.protocol.desc"),
+      features: [t("price.protocol.f1"), t("price.protocol.f2"), t("price.protocol.f3"), t("price.protocol.f4"), t("price.protocol.f5")],
+      cta: t("price.protocol.cta"),
+      href: "/sample-report",
       highlight: true,
+      badge: t("price.protocol.badge"),
+      roi: t("price.protocol.roi"),
+      tier: "core" as const,
     },
-  ];
-
-  const FAQ = [
-    { q: t("faq.q1"), a: t("faq.a1") },
-    { q: t("faq.q2"), a: t("faq.a2") },
-    { q: t("faq.q3"), a: t("faq.a3") },
-    { q: t("faq.q4"), a: t("faq.a4") },
-    { q: t("faq.q5"), a: t("faq.a5") },
-    { q: t("faq.q6"), a: t("faq.a6") },
-  ];
-
-  const TRUST_STATS = [
-    { value: t("trust.roi.value"), label: t("trust.roi") },
-    { value: t("trust.types.value"), label: t("trust.types") },
-    { value: t("trust.delivery.value"), label: t("trust.delivery") },
-    { value: t("trust.access.value"), label: t("trust.access") },
+    {
+      name: t("price.controlplane.name"),
+      price: t("price.controlplane.price"),
+      period: "",
+      desc: t("price.controlplane.desc"),
+      features: [t("price.controlplane.f1"), t("price.controlplane.f2"), t("price.controlplane.f3"), t("price.controlplane.f4"), t("price.controlplane.f5")],
+      cta: t("price.controlplane.cta"),
+      href: "mailto:sales@valuguard.com",
+      highlight: false,
+      badge: t("price.controlplane.badge"),
+      roi: t("price.controlplane.roi"),
+      tier: "premium" as const,
+    },
   ];
 
   return (
     <div style={{ minHeight: "100vh", background: V, fontFamily: SA, color: T1 }}>
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "0 16px" }}>
 
-        {/* ═══════ HERO ═══════ */}
+        {/* ═══════ 1. HERO ═══════ */}
         <Section style={{ textAlign: "center", paddingTop: 56, paddingBottom: 48 }}>
-          <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 16 }}>
             {t("hero.badge")}
           </p>
-          <h1 style={{ fontSize: "clamp(30px, 5vw, 52px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-.03em", marginBottom: 16, maxWidth: 700, margin: "0 auto 16px" }}>
-            {t("hero.title1")}{" "}
-            <span style={{ color: RD }}>{t("hero.ghosttax")}</span>
+          <h1 style={{ fontSize: "clamp(38px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-.03em", marginBottom: 16, maxWidth: 700, margin: "0 auto 16px" }}>
+            {t("hero.title1")}
             <br />
-            {t("hero.title2")}{" "}
-            <span style={{ fontFamily: MO, color: TL }}>{t("hero.time")}</span>
+            <span style={{ color: AH }}>{t("hero.title2")}</span>
           </h1>
           <p style={{ fontSize: 16, color: T2, maxWidth: 560, margin: "0 auto 28px", lineHeight: 1.6 }}>
             {t("hero.sub")}
@@ -267,48 +234,11 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════ SOCIAL PROOF LOGOS ═══════ */}
-        <Section>
-          <div style={{ textAlign: "center", marginBottom: 10 }}>
-            <p style={{ fontSize: 9, fontWeight: 600, fontFamily: MO, letterSpacing: ".12em", textTransform: "uppercase", color: T3 }}>
-              {t("social.trusted")}
-            </p>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 32, flexWrap: "wrap", opacity: 0.35 }}>
-            {LOGOS.map(function (name) {
-              return (
-                <span key={name} style={{ fontSize: 14, fontFamily: MO, fontWeight: 700, color: T2, letterSpacing: ".04em" }}>
-                  {name}
-                </span>
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* ═══════ TRUST STATS ═══════ */}
-        <Section>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-            {TRUST_STATS.map(function (stat) {
-              return (
-                <motion.div
-                  key={stat.label}
-                  whileHover={{ scale: 1.03, borderColor: A + "40" }}
-                  transition={{ duration: 0.2 }}
-                  style={Object.assign({}, gl, { padding: 16, textAlign: "center" as const, cursor: "default" })}
-                >
-                  <p style={{ fontFamily: MO, fontSize: 26, fontWeight: 800, color: AH, lineHeight: 1 }}>{stat.value}</p>
-                  <p style={{ fontSize: 10, color: T3, marginTop: 6, textTransform: "uppercase", letterSpacing: ".06em" }}>{stat.label}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* ═══════ THE PROBLEM ═══════ */}
+        {/* ═══════ 2. THE PROBLEM ═══════ */}
         <Section>
           <div style={Object.assign({}, gl, { padding: 28 })}>
             <Label>{t("problem.label")}</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12, lineHeight: 1.2 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 12, lineHeight: 1.2 }}>
               {t("problem.title1")} <span style={{ color: RD }}>{t("problem.title2")}</span>
             </h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginTop: 16 }}>
@@ -331,55 +261,45 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════ DETECTION ENGINE ═══════ */}
-        <Section>
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <Label>{t("detect.label")}</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700 }}>{t("detect.title")}</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-            {DETECTIONS.map(function (d, i) {
-              return (
-                <motion.div
-                  key={d.title}
-                  variants={reveal}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 0.45, delay: i * 0.06 }}
-                  whileHover={{ borderColor: A + "40", scale: 1.02 }}
-                  style={Object.assign({}, gl, { padding: 16, cursor: "default" })}
-                >
-                  <span style={{ fontSize: 22 }}>{d.icon}</span>
-                  <h3 style={{ fontSize: 14, fontWeight: 700, color: T1, marginTop: 8, marginBottom: 4 }}>{d.title}</h3>
-                  <p style={{ fontSize: 11, color: T2, lineHeight: 1.5 }}>{d.desc}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </Section>
+        {/* ═══════ 3. AUDIT FRAMEWORK ═══════ */}
+        <ControlPlaneSection t={t} />
 
-        {/* ═══════ HOW IT WORKS ═══════ */}
+        {/* ═══════ 4. CAUSAL FINANCIAL GRAPH ═══════ */}
+        <CausalGraphSection t={t} />
+
+        {/* ═══════ 5. PROCESS ═══════ */}
         <Section>
           <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("how.label")}</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 20 }}>{t("how.title")}</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-              {STEPS.map(function (step, i) {
+            <Label>{t("proc.label")}</Label>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
+              {t("proc.title")}
+            </h2>
+            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+              {t("proc.sub")}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+              {(["proc.s1", "proc.s2", "proc.s3", "proc.s4", "proc.s5"] as const).map(function (key, i) {
                 return (
                   <motion.div
-                    key={step.num}
+                    key={key}
                     variants={reveal}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    transition={{ duration: 0.45, delay: i * 0.08 }}
-                    style={{ padding: 16, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", position: "relative" }}
+                    transition={{ duration: 0.45, delay: i * 0.07 }}
+                    style={{
+                      padding: 16,
+                      borderRadius: 10,
+                      background: "rgba(0,0,0,0.15)",
+                      border: "1px solid rgba(36,48,78,0.18)",
+                      position: "relative",
+                    }}
                   >
-                    <div style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: "rgba(59,130,246,0.08)", position: "absolute", top: 10, right: 14 }}>{step.num}</div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: T1, marginBottom: 4 }}>{step.title}</h3>
-                    <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, marginBottom: 8 }}>{step.desc}</p>
-                    <span style={{ fontSize: 9, fontFamily: MO, color: TL, fontWeight: 600 }}>{step.time}</span>
+                    <div style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: "rgba(59,130,246,0.08)", position: "absolute", top: 8, right: 12 }}>
+                      0{i + 1}
+                    </div>
+                    <h3 style={{ fontSize: 12, fontWeight: 700, color: T1, marginBottom: 4 }}>{t(key)}</h3>
+                    <p style={{ fontSize: 10, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
                   </motion.div>
                 );
               })}
@@ -387,78 +307,106 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════ TESTIMONIALS ═══════ */}
+        {/* ═══════ 6. FINANCIAL IMPACT ═══════ */}
         <Section>
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <Label>{t("testimonials.label")}</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700 }}>{t("testimonials.title")}</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-            {TESTIMONIALS.map(function (tm, i) {
-              return (
-                <motion.div
-                  key={i}
-                  variants={reveal}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: i * 0.08 }}
-                  style={Object.assign({}, gl, { padding: 20, display: "flex", flexDirection: "column" as const, justifyContent: "space-between" })}
-                >
-                  <div>
-                    <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
-                      {[1, 2, 3, 4, 5].map(function (s) {
-                        return <span key={s} style={{ fontSize: 12, color: "#facc15" }}>&#9733;</span>;
-                      })}
-                    </div>
-                    <p style={{ fontSize: 12, color: T2, lineHeight: 1.6, fontStyle: "italic" }}>
-                      &ldquo;{tm.quote}&rdquo;
-                    </p>
+          <div style={Object.assign({}, gl, { padding: 28 })}>
+            <Label>{t("fi.label")}</Label>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
+              {t("fi.title")}
+            </h2>
+            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+              {t("fi.sub")}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+              {[
+                { value: t("fi.m1.value"), label: t("fi.m1.label"), color: TL },
+                { value: t("fi.m2.value"), label: t("fi.m2.label"), color: AH },
+                { value: t("fi.m3.value"), label: t("fi.m3.label"), color: OR },
+              ].map(function (m) {
+                return (
+                  <div key={m.label} style={{ padding: 20, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
+                    <p style={{ fontFamily: MO, fontSize: 36, fontWeight: 800, color: m.color, lineHeight: 1, marginBottom: 8 }}>{m.value}</p>
+                    <p style={{ fontSize: 12, color: T2, lineHeight: 1.4 }}>{m.label}</p>
                   </div>
-                  <div style={{ marginTop: 14, paddingTop: 10, borderTop: "1px solid rgba(36,48,78,0.18)" }}>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: T1 }}>{tm.name}</p>
-                    <p style={{ fontSize: 10, color: T3 }}>{tm.role}, {tm.company}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <p style={{ fontSize: 10, color: T3, textAlign: "center", marginTop: 14, fontFamily: MO }}>
+              {t("fi.source")}
+            </p>
           </div>
         </Section>
 
-        {/* ═══════ INSTANT ESTIMATOR ═══════ */}
+        {/* ═══════ 7. INSTANT ESTIMATOR ═══════ */}
         <EstimatorWidget t={t} formatCurrency={formatCurrency} />
 
-        {/* ═══════ PRICING ═══════ */}
+        {/* ═══════ 8. PRICING ═══════ */}
         <Section>
-          <div id="pricing" style={{ textAlign: "center", marginBottom: 20 }}>
+          <div id="pricing" style={{ textAlign: "center", marginBottom: 24 }}>
             <Label>{t("price.label")}</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700 }}>{t("price.title")}</h2>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8 }}>{t("price.title")}</h2>
+            <p style={{ fontSize: 13, color: T2, maxWidth: 560, margin: "0 auto", lineHeight: 1.6 }}>{t("price.sub")}</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+
+          {/* Process progression bar */}
+          <div style={Object.assign({}, gl, { padding: "18px 24px", marginBottom: 28 })}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr", alignItems: "center", gap: 0 }}>
+              {[
+                { step: t("price.step.s1"), name: t("price.diag.name"), color: AH },
+                { step: t("price.step.s2"), name: t("price.protocol.name"), color: TL },
+                { step: t("price.step.s3"), name: t("price.controlplane.name"), color: A },
+              ].map(function (s, i) {
+                return (
+                  <div key={s.step} style={{ display: "contents" }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 6 }}>
+                        <span style={{ fontFamily: MO, fontSize: 11, fontWeight: 800, color: s.color, width: 22, height: 22, borderRadius: "50%", border: "1.5px solid " + s.color + "40", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                          {i + 1}
+                        </span>
+                        <span style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: T3 }}>{s.step}</span>
+                      </div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: s.color, lineHeight: 1.3 }}>{s.name}</p>
+                    </div>
+                    {i < 2 && (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+                        <svg width="24" height="14" viewBox="0 0 24 14" fill="none">
+                          <path d="M2 7h16M14 2l5 5-5 5" stroke={T3} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
             {PRICING.map(function (tier) {
+              var isPremium = tier.tier === "premium";
               return (
                 <motion.div
                   key={tier.name}
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.2 }}
                   style={Object.assign({}, gl, {
-                    padding: 22,
-                    borderColor: tier.highlight ? TL + "40" : BD,
+                    padding: 24,
+                    borderColor: tier.highlight ? TL + "40" : isPremium ? A + "25" : BD,
                     position: "relative" as const,
+                    display: "flex",
+                    flexDirection: "column" as const,
                   })}
                 >
-                  {tier.highlight && (
-                    <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontFamily: MO, fontWeight: 700, padding: "3px 10px", borderRadius: 4, background: TL, color: V, letterSpacing: ".06em", textTransform: "uppercase" }}>
-                      {t("price.badge")}
-                    </div>
-                  )}
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 8 }}>{tier.name}</h3>
-                  <div style={{ marginBottom: 8 }}>
-                    <span style={{ fontFamily: MO, fontSize: 30, fontWeight: 800, color: tier.highlight ? TL : AH }}>{tier.price}</span>
-                    <span style={{ fontSize: 12, color: T3 }}>{tier.period}</span>
+                  {/* Badge */}
+                  <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontFamily: MO, fontWeight: 700, padding: "3px 10px", borderRadius: 4, background: tier.highlight ? TL : isPremium ? A : "rgba(36,48,78,0.5)", color: tier.highlight ? V : isPremium ? "#fff" : T2, letterSpacing: ".06em", textTransform: "uppercase", whiteSpace: "nowrap" as const }}>
+                    {tier.badge}
                   </div>
-                  <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, marginBottom: 14 }}>{tier.desc}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 8, marginTop: 4 }}>{tier.name}</h3>
+                  <div style={{ marginBottom: 10 }}>
+                    <span style={{ fontFamily: MO, fontSize: isPremium ? 18 : 28, fontWeight: 800, color: tier.highlight ? TL : AH, letterSpacing: isPremium ? ".02em" : "-.02em" }}>{tier.price}</span>
+                    {tier.period && <span style={{ fontSize: 12, color: T3, marginLeft: 2 }}>{tier.period}</span>}
+                  </div>
+                  <p style={{ fontSize: 11, color: T2, lineHeight: 1.5, marginBottom: 16 }}>{tier.desc}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16, flex: 1 }}>
                     {tier.features.map(function (f) {
                       return (
                         <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T2 }}>
@@ -468,11 +416,17 @@ export default function LandingPage() {
                       );
                     })}
                   </div>
+
+                  {/* ROI proof line */}
+                  <div style={{ padding: "8px 10px", borderRadius: 6, background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 14 }}>
+                    <p style={{ fontSize: 9, fontFamily: MO, color: TL, letterSpacing: ".04em", textAlign: "center" }}>{tier.roi}</p>
+                  </div>
+
                   <a
                     href={tier.href}
                     style={{
                       display: "block", width: "100%", padding: "11px", borderRadius: 7, border: "none",
-                      background: tier.highlight ? TL : "rgba(59,130,246,0.08)",
+                      background: tier.highlight ? TL : isPremium ? "rgba(59,130,246,0.12)" : "rgba(59,130,246,0.08)",
                       color: tier.highlight ? V : AH,
                       fontSize: 11, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
                       cursor: "pointer", textDecoration: "none", textAlign: "center",
@@ -491,38 +445,62 @@ export default function LandingPage() {
           </p>
         </Section>
 
-        {/* ═══════ FAQ ═══════ */}
+        {/* ═══════ 9. SAMPLE REPORT ═══════ */}
         <Section>
-          <div style={Object.assign({}, gl, { padding: 24 })}>
-            <Label>{t("faq.label")}</Label>
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{t("faq.title")}</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {FAQ.map(function (item, i) {
-                const open = openFaq === i;
+          <div style={Object.assign({}, gl, { padding: 28 })}>
+            <Label>{t("sr.label")}</Label>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
+              {t("sr.title")}
+            </h2>
+            <p style={{ fontSize: 14, color: T2, marginBottom: 24, maxWidth: 620, lineHeight: 1.6 }}>
+              {t("sr.sub")}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+              {["sr.i1", "sr.i2", "sr.i3"].map(function (key) {
                 return (
-                  <div key={i} style={{ borderRadius: 8, border: "1px solid " + (open ? A + "28" : "rgba(36,48,78,0.14)"), background: open ? "rgba(59,130,246,0.03)" : "rgba(0,0,0,0.08)", overflow: "hidden", transition: "all 0.2s" }}>
-                    <button
-                      onClick={function () { setOpenFaq(open ? -1 : i); }}
-                      style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "none", border: "none", cursor: "pointer", color: T1, fontSize: 13, fontWeight: 600, textAlign: "left", fontFamily: SA }}
-                    >
-                      <span>{item.q}</span>
-                      <span style={{ fontSize: 11, color: T3, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0, marginLeft: 10 }}>&blacktriangledown;</span>
-                    </button>
-                    <AnimatePresence>
-                      {open && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          style={{ overflow: "hidden" }}
-                        >
-                          <div style={{ padding: "0 14px 14px", fontSize: 12, color: T2, lineHeight: 1.6 }}>
-                            {item.a}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 8, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)" }}>
+                    <CheckCircle size={16} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: T2 }}>{t(key)}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <a href="/sample-report" style={{ display: "inline-block", padding: "12px 28px", borderRadius: 8, border: "1px solid " + BD, color: AH, fontSize: 13, fontWeight: 700, letterSpacing: ".04em", textDecoration: "none", transition: "border-color 0.15s" }}>
+                {t("sr.cta")} &rarr;
+              </a>
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════ 10. SECURITY & TRUST ═══════ */}
+        <Section>
+          <div style={Object.assign({}, gl, { padding: 28 })}>
+            <Label>{t("sec.label")}</Label>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 24, lineHeight: 1.15 }}>
+              {t("sec.title")}
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {(["sec.i1", "sec.i2", "sec.i3", "sec.i4", "sec.i5"] as const).map(function (key, i) {
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 12,
+                      padding: 16,
+                      borderRadius: 10,
+                      background: "rgba(0,0,0,0.12)",
+                      border: "1px solid rgba(36,48,78,0.18)",
+                      gridColumn: i === 4 ? "1 / -1" : undefined,
+                    }}
+                  >
+                    <div style={{ color: A, flexShrink: 0, marginTop: 2 }}>{SEC_ICONS[i]}</div>
+                    <div>
+                      <h3 style={{ fontSize: 13, fontWeight: 700, color: T1, marginBottom: 2 }}>{t(key)}</h3>
+                      <p style={{ fontSize: 11, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
+                    </div>
                   </div>
                 );
               })}
@@ -530,13 +508,32 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════ FINAL CTA ═══════ */}
+        {/* ═══════ 11. ECONOMIC ALIGNMENT ═══════ */}
         <Section>
           <div style={Object.assign({}, gl, { padding: 32, textAlign: "center" as const })}>
-            <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 8 }}>
+            <Label>{t("ea.label")}</Label>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 20, lineHeight: 1.15 }}>
+              {t("ea.title")}
+            </h2>
+            <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 12 }}>
+              {["ea.l1", "ea.l2", "ea.l3"].map(function (key) {
+                return (
+                  <p key={key} style={{ fontSize: 14, color: T2, lineHeight: 1.6 }}>
+                    {t(key)}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════ 12. FINAL CTA ═══════ */}
+        <Section>
+          <div style={Object.assign({}, gl, { padding: 32, textAlign: "center" as const })}>
+            <p style={{ fontSize: 10, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 8 }}>
               {t("cta.urgency")}
             </p>
-            <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>
+            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, marginBottom: 8 }}>
               {t("cta.title1")} <span style={{ color: TL }}>{t("cta.title2")}</span>
             </h2>
             <p style={{ fontSize: 14, color: T2, maxWidth: 480, margin: "0 auto 20px", lineHeight: 1.5 }}>
@@ -600,14 +597,14 @@ export default function LandingPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 16, borderTop: "1px solid " + BD, flexWrap: "wrap", gap: 12 }}>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
               {[
-                { icon: "\u{1F6E1}", title: t("footer.badge1") },
-                { icon: "\u{1F510}", title: t("footer.badge2") },
-                { icon: "\u{1F1FA}\u{1F1F8}", title: t("footer.badge3") },
-                { icon: "\u23F1", title: t("footer.badge4") },
+                { label: t("footer.badge1") },
+                { label: t("footer.badge2") },
+                { label: t("footer.badge3") },
+                { label: t("footer.badge4") },
               ].map(function (b) {
                 return (
-                  <span key={b.title} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: T3 }}>
-                    <span style={{ fontSize: 12 }}>{b.icon}</span>{b.title}
+                  <span key={b.label} style={{ fontSize: 9, color: T3, fontFamily: MO, letterSpacing: ".04em" }}>
+                    {b.label}
                   </span>
                 );
               })}
