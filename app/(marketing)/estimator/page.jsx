@@ -2,9 +2,10 @@
 // @ts-nocheck
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useI18n } from "@/lib/i18n";
 
-/*  VALUGUARD COCKPIT — FR 2026
-    Estimateur Ghost Tax + Peer-Gap + Rapport Board + Signaux de confiance */
+/*  VALUGUARD COCKPIT — i18n 2026
+    Ghost Tax Estimator + Peer-Gap + Board Report + Trust Signals */
 
 // ═════════════════ TOKENS ═════════════════
 const C = {
@@ -290,6 +291,7 @@ function TrustFooter() {
 // MAIN
 // ═══════════════════════════════════════════════════
 export default function Cockpit() {
+  var { t } = useI18n();
   const [tab, setTab] = useState("entropy");
   const [step, setStep] = useState(0);
   const [inp, setInp] = useState({
@@ -338,8 +340,8 @@ export default function Cockpit() {
     <div style={{ minHeight: "100vh", background: C.void, fontFamily: SA, color: C.t1, padding: "20px 14px 40px" }}>
       <div style={{ maxWidth: 660, margin: "0 auto" }}>
 
-        {/* ── RETOUR ────────────────────────────── */}
-        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: C.t2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: `1px solid ${C.bdr}`, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
+        {/* ── BACK ────────────────────────────── */}
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: C.t2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: `1px solid ${C.bdr}`, background: "rgba(11,14,24,0.5)" }}>{t("back")}</a></div>
 
         {/* ── HEADER BAR ────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
@@ -437,7 +439,7 @@ export default function Cockpit() {
                     <span style={{ fontFamily: MO, fontSize: 17, fontWeight: 700, color: C.ahi }}>{D(tot)}</span>
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => setStep(0)} style={{ padding: "9px 14px", borderRadius: 7, border: `1px solid ${C.bdr}`, background: "transparent", color: C.t2, fontSize: 11, cursor: "pointer" }}>← Back</button>
+                    <button onClick={() => setStep(0)} style={{ padding: "9px 14px", borderRadius: 7, border: `1px solid ${C.bdr}`, background: "transparent", color: C.t2, fontSize: 11, cursor: "pointer" }}>{t("back")}</button>
                     <button onClick={() => setStep(2)} style={{ flex: 1, padding: "13px", borderRadius: 8, border: "none", background: C.accent, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase", cursor: "pointer" }}>CONTINUE →</button>
                   </div>
                 </div>
@@ -458,7 +460,7 @@ export default function Cockpit() {
                     </button>
                   ))}
                   <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-                    <button onClick={() => setStep(1)} style={{ padding: "9px 14px", borderRadius: 7, border: `1px solid ${C.bdr}`, background: "transparent", color: C.t2, fontSize: 11, cursor: "pointer" }}>← Back</button>
+                    <button onClick={() => setStep(1)} style={{ padding: "9px 14px", borderRadius: 7, border: `1px solid ${C.bdr}`, background: "transparent", color: C.t2, fontSize: 11, cursor: "pointer" }}>{t("back")}</button>
                     <button onClick={run} disabled={sc === 0} style={{ flex: 1, padding: "13px", borderRadius: 8, border: "none", background: sc > 0 ? C.teal : "#131828", color: sc > 0 ? C.void : "#333d55", fontSize: 12, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", cursor: sc > 0 ? "pointer" : "not-allowed" }}>
                       {sc > 0 ? `RECLAIM ${D(liveReclaim, true)} — EXPOSE ENTROPY` : "SELECT AT LEAST 1 SIGNAL"}
                     </button>

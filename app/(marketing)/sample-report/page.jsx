@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 
 /*  VALUGUARD — SAMPLE REPORT (US 2026)
     Interactive demo of what the client gets after an audit.
@@ -98,6 +99,7 @@ function genSummaryText(){
 }
 
 export default function SampleReport(){
+  var { t } = useI18n();
   var st=useState("overview");var tab=st[0];var setTab=st[1];
 
   var totalRecoverable=RECS.reduce(function(s,r){return s+r.savings;},0);
@@ -107,11 +109,11 @@ export default function SampleReport(){
       <div style={{maxWidth:820,margin:"0 auto"}}>
 
         {/* RETOUR */}
-        <div style={{marginBottom:14}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)"}}>{"\u2190"} Back</a></div>
+        <div style={{marginBottom:14}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)"}}>{t("back")}</a></div>
 
         {/* WATERMARK */}
         <div style={{textAlign:"center",padding:"10px",marginBottom:16,borderRadius:8,background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.18)"}}>
-          <p style={{fontSize:10,fontFamily:MO,fontWeight:600,color:OR,letterSpacing:".08em"}}>⚠ SAMPLE REPORT — FICTIONAL DATA — FOR DEMONSTRATION ONLY</p>
+          <p style={{fontSize:10,fontFamily:MO,fontWeight:600,color:OR,letterSpacing:".08em"}}>{t("sample.watermark")}</p>
         </div>
 
         {/* HEADER */}
@@ -260,12 +262,12 @@ export default function SampleReport(){
 
         {/* BOTTOM CTA */}
         <div style={Object.assign({},gl,{padding:22,marginTop:14,textAlign:"center"})}>
-          <p style={{fontSize:14,fontWeight:700,marginBottom:6}}>This is a sample. <span style={{color:TL}}>Want the real thing?</span></p>
+          <p style={{fontSize:14,fontWeight:700,marginBottom:6}}>{t("sample.cta.title1")} <span style={{color:TL}}>{t("sample.cta.title2")}</span></p>
           <p style={{fontSize:12,color:T2,marginBottom:16,lineHeight:1.5,maxWidth:400,margin:"0 auto 16px"}}>
-            Your actual Ghost Tax Audit analyzes YOUR billing data with the same engine, methodology, and precision shown above.
+            {t("sample.cta.sub")}
           </p>
           <a href="/estimator" style={{display:"inline-block",padding:"13px 26px",borderRadius:8,background:TL,color:V,fontSize:12,fontWeight:800,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>
-            EXPOSE MY GHOST TAX — $990
+            {t("sample.cta")}
           </a>
         </div>
 

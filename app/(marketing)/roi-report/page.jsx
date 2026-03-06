@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 
 /*  VALUGUARD — BOARD REPORT GENERATOR (US 2026)
     Creates a downloadable executive summary for the C-suite.
@@ -120,6 +121,7 @@ function downloadTxt(content, filename) {
 // MAIN
 // ══════════════════════════════════════════════════
 export default function BoardReport() {
+  var { t } = useI18n();
   // Editable fields (pre-filled with demo diagnostic)
   var [cfg, setCfg] = useState({
     company: "Acme Corp",
@@ -174,13 +176,13 @@ export default function BoardReport() {
       <div style={{ maxWidth: 780, margin: "0 auto" }}>
 
         {/* ── RETOUR ─────────────────────────────── */}
-        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: "#8d9bb5", textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(36,48,78,0.32)", background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: "#8d9bb5", textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(36,48,78,0.32)", background: "rgba(11,14,24,0.5)" }}>{t("back")}</a></div>
 
         {/* ── HEADER ──────────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ fontSize: 11, fontFamily: MO, fontWeight: 700, letterSpacing: ".06em", color: A }}>VALUGUARD</span>
-            <span style={{ fontSize: 8, color: T3, fontFamily: MO, padding: "2px 6px", borderRadius: 3, border: "1px solid " + BD }}>BOARD REPORT</span>
+            <span style={{ fontSize: 8, color: T3, fontFamily: MO, padding: "2px 6px", borderRadius: 3, border: "1px solid " + BD }}>{t("roi.badge")}</span>
           </div>
           <button
             onClick={handleDownload}
@@ -193,7 +195,7 @@ export default function BoardReport() {
         {/* ── EDIT FIELDS (quick customization) ──── */}
         <div style={Object.assign({}, gl, { padding: 16, marginBottom: 14 })}>
           <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: A, marginBottom: 10 }}>
-            CUSTOMIZE BEFORE DOWNLOAD
+            {t("roi.customize")}
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
             {[
@@ -222,7 +224,7 @@ export default function BoardReport() {
         <div style={Object.assign({}, gl, { padding: 18, marginBottom: 14 })}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: T3 }}>
-              LIVE PREVIEW
+              {t("roi.preview")}
             </p>
             <span style={{ fontSize: 8, fontFamily: MO, color: T3 }}>
               {reportText.split("\n").length} lines
@@ -252,7 +254,7 @@ export default function BoardReport() {
             onClick={handleDownload}
             style={{ padding: "12px 28px", borderRadius: 8, border: "none", background: A, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase", cursor: "pointer" }}
           >
-            DOWNLOAD EXECUTIVE SUMMARY ↓
+            {t("roi.download")} ↓
           </button>
           <button
             onClick={function() {
@@ -262,15 +264,14 @@ export default function BoardReport() {
             }}
             style={{ padding: "12px 20px", borderRadius: 8, border: "1px solid " + BD, background: "transparent", color: T2, fontSize: 12, cursor: "pointer" }}
           >
-            COPY TO CLIPBOARD
+            {t("roi.copy")}
           </button>
         </div>
 
         {/* ── FORMAT NOTE ──────────────────────────── */}
         <div style={{ marginTop: 16, textAlign: "center" }}>
           <p style={{ fontSize: 9, color: T3, lineHeight: 1.5 }}>
-            Plain-text format ensures compatibility with any email client, Slack, or presentation deck.
-            Paste directly into your board materials. No formatting issues.
+            {t("roi.format")}
           </p>
         </div>
 

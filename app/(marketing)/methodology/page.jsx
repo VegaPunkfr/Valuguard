@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useI18n } from "@/lib/i18n";
 var V="#060912",A="#3b82f6",AH="#60a5fa",T1="#e0e6f2",T2="#8d9bb5",T3="#55637d",RD="#ef4444",OR="#f59e0b",TL="#34d399",BD="rgba(36,48,78,0.32)",MO="ui-monospace,'Cascadia Code','Fira Code',monospace",SA="system-ui,-apple-system,sans-serif";
 var gl={background:"rgba(11,14,24,0.72)",backdropFilter:"blur(18px) saturate(1.15)",WebkitBackdropFilter:"blur(18px) saturate(1.15)",border:"1px solid "+BD,borderRadius:12,boxShadow:"0 4px 32px rgba(0,0,0,0.28)"};
 function useReveal(th){var ref=useRef(null);var s=useState(false);var vis=s[0];var setVis=s[1];useEffect(function(){var el=ref.current;if(!el)return;var obs=new IntersectionObserver(function(e){if(e[0].isIntersecting){setVis(true);obs.disconnect();}},{threshold:th||0.1});obs.observe(el);return function(){obs.disconnect();};},[th]);return[ref,vis];}
@@ -29,13 +30,13 @@ return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 </svg>
 <p style={{fontSize:12,color:T2,lineHeight:1.5}}>{k===0?"Compact org (≤50). Entropy is zero — one person governs all purchases.":k<0.10?"Low entropy. Coordination manageable, but duplicates appear at team boundaries.":k<0.20?"Moderate entropy. Shadow IT and orphan licenses increasing. Monitoring recommended.":"High entropy. Leaks near-inevitable without active FinOps governance. Audit urgent."}</p>
 </div>);}
-export default function Methodology(){return(
+export default function Methodology(){var { t } = useI18n();return(
 <div style={{minHeight:"100vh",background:V,fontFamily:SA,color:T1,padding:"0 14px 64px"}}><div style={{maxWidth:1020,margin:"0 auto"}}>
-<div style={{paddingTop:16}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)",transition:"color 0.15s"}}>{"\u2190"} Back</a></div>
+<div style={{paddingTop:16}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:T2,textDecoration:"none",padding:"6px 12px",borderRadius:6,border:"1px solid "+BD,background:"rgba(11,14,24,0.5)",transition:"color 0.15s"}}>{t("back")}</a></div>
 <header style={{textAlign:"center",padding:"36px 0 40px"}}>
-<p style={{fontSize:9,fontWeight:600,letterSpacing:".16em",textTransform:"uppercase",color:A,fontFamily:MO,marginBottom:14}}>QUANTITATIVE METHODOLOGY</p>
-<h1 style={{fontSize:"clamp(26px,4vw,40px)",fontWeight:800,lineHeight:1.1,letterSpacing:"-.025em",marginBottom:14}}>12 leak types. <span style={{color:A}}>1 engine.</span> <span style={{color:RD}}>0 blind spots.</span></h1>
-<p style={{fontSize:15,color:T2,maxWidth:540,margin:"0 auto",lineHeight:1.6}}>A deterministic, explainable, and verifiable engine. We publish our thresholds, formulas, and limitations.</p>
+<p style={{fontSize:9,fontWeight:600,letterSpacing:".16em",textTransform:"uppercase",color:A,fontFamily:MO,marginBottom:14}}>{t("method.badge")}</p>
+<h1 style={{fontSize:"clamp(26px,4vw,40px)",fontWeight:800,lineHeight:1.1,letterSpacing:"-.025em",marginBottom:14}}>{t("method.title1")} <span style={{color:A}}>{t("method.title2")}</span> <span style={{color:RD}}>{t("method.title3")}</span></h1>
+<p style={{fontSize:15,color:T2,maxWidth:540,margin:"0 auto",lineHeight:1.6}}>{t("method.subtitle")}</p>
 <div style={{display:"flex",justifyContent:"center",gap:10,marginTop:20,flexWrap:"wrap"}}>{["Deterministic","Zero ML V1","Explainable","Open Methodology"].map(function(b){return <span key={b} style={{fontSize:9,fontWeight:600,fontFamily:MO,letterSpacing:".06em",textTransform:"uppercase",padding:"4px 10px",borderRadius:5,background:"rgba(59,130,246,0.06)",border:"1px solid rgba(59,130,246,0.18)",color:AH}}>{b}</span>;})}</div>
 </header>
 <section style={{marginBottom:40,display:"grid",gridTemplateColumns:"7fr 5fr",gap:14}}>
@@ -62,6 +63,6 @@ export default function Methodology(){return(
 <Panel><Lab>06 — WHAT V1 DOES NOT DO</Lab><Ttl>Honesty over marketing.</Ttl><div style={{display:"flex",flexDirection:"column",gap:6}}>{HON.map(function(h,j){return(<div key={j} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",borderRadius:6,background:"rgba(0,0,0,0.12)",border:"1px solid rgba(36,48,78,0.12)"}}><span style={{fontSize:11,color:T2}}>{h[0]}</span><span style={{fontSize:9,fontFamily:MO,fontWeight:600,padding:"2px 7px",borderRadius:4,background:"rgba(59,130,246,0.06)",border:"1px solid rgba(59,130,246,0.16)",color:AH}}>{h[1]}</span></div>);})}</div></Panel>
 <div style={{display:"flex",flexDirection:"column",gap:14}}>
 <Panel delay={80}><Lab>WHY NO ML IN V1?</Lab>{[["01","Explainable — CFO understands every alert"],["02","Reproducible — same input, same output"],["03","Zero hallucination — no AI false positives"],["04","Instant — under 50ms, no API call"]].map(function(x){return(<div key={x[0]} style={{display:"flex",gap:8,marginBottom:8}}><span style={{fontFamily:MO,fontSize:10,fontWeight:700,color:A,minWidth:20}}>{x[0]}</span><span style={{fontSize:11,color:T2,lineHeight:1.4}}>{x[1]}</span></div>);})}</Panel>
-<Panel delay={160}><div style={{textAlign:"center"}}><p style={{fontSize:12,color:T2,marginBottom:14}}>Test this methodology on your own data.</p><a href="/estimator" style={{display:"inline-block",padding:"11px 22px",borderRadius:8,background:A,color:"#fff",fontSize:11,fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>EXPOSE MY GHOST TAX →</a><p style={{fontSize:10,color:T3,marginTop:8}}>60s · Free · No sensitive data needed</p></div></Panel>
+<Panel delay={160}><div style={{textAlign:"center"}}><p style={{fontSize:12,color:T2,marginBottom:14}}>{t("method.cta.text")}</p><a href="/estimator" style={{display:"inline-block",padding:"11px 22px",borderRadius:8,background:A,color:"#fff",fontSize:11,fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",textDecoration:"none"}}>{t("method.cta")} →</a><p style={{fontSize:10,color:T3,marginTop:8}}>{t("method.cta.sub")}</p></div></Panel>
 </div></section>
 </div></div>);}

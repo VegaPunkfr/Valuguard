@@ -2,6 +2,7 @@
 // @ts-nocheck
 
 import { useState, useEffect, useRef } from "react";
+import { useI18n } from "@/lib/i18n";
 
 /*  VALUGUARD — SECURITY VAULT (US 2026)
     Trust architecture page. SOC2 Type II Readiness.
@@ -165,6 +166,7 @@ var HONESTY_ITEMS = [
 // MAIN
 // ══════════════════════════════════════════════════
 export default function SecurityVault() {
+  var { t } = useI18n();
   var [openFaq, setOpenFaq] = useState(-1);
 
   return (
@@ -172,19 +174,18 @@ export default function SecurityVault() {
       <div style={{ maxWidth: 1020, margin: "0 auto" }}>
 
         {/* ── RETOUR ─────────────────────────────── */}
-        <div style={{ paddingTop: 16 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
+        <div style={{ paddingTop: 16 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{t("back")}</a></div>
 
         {/* ── HERO ──────────────────────────────── */}
         <header style={{ textAlign: "center", padding: "36px 0 40px" }}>
           <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: ".16em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 14 }}>
-            SECURITY VAULT
+            {t("vault.badge")}
           </p>
           <h1 style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-.025em", marginBottom: 14 }}>
-            Your data. <span style={{ color: TL }}>Our obsession.</span>
+            {t("vault.title1")} <span style={{ color: TL }}>{t("vault.title2")}</span>
           </h1>
           <p style={{ fontSize: 15, color: T2, maxWidth: 540, margin: "0 auto", lineHeight: 1.6 }}>
-            Secure by architecture, not by promise. We publish our controls,
-            our sub-processors, and our limitations. Trust is earned, not claimed.
+            {t("vault.subtitle")}
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
             {["AES-256", "SOC2 Ready", "US Hosted", "Zero-Knowledge", "30-Day Purge"].map(function(b) {
@@ -374,17 +375,16 @@ export default function SecurityVault() {
         <section>
           <Panel>
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 6 }}>Questions about security?</p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 6 }}>{t("vault.cta.text")}</p>
               <p style={{ fontSize: 12, color: T2, marginBottom: 16, lineHeight: 1.5, maxWidth: 380, margin: "0 auto 16px" }}>
-                Our security team responds within 48 hours. We'll walk through
-                our architecture, controls, and compliance roadmap.
+                {t("vault.cta.sub")}
               </p>
               <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
                 <a href="mailto:security@valuguard.com" style={{ display: "inline-block", padding: "11px 22px", borderRadius: 8, background: A, color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none" }}>
-                  CONTACT SECURITY TEAM
+                  {t("vault.cta")}
                 </a>
                 <a href="/estimator" style={{ display: "inline-block", padding: "11px 22px", borderRadius: 8, border: "1px solid " + BD, background: "transparent", color: T2, fontSize: 11, fontWeight: 600, textDecoration: "none" }}>
-                  RUN GHOST TAX AUDIT →
+                  {t("vault.cta2")} →
                 </a>
               </div>
             </div>

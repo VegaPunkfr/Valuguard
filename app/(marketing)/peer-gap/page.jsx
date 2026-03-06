@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { useI18n } from "@/lib/i18n";
 
 /*  VALUGUARD — PEER-GAP ANALYSIS (US 2026 FINAL)
     Self-contained. Renders immediately with demo data.
@@ -285,6 +286,7 @@ function MetricBar(props) {
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════
 export default function PeerGapAnalysis() {
+  var { t } = useI18n();
   var [input, setInput] = useState({
     industry: "saas_tech",
     headcount: 150,
@@ -326,7 +328,7 @@ export default function PeerGapAnalysis() {
       <div style={{ maxWidth: 880, margin: "0 auto" }}>
 
         {/* ── RETOUR ─────────────────────────────── */}
-        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{"\u2190"} Back</a></div>
+        <div style={{ marginBottom: 14 }}><a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, color: T2, textDecoration: "none", padding: "6px 12px", borderRadius: 6, border: "1px solid " + BD, background: "rgba(11,14,24,0.5)" }}>{t("back")}</a></div>
 
         {/* ── HEADER ──────────────────────────────── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
@@ -335,8 +337,8 @@ export default function PeerGapAnalysis() {
             <span style={{ fontSize: 8, color: T3, fontFamily: MO, padding: "2px 5px", borderRadius: 3, border: "1px solid " + BD }}>PEER-GAP</span>
           </div>
           <span style={{ fontSize: 8, color: T3, fontFamily: MO, padding: "3px 7px", borderRadius: 4, border: "1px solid " + BD }}>
-            Stealth Mode — data stays in-browser
-          </span>
+            {t("peergap.stealth")}
+</span>
         </div>
 
         {/* ── CONTROLS ────────────────────────────── */}
@@ -431,23 +433,23 @@ export default function PeerGapAnalysis() {
           {captured ? (
             <div>
               <p style={{ fontSize: 17, fontWeight: 700, color: TL, marginBottom: 6 }}>
-                ✓ Priority Audit Registered
+                ✓ {t("peergap.registered")}
               </p>
               <p style={{ fontSize: 12, color: T2 }}>
-                An expert will contact you within 24 hours with your personalized recovery plan.
+                {t("peergap.registered.sub")}
               </p>
             </div>
           ) : (
             <div>
               <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", color: RD, marginBottom: 5 }}>
-                RECOVERABLE GHOST TAX
+                {t("peergap.reclaim")}
               </p>
               <p style={{ fontFamily: MO, fontSize: 36, fontWeight: 800, color: TL, lineHeight: 1, letterSpacing: "-.02em", marginBottom: 4 }}>
                 {fmt(result.ghostTax)}
                 <span style={{ fontSize: 14, color: T3, fontWeight: 400 }}>/yr</span>
               </p>
               <p style={{ fontSize: 10, color: T3, marginBottom: 18 }}>
-                Conservative 60% recovery of your estimated annual Ghost Tax.
+                {t("peergap.reclaim.sub")}
               </p>
               <div style={{ display: "flex", gap: 8, maxWidth: 420, margin: "0 auto" }}>
                 <input
@@ -479,7 +481,7 @@ export default function PeerGapAnalysis() {
                 </button>
               </div>
               <p style={{ fontSize: 8, color: T3, marginTop: 10 }}>
-                All calculations run locally in your browser. Zero data transmitted without explicit consent.
+                {t("peergap.reclaim.privacy")}
               </p>
             </div>
           )}
