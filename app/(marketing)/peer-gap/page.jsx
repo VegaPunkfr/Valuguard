@@ -31,13 +31,6 @@ const gls = {
   boxShadow: "0 4px 32px rgba(0,0,0,0.28)",
 };
 
-// ── USD Formatter ──────────────────────────────────
-function fmt(n, compact) {
-  if (compact && n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
-  if (compact && n >= 1e4) return "$" + Math.round(n / 1e3) + "k";
-  return "$" + Math.round(n).toLocaleString("en-US");
-}
-
 // ── US Industry benchmarks [P10, P25, P50, P75, P90] ──
 const BENCH = {
   saas_tech:     { spe: [180,280,380,520,720], tools: [0.3,0.5,0.8,1.2,1.8], util: [88,78,65,52,38], shadow: [3,8,15,25,38], ai: [5,15,35,60,120] },
@@ -50,11 +43,11 @@ const BENCH = {
 };
 
 const METRIC_DEFS = [
-  { id: "spe",    name: "Spend / Employee",    unit: "/mo", lowerBetter: true },
-  { id: "tools",  name: "SaaS / Employee",     unit: "",    lowerBetter: true },
-  { id: "util",   name: "License Utilization",  unit: "%",   lowerBetter: false },
-  { id: "shadow", name: "Shadow IT Rate",       unit: "%",   lowerBetter: true },
-  { id: "ai",     name: "AI Spend Growth 6mo",  unit: "%",   lowerBetter: true },
+  { id: "spe",    nameKey: "peergap.m.spe",    unit: "/mo", lowerBetter: true },
+  { id: "tools",  nameKey: "peergap.m.tools",  unit: "",    lowerBetter: true },
+  { id: "util",   nameKey: "peergap.m.util",   unit: "%",   lowerBetter: false },
+  { id: "shadow", nameKey: "peergap.m.shadow", unit: "%",   lowerBetter: true },
+  { id: "ai",     nameKey: "peergap.m.ai",     unit: "%",   lowerBetter: true },
 ];
 
 const IND_NAMES = {
@@ -67,14 +60,14 @@ const IND_NAMES = {
   other: "companies in your sector",
 };
 
-const IND_OPTIONS = [
-  ["saas_tech", "SaaS / Tech"],
-  ["finance", "Finance / Insurance"],
-  ["healthcare", "Healthcare"],
-  ["retail", "Retail / DTC"],
-  ["services", "Professional Services"],
-  ["manufacturing", "Manufacturing"],
-  ["other", "Other"],
+const IND_OPTION_KEYS = [
+  ["saas_tech", "est.industry.saas"],
+  ["finance", "est.industry.finance"],
+  ["healthcare", "est.industry.healthcare"],
+  ["retail", "est.industry.retail"],
+  ["services", "est.industry.services"],
+  ["manufacturing", "est.industry.mfg"],
+  ["other", "est.industry.other"],
 ];
 
 // ── Percentile interpolation ───────────────────────
@@ -123,7 +116,7 @@ function analyze(input) {
     var verd = getVerdict(pct);
     return {
       id: def.id,
-      name: def.name,
+      nameKey: def.nameKey,
       unit: def.unit,
       lowerBetter: def.lowerBetter,
       value: Math.round(val * 100) / 100,
@@ -147,6 +140,7 @@ function analyze(input) {
 // ── SVG Radar (fully self-contained) ───────────────
 function RadarChart(props) {
   var metrics = props.metrics;
+  var t = props.t;
   var CX = 115;
   var CY = 115;
   var R = 88;
@@ -212,7 +206,7 @@ function RadarChart(props) {
   // Labels
   var labels = metrics.map(function(m, i) {
     var pt = toXY(i * STEP, R + 16);
-    var shortName = m.name.split(" ").slice(0, 2).join(" ");
+    var shortName = t(m.nameKey).split(" ").slice(0, 2).join(" ");
     return (
       <text key={"lbl" + i}
         x={pt[0]} y={pt[1]}
@@ -239,25 +233,27 @@ function RadarChart(props) {
 // ── Percentile bar ─────────────────────────────────
 function MetricBar(props) {
   var m = props.metric;
+  var t = props.t;
+  var fc = props.formatCurrency;
   var col = VERDICT_COLOR[m.verdict];
   var bg = VERDICT_BG[m.verdict];
   var barW = Math.max(3, Math.min(97, m.percentile));
 
   var displayVal = m.id === "spe"
-    ? fmt(m.value) + m.unit
+    ? fc(m.value) + m.unit
     : (m.id === "tools" ? m.value.toFixed(1) : Math.round(m.value)) + m.unit;
 
   var medianVal = m.id === "spe"
-    ? fmt(m.median) + m.unit
+    ? fc(m.median) + m.unit
     : m.median + m.unit;
 
   return (
     <div style={{ padding: "9px 11px", borderRadius: 7, background: bg, border: "1px solid " + col + "14" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: T1 }}>{m.name}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: T1 }}>{t(m.nameKey)}</span>
         <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
           <span style={{ fontSize: 8, color: T3 }}>
-            Median: <span style={{ fontFamily: MO, color: T2 }}>{medianVal}</span>
+            {t("peergap.median")}: <span style={{ fontFamily: MO, color: T2 }}>{medianVal}</span>
           </span>
           <span style={{ fontFamily: MO, fontSize: 12, fontWeight: 700, color: col }}>
             {displayVal}
@@ -274,9 +270,9 @@ function MetricBar(props) {
         <div style={{ position: "absolute", left: "50%", top: -2, width: 1, height: 8, background: "rgba(141,155,181,0.35)" }} />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
-        <span style={{ fontSize: 7, fontFamily: MO, color: T3 }}>TOP 10%</span>
+        <span style={{ fontSize: 7, fontFamily: MO, color: T3 }}>{t("peergap.top10")}</span>
         <span style={{ fontSize: 7, fontFamily: MO, color: col, fontWeight: 600 }}>P{m.percentile}</span>
-        <span style={{ fontSize: 7, fontFamily: MO, color: T3 }}>BOTTOM 10%</span>
+        <span style={{ fontSize: 7, fontFamily: MO, color: T3 }}>{t("peergap.btm10")}</span>
       </div>
     </div>
   );
@@ -286,7 +282,7 @@ function MetricBar(props) {
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════
 export default function PeerGapAnalysis() {
-  var { t } = useI18n();
+  var { t, formatCurrency } = useI18n();
   var [input, setInput] = useState({
     industry: "saas_tech",
     headcount: 150,
@@ -313,15 +309,20 @@ export default function PeerGapAnalysis() {
 
   var overallCol = result.overall > 75 ? RD : result.overall > 50 ? OR : result.overall > 25 ? GR : TL;
 
-  // Slider config
+  // Slider config — labels use t() inside the component
   var sliders = [
-    { key: "headcount",    label: "Headcount",         min: 10,   max: 500,    step: 10,  format: function(v) { return v; } },
-    { key: "monthlySpend", label: "Monthly IT Spend",  min: 5000, max: 200000, step: 1000, format: function(v) { return fmt(v, true); } },
-    { key: "saasTools",    label: "SaaS Tools",        min: 5,    max: 200,    step: 5,   format: function(v) { return v; } },
-    { key: "utilization",  label: "License Util %",    min: 20,   max: 95,     step: 5,   format: function(v) { return v + "%"; } },
-    { key: "shadowRate",   label: "Shadow IT %",       min: 0,    max: 50,     step: 2,   format: function(v) { return v + "%"; } },
-    { key: "aiGrowth",     label: "AI Growth 6mo %",   min: 0,    max: 200,    step: 5,   format: function(v) { return v + "%"; } },
+    { key: "headcount",    label: t("peergap.headcount"),     min: 10,   max: 500,    step: 10,  format: function(v) { return v; } },
+    { key: "monthlySpend", label: t("peergap.monthlyspend"),  min: 5000, max: 200000, step: 1000, format: function(v) { return formatCurrency(v, true); } },
+    { key: "saasTools",    label: t("peergap.saastools"),     min: 5,    max: 200,    step: 5,   format: function(v) { return v; } },
+    { key: "utilization",  label: t("peergap.licenseutil"),   min: 20,   max: 95,     step: 5,   format: function(v) { return v + "%"; } },
+    { key: "shadowRate",   label: t("peergap.shadowit"),      min: 0,    max: 50,     step: 2,   format: function(v) { return v + "%"; } },
+    { key: "aiGrowth",     label: t("peergap.aigrowth"),      min: 0,    max: 200,    step: 5,   format: function(v) { return v + "%"; } },
   ];
+
+  // Industry options with i18n labels
+  var indOptions = IND_OPTION_KEYS.map(function(opt) {
+    return [opt[0], t(opt[1])];
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: V, fontFamily: SA, color: T1, padding: "24px 14px 48px" }}>
@@ -338,20 +339,20 @@ export default function PeerGapAnalysis() {
           </div>
           <span style={{ fontSize: 8, color: T3, fontFamily: MO, padding: "3px 7px", borderRadius: 4, border: "1px solid " + BD }}>
             {t("peergap.stealth")}
-</span>
+          </span>
         </div>
 
         {/* ── CONTROLS ────────────────────────────── */}
         <div style={Object.assign({}, gls, { padding: "12px 16px", marginBottom: 14 })}>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ minWidth: 120 }}>
-              <label style={{ display: "block", fontSize: 8, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 3 }}>Industry</label>
+              <label style={{ display: "block", fontSize: 8, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 3 }}>{t("peergap.industry")}</label>
               <select
                 value={input.industry}
                 onChange={function(e) { upd("industry", e.target.value); }}
                 style={{ width: "100%", padding: "5px 8px", borderRadius: 5, border: "1px solid #1e2640", background: "#080b14", color: T1, fontSize: 11, outline: "none", cursor: "pointer" }}
               >
-                {IND_OPTIONS.map(function(opt) {
+                {indOptions.map(function(opt) {
                   return <option key={opt[0]} value={opt[0]}>{opt[1]}</option>;
                 })}
               </select>
@@ -379,17 +380,17 @@ export default function PeerGapAnalysis() {
         {/* ── HEADLINE ────────────────────────────── */}
         <div style={Object.assign({}, gls, { padding: 18, marginBottom: 14, textAlign: "center" })}>
           <p style={{ fontSize: 9, fontWeight: 600, fontFamily: MO, letterSpacing: ".14em", textTransform: "uppercase", color: overallCol, marginBottom: 5 }}>
-            PEER-GAP ANALYSIS — {(input.industry || "").replace(/_/g, " ").toUpperCase()}
+            {t("peergap.headline")} — {(input.industry || "").replace(/_/g, " ").toUpperCase()}
           </p>
           <p style={{ fontSize: 14, color: T2, lineHeight: 1.5, maxWidth: 480, margin: "0 auto 12px" }}>
-            Your organization is{" "}
+            {t("peergap.efficiency")}{" "}
             <strong style={{ color: overallCol, fontWeight: 700 }}>
-              less efficient than {result.overall}%
+              {t("peergap.lessthan")} {result.overall}%
             </strong>{" "}
-            of comparable {result.peerName}.
+            {t("peergap.ofcomp")} {result.peerName}.
           </p>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "7px 16px", borderRadius: 8, background: "rgba(0,0,0,0.2)", border: "1px solid " + overallCol + "25" }}>
-            <span style={{ fontSize: 9, color: T3, textTransform: "uppercase", letterSpacing: ".08em" }}>Overall Percentile</span>
+            <span style={{ fontSize: 9, color: T3, textTransform: "uppercase", letterSpacing: ".08em" }}>{t("peergap.overall")}</span>
             <span style={{ fontFamily: MO, fontSize: 26, fontWeight: 800, color: overallCol }}>P{result.overall}</span>
           </div>
         </div>
@@ -399,17 +400,17 @@ export default function PeerGapAnalysis() {
           {/* Radar */}
           <div style={Object.assign({}, gls, { padding: 14, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" })}>
             <p style={{ fontSize: 8, fontFamily: MO, color: T3, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 6 }}>
-              EFFICIENCY RADAR
+              {t("peergap.radar")}
             </p>
-            <RadarChart metrics={result.metrics} />
+            <RadarChart metrics={result.metrics} t={t} />
             <div style={{ display: "flex", gap: 12, marginTop: 8, fontSize: 8, color: T3 }}>
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 2, background: "rgba(59,130,246,0.2)", border: "1px solid " + A }} />
-                You
+                {t("peergap.you")}
               </span>
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <span style={{ width: 10, height: 0, borderTop: "1px dashed rgba(141,155,181,0.4)" }} />
-                P50 Median
+                {t("peergap.median")}
               </span>
             </div>
           </div>
@@ -417,10 +418,10 @@ export default function PeerGapAnalysis() {
           {/* Bars */}
           <div style={Object.assign({}, gls, { padding: 12, display: "flex", flexDirection: "column", gap: 7 })}>
             <p style={{ fontSize: 8, fontFamily: MO, color: T3, letterSpacing: ".1em", textTransform: "uppercase" }}>
-              METRIC BREAKDOWN
+              {t("peergap.metricbd")}
             </p>
             {result.metrics.map(function(m) {
-              return <MetricBar key={m.id} metric={m} />;
+              return <MetricBar key={m.id} metric={m} t={t} formatCurrency={formatCurrency} />;
             })}
           </div>
         </div>
@@ -445,8 +446,8 @@ export default function PeerGapAnalysis() {
                 {t("peergap.reclaim")}
               </p>
               <p style={{ fontFamily: MO, fontSize: 36, fontWeight: 800, color: TL, lineHeight: 1, letterSpacing: "-.02em", marginBottom: 4 }}>
-                {fmt(result.ghostTax)}
-                <span style={{ fontSize: 14, color: T3, fontWeight: 400 }}>/yr</span>
+                {formatCurrency(result.ghostTax)}
+                <span style={{ fontSize: 14, color: T3, fontWeight: 400 }}>{t("peergap.peryr")}</span>
               </p>
               <p style={{ fontSize: 10, color: T3, marginBottom: 18 }}>
                 {t("peergap.reclaim.sub")}
@@ -477,7 +478,7 @@ export default function PeerGapAnalysis() {
                     transition: "all 0.15s",
                   }}
                 >
-                  RECLAIM {fmt(result.ghostTax, true)} NOW
+                  {t("peergap.reclaim.now")} {formatCurrency(result.ghostTax, true)} {t("peergap.reclaim.suffix")}
                 </button>
               </div>
               <p style={{ fontSize: 8, color: T3, marginTop: 10 }}>
@@ -490,15 +491,15 @@ export default function PeerGapAnalysis() {
         {/* ── TRUST FOOTER ────────────────────────── */}
         <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 10, border: "1px solid " + BD, background: "rgba(11,14,24,0.35)", display: "flex", justifyContent: "center", gap: 18, flexWrap: "wrap" }}>
           {[
-            { icon: "🛡", title: "SOC2 Type II Ready" },
-            { icon: "🔐", title: "Zero-Knowledge Audit" },
-            { icon: "🇺🇸", title: "US Data Residency" },
-            { icon: "⏱", title: "30-Day Auto-Delete" },
+            { icon: "🛡", titleKey: "trustfooter.soc2" },
+            { icon: "🔐", titleKey: "trustfooter.zk" },
+            { icon: "🇺🇸", titleKey: "trustfooter.us" },
+            { icon: "⏱", titleKey: "trustfooter.purge" },
           ].map(function(b) {
             return (
-              <div key={b.title} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, color: T2 }}>
+              <div key={b.titleKey} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, color: T2 }}>
                 <span style={{ fontSize: 14 }}>{b.icon}</span>
-                <span style={{ fontWeight: 600 }}>{b.title}</span>
+                <span style={{ fontWeight: 600 }}>{t(b.titleKey)}</span>
               </div>
             );
           })}

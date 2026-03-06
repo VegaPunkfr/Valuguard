@@ -10,20 +10,20 @@ import { useI18n } from "@/lib/i18n";
     Converts skeptical CISOs and compliance officers. */
 
 // ── Tokens ─────────────────────────────────────────
-const V = "#060912";
-const A = "#3b82f6";
-const AH = "#60a5fa";
-const T1 = "#e0e6f2";
-const T2 = "#8d9bb5";
-const T3 = "#55637d";
-const RD = "#ef4444";
-const GR = "#22c55e";
-const TL = "#34d399";
-const BD = "rgba(36,48,78,0.32)";
-const MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
-const SA = "system-ui,-apple-system,sans-serif";
+var V = "#060912";
+var A = "#3b82f6";
+var AH = "#60a5fa";
+var T1 = "#e0e6f2";
+var T2 = "#8d9bb5";
+var T3 = "#55637d";
+var RD = "#ef4444";
+var GR = "#22c55e";
+var TL = "#34d399";
+var BD = "rgba(36,48,78,0.32)";
+var MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
+var SA = "system-ui,-apple-system,sans-serif";
 
-const gls = {
+var gls = {
   background: "rgba(11,14,24,0.72)",
   backdropFilter: "blur(18px) saturate(1.15)",
   WebkitBackdropFilter: "blur(18px) saturate(1.15)",
@@ -101,73 +101,58 @@ function SectionTitle(props) {
   );
 }
 
-// ── Security commitments data ──────────────────────
-var COMMITMENTS = [
-  { icon: "🔐", title: "AES-256 Encryption", detail: "All data encrypted at rest (AES-256) and in transit (TLS 1.3). Keys managed by AWS KMS with automatic rotation." },
-  { icon: "⏱", title: "30-Day Auto-Purge", detail: "Raw uploaded files are automatically deleted 30 days after processing. Full deletion on request within 72 hours." },
-  { icon: "🚪", title: "Row-Level Security", detail: "Every database query is filtered by organization. No user can access another organization's data, even with a valid session." },
-  { icon: "📋", title: "Complete Audit Trail", detail: "Every data access, export, and modification is logged. Audit logs exportable on demand for your compliance team." },
-  { icon: "🇺🇸", title: "US Data Residency", detail: "All data stored in AWS us-east-1 (Virginia). No data leaves US jurisdiction. No international transfers." },
-  { icon: "👤", title: "Dedicated DPO", detail: "security@valuguard.com. Response within 48 hours. Processing records and sub-processor list available on request." },
-];
-
-// ── Zero-Knowledge Protocol steps ──────────────────
-var ZK_STEPS = [
-  { num: "01", title: "You Export", detail: "Download CSV/XLSX from your billing tools. You control exactly what data leaves your systems.", icon: "📤" },
-  { num: "02", title: "You Upload", detail: "Encrypted TLS 1.3 upload to our vault. Files never touch our team's machines — automated pipeline only.", icon: "🔒" },
-  { num: "03", title: "Engine Analyzes", detail: "Deterministic rule engine processes data in an isolated container. No human reads your raw files.", icon: "⚡" },
-  { num: "04", title: "You Receive", detail: "Structured report with anomalies, scores, and recommendations. Raw data purged within 30 days.", icon: "📊" },
-];
-
-// ── Sub-processors (compliance transparency) ───────
-var SUBPROCESSORS = [
-  { name: "AWS (Supabase)", role: "Database, Auth, Storage", location: "us-east-1 (Virginia)", soc2: true },
-  { name: "Vercel", role: "Hosting, CDN, Edge Functions", location: "US East", soc2: true },
-  { name: "Stripe", role: "Payment processing", location: "US", soc2: true },
-  { name: "Resend", role: "Transactional email", location: "US", soc2: true },
-  { name: "PostHog", role: "Product analytics", location: "US", soc2: true },
-  { name: "Sentry", role: "Error monitoring", location: "US", soc2: true },
-];
-
-// ── FAQ data ───────────────────────────────────────
-var FAQ_ITEMS = [
-  {
-    q: "What data do you need for an audit?",
-    a: "Billing exports (CSV/XLSX), license inventories, and optionally vendor invoices. We never need login credentials, API keys, OAuth access, or any connection to your production systems.",
-  },
-  {
-    q: "Who can access my data inside Valuguard?",
-    a: "Only the automated analysis engine processes your raw data. The assigned analyst reviews the structured output (anomalies, scores) — never the source files. All access is logged.",
-  },
-  {
-    q: "Is Valuguard SOC2 certified?",
-    a: "We are SOC2 Type II audit-ready with all controls in place: encryption at rest/transit, RLS, audit logging, access controls, and 30-day auto-purge. Formal certification is in progress (target: Q3 2026). We list our actual controls rather than claiming certifications we don't yet hold.",
-  },
-  {
-    q: "Can I delete my data before the 30-day window?",
-    a: "Yes. Request deletion at security@valuguard.com and all data (raw files, processed results, reports) is permanently removed within 72 hours. You'll receive a deletion confirmation.",
-  },
-  {
-    q: "What happens if there's a data breach?",
-    a: "Our incident response protocol requires notification within 72 hours per US state breach notification laws. All data is encrypted at rest, so even in the unlikely event of unauthorized access, the data is unreadable without KMS keys.",
-  },
-];
-
-// ── Honesty block: what we DON'T have yet ──────────
-var HONESTY_ITEMS = [
-  { text: "SOC2 Type II formal certification", target: "Q3 2026" },
-  { text: "ISO 27001 certification", target: "V2" },
-  { text: "FedRAMP authorization", target: "V3" },
-  { text: "HIPAA BAA (healthcare customers)", target: "V2" },
-  { text: "Penetration test report (third-party)", target: "Q2 2026" },
-];
-
 // ══════════════════════════════════════════════════
 // MAIN
 // ══════════════════════════════════════════════════
 export default function SecurityVault() {
   var { t } = useI18n();
   var [openFaq, setOpenFaq] = useState(-1);
+
+  // ── Security commitments data ──────────────────────
+  var COMMITMENTS = [
+    { icon: "🔐", title: t("vault.commit.1.title"), detail: t("vault.commit.1.desc") },
+    { icon: "⏱", title: t("vault.commit.2.title"), detail: t("vault.commit.2.desc") },
+    { icon: "🚪", title: t("vault.commit.3.title"), detail: t("vault.commit.3.desc") },
+    { icon: "📋", title: t("vault.commit.4.title"), detail: t("vault.commit.4.desc") },
+    { icon: "🇺🇸", title: t("vault.commit.5.title"), detail: t("vault.commit.5.desc") },
+    { icon: "👤", title: t("vault.commit.6.title"), detail: t("vault.commit.6.desc") },
+  ];
+
+  // ── Zero-Knowledge Protocol steps ──────────────────
+  var ZK_STEPS = [
+    { num: "01", title: t("vault.zk.step1"), detail: t("vault.zk.step1d"), icon: "📤" },
+    { num: "02", title: t("vault.zk.step2"), detail: t("vault.zk.step2d"), icon: "🔒" },
+    { num: "03", title: t("vault.zk.step3"), detail: t("vault.zk.step3d"), icon: "⚡" },
+    { num: "04", title: t("vault.zk.step4"), detail: t("vault.zk.step4d"), icon: "📊" },
+  ];
+
+  // ── Sub-processors (compliance transparency) ───────
+  var SUBPROCESSORS = [
+    { name: "AWS (Supabase)", role: t("vault.sub.aws"), location: t("vault.sub.loc.virginia"), soc2: true },
+    { name: "Vercel", role: t("vault.sub.vercel"), location: t("vault.sub.loc.useast"), soc2: true },
+    { name: "Stripe", role: t("vault.sub.stripe"), location: t("vault.sub.loc.us"), soc2: true },
+    { name: "Resend", role: t("vault.sub.resend"), location: t("vault.sub.loc.us"), soc2: true },
+    { name: "PostHog", role: t("vault.sub.posthog"), location: t("vault.sub.loc.us"), soc2: true },
+    { name: "Sentry", role: t("vault.sub.sentry"), location: t("vault.sub.loc.us"), soc2: true },
+  ];
+
+  // ── FAQ data ───────────────────────────────────────
+  var FAQ_ITEMS = [
+    { q: t("vault.faq.q1"), a: t("vault.faq.a1") },
+    { q: t("vault.faq.q2"), a: t("vault.faq.a2") },
+    { q: t("vault.faq.q3"), a: t("vault.faq.a3") },
+    { q: t("vault.faq.q4"), a: t("vault.faq.a4") },
+    { q: t("vault.faq.q5"), a: t("vault.faq.a5") },
+  ];
+
+  // ── Honesty block: what we DON'T have yet ──────────
+  var HONESTY_ITEMS = [
+    { text: t("vault.hon.1"), target: "Q3 2026" },
+    { text: t("vault.hon.2"), target: "V2" },
+    { text: t("vault.hon.3"), target: "V3" },
+    { text: t("vault.hon.4"), target: "V2" },
+    { text: t("vault.hon.5"), target: "Q2 2026" },
+  ];
 
   return (
     <div style={{ minHeight: "100vh", background: V, fontFamily: SA, color: T1, padding: "0 14px 64px" }}>
@@ -188,7 +173,7 @@ export default function SecurityVault() {
             {t("vault.subtitle")}
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
-            {["AES-256", "SOC2 Ready", "US Hosted", "Zero-Knowledge", "30-Day Purge"].map(function(b) {
+            {[t("vault.tags.1"), t("vault.tags.2"), t("vault.tags.3"), t("vault.tags.4"), t("vault.tags.5")].map(function(b) {
               return <Tag key={b}>{b}</Tag>;
             })}
           </div>
@@ -197,12 +182,12 @@ export default function SecurityVault() {
         {/* ── ZERO-KNOWLEDGE PROTOCOL ────────────── */}
         <section style={{ marginBottom: 40 }}>
           <Panel>
-            <SectionLabel>01 — ZERO-KNOWLEDGE AUDIT PROTOCOL</SectionLabel>
-            <SectionTitle>We analyze your spend without seeing your data.</SectionTitle>
+            <SectionLabel>{t("vault.s1.label")}</SectionLabel>
+            <SectionTitle>{t("vault.s1.title")}</SectionTitle>
             <p style={{ fontSize: 13, color: T2, lineHeight: 1.6, marginBottom: 18 }}>
-              Unlike tools that require OAuth access to your SaaS accounts or install agents on your network,
-              Valuguard operates exclusively on <strong style={{ color: T1 }}>billing exports you control</strong>.
-              No credentials. No API connections. No agents. Your attack surface stays identical before and after the audit.
+              {t("vault.s1.desc")}
+              {" "}<strong style={{ color: T1 }}>{t("vault.s1.descb")}</strong>
+              {t("vault.s1.descc")}
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
               {ZK_STEPS.map(function(step) {
@@ -219,8 +204,8 @@ export default function SecurityVault() {
             <div style={{ marginTop: 16, padding: "10px 14px", borderRadius: 8, background: "rgba(52,211,153,0.04)", border: "1px solid rgba(52,211,153,0.12)", display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 20 }}>🛡</span>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: T1 }}>Less access = less risk</p>
-                <p style={{ fontSize: 10, color: T3 }}>The Zero-Knowledge protocol is an architectural choice, not a limitation. Your security posture remains unchanged.</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: T1 }}>{t("vault.zk.trust")}</p>
+                <p style={{ fontSize: 10, color: T3 }}>{t("vault.zk.trustsub")}</p>
               </div>
             </div>
           </Panel>
@@ -248,19 +233,19 @@ export default function SecurityVault() {
         {/* ── DATA FLOW ARCHITECTURE ──────────────── */}
         <section style={{ marginBottom: 40 }}>
           <Panel>
-            <SectionLabel>02 — DATA FLOW ARCHITECTURE</SectionLabel>
-            <SectionTitle>From upload to report — every step encrypted.</SectionTitle>
+            <SectionLabel>{t("vault.s2.label")}</SectionLabel>
+            <SectionTitle>{t("vault.s2.title")}</SectionTitle>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, padding: "20px 0", flexWrap: "wrap" }}>
               {[
-                { label: "Your Browser", sub: "Local calculation", color: T1, bg: "rgba(59,130,246,0.06)", border: A + "25" },
+                { label: t("vault.flow.browser"), sub: t("vault.flow.browsersub"), color: T1, bg: "rgba(59,130,246,0.06)", border: A + "25" },
                 null,
-                { label: "TLS 1.3", sub: "In-transit encryption", color: TL, bg: "rgba(52,211,153,0.06)", border: TL + "25" },
+                { label: t("vault.flow.tls"), sub: t("vault.flow.tlssub"), color: TL, bg: "rgba(52,211,153,0.06)", border: TL + "25" },
                 null,
-                { label: "Supabase Vault", sub: "AES-256 at rest", color: AH, bg: "rgba(59,130,246,0.06)", border: A + "25" },
+                { label: t("vault.flow.vault"), sub: t("vault.flow.vaultsub"), color: AH, bg: "rgba(59,130,246,0.06)", border: A + "25" },
                 null,
-                { label: "Analysis Engine", sub: "Isolated container", color: T1, bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.25)" },
+                { label: t("vault.flow.engine"), sub: t("vault.flow.enginesub"), color: T1, bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.25)" },
                 null,
-                { label: "Your Report", sub: "Structured output", color: TL, bg: "rgba(52,211,153,0.06)", border: TL + "25" },
+                { label: t("vault.flow.report"), sub: t("vault.flow.reportsub"), color: TL, bg: "rgba(52,211,153,0.06)", border: TL + "25" },
               ].map(function(item, i) {
                 if (item === null) {
                   return <span key={"arr" + i} style={{ fontSize: 14, color: T3, margin: "0 6px" }}>→</span>;
@@ -274,11 +259,11 @@ export default function SecurityVault() {
               })}
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 8, fontSize: 8, color: T3, fontFamily: MO, textTransform: "uppercase", letterSpacing: ".06em" }}>
-              <span>Raw files purged at day 30</span>
+              <span>{t("vault.flow.note1")}</span>
               <span>·</span>
-              <span>No human accesses source files</span>
+              <span>{t("vault.flow.note2")}</span>
               <span>·</span>
-              <span>All access logged</span>
+              <span>{t("vault.flow.note3")}</span>
             </div>
           </Panel>
         </section>
@@ -287,11 +272,11 @@ export default function SecurityVault() {
         <section style={{ marginBottom: 40 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Panel>
-              <SectionLabel>03 — SUB-PROCESSORS</SectionLabel>
-              <SectionTitle>Full transparency on who handles what.</SectionTitle>
+              <SectionLabel>{t("vault.s3.label")}</SectionLabel>
+              <SectionTitle>{t("vault.s3.title")}</SectionTitle>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: 8, padding: "6px 10px", fontSize: 8, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".06em" }}>
-                  <span>Provider</span><span>Role</span><span>Location</span><span>SOC2</span>
+                  <span>{t("vault.table.provider")}</span><span>{t("vault.table.role")}</span><span>{t("vault.table.location")}</span><span>SOC2</span>
                 </div>
                 {SUBPROCESSORS.map(function(sp) {
                   return (
@@ -309,10 +294,10 @@ export default function SecurityVault() {
             {/* Honesty block */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <Panel delay={80}>
-                <SectionLabel>04 — WHAT WE DON'T HAVE YET</SectionLabel>
-                <SectionTitle>Honesty over marketing.</SectionTitle>
+                <SectionLabel>{t("vault.s4.label")}</SectionLabel>
+                <SectionTitle>{t("vault.s4.title")}</SectionTitle>
                 <p style={{ fontSize: 12, color: T2, lineHeight: 1.5, marginBottom: 12 }}>
-                  We list our limitations upfront. Every item below is on our roadmap with a target date.
+                  {t("vault.s4.desc")}
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {HONESTY_ITEMS.map(function(item, i) {
@@ -329,11 +314,9 @@ export default function SecurityVault() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 20 }}>⚖️</span>
                   <div>
-                    <p style={{ fontSize: 11, fontWeight: 600, color: T1, marginBottom: 2 }}>Why we publish this list</p>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: T1, marginBottom: 2 }}>{t("vault.hon.why.title")}</p>
                     <p style={{ fontSize: 10, color: T3, lineHeight: 1.4 }}>
-                      Any vendor that claims SOC2 without proof is a red flag.
-                      We show you exactly where we are and where we're headed.
-                      Trust is built on verified controls, not badge graphics.
+                      {t("vault.hon.why.desc")}
                     </p>
                   </div>
                 </div>
@@ -345,8 +328,8 @@ export default function SecurityVault() {
         {/* ── SECURITY FAQ ────────────────────────── */}
         <section style={{ marginBottom: 40 }}>
           <Panel>
-            <SectionLabel>05 — SECURITY FAQ</SectionLabel>
-            <SectionTitle>The real questions. Direct answers.</SectionTitle>
+            <SectionLabel>{t("vault.s5.label")}</SectionLabel>
+            <SectionTitle>{t("vault.s5.title")}</SectionTitle>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
               {FAQ_ITEMS.map(function(faq, i) {
                 var isOpen = openFaq === i;
@@ -394,10 +377,10 @@ export default function SecurityVault() {
         {/* ── TRUST FOOTER ─────────────────────────── */}
         <div style={{ marginTop: 20, padding: "12px 14px", borderRadius: 10, border: "1px solid " + BD, background: "rgba(11,14,24,0.35)", display: "flex", justifyContent: "center", gap: 18, flexWrap: "wrap" }}>
           {[
-            { icon: "🛡", title: "SOC2 Type II Ready" },
-            { icon: "🔐", title: "Zero-Knowledge Audit" },
-            { icon: "🇺🇸", title: "US Data Residency" },
-            { icon: "⏱", title: "30-Day Auto-Delete" },
+            { icon: "🛡", title: t("trustfooter.soc2") },
+            { icon: "🔐", title: t("trustfooter.zk") },
+            { icon: "🇺🇸", title: t("trustfooter.us") },
+            { icon: "⏱", title: t("trustfooter.purge") },
           ].map(function(b) {
             return (
               <div key={b.title} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, color: T2 }}>
@@ -412,5 +395,3 @@ export default function SecurityVault() {
     </div>
   );
 }
-
-

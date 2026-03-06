@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useI18n } from "@/lib/i18n";
+import { CheckCircle } from "lucide-react";
+import { useI18n, PRICES } from "@/lib/i18n";
 
 /*  VALUGUARD — LANDING PAGE (i18n: EN/FR/DE)
     Navbar is in layout.tsx (global sticky).
@@ -65,34 +66,20 @@ const DETECT_ICONS = ["\u{1F47B}", "\u{1F504}", "\u{1F4D0}", "\u{1F3F4}", "\u{1F
 // ── Social proof logos (greyed, subtle) ────────────
 const LOGOS = ["Stripe", "Datadog", "Notion", "HubSpot", "Figma", "Vercel", "Snowflake", "Okta"];
 
-// ── Testimonials ───────────────────────────────────
-const TESTIMONIALS = [
-  {
-    quote: "Valuguard found $186k in annual Ghost Tax we had no idea existed. The board presentation was ready the same day.",
-    name: "Sarah Chen",
-    role: "VP Finance",
-    company: "TechScale (Series B, 220 employees)",
-  },
-  {
-    quote: "We had 4 overlapping AI writing tools across teams. Valuguard caught it in hours, not months.",
-    name: "Marcus Petrov",
-    role: "CTO",
-    company: "CloudNova (180 employees)",
-  },
-  {
-    quote: "The Zero-Knowledge protocol made it a no-brainer for our security team. No API access, no risk.",
-    name: "Lisa Hartmann",
-    role: "CISO",
-    company: "FinEdge (320 employees)",
-  },
-];
+// (testimonials are now i18n-driven inside the component)
 
 // ══════════════════════════════════════════════════
 // MAIN
 // ══════════════════════════════════════════════════
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(-1);
-  const { t } = useI18n();
+  const { t, formatCurrency } = useI18n();
+
+  const TESTIMONIALS = [
+    { quote: t("testimonials.1.quote"), name: t("testimonials.1.name"), role: t("testimonials.1.role"), company: t("testimonials.1.company") },
+    { quote: t("testimonials.2.quote"), name: t("testimonials.2.name"), role: t("testimonials.2.role"), company: t("testimonials.2.company") },
+    { quote: t("testimonials.3.quote"), name: t("testimonials.3.name"), role: t("testimonials.3.role"), company: t("testimonials.3.company") },
+  ];
 
   const DETECTIONS = [
     { icon: DETECT_ICONS[0], title: t("detect.t1"), desc: t("detect.d1") },
@@ -113,8 +100,8 @@ export default function LandingPage() {
   const PRICING = [
     {
       name: t("price.audit.name"),
-      price: t("price.audit.price"),
-      period: t("price.audit.period"),
+      price: formatCurrency(PRICES.audit),
+      period: t("price.period.onetime"),
       desc: t("price.audit.desc"),
       features: [t("price.audit.f1"), t("price.audit.f2"), t("price.audit.f3"), t("price.audit.f4"), t("price.audit.f5")],
       cta: t("price.audit.cta"),
@@ -123,8 +110,8 @@ export default function LandingPage() {
     },
     {
       name: t("price.essentials.name"),
-      price: t("price.essentials.price"),
-      period: t("price.essentials.period"),
+      price: formatCurrency(PRICES.essentials),
+      period: t("price.period.monthly"),
       desc: t("price.essentials.desc"),
       features: [t("price.essentials.f1"), t("price.essentials.f2"), t("price.essentials.f3"), t("price.essentials.f4"), t("price.essentials.f5")],
       cta: t("price.essentials.cta"),
@@ -133,8 +120,8 @@ export default function LandingPage() {
     },
     {
       name: t("price.guardian.name"),
-      price: t("price.guardian.price"),
-      period: t("price.guardian.period"),
+      price: formatCurrency(PRICES.guardian),
+      period: t("price.period.monthly"),
       desc: t("price.guardian.desc"),
       features: [t("price.guardian.f1"), t("price.guardian.f2"), t("price.guardian.f3"), t("price.guardian.f4"), t("price.guardian.f5"), t("price.guardian.f6"), t("price.guardian.f7")],
       cta: t("price.guardian.cta"),
@@ -192,7 +179,7 @@ export default function LandingPage() {
         <Section>
           <div style={{ textAlign: "center", marginBottom: 10 }}>
             <p style={{ fontSize: 9, fontWeight: 600, fontFamily: MO, letterSpacing: ".12em", textTransform: "uppercase", color: T3 }}>
-              TRUSTED BY TEAMS AT
+              {t("social.trusted")}
             </p>
           </div>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 32, flexWrap: "wrap", opacity: 0.35 }}>
@@ -311,8 +298,8 @@ export default function LandingPage() {
         {/* ═══════ TESTIMONIALS ═══════ */}
         <Section>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <Label>WHAT OUR CLIENTS SAY</Label>
-            <h2 style={{ fontSize: 22, fontWeight: 700 }}>Real results. Real savings.</h2>
+            <Label>{t("testimonials.label")}</Label>
+            <h2 style={{ fontSize: 22, fontWeight: 700 }}>{t("testimonials.title")}</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
             {TESTIMONIALS.map(function (tm, i) {
@@ -380,7 +367,7 @@ export default function LandingPage() {
                     {tier.features.map(function (f) {
                       return (
                         <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T2 }}>
-                          <span style={{ color: TL, fontSize: 10, fontWeight: 700 }}>&check;</span>
+                          <CheckCircle size={13} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                           {f}
                         </div>
                       );

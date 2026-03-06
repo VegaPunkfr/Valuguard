@@ -188,7 +188,7 @@ export default function BoardReport() {
             onClick={handleDownload}
             style={{ padding: "7px 16px", borderRadius: 7, border: "none", background: TL, color: V, fontSize: 10, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", cursor: "pointer" }}
           >
-            ↓ DOWNLOAD .TXT
+            ↓ {t("roi.download")}
           </button>
         </div>
 
@@ -199,9 +199,9 @@ export default function BoardReport() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
             {[
-              { key: "company", label: "Company Name", type: "text" },
-              { key: "industry", label: "Industry", type: "text" },
-              { key: "headcount", label: "Headcount", type: "number" },
+              { key: "company", label: t("roi.field.company"), type: "text" },
+              { key: "industry", label: t("roi.field.industry"), type: "text" },
+              { key: "headcount", label: t("roi.field.headcount"), type: "number" },
             ].map(function(f) {
               return (
                 <div key={f.key}>
@@ -227,7 +227,7 @@ export default function BoardReport() {
               {t("roi.preview")}
             </p>
             <span style={{ fontSize: 8, fontFamily: MO, color: T3 }}>
-              {reportText.split("\n").length} lines
+              {reportText.split("\n").length} {t("roi.lines")}
             </span>
           </div>
           <pre style={{
@@ -278,10 +278,10 @@ export default function BoardReport() {
         {/* ── TRUST FOOTER ─────────────────────────── */}
         <div style={{ marginTop: 18, padding: "11px 14px", borderRadius: 10, border: "1px solid " + BD, background: "rgba(11,14,24,0.35)", display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
           {[
-            { icon: "🛡", title: "SOC2 Type II Ready" },
-            { icon: "🔐", title: "Zero-Knowledge Audit" },
-            { icon: "🇺🇸", title: "US Data Residency" },
-            { icon: "⏱", title: "30-Day Auto-Delete" },
+            { icon: "🛡", title: t("trustfooter.soc2") },
+            { icon: "🔐", title: t("trustfooter.zk") },
+            { icon: "🇺🇸", title: t("trustfooter.us") },
+            { icon: "⏱", title: t("trustfooter.purge") },
           ].map(function(b) {
             return (
               <div key={b.title} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 9, color: T2 }}>
