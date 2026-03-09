@@ -1,5 +1,5 @@
 /**
- * VALUGUARD — SUPABASE CLIENT FACTORY
+ * GHOST TAX — SUPABASE CLIENT FACTORY
  *
  * Single source of truth for all database access.
  * No component ever imports @supabase/ssr directly.
@@ -38,7 +38,7 @@ function getEnv(name: string): string | null {
   const value = process.env[name];
   if (!value) {
     console.warn(
-      `[Valuguard] Missing env var: ${name}. Supabase features disabled.`
+      `[Ghost Tax] Missing env var: ${name}. Supabase features disabled.`
     );
     return null;
   }

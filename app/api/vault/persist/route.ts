@@ -1,5 +1,5 @@
 /**
- * VALUGUARD — POST /api/vault/persist
+ * GHOST TAX — POST /api/vault/persist
  *
  * Receives the Ghost Tax diagnostic snapshot when a prospect
  * clicks "RECLAIM $XXk NOW" and submits their email.
@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
       {
         id: inserted?.id,
         status: "captured",
-        message: "Diagnostic data secured. A recovery specialist will contact you within 24 hours.",
+        message: "Diagnostic data secured. Your scan results are ready — check your email for the full analysis.",
       },
       { status: 200 }
     );

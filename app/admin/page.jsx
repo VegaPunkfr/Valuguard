@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 
-/*  VALUGUARD — PROFIT COMMAND CENTER (ADMIN DASHBOARD)
+/*  GHOST TAX — PROFIT COMMAND CENTER (ADMIN DASHBOARD)
     Sprint 4. Lists vault_sessions leads sorted by recoverable_annual DESC.
     Mini entropy radar + percentile per lead. ADMIN_TOKEN gate.
     Production: replace MOCK_LEADS with Supabase query.
@@ -123,7 +123,7 @@ export default function AdminDashboard(){
         {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:12,fontFamily:MO,fontWeight:700,letterSpacing:".06em",color:A}}>VALUGUARD</span>
+            <span style={{fontSize:12,fontFamily:MO,fontWeight:700,letterSpacing:".06em",color:A}}>GHOST TAX</span>
             <span style={{fontSize:8,fontFamily:MO,color:T3,padding:"2px 6px",borderRadius:3,border:"1px solid "+BD}}>COMMAND CENTER</span>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>

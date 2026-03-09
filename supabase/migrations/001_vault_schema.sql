@@ -1,5 +1,5 @@
 -- ================================================================
--- VALUGUARD — DATABASE SCHEMA (Supabase / PostgreSQL 15)
+-- GHOST TAX — DATABASE SCHEMA (Supabase / PostgreSQL 15)
 -- US 2026 Production DDL
 --
 -- EXECUTION ORDER: Run this file top to bottom in Supabase SQL Editor
@@ -23,7 +23,6 @@
 -- EXTENSIONS
 -- ════════════════════════════════════════════════════════════════
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "vector";    -- pgvector for RAG V2
 
 
@@ -68,7 +67,7 @@ END $$;
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS vault_sessions (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Prospect identity (minimum for recontact)
   email               TEXT NOT NULL,
@@ -139,25 +138,8 @@ CREATE POLICY "Public insert vault"
   ON vault_sessions FOR INSERT
   WITH CHECK (true);
 
-CREATE POLICY "Admin select vault"
-  ON vault_sessions FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('owner', 'admin')
-    )
-  );
-
-CREATE POLICY "Admin update vault"
-  ON vault_sessions FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('owner', 'admin')
-    )
-  );
+-- NOTE: Admin select/update policies for vault_sessions are created
+-- after the profiles table exists (see below).
 
 
 -- ════════════════════════════════════════════════════════════════
@@ -166,7 +148,7 @@ CREATE POLICY "Admin update vault"
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS organizations (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name                TEXT NOT NULL,
   slug                TEXT UNIQUE NOT NULL,
   industry            TEXT,
@@ -183,11 +165,7 @@ CREATE TABLE IF NOT EXISTS organizations (
 
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users see own org"
-  ON organizations FOR SELECT
-  USING (
-    id IN (SELECT organization_id FROM profiles WHERE id = auth.uid())
-  );
+-- NOTE: "Users see own org" policy moved after profiles table creation.
 
 
 -- ════════════════════════════════════════════════════════════════
@@ -222,12 +200,43 @@ CREATE POLICY "Users update own profile"
 
 
 -- ════════════════════════════════════════════════════════════════
+-- DEFERRED POLICIES (need profiles table to exist)
+-- ════════════════════════════════════════════════════════════════
+
+CREATE POLICY "Users see own org"
+  ON organizations FOR SELECT
+  USING (
+    id IN (SELECT organization_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "Admin select vault"
+  ON vault_sessions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role IN ('owner', 'admin')
+    )
+  );
+
+CREATE POLICY "Admin update vault"
+  ON vault_sessions FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role IN ('owner', 'admin')
+    )
+  );
+
+
+-- ════════════════════════════════════════════════════════════════
 -- TABLE 4: AUDIT_REQUESTS
 -- Pipeline: prospect → qualified → paid → processing → delivered
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS audit_requests (
-  id                        UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id           UUID REFERENCES organizations(id),
   vault_session_id          UUID REFERENCES vault_sessions(id),
   email                     TEXT NOT NULL,
@@ -269,7 +278,7 @@ CREATE POLICY "Admin manage audit requests"
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS reports (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id     UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   title               TEXT NOT NULL,
   status              TEXT DEFAULT 'draft'
@@ -309,7 +318,7 @@ CREATE POLICY "Org members see own reports"
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS anomalies (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id           UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
   organization_id     UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   type                anomaly_type NOT NULL,
@@ -349,7 +358,7 @@ CREATE POLICY "Org members see own anomalies"
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS recommendations (
-  id                          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id                   UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
   organization_id             UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   title                       TEXT NOT NULL,
@@ -397,7 +406,7 @@ CREATE POLICY "Org members update rec status"
 -- ════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS events (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id     UUID REFERENCES organizations(id),
   user_id             UUID REFERENCES auth.users(id),
   event_name          TEXT NOT NULL,

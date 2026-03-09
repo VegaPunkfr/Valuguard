@@ -1,0 +1,62 @@
+# GHOST TAX — Robots Directives
+# AI-discovery friendly. Private app routes excluded.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+# AI search crawlers — explicitly welcomed on public surfaces
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+Sitemap: https://ghost-tax.com/sitemap.xml

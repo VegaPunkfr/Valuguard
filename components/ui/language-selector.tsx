@@ -1,39 +1,34 @@
 "use client";
 
 import { useI18n, LOCALES } from "@/lib/i18n";
-
-const BD = "rgba(36,48,78,0.32)";
-const T2 = "#8d9bb5";
-const T3 = "#55637d";
-const A = "#3b82f6";
-const MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
+import { c, f } from "@/lib/tokens";
 
 export default function LanguageSelector() {
   const { locale, setLocale } = useI18n();
 
   return (
-    <div style={{ display: "flex", gap: 0, borderRadius: 6, border: "1px solid " + BD, overflow: "hidden" }}>
-      {LOCALES.map((l) => {
+    <div style={{ display: "flex", gap: 0, borderRadius: 8, border: "1px solid " + c.borderS, overflow: "hidden" }}>
+      {LOCALES.map((l, i) => {
         const active = locale === l.code;
+        const isLast = i === LOCALES.length - 1;
         return (
           <button
             key={l.code}
             onClick={() => setLocale(l.code)}
             style={{
-              padding: "4px 8px",
-              fontSize: 9,
-              fontFamily: MO,
+              padding: "6px 12px",
+              fontSize: 12,
+              fontFamily: f.mono,
               fontWeight: active ? 700 : 500,
               letterSpacing: ".04em",
-              background: active ? "rgba(59,130,246,0.12)" : "transparent",
-              color: active ? A : T3,
+              background: active ? c.accentBg : "transparent",
+              color: active ? c.accent : c.text3,
               border: "none",
-              borderRight: "1px solid " + BD,
+              borderRight: isLast ? "none" : "1px solid " + c.borderS,
               cursor: "pointer",
-              transition: "all 0.12s",
+              transition: "all 120ms",
+              minHeight: 36,
             }}
-            onMouseEnter={(e) => { if (!active) (e.target as HTMLElement).style.color = T2; }}
-            onMouseLeave={(e) => { if (!active) (e.target as HTMLElement).style.color = T3; }}
           >
             {l.label}
           </button>

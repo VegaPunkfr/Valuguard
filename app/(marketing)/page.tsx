@@ -1,625 +1,502 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, Shield, Lock, Server, Globe, Trash2 } from "lucide-react";
+import { CheckCircle, ArrowRight, Shield, Zap, BarChart3, FileText, Target } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import ControlPlaneSection from "@/components/ControlPlaneSection";
-import CausalGraphSection from "@/components/CausalGraphSection";
+import { c, f, panel, card, inset, reveal, revealTransition, sectionLabel } from "@/lib/tokens";
+import Section from "@/components/ui/section";
+import Footer from "@/components/ui/footer";
 
-/*  VALUGUARD — LANDING PAGE (i18n: EN/FR/DE)
-    Navbar is in layout.tsx (global sticky).
-    12-section CFO-grade structure. */
-
-const V = "#060912";
-const A = "#3b82f6";
-const AH = "#60a5fa";
-const T1 = "#e0e6f2";
-const T2 = "#8d9bb5";
-const T3 = "#55637d";
-const RD = "#ef4444";
-const OR = "#f59e0b";
-const TL = "#34d399";
-const BD = "rgba(36,48,78,0.32)";
-const MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
-const SA = "system-ui,-apple-system,sans-serif";
-
-const gl = {
-  background: "rgba(11,14,24,0.72)",
-  backdropFilter: "blur(18px) saturate(1.15)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.15)",
-  border: "1px solid " + BD,
-  borderRadius: 12,
-  boxShadow: "0 4px 32px rgba(0,0,0,0.28)",
-};
-
-// ── Framer Motion scroll reveal ────────────────────
-const reveal = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-function Section(props: { delay?: number; style?: React.CSSProperties; children: React.ReactNode }) {
-  return (
-    <motion.section
-      variants={reveal}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.08 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: (props.delay || 0) / 1000 }}
-      style={Object.assign({ marginBottom: 48 }, props.style || {})}
-    >
-      {props.children}
-    </motion.section>
-  );
-}
-
-function Label(props: { children: React.ReactNode }) {
-  return (
-    <span style={{ display: "block", fontSize: 15, fontWeight: 800, fontFamily: MO, letterSpacing: ".25em", textTransform: "uppercase", color: A, marginBottom: 14 }}>
-      {props.children}
-    </span>
-  );
-}
-
-// ── Estimator Widget (PDF Section 2 — Instant Leak & ROI) ──
-function EstimatorWidget({ t, formatCurrency }: { t: (k: string) => string; formatCurrency: (n: number, compact?: boolean) => string }) {
-  const [employees, setEmployees] = useState(120);
-  const [budget, setBudget] = useState(480000);
-
-  const result = useMemo(() => {
-    const monthly = budget / 12;
-    const kappa = employees <= 50 ? 0 : 0.04 * Math.log(employees / 50);
-    const baseLeakPct = 0.15 + kappa * 0.6;
-    const exposure = Math.round(monthly * baseLeakPct * 12);
-    const tensionRaw = Math.min(99, Math.round(30 + kappa * 200 + (budget > 600000 ? 15 : 0)));
-    const window = Math.max(20, Math.round(90 - tensionRaw * 0.5));
-    const leverCount = tensionRaw >= 60 ? 5 : tensionRaw >= 40 ? 4 : 3;
-    return { exposure, tension: tensionRaw, window, leverCount };
-  }, [employees, budget]);
-
-  const tensionColor = result.tension >= 60 ? "#ef4444" : result.tension >= 40 ? "#f59e0b" : result.tension >= 25 ? "#60a5fa" : "#34d399";
-  const tensionLabel = result.tension >= 60 ? t("est.widget.tension.critical") : result.tension >= 40 ? t("est.widget.tension.elevated") : result.tension >= 25 ? t("est.widget.tension.moderate") : t("est.widget.tension.low");
-  const leverKeys = ["est.widget.lever1", "est.widget.lever2", "est.widget.lever3", "est.widget.lever4", "est.widget.lever5"];
-
-  return (
-    <Section>
-      <div style={Object.assign({}, gl, { padding: 28 })}>
-        <Label>{t("est.widget.title")}</Label>
-        <p style={{ fontSize: 16, color: T2, marginBottom: 20, lineHeight: 1.6 }}>{t("est.widget.sub")}</p>
-
-        {/* Sliders */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
-          <div>
-            <label style={{ display: "block", fontSize: 12, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.employees")}</label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <input type="range" min={10} max={500} step={10} value={employees} onChange={(e) => setEmployees(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
-              <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 40, textAlign: "right" }}>{employees}</span>
-            </div>
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 12, fontFamily: MO, color: T3, textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>{t("est.widget.budget")}</label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <input type="range" min={50000} max={2000000} step={10000} value={budget} onChange={(e) => setBudget(Number(e.target.value))} style={{ flex: 1, accentColor: A }} />
-              <span style={{ fontFamily: MO, fontSize: 16, fontWeight: 800, color: AH, minWidth: 70, textAlign: "right" }}>{formatCurrency(budget, true)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Results */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
-          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(239,68,68,0.12)", textAlign: "center" }}>
-            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.exposure")}</p>
-            <p style={{ fontFamily: MO, fontSize: 42, fontWeight: 800, color: "#ef4444", lineHeight: 1, letterSpacing: "-.02em" }}>
-              {formatCurrency(result.exposure)}
-            </p>
-          </div>
-          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.tension")}</p>
-            <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: tensionColor, lineHeight: 1 }}>{result.tension}</p>
-            <p style={{ fontSize: 11, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", color: tensionColor, marginTop: 4 }}>{tensionLabel}</p>
-          </div>
-          <div style={{ padding: 18, borderRadius: 10, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-            <p style={{ fontSize: 12, fontFamily: MO, fontWeight: 700, color: T3, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>{t("est.widget.window")}</p>
-            <p style={{ fontFamily: MO, fontSize: 32, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>{result.window}</p>
-            <p style={{ fontSize: 11, fontFamily: MO, color: T3, marginTop: 4 }}>{t("est.widget.window.val")}</p>
-          </div>
-        </div>
-
-        {/* Corrective Levers */}
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 13, fontFamily: MO, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: T3, marginBottom: 8 }}>{t("est.widget.levers")}</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {leverKeys.slice(0, result.leverCount).map((key, i) => (
-              <div key={key} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.08)" }}>
-                <span style={{ fontFamily: MO, fontSize: 13, fontWeight: 700, color: A, minWidth: 16 }}>0{i + 1}</span>
-                <span style={{ fontSize: 14, color: T2 }}>{t(key)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div style={{ textAlign: "center" }}>
-          <a href="/estimator" style={{ display: "inline-block", padding: "16px 36px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
-            {t("est.widget.cta")} &rarr;
-          </a>
-          <p style={{ fontSize: 12, color: T3, marginTop: 8 }}>{t("est.widget.micro")}</p>
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-const SEC_ICONS = [
-  <Shield key="s" size={20} />,
-  <Lock key="l" size={20} />,
-  <Server key="sv" size={20} />,
-  <Globe key="g" size={20} />,
-  <Trash2 key="t" size={20} />,
-];
-
-// ══════════════════════════════════════════════════
-// MAIN
-// ══════════════════════════════════════════════════
+/* ─── Main ───────────────────────────────────────────── */
 export default function LandingPage() {
-  const { t, formatCurrency } = useI18n();
+  const { t, locale } = useI18n();
+  const [heroInput, setHeroInput] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(false);
+
+  const navigateToIntel = useCallback(() => {
+    const domain = heroInput.trim();
+    window.location.href = domain ? `/intel?domain=${encodeURIComponent(domain)}` : "/intel";
+  }, [heroInput]);
+
+  const handleRailACheckout = useCallback(async () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    setCheckoutError(false);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else { setCheckoutLoading(false); setCheckoutError(true); }
+    } catch {
+      setCheckoutLoading(false);
+      setCheckoutError(true);
+    }
+  }, [checkoutLoading, locale]);
 
   const PRICING = [
     {
-      name: t("price.diag.name"),
-      price: t("price.diag.price"),
-      period: t("price.period.onetime"),
-      desc: t("price.diag.desc"),
+      name: t("price.diag.name"), price: t("price.diag.price"),
+      period: t("price.period.onetime"), desc: t("price.diag.desc"),
       features: [t("price.diag.f1"), t("price.diag.f2"), t("price.diag.f3"), t("price.diag.f4"), t("price.diag.f5")],
-      cta: t("price.diag.cta"),
-      href: "/estimator",
-      highlight: false,
-      badge: t("price.diag.badge"),
-      roi: t("price.diag.roi"),
-      tier: "entry" as const,
+      cta: checkoutLoading ? t("landing.pricing.cta.loading") : t("landing.pricing.cta"),
+      onClick: handleRailACheckout, highlight: true,
+      badge: t("price.diag.badge"), roi: t("price.diag.roi"),
     },
     {
-      name: t("price.protocol.name"),
-      price: t("price.protocol.price"),
-      period: "",
+      name: t("price.protocol.name"), price: t("price.protocol.price"), period: "",
       desc: t("price.protocol.desc"),
       features: [t("price.protocol.f1"), t("price.protocol.f2"), t("price.protocol.f3"), t("price.protocol.f4"), t("price.protocol.f5")],
-      cta: t("price.protocol.cta"),
-      href: "/sample-report",
-      highlight: true,
-      badge: t("price.protocol.badge"),
-      roi: t("price.protocol.roi"),
-      tier: "core" as const,
+      cta: t("price.protocol.cta"), href: "/contact?plan=stabilization",
+      highlight: false, badge: t("price.protocol.badge"), roi: t("price.protocol.roi"),
     },
     {
-      name: t("price.controlplane.name"),
-      price: t("price.controlplane.price"),
-      period: "",
+      name: t("price.controlplane.name"), price: t("price.controlplane.price"), period: "",
       desc: t("price.controlplane.desc"),
       features: [t("price.controlplane.f1"), t("price.controlplane.f2"), t("price.controlplane.f3"), t("price.controlplane.f4"), t("price.controlplane.f5")],
-      cta: t("price.controlplane.cta"),
-      href: "mailto:sales@valuguard.com",
-      highlight: false,
-      badge: t("price.controlplane.badge"),
-      roi: t("price.controlplane.roi"),
-      tier: "premium" as const,
+      cta: t("price.controlplane.cta"), href: "/contact?plan=institutional",
+      highlight: false, badge: t("price.controlplane.badge"), roi: t("price.controlplane.roi"),
     },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: V, fontFamily: SA, color: T1 }}>
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "0 16px" }}>
+    <div style={{ minHeight: "100vh", background: c.bg, color: c.text1 }}>
+      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px" }}>
 
-        {/* ═══════ 1. HERO ═══════ */}
-        <Section style={{ textAlign: "center", paddingTop: 56, paddingBottom: 48 }}>
-          <p style={{ fontSize: 14, fontWeight: 800, letterSpacing: ".25em", textTransform: "uppercase", color: A, fontFamily: MO, marginBottom: 20 }}>
-            {t("hero.badge")}
-          </p>
-          <h1 style={{ fontSize: "clamp(44px, 7vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-.035em", marginBottom: 20, maxWidth: 760, margin: "0 auto 20px" }}>
-            {t("hero.title1")}
+        {/* ═══════════ HERO ═══════════ */}
+        <Section style={{ textAlign: "center", paddingTop: 80, paddingBottom: 40, position: "relative" }}>
+          {/* Ambient glow */}
+          <div style={{
+            position: "absolute", top: -100, left: "50%", transform: "translateX(-50%)",
+            width: 600, height: 400,
+            background: "radial-gradient(ellipse at center, rgba(79,143,247,0.06) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+
+          <div className="gt-badge gt-badge--blue" style={{ marginBottom: 20, display: "inline-flex" }}>
+            {t("landing.hero.badge") || "Decision Intelligence Platform"}
+          </div>
+
+          <h1 style={{
+            fontSize: "clamp(40px, 7vw, 72px)", fontWeight: 800,
+            lineHeight: 1.04, letterSpacing: "-0.04em",
+            marginBottom: 20, maxWidth: 820, margin: "0 auto 20px",
+          }}>
+            {t("landing.hero.t1")}
             <br />
-            <span style={{ color: AH }}>{t("hero.title2")}</span>
+            <span className="gt-text-gradient">{t("landing.hero.t2")}</span>
           </h1>
-          <p style={{ fontSize: 20, color: T2, maxWidth: 580, margin: "0 auto 32px", lineHeight: 1.6 }}>
-            {t("hero.sub")}
+
+          <p style={{
+            fontSize: "clamp(17px, 2.2vw, 20px)", color: c.text2,
+            maxWidth: 560, margin: "0 auto 36px", lineHeight: 1.6,
+          }}>
+            {t("landing.hero.sub")}
           </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-            <a href="/estimator" style={{ display: "inline-block", padding: "16px 32px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
-              {t("hero.cta1")} &rarr;
-            </a>
-            <a href="/sample-report" style={{ display: "inline-block", padding: "16px 28px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 15, fontWeight: 500, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
-              {t("hero.cta2")}
-            </a>
+
+          {/* Domain input */}
+          <div style={{ maxWidth: 520, margin: "0 auto 14px", display: "flex", gap: 10 }}>
+            <input
+              type="text"
+              value={heroInput}
+              onChange={(e) => setHeroInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
+              placeholder="acme.com"
+              className="gt-input gt-input-mono"
+              style={{ flex: 1, padding: "14px 18px", fontSize: 16 }}
+            />
+            <button
+              type="button"
+              onClick={navigateToIntel}
+              className="gt-btn gt-btn-primary"
+              style={{ padding: "14px 28px", fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}
+            >
+              {t("landing.hero.cta")}
+            </button>
+          </div>
+
+          <p style={{ fontSize: 13, color: c.text3, fontFamily: f.mono, marginBottom: 32 }}>
+            {t("landing.hero.nologin")}
+          </p>
+
+          {/* Trust stats */}
+          <div className="gt-trust-bar" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, maxWidth: 520, margin: "0 auto 48px" }}>
+            {[
+              { val: t("landing.trust.stat1"), label: t("landing.trust.stat1d") },
+              { val: t("landing.trust.stat2"), label: t("landing.trust.stat2d") },
+              { val: t("landing.trust.stat3"), label: t("landing.trust.stat3d") },
+              { val: t("landing.trust.stat4"), label: t("landing.trust.stat4d") },
+            ].map((s) => (
+              <div key={s.label} style={{ textAlign: "center" }}>
+                <p style={{ fontFamily: f.mono, fontSize: 24, fontWeight: 800, color: c.accent, letterSpacing: "-0.02em", lineHeight: 1 }}>{s.val}</p>
+                <p style={{ fontSize: 11, color: c.text3, marginTop: 4, lineHeight: 1.3 }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Product preview card */}
+          <div style={{ maxWidth: 600, margin: "0 auto", ...card, padding: "24px 28px", textAlign: "left" }}>
+            <p className="gt-section-label" style={{ fontSize: 10, marginBottom: 12 }}>
+              {t("landing.hero.sample.label")}
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 600, color: c.text1, marginBottom: 12, lineHeight: 1.5 }}>
+              {t("landing.hero.sample.text")}
+            </p>
+            <div className="gt-preview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 10 }}>
+              {[
+                { label: "EXPOSURE", value: "210k\u2013280k \u20AC", color: c.red },
+                { label: "CONFIDENCE", value: "62 / 100", color: c.amber },
+                { label: "DAILY LOSS", value: "~580 \u20AC", color: c.red },
+                { label: "READINESS", value: "72 / 100", color: c.green },
+              ].map((m) => (
+                <div key={m.label} style={{ ...inset, padding: "10px 8px", textAlign: "center" }}>
+                  <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text3, letterSpacing: ".06em", marginBottom: 4 }}>{m.label}</p>
+                  <p style={{ fontSize: 13, fontFamily: f.mono, fontWeight: 700, color: m.color, lineHeight: 1.2 }}>{m.value}</p>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: 12, color: c.text3, fontFamily: f.mono, lineHeight: 1.5 }}>
+              {t("landing.hero.sample.signals")}
+            </p>
           </div>
         </Section>
 
-        {/* ═══════ 2. THE PROBLEM ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("problem.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 12, lineHeight: 1.2 }}>
-              {t("problem.title1")} <span style={{ color: RD }}>{t("problem.title2")}</span>
+        {/* ═══════════ VALUE STRIP ═══════════ */}
+        <Section style={{ paddingTop: 80 }}>
+          <div className="gt-strip-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+            {[
+              { icon: <Target size={18} />, label: t("landing.strip.detect"), desc: t("landing.strip.detect.d") },
+              { icon: <BarChart3 size={18} />, label: t("landing.strip.explain"), desc: t("landing.strip.explain.d") },
+              { icon: <Zap size={18} />, label: t("landing.strip.simulate"), desc: t("landing.strip.simulate.d") },
+              { icon: <FileText size={18} />, label: t("landing.strip.arm"), desc: t("landing.strip.arm.d") },
+              { icon: <Shield size={18} />, label: t("landing.strip.connect"), desc: t("landing.strip.connect.d") },
+            ].map((item) => (
+              <div key={item.label} className="gt-card gt-card-interactive" style={{ padding: "24px 18px", textAlign: "center" }}>
+                <div style={{ color: c.accent, marginBottom: 10, display: "flex", justifyContent: "center" }}>{item.icon}</div>
+                <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, color: c.text1, letterSpacing: ".06em", marginBottom: 8, textTransform: "uppercase" }}>
+                  {item.label}
+                </p>
+                <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ═══════════ PROBLEM ═══════════ */}
+        <Section style={{ paddingTop: 100 }}>
+          <div className="gt-panel" style={{ padding: "48px 40px" }}>
+            <p className="gt-section-label" style={{ color: c.red }}>{t("problem.label")}</p>
+            <h2 style={{ marginBottom: 28 }}>
+              {t("problem.title1")}
+              <br />
+              <span style={{ color: c.red }}>{t("problem.title2")}</span>
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginTop: 16 }}>
+
+            <div className="gt-problem-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
               {[
-                { amt: t("problem.amt1"), label: t("problem.desc1"), color: RD },
-                { amt: t("problem.amt2"), label: t("problem.desc2"), color: OR },
-                { amt: t("problem.amt3"), label: t("problem.desc3"), color: RD },
-              ].map(function (item) {
-                return (
-                  <div key={item.label} style={{ padding: 16, borderRadius: 9, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-                    <p style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: item.color, marginBottom: 8 }}>{item.amt}</p>
-                    <p style={{ fontSize: 15, color: T2, lineHeight: 1.5 }}>{item.label}</p>
-                  </div>
-                );
-              })}
+                { amt: t("problem.amt1"), desc: t("problem.desc1"), color: c.red },
+                { amt: t("problem.amt2"), desc: t("problem.desc2"), color: c.amber },
+                { amt: t("problem.amt3"), desc: t("problem.desc3"), color: c.red },
+              ].map((item) => (
+                <div key={item.amt} className="gt-metric" style={{ padding: "24px 20px", textAlign: "left" }}>
+                  <p style={{ fontFamily: f.mono, fontSize: 26, fontWeight: 800, color: item.color, letterSpacing: "-0.02em", marginBottom: 8 }}>
+                    {item.amt}
+                  </p>
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55 }}>{item.desc}</p>
+                </div>
+              ))}
             </div>
-            <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 16, fontFamily: MO }}>
+
+            <p style={{ fontSize: 12, color: c.text3, fontFamily: f.mono, marginTop: 16, textAlign: "center", lineHeight: 1.5 }}>
               {t("problem.source")}
             </p>
           </div>
         </Section>
 
-        {/* ═══════ 3. AUDIT FRAMEWORK ═══════ */}
-        <div id="methodology">
-          <ControlPlaneSection t={t} />
-        </div>
-
-        {/* ═══════ 4. CAUSAL FINANCIAL GRAPH ═══════ */}
-        <div id="technology">
-          <CausalGraphSection t={t} />
-        </div>
-
-        {/* ═══════ 5. PROCESS ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("proc.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
-              {t("proc.title")}
-            </h2>
-            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
-              {t("proc.sub")}
+        {/* ═══════════ WHAT YOU RECEIVE ═══════════ */}
+        <Section style={{ paddingTop: 100 }}>
+          <div className="gt-panel" style={{ padding: "48px 40px" }}>
+            <p className="gt-section-label">{t("landing.output.label")}</p>
+            <h2 style={{ marginBottom: 10 }}>{t("landing.output.title")}</h2>
+            <p style={{ fontSize: 17, color: c.text2, marginBottom: 32, maxWidth: 600, lineHeight: 1.6 }}>
+              {t("landing.output.sub")}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-              {(["proc.s1", "proc.s2", "proc.s3", "proc.s4", "proc.s5"] as const).map(function (key, i) {
-                return (
-                  <motion.div
-                    key={key}
-                    variants={reveal}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.45, delay: i * 0.07 }}
-                    style={{
-                      padding: 16,
-                      borderRadius: 10,
-                      background: "rgba(0,0,0,0.15)",
-                      border: "1px solid rgba(36,48,78,0.18)",
-                      position: "relative",
-                    }}
-                  >
-                    <div style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: "rgba(59,130,246,0.08)", position: "absolute", top: 8, right: 12 }}>
-                      0{i + 1}
-                    </div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: T1, marginBottom: 4 }}>{t(key)}</h3>
-                    <p style={{ fontSize: 13, color: T2, lineHeight: 1.5 }}>{t(key + ".desc")}</p>
-                  </motion.div>
-                );
-              })}
+
+            <div className="gt-output-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              {[
+                { num: "01", title: t("landing.output.01"), desc: t("landing.output.01d") },
+                { num: "02", title: t("landing.output.02"), desc: t("landing.output.02d") },
+                { num: "03", title: t("landing.output.03"), desc: t("landing.output.03d") },
+                { num: "04", title: t("landing.output.04"), desc: t("landing.output.04d") },
+                { num: "05", title: t("landing.output.05"), desc: t("landing.output.05d") },
+                { num: "06", title: t("landing.output.06"), desc: t("landing.output.06d") },
+              ].map((item) => (
+                <div key={item.num} className="gt-card gt-card-interactive" style={{ padding: "20px", position: "relative" }}>
+                  <span style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: "rgba(79,143,247,0.06)", position: "absolute", top: 10, right: 14 }}>
+                    {item.num}
+                  </span>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 4 }}>{item.title}</p>
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55 }}>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 28 }}>
+              <a href="/intel" className="gt-btn gt-btn-primary" style={{ padding: "14px 32px" }}>
+                {t("landing.output.cta")} <ArrowRight size={16} />
+              </a>
             </div>
           </div>
         </Section>
 
-        {/* ═══════ 6. FINANCIAL IMPACT ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("fi.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
-              {t("fi.title")}
-            </h2>
-            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
-              {t("fi.sub")}
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+        {/* ═══════════ HOW IT WORKS ═══════════ */}
+        <Section style={{ paddingTop: 100 }}>
+          <div className="gt-panel" style={{ padding: "48px 40px" }}>
+            <p className="gt-section-label">{t("landing.how.label")}</p>
+            <h2 style={{ marginBottom: 28 }}>{t("landing.how.title")}</h2>
+
+            <div className="gt-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
               {[
-                { value: t("fi.m1.value"), label: t("fi.m1.label"), color: TL },
-                { value: t("fi.m2.value"), label: t("fi.m2.label"), color: AH },
-                { value: t("fi.m3.value"), label: t("fi.m3.label"), color: OR },
-              ].map(function (m) {
-                return (
-                  <div key={m.label} style={{ padding: 20, borderRadius: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(36,48,78,0.18)", textAlign: "center" }}>
-                    <p style={{ fontFamily: MO, fontSize: 36, fontWeight: 800, color: m.color, lineHeight: 1, marginBottom: 8 }}>{m.value}</p>
-                    <p style={{ fontSize: 15, color: T2, lineHeight: 1.5 }}>{m.label}</p>
-                  </div>
-                );
-              })}
+                { num: "01", title: t("landing.how.s1"), desc: t("landing.how.s1d") },
+                { num: "02", title: t("landing.how.s2"), desc: t("landing.how.s2d") },
+                { num: "03", title: t("landing.how.s3"), desc: t("landing.how.s3d") },
+                { num: "04", title: t("landing.how.s4"), desc: t("landing.how.s4d") },
+              ].map((item) => (
+                <div key={item.num} className="gt-card" style={{ padding: "24px 18px", position: "relative" }}>
+                  <span style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 800, color: "rgba(79,143,247,0.06)", position: "absolute", top: 10, right: 14 }}>
+                    {item.num}
+                  </span>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 6 }}>{item.title}</p>
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55 }}>{item.desc}</p>
+                </div>
+              ))}
             </div>
-            <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 14, fontFamily: MO }}>
-              {t("fi.source")}
-            </p>
+
+            {/* Confidence note */}
+            <div style={{ marginTop: 20, padding: "16px 20px", borderRadius: 10, background: c.amberBg, border: "1px solid " + c.amberBd }}>
+              <p style={{ fontSize: 13, color: c.amber, fontWeight: 600, marginBottom: 4 }}>{t("landing.how.conf.title")}</p>
+              <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.55 }}>{t("landing.how.conf.desc")}</p>
+            </div>
           </div>
         </Section>
 
-        {/* ═══════ 7. INSTANT ESTIMATOR ═══════ */}
-        <EstimatorWidget t={t} formatCurrency={formatCurrency} />
+        {/* ═══════════ DECISION TIERS ═══════════ */}
+        <Section style={{ paddingTop: 100 }}>
+          <div className="gt-panel" style={{ padding: "48px 40px" }}>
+            <p className="gt-section-label">{t("landing.tiers.label")}</p>
+            <h2 style={{ marginBottom: 28 }}>{t("landing.tiers.title")}</h2>
 
-        {/* ═══════ 8. PRICING ═══════ */}
-        <Section>
-          <div id="pricing" style={{ textAlign: "center", marginBottom: 24 }}>
-            <Label>{t("price.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8 }}>{t("price.title")}</h2>
-            <p style={{ fontSize: 17, color: T2, maxWidth: 580, margin: "0 auto", lineHeight: 1.6 }}>{t("price.sub")}</p>
-          </div>
-
-          {/* Process progression bar */}
-          <div style={Object.assign({}, gl, { padding: "18px 24px", marginBottom: 28 })}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr", alignItems: "center", gap: 0 }}>
+            <div className="gt-tiers-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
               {[
-                { step: t("price.step.s1"), name: t("price.diag.name"), color: AH },
-                { step: t("price.step.s2"), name: t("price.protocol.name"), color: TL },
-                { step: t("price.step.s3"), name: t("price.controlplane.name"), color: A },
-              ].map(function (s, i) {
-                return (
-                  <div key={s.step} style={{ display: "contents" }}>
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontFamily: MO, fontSize: 11, fontWeight: 800, color: s.color, width: 22, height: 22, borderRadius: "50%", border: "1.5px solid " + s.color + "40", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                          {i + 1}
-                        </span>
-                        <span style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: T3 }}>{s.step}</span>
-                      </div>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: s.color, lineHeight: 1.3 }}>{s.name}</p>
-                    </div>
-                    {i < 2 && (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
-                        <svg width="24" height="14" viewBox="0 0 24 14" fill="none">
-                          <path d="M2 7h16M14 2l5 5-5 5" stroke={T3} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                {
+                  badge: t("landing.tiers.l1.badge"), badgeColor: c.accentHi,
+                  name: t("landing.tiers.l1.name"), desc: t("landing.tiers.l1.desc"),
+                  cta: t("landing.tiers.l1.cta"), href: "/intel", ctaColor: c.accentHi,
+                  borderColor: c.accentBd,
+                },
+                {
+                  badge: t("landing.tiers.l2.badge"), badgeColor: c.green,
+                  name: t("landing.tiers.l2.name"), desc: t("landing.tiers.l2.desc"),
+                  cta: t("landing.tiers.l2.cta"), href: "#pricing", ctaColor: c.green,
+                  borderColor: c.greenBd,
+                },
+                {
+                  badge: t("landing.tiers.l3.badge"), badgeColor: c.text3,
+                  name: t("landing.tiers.l3.name"), desc: t("landing.tiers.l3.desc"),
+                  cta: t("landing.tiers.l3.cta"), href: "mailto:audits@ghost-tax.com", ctaColor: c.text3,
+                  borderColor: c.borderS,
+                },
+              ].map((tier) => (
+                <div key={tier.name} className="gt-card gt-card-interactive" style={{ padding: "24px 20px", borderColor: tier.borderColor }}>
+                  <p style={{ fontSize: 10, fontFamily: f.mono, fontWeight: 700, color: tier.badgeColor, letterSpacing: ".08em", marginBottom: 10, textTransform: "uppercase" }}>
+                    {tier.badge}
+                  </p>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{tier.name}</p>
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55, marginBottom: 14 }}>{tier.desc}</p>
+                  <a href={tier.href} style={{ fontSize: 13, fontFamily: f.mono, color: tier.ctaColor, textDecoration: "none", fontWeight: 600 }}>
+                    {tier.cta} &rarr;
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
+        </Section>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-            {PRICING.map(function (tier) {
-              var isPremium = tier.tier === "premium";
+        {/* ═══════════ PRICING ═══════════ */}
+        <Section style={{ paddingTop: 100 }}>
+          <div id="pricing" style={{ textAlign: "center", marginBottom: 28 }}>
+            <p className="gt-section-label">{t("price.label")}</p>
+            <h2 style={{ marginBottom: 8 }}>{t("price.title")}</h2>
+            <p style={{ fontSize: 17, color: c.text2, maxWidth: 560, margin: "0 auto", lineHeight: 1.6 }}>
+              {t("price.sub")}
+            </p>
+          </div>
+
+          <div className="gt-pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {PRICING.map((tier, idx) => {
+              const isPremium = idx === 2;
               return (
-                <motion.div
+                <div
                   key={tier.name}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                  style={Object.assign({}, gl, {
-                    padding: 24,
-                    borderColor: tier.highlight ? TL + "40" : isPremium ? A + "25" : BD,
-                    position: "relative" as const,
-                    display: "flex",
-                    flexDirection: "column" as const,
-                  })}
+                  className="gt-panel"
+                  style={{
+                    padding: "28px 24px",
+                    borderColor: tier.highlight ? c.greenBd : isPremium ? c.accentBd : c.borderS,
+                    position: "relative",
+                    display: "flex", flexDirection: "column",
+                  }}
                 >
-                  {/* Badge */}
-                  <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontFamily: MO, fontWeight: 700, padding: "3px 10px", borderRadius: 4, background: tier.highlight ? TL : isPremium ? A : "rgba(36,48,78,0.5)", color: tier.highlight ? V : isPremium ? "#fff" : T2, letterSpacing: ".06em", textTransform: "uppercase", whiteSpace: "nowrap" as const }}>
+                  <div className={`gt-badge ${tier.highlight ? "gt-badge--green" : isPremium ? "gt-badge--blue" : "gt-badge--muted"}`}
+                    style={{ position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>
                     {tier.badge}
                   </div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: T1, marginBottom: 8, marginTop: 4 }}>{tier.name}</h3>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, marginTop: 6 }}>{tier.name}</h3>
                   <div style={{ marginBottom: 10 }}>
-                    <span style={{ fontFamily: MO, fontSize: isPremium ? 18 : 28, fontWeight: 800, color: tier.highlight ? TL : AH, letterSpacing: isPremium ? ".02em" : "-.02em" }}>{tier.price}</span>
-                    {tier.period && <span style={{ fontSize: 12, color: T3, marginLeft: 2 }}>{tier.period}</span>}
+                    <span style={{ fontFamily: f.mono, fontSize: isPremium ? 18 : 28, fontWeight: 800, color: tier.highlight ? c.green : c.accentHi, letterSpacing: isPremium ? ".02em" : "-0.02em" }}>
+                      {tier.price}
+                    </span>
+                    {tier.period && <span style={{ fontSize: 13, color: c.text3, marginLeft: 4 }}>{tier.period}</span>}
                   </div>
-                  <p style={{ fontSize: 14, color: T2, lineHeight: 1.6, marginBottom: 16 }}>{tier.desc}</p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16, flex: 1 }}>
-                    {tier.features.map(function (f) {
-                      return (
-                        <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: T2 }}>
-                          <CheckCircle size={15} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                          {f}
-                        </div>
-                      );
-                    })}
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6, marginBottom: 18 }}>{tier.desc}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18, flex: 1 }}>
+                    {tier.features.map((feat) => (
+                      <div key={feat} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 14, color: c.text2, lineHeight: 1.4 }}>
+                        <CheckCircle size={15} color={c.green} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 2 }} />
+                        {feat}
+                      </div>
+                    ))}
                   </div>
-
-                  {/* ROI proof line */}
-                  <div style={{ padding: "8px 10px", borderRadius: 6, background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 14 }}>
-                    <p style={{ fontSize: 12, fontFamily: MO, color: TL, letterSpacing: ".04em", textAlign: "center" }}>{tier.roi}</p>
+                  <div style={{ padding: "8px 12px", borderRadius: 8, background: c.greenBg, border: "1px solid " + c.greenBd, marginBottom: 14 }}>
+                    <p style={{ fontSize: 12, fontFamily: f.mono, color: c.green, letterSpacing: ".04em", textAlign: "center" }}>{tier.roi}</p>
                   </div>
-
-                  <a
-                    href={tier.href}
-                    style={{
-                      display: "block", width: "100%", padding: "11px", borderRadius: 7, border: "none",
-                      background: tier.highlight ? TL : isPremium ? "rgba(59,130,246,0.12)" : "rgba(59,130,246,0.08)",
-                      color: tier.highlight ? V : AH,
-                      fontSize: 13, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase",
-                      cursor: "pointer", textDecoration: "none", textAlign: "center",
-                      transition: "opacity 0.15s",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {tier.cta}
-                  </a>
-                </motion.div>
+                  {tier.onClick ? (
+                    <button
+                      type="button" onClick={tier.onClick} disabled={checkoutLoading}
+                      className={`gt-btn ${tier.highlight ? "gt-btn-green" : "gt-btn-accent-ghost"}`}
+                      style={{ width: "100%", opacity: checkoutLoading ? 0.7 : 1 }}
+                    >
+                      {tier.cta}
+                    </button>
+                  ) : (
+                    <a href={tier.href} className="gt-btn gt-btn-accent-ghost" style={{ width: "100%", textAlign: "center" }}>
+                      {tier.cta}
+                    </a>
+                  )}
+                </div>
               );
             })}
           </div>
-          <p style={{ fontSize: 13, color: T3, textAlign: "center", marginTop: 14 }}>
-            {t("price.note")}
-          </p>
+          {checkoutError && <p style={{ fontSize: 13, color: c.red, textAlign: "center", marginTop: 12 }}>{t("landing.pricing.cta.error")}</p>}
+          <p style={{ fontSize: 13, color: c.text3, textAlign: "center", marginTop: 14 }}>{t("price.note")}</p>
         </Section>
 
-        {/* ═══════ 9. SAMPLE REPORT ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("sr.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 8, lineHeight: 1.15 }}>
-              {t("sr.title")}
-            </h2>
-            <p style={{ fontSize: 18, color: T2, marginBottom: 28, maxWidth: 640, lineHeight: 1.65 }}>
-              {t("sr.sub")}
+        {/* ═══════════ SECURITY STRIP ═══════════ */}
+        <Section style={{ paddingTop: 80 }}>
+          <div className="gt-security-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+            {[
+              { label: t("landing.security.aes"), desc: t("landing.security.aes.d") },
+              { label: t("landing.security.zk"), desc: t("landing.security.zk.d") },
+              { label: t("landing.security.us"), desc: t("landing.security.us.d") },
+              { label: t("landing.security.purge"), desc: t("landing.security.purge.d") },
+            ].map((item) => (
+              <div key={item.label} className="gt-card" style={{ padding: "20px 16px", textAlign: "center" }}>
+                <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, color: c.accent, letterSpacing: ".06em", marginBottom: 6 }}>{item.label}</p>
+                <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.45 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 14 }}>
+            <a href="/security-vault" style={{ fontSize: 13, fontFamily: f.mono, color: c.text3, textDecoration: "none", fontWeight: 500 }}>
+              {t("landing.security.link")} &rarr;
+            </a>
+          </div>
+        </Section>
+
+        {/* ═══════════ SOCIAL PROOF ═══════════ */}
+        <Section style={{ paddingTop: 80 }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <p className="gt-section-label">{t("landing.social.label")}</p>
+            <h2>{t("landing.social.title")}</h2>
+          </div>
+
+          <div className="gt-social-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {[
+              { q: t("landing.social.q1"), a: t("landing.social.a1") },
+              { q: t("landing.social.q2"), a: t("landing.social.a2") },
+              { q: t("landing.social.q3"), a: t("landing.social.a3") },
+            ].map((item) => (
+              <div key={item.a} className="gt-panel" style={{ padding: "28px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <p style={{ fontSize: 15, color: c.text1, lineHeight: 1.65, fontStyle: "italic", marginBottom: 18 }}>
+                  &ldquo;{item.q}&rdquo;
+                </p>
+                <p style={{ fontSize: 12, fontFamily: f.mono, color: c.text3, letterSpacing: ".04em" }}>{item.a}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <p style={{ fontSize: 13, fontFamily: f.mono, color: c.green, fontWeight: 600 }}>{t("landing.trust.proof")}</p>
+          </div>
+        </Section>
+
+        {/* ═══════════ FINAL CTA ═══════════ */}
+        <Section style={{ paddingTop: 80 }}>
+          <div className="gt-panel" style={{ padding: "56px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+            {/* Ambient glow */}
+            <div style={{
+              position: "absolute", top: -80, left: "50%", transform: "translateX(-50%)",
+              width: 400, height: 200,
+              background: "radial-gradient(ellipse at center, rgba(240,96,96,0.06) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }} />
+            <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".14em", color: c.red, marginBottom: 14, textTransform: "uppercase" }}>
+              {t("landing.cta.urgency")}
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-              {["sr.i1", "sr.i2", "sr.i3"].map(function (key) {
-                return (
-                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderRadius: 8, background: "rgba(0,0,0,0.15)", border: "1px solid rgba(36,48,78,0.18)" }}>
-                    <CheckCircle size={18} color={TL} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 16, color: T2 }}>{t(key)}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <a href="/sample-report" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 8, border: "1px solid " + BD, color: AH, fontSize: 15, fontWeight: 700, letterSpacing: ".04em", textDecoration: "none", transition: "border-color 0.15s" }}>
-                {t("sr.cta")} &rarr;
+            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 40px)", fontWeight: 800, marginBottom: 12 }}>
+              {t("landing.cta.title")}
+            </h2>
+            <p style={{ fontSize: 17, color: c.text2, maxWidth: 520, margin: "0 auto 32px", lineHeight: 1.6 }}>
+              {t("landing.cta.sub")}
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+              <a href="/intel" className="gt-btn gt-btn-primary" style={{ padding: "16px 32px", fontSize: 15 }}>
+                {t("landing.cta.primary")} <ArrowRight size={16} />
+              </a>
+              <a href="#pricing" className="gt-btn gt-btn-ghost" style={{ padding: "16px 28px", fontSize: 15 }}>
+                {t("landing.cta.secondary")}
               </a>
             </div>
           </div>
         </Section>
-
-        {/* ═══════ 10. SECURITY & TRUST ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 28 })}>
-            <Label>{t("sec.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 24, lineHeight: 1.15 }}>
-              {t("sec.title")}
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {(["sec.i1", "sec.i2", "sec.i3", "sec.i4", "sec.i5"] as const).map(function (key, i) {
-                return (
-                  <div
-                    key={key}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 12,
-                      padding: 16,
-                      borderRadius: 10,
-                      background: "rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(36,48,78,0.18)",
-                      gridColumn: i === 4 ? "1 / -1" : undefined,
-                    }}
-                  >
-                    <div style={{ color: A, flexShrink: 0, marginTop: 2 }}>{SEC_ICONS[i]}</div>
-                    <div>
-                      <h3 style={{ fontSize: 16, fontWeight: 700, color: T1, marginBottom: 3 }}>{t(key)}</h3>
-                      <p style={{ fontSize: 14, color: T2, lineHeight: 1.55 }}>{t(key + ".desc")}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </Section>
-
-        {/* ═══════ 11. ECONOMIC ALIGNMENT ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 32, textAlign: "center" as const })}>
-            <Label>{t("ea.label")}</Label>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, marginBottom: 20, lineHeight: 1.15 }}>
-              {t("ea.title")}
-            </h2>
-            <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 12 }}>
-              {["ea.l1", "ea.l2", "ea.l3"].map(function (key) {
-                return (
-                  <p key={key} style={{ fontSize: 18, color: T2, lineHeight: 1.65 }}>
-                    {t(key)}
-                  </p>
-                );
-              })}
-            </div>
-          </div>
-        </Section>
-
-        {/* ═══════ 12. FINAL CTA ═══════ */}
-        <Section>
-          <div style={Object.assign({}, gl, { padding: 32, textAlign: "center" as const })}>
-            <p style={{ fontSize: 14, fontFamily: MO, fontWeight: 800, letterSpacing: ".2em", textTransform: "uppercase", color: RD, marginBottom: 10 }}>
-              {t("cta.urgency")}
-            </p>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 800, marginBottom: 8 }}>
-              {t("cta.title1")} <span style={{ color: TL }}>{t("cta.title2")}</span>
-            </h2>
-            <p style={{ fontSize: 17, color: T2, maxWidth: 500, margin: "0 auto 24px", lineHeight: 1.6 }}>
-              {t("cta.sub")}
-            </p>
-            <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-              <a id="audit" href="/estimator" style={{ display: "inline-block", padding: "16px 32px", borderRadius: 8, background: TL, color: V, fontSize: 15, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", textDecoration: "none", transition: "opacity 0.15s" }}>
-                {t("cta.primary")}
-              </a>
-              <a href="mailto:audits@valuguard.com" style={{ display: "inline-block", padding: "16px 26px", borderRadius: 8, border: "1px solid " + BD, color: T2, fontSize: 15, textDecoration: "none", transition: "border-color 0.15s, color 0.15s" }}>
-                {t("cta.secondary")}
-              </a>
-            </div>
-          </div>
-        </Section>
-
-        {/* ═══════ FOOTER ═══════ */}
-        <footer style={{ borderTop: "1px solid " + BD, padding: "32px 0", marginTop: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24 }}>
-            <div>
-              <span style={{ fontSize: 14, fontFamily: MO, fontWeight: 700, color: A, letterSpacing: ".06em" }}>VALUGUARD</span>
-              <p style={{ fontSize: 13, color: T3, marginTop: 6, maxWidth: 260, lineHeight: 1.55 }}>
-                {t("footer.desc")}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
-              <div>
-                <p style={{ fontSize: 9, fontFamily: MO, color: T3, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 8 }}>{t("footer.product")}</p>
-                {[
-                  { label: t("footer.link.audit"), href: "/estimator" },
-                  { label: t("footer.link.methodology"), href: "/methodology" },
-                  { label: t("footer.link.sample"), href: "/sample-report" },
-                  { label: t("footer.link.pricing"), href: "#pricing" },
-                ].map(function (link) {
-                  return <a key={link.label} href={link.href} style={{ display: "block", fontSize: 11, color: T2, marginBottom: 5, textDecoration: "none", transition: "color 0.12s" }}>{link.label}</a>;
-                })}
-              </div>
-              <div>
-                <p style={{ fontSize: 9, fontFamily: MO, color: T3, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 8 }}>{t("footer.trust")}</p>
-                {[
-                  { label: t("footer.link.vault"), href: "/security-vault" },
-                  { label: t("footer.link.privacy"), href: "/security-vault" },
-                  { label: t("footer.link.terms"), href: "/security-vault" },
-                  { label: "DPO", href: "mailto:security@valuguard.com" },
-                ].map(function (link) {
-                  return <a key={link.label} href={link.href} style={{ display: "block", fontSize: 11, color: T2, marginBottom: 5, textDecoration: "none", transition: "color 0.12s" }}>{link.label}</a>;
-                })}
-              </div>
-              <div>
-                <p style={{ fontSize: 9, fontFamily: MO, color: T3, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 8 }}>{t("footer.resources")}</p>
-                {[
-                  { label: t("footer.link.peergap"), href: "/peer-gap" },
-                  { label: t("footer.link.roi"), href: "/roi-report" },
-                  { label: t("footer.link.estimator"), href: "/estimator" },
-                ].map(function (link) {
-                  return <a key={link.label} href={link.href} style={{ display: "block", fontSize: 11, color: T2, marginBottom: 5, textDecoration: "none", transition: "color 0.12s" }}>{link.label}</a>;
-                })}
-              </div>
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 16, borderTop: "1px solid " + BD, flexWrap: "wrap", gap: 12 }}>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              {[
-                { label: t("footer.badge1") },
-                { label: t("footer.badge2") },
-                { label: t("footer.badge3") },
-                { label: t("footer.badge4") },
-              ].map(function (b) {
-                return (
-                  <span key={b.label} style={{ fontSize: 9, color: T3, fontFamily: MO, letterSpacing: ".04em" }}>
-                    {b.label}
-                  </span>
-                );
-              })}
-            </div>
-            <p style={{ fontSize: 9, color: T3 }}>
-              {t("footer.copyright")}
-            </p>
-          </div>
-        </footer>
 
       </div>
+
+      <Footer />
+
+      {/* Responsive */}
+      <style>{`
+        @media (max-width: 768px) {
+          .gt-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .gt-output-grid { grid-template-columns: 1fr !important; }
+          .gt-how-grid { grid-template-columns: 1fr 1fr !important; }
+          .gt-tiers-grid { grid-template-columns: 1fr !important; }
+          .gt-pricing-grid { grid-template-columns: 1fr !important; }
+          .gt-security-grid { grid-template-columns: 1fr 1fr !important; }
+          .gt-preview-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .gt-problem-grid { grid-template-columns: 1fr !important; }
+          .gt-social-grid { grid-template-columns: 1fr !important; }
+          .gt-trust-bar { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+        }
+        @media (max-width: 480px) {
+          .gt-strip-grid { grid-template-columns: 1fr !important; }
+          .gt-how-grid { grid-template-columns: 1fr !important; }
+          .gt-security-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

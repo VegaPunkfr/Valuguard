@@ -18,9 +18,9 @@ const fontMono = JetBrains_Mono({
 });
 
 /* ─── Constants ─────────────────────────────────────── */
-const SITE_URL = "https://valuguard.com";
-const SITE_NAME = "Valuguard";
-const TITLE = "ValuGuard \u2014 AI Financial Control Plane for SaaS & AI Spend";
+const SITE_URL = "https://ghost-tax.com";
+const SITE_NAME = "Ghost Tax";
+const TITLE = "Ghost Tax \u2014 AI Financial Control Plane for SaaS & AI Spend";
 const DESCRIPTION =
   "Detect hidden SaaS, AI and cloud spend using a proprietary Causal Financial Graph. " +
   "Deterministic detection. Causal explanation. Corrective protocol in 48h.";
@@ -30,13 +30,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: TITLE,
-    template: "%s | Valuguard",
+    template: "%s | Ghost Tax",
   },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
-  authors: [{ name: "Valuguard Inc.", url: SITE_URL }],
-  creator: "Valuguard Inc.",
-  publisher: "Valuguard Inc.",
+  authors: [{ name: "Ghost Tax Inc.", url: SITE_URL }],
+  creator: "Ghost Tax Inc.",
+  publisher: "Ghost Tax Inc.",
   keywords: [
     "SaaS spend management",
     "AI cost governance",
@@ -67,21 +67,21 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [
       {
-        url: `${SITE_URL}/og/valuguard-og-us.png`,
+        url: `${SITE_URL}/og/ghost-tax-og-us.png`,
         width: 1200,
         height: 630,
-        alt: "Valuguard — Expose Your AI Ghost Tax",
+        alt: "Ghost Tax — Expose Your Hidden IT Spend",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@valuguard",
-    creator: "@valuguard",
+    site: "@ghosttaxhq",
+    creator: "@ghosttaxhq",
     title: TITLE,
     description: DESCRIPTION,
-    images: [`${SITE_URL}/og/valuguard-og-us.png`],
+    images: [`${SITE_URL}/og/ghost-tax-og-us.png`],
   },
   icons: {
     icon: [
@@ -121,7 +121,7 @@ export const viewport: Viewport = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Valuguard",
+  name: "Ghost Tax",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,
   description: DESCRIPTION,
@@ -134,17 +134,17 @@ const organizationJsonLd = {
   },
   contactPoint: {
     "@type": "ContactPoint",
-    email: "audits@valuguard.com",
+    email: "audits@ghost-tax.com",
     contactType: "sales",
     availableLanguage: ["English", "French", "German"],
   },
-  sameAs: [],
+  sameAs: ["https://www.linkedin.com/company/ghost-tax"],
 };
 
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Valuguard AI Spend Leak Monitor",
+  name: "Ghost Tax — AI Spend Leak Monitor",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
@@ -152,9 +152,9 @@ const softwareJsonLd = {
     "engine with organizational entropy modeling. Zero system access required.",
   offers: {
     "@type": "Offer",
-    price: "990",
-    priceCurrency: "USD",
-    description: "Ghost Tax Audit \u2014 one-time diagnostic",
+    price: "490",
+    priceCurrency: "EUR",
+    description: "Financial Exposure Detection \u2014 one-time corrective protocol unlock",
   },
   featureList: [
     "12-type anomaly detection",

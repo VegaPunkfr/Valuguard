@@ -44,8 +44,9 @@ function buildCurrencyFormatter(locale: Locale) {
 }
 
 // ── Pricing amounts (locale-aware) ──────────────────
+// Canonical prices live in lib/pricing.ts — these are kept for backward compat.
 export const PRICES = {
-  audit: 990,
+  audit: 490,
   essentials: 490,
   guardian: 990,
 };
@@ -56,7 +57,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
-    if (stored && dict[stored]) setLocaleState(stored);
+    if (stored && dict[stored]) {
+      setLocaleState(stored);
+      document.documentElement.lang = stored;
+    }
   }, []);
 
   const setLocale = useCallback((l: Locale) => {
