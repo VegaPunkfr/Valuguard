@@ -17,24 +17,6 @@ interface ContractTrap {
   actionable: boolean;
 }
 
-const CONTRACT_TRAP_PATTERNS: Record<string, { type: ContractTrap["type"]; severity: ContractTrap["severity"]; multiplier: number }[]> = {
-  auto_renewal: [
-    { type: "auto_renewal", severity: "high", multiplier: 1.0 },
-  ],
-  price_escalation: [
-    { type: "price_escalation", severity: "critical", multiplier: 0.08 }, // 8% typical annual increase
-  ],
-  minimum_commit: [
-    { type: "minimum_commit", severity: "medium", multiplier: 0.15 }, // 15% over-provisioned
-  ],
-  termination_penalty: [
-    { type: "termination_penalty", severity: "high", multiplier: 0.25 }, // 25% of contract value
-  ],
-  usage_overage: [
-    { type: "usage_overage", severity: "medium", multiplier: 0.12 }, // 12% in overage fees
-  ],
-};
-
 export const contractAnalyzerPlugin: GhostTaxPlugin = {
   manifest: {
     id: "contract-analyzer",

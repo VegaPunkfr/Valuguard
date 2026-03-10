@@ -14,6 +14,68 @@
 
 type EventProperties = Record<string, string | number | boolean | null>;
 
+// ── Signal buffer for server relay ─────────────────────
+
+let signalBuffer: Array<{
+  event: string;
+  domain?: string;
+  email?: string;
+  properties?: EventProperties;
+}> = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+let currentDomain: string | null = null;
+let currentEmail: string | null = null;
+
+/** Set the domain context for signal relay (call after scan starts) */
+export function setSignalContext(domain: string, email?: string): void {
+  currentDomain = domain;
+  if (email) currentEmail = email;
+}
+
+function flushSignals(): void {
+  if (signalBuffer.length === 0) return;
+  const batch = signalBuffer.splice(0, 20);
+  if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+    navigator.sendBeacon(
+      "/api/signals",
+      JSON.stringify({ events: batch })
+    );
+  } else if (typeof fetch !== "undefined") {
+    fetch("/api/signals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ events: batch }),
+      keepalive: true,
+    }).catch(() => {});
+  }
+}
+
+function queueSignal(event: string, properties?: EventProperties): void {
+  if (typeof window === "undefined") return;
+  signalBuffer.push({
+    event,
+    domain: currentDomain || undefined,
+    email: currentEmail || undefined,
+    properties: properties || undefined,
+  });
+  // Flush every 3 seconds or when buffer hits 10
+  if (signalBuffer.length >= 10) {
+    flushSignals();
+  } else if (!flushTimer) {
+    flushTimer = setTimeout(() => {
+      flushSignals();
+      flushTimer = null;
+    }, 3000);
+  }
+}
+
+// Flush on page unload
+if (typeof window !== "undefined") {
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushSignals();
+  });
+}
+
 // ── Event names (exhaustive taxonomy) ──────────────────
 
 export const EVENTS = {
@@ -103,6 +165,9 @@ export function trackEvent(event: string, properties?: EventProperties): void {
       trust_interacted: trustInteracted,
     },
   };
+
+  // Queue signal for server-side orchestrator
+  queueSignal(event, payload.properties);
 
   // PostHog integration (when available)
   if (typeof window !== "undefined" && (window as any).posthog?.capture) {

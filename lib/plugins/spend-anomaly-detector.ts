@@ -35,17 +35,6 @@ export const spendAnomalyDetectorPlugin: GhostTaxPlugin = {
     const headcount = ctx.company.headcount || 200;
     const toolCount = ctx.company.saasToolCount || 40;
 
-    // Leverage pipeline data for calibration
-    const pipelineExposure = ctx.pipeline?.exposure;
-    const pipelineDrift = ctx.pipeline?.driftMonitor;
-    const pipelineConfidence = ctx.pipeline?.confidenceModel;
-    const globalScore = ctx.pipeline?.globalExposureScore || 0;
-
-    // If pipeline detected high exposure, anomaly thresholds should be tighter
-    const exposureCalibration = pipelineExposure
-      ? (pipelineExposure.highEur / (monthlySpend * 12))
-      : 0.15;
-
     // Zombie spend detection (tools with low/no usage)
     const estimatedZombieRate = toolCount > 60 ? 0.18 : toolCount > 30 ? 0.12 : 0.08;
     const zombieCount = Math.round(toolCount * estimatedZombieRate);

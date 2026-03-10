@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { c, f, panel, inset, sectionLabel } from "@/lib/tokens";
+import { c, f, inset } from "@/lib/tokens";
 import Section from "@/components/ui/section";
 import Footer from "@/components/ui/footer";
 

@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export const alt =
-  "Ghost Tax Pricing — Financial Exposure Detection from 490 EUR";
+  "Ghost Tax Pricing — Financial Exposure Detection from $990";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -131,7 +131,7 @@ export default function OGImage() {
               fontFamily: "monospace",
             }}
           >
-            490
+            $990
           </div>
           <div
             style={{
@@ -142,7 +142,7 @@ export default function OGImage() {
               fontFamily: "monospace",
             }}
           >
-            EUR
+            FROM
           </div>
         </div>
 

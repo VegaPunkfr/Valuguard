@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { trackEvent, EVENTS } from "@/lib/events";
-import { c, f, panel, card, inset, sectionLabel } from "@/lib/tokens";
+import { c, f, inset } from "@/lib/tokens";
 import Footer from "@/components/ui/footer";
 
 /* ── GHOST TAX — PROCUREMENT & DECISION SCOPE ────────────────────────
@@ -229,7 +229,7 @@ export default function ProcurementPage() {
               <StageRow
                 stage="RAIL A"
                 name="Corrective Protocol"
-                price="€490"
+                price="From $990"
                 scope="Deep corrective analysis. Structured remediation plan with prioritized actions, ownership mapping, payback projections."
                 data="Same as public + optional internal context shared during intake."
                 delivery="48 hours"
@@ -348,7 +348,7 @@ export default function ProcurementPage() {
             <Card>
               <Lab>AFTER PURCHASE — RAIL A</Lab>
               <H2>Corrective Protocol</H2>
-              <P>What deepens when you commit to the paid detection at &euro;490.</P>
+              <P>What deepens when you commit to the paid detection (from $990).</P>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {[
                   "Deeper signal sourcing with extended enrichment window",

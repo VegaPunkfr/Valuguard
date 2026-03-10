@@ -213,8 +213,8 @@ export async function getReferralStats(email: string): Promise<ReferralStats | n
   }
 
   const referrals = rows?.length ?? 0;
-  const converted = rows?.filter((r) => r.status === "converted").length ?? 0;
-  const rewardEur = rows?.reduce((sum, r) => sum + (r.reward_eur ?? 0), 0) ?? 0;
+  const converted = rows?.filter((r: any) => r.status === "converted").length ?? 0;
+  const rewardEur = rows?.reduce((sum: number, r: any) => sum + (r.reward_eur ?? 0), 0) ?? 0;
 
   return { code, referrals, converted, rewardEur };
 }
@@ -246,7 +246,7 @@ export async function getReferralInfo(code: string): Promise<ReferralInfo> {
   }
 
   const referrerEmail = rows[0].referrer_email;
-  const totalReferred = rows.filter((r) => r.status !== "seed").length;
+  const totalReferred = rows.filter((r: any) => r.status !== "seed").length;
 
   return {
     valid: true,

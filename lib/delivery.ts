@@ -22,6 +22,7 @@ import {
   type CompanyContext,
   type DecisionIntelligence,
 } from "@/lib/analysis";
+import { generateViralEmailBlock } from "@/lib/viral-loop";
 
 // ── Types ─────────────────────────────────────────────
 
@@ -309,7 +310,7 @@ export async function executeDeliveryPipeline(
 
 function buildStructuredReport(
   runId: string,
-  input: DeliveryInput,
+  _input: DeliveryInput,
   intel: DecisionIntelligence,
 ): StructuredReport {
   return {
@@ -650,6 +651,14 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
       : "Obtenez un protocole de stabilisation 30/60/90 jours structure avec des protocoles de negociation par fournisseur. One-shot: 2 500 EUR."}</p>
     <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_SETUP" style="display:inline-block;border:1px solid #f59e0b;color:#f59e0b;padding:8px 24px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">${isEn ? "View Stabilization Plans" : "Voir les Plans de Stabilisation"}</a>
   </div>
+
+  <!-- Viral Loop CTAs -->
+  ${generateViralEmailBlock({
+    runId: report.runId,
+    domain: report.company.domain,
+    companyName: report.company.name,
+    locale: (locale === "fr" ? "fr" : locale === "de" ? "de" : "en") as "en" | "fr" | "de",
+  })}
 
   <!-- Footer -->
   <div style="text-align:center;padding:24px 0;border-top:1px solid #1a1f2e;margin-top:16px">

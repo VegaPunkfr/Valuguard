@@ -28,6 +28,7 @@ import {
   checkRateLimit,
   recordSend,
   getNextSendDate,
+  validateAndEnrichLead,
 } from "@/lib/outreach";
 
 export const maxDuration = 300; // 5 min for batch sends
@@ -78,11 +79,26 @@ export async function POST(request: NextRequest) {
   let skipped = 0;
 
   for (const lead of body.leads) {
+    // ── Validate email & enrich lead ─────────────────
+    const validation = validateAndEnrichLead(lead);
+    if (!validation.valid) {
+      results.push({ email: lead.email, success: false, error: validation.reason || "Invalid email", touch: 1 });
+      skipped++;
+      continue;
+    }
+
+    // Auto-enrich locale and geo
+    if (!lead.locale || lead.locale === "en") {
+      lead.locale = validation.enrichedLocale;
+    }
+    lead.geoMarket = validation.geoMarket;
+    lead.emailQuality = validation.emailQuality;
+
     // ── Rate limit check ─────────────────────────────
-    const rateCheck = checkRateLimit();
+    const rateCheck = checkRateLimit(lead.domain);
     if (!rateCheck.allowed) {
-      console.warn(`[Ghost Tax Outreach] Rate limit reached. Retry after ${Math.ceil(rateCheck.retryAfterMs / 1000)}s`);
-      results.push({ email: lead.email, success: false, error: "Rate limit exceeded", touch: 1 });
+      console.warn(`[Ghost Tax Outreach] Rate limit: ${rateCheck.reason}`);
+      results.push({ email: lead.email, success: false, error: rateCheck.reason || "Rate limit exceeded", touch: 1 });
       skipped++;
       continue;
     }
@@ -109,9 +125,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Calculate exposure ───────────────────────────
-    const exposure = estimateExposure(lead.headcount, lead.industry);
-    const locale = lead.locale || "en";
+    // ── Calculate exposure (v2: geo-aware) ────────────
+    const exposure = estimateExposure(lead.headcount, lead.industry, lead.geoMarket);
+    const locale = lead.locale || validation.enrichedLocale || "en";
 
     // ── Build and send Touch 1 ───────────────────────
     const { subject, html } = buildTouchEmail(1, lead, exposure, locale);
@@ -128,7 +144,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (sendResult.success) {
-      recordSend();
+      recordSend(lead.domain);
       sent++;
 
       // ── Persist lead + send record ─────────────────
@@ -153,6 +169,9 @@ export async function POST(request: NextRequest) {
             next_send_at: nextSendAt,
             unsubscribed: false,
             converted: false,
+            // v2 enrichment fields
+            geo_market: lead.geoMarket || null,
+            email_quality: lead.emailQuality || null,
           }, { onConflict: "email" });
 
         if (leadError) {

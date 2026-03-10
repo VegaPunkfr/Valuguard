@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase } from "@/lib/supabase";
+import { generateViralEmailBlock } from "@/lib/viral-loop";
 
 export const maxDuration = 60;
 
@@ -50,16 +51,18 @@ export async function GET(request: NextRequest) {
   for (const row of dueFollowups) {
     try {
       const report = row.report_data;
-      const locale = row.locale || "en";
-      const isEn = locale !== "fr";
+      const locale = (row.locale || "en") as "en" | "fr" | "de";
       const exposureLow = report?.executiveSnapshot?.exposureRangeEur?.[0] || 50000;
       const exposureHigh = report?.executiveSnapshot?.exposureRangeEur?.[1] || 200000;
       const dailyLow = Math.round(exposureLow / 365);
       const dailyHigh = Math.round(exposureHigh / 365);
 
-      const subject = isEn
-        ? `${row.company_name || row.domain}: 14 days later, your exposure has grown`
-        : `${row.company_name || row.domain}: 14 jours plus tard, votre exposition a augmenté`;
+      const subjects: Record<"en" | "fr" | "de", string> = {
+        en: `${row.company_name || row.domain}: 14 days later, your exposure has grown`,
+        fr: `${row.company_name || row.domain}: 14 jours plus tard, votre exposition a augmenté`,
+        de: `${row.company_name || row.domain}: 14 Tage später — Ihre Exposition wächst`,
+      };
+      const subject = subjects[locale];
 
       const html = buildFollowupEmail(row, report, locale, {
         exposureLow, exposureHigh, dailyLow, dailyHigh,
@@ -115,15 +118,76 @@ function fmtEur(n: number): string {
 
 function buildFollowupEmail(
   row: any,
-  report: any,
+  _report: any,
   locale: string,
   nums: { exposureLow: number; exposureHigh: number; dailyLow: number; dailyHigh: number },
 ): string {
-  const isEn = locale !== "fr";
+  const loc = (locale || "en") as "en" | "fr" | "de";
   const daysSince = 14;
   const accumulatedLow = nums.dailyLow * daysSince;
   const accumulatedHigh = nums.dailyHigh * daysSince;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+
+  const copy = {
+    title: {
+      en: `${row.company_name || row.domain} — 14 days since your report`,
+      fr: `${row.company_name || row.domain} — 14 jours depuis votre rapport`,
+      de: `${row.company_name || row.domain} — 14 Tage seit Ihrem Bericht`,
+    },
+    lossLabel: {
+      en: "ESTIMATED LOSS SINCE YOUR REPORT",
+      fr: "PERTE ESTIMEE DEPUIS VOTRE RAPPORT",
+      de: "GESCHAETZTER VERLUST SEIT IHREM BERICHT",
+    },
+    dailyCalc: {
+      en: `${fmtEur(nums.dailyLow)}-${fmtEur(nums.dailyHigh)} EUR/day \u00d7 ${daysSince} days of inaction`,
+      fr: `${fmtEur(nums.dailyLow)}-${fmtEur(nums.dailyHigh)} EUR/jour \u00d7 ${daysSince} jours d'inaction`,
+      de: `${fmtEur(nums.dailyLow)}-${fmtEur(nums.dailyHigh)} EUR/Tag \u00d7 ${daysSince} Tage Untätigkeit`,
+    },
+    body: {
+      en: `Two weeks ago, we identified ${fmtEur(nums.exposureLow)}-${fmtEur(nums.exposureHigh)} EUR/year in financial exposure at ${row.company_name || row.domain}. Since then, an estimated ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR has been silently lost.`,
+      fr: `Il y a deux semaines, nous avons identifié ${fmtEur(nums.exposureLow)}-${fmtEur(nums.exposureHigh)} EUR/an d'exposition financière chez ${row.company_name || row.domain}. Depuis, une perte estimée de ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR s'est accumulée silencieusement.`,
+      de: `Vor zwei Wochen haben wir ${fmtEur(nums.exposureLow)}-${fmtEur(nums.exposureHigh)} EUR/Jahr an finanzieller Exposition bei ${row.company_name || row.domain} identifiziert. Seitdem sind geschätzt ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR still verloren gegangen.`,
+    },
+    stopBleeding: {
+      en: "STOP THE BLEEDING",
+      fr: "ARRETEZ L'HEMORRAGIE",
+      de: "STOPPEN SIE DEN VERLUST",
+    },
+    monitorCta: {
+      en: "Activate continuous drift monitoring — 2,000 EUR/month",
+      fr: "Activez le monitoring continu de dérive — 2 000 EUR/mois",
+      de: "Aktivieren Sie kontinuierliches Drift-Monitoring — 2.000 EUR/Monat",
+    },
+    monitorBtn: {
+      en: "Activate Monitoring",
+      fr: "Activer le Monitoring",
+      de: "Monitoring aktivieren",
+    },
+    instant: {
+      en: "Instant activation. No call required.",
+      fr: "Activation instantanée. Aucun appel requis.",
+      de: "Sofortige Aktivierung. Kein Anruf erforderlich.",
+    },
+    setupCta: {
+      en: "Or get a one-time 30/60/90-day corrective plan — 2,500 EUR",
+      fr: "Ou obtenez un plan correctif 30/60/90 jours — 2 500 EUR",
+      de: "Oder erhalten Sie einen einmaligen 30/60/90-Tage-Korrekturplan — 2.500 EUR",
+    },
+    setupLink: {
+      en: "View Stabilization Plans \u2192",
+      fr: "Voir les Plans de Stabilisation \u2192",
+      de: "Stabilisierungspl\u00e4ne ansehen \u2192",
+    },
+  };
+
+  // Generate viral block for post-purchase sharing
+  const viralBlock = generateViralEmailBlock({
+    runId: row.run_id,
+    domain: row.domain,
+    companyName: row.company_name || row.domain,
+    locale: loc,
+  });
 
   return `<!DOCTYPE html>
 <html>
@@ -134,61 +198,54 @@ function buildFollowupEmail(
   <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;margin:0 0 16px 0">GHOST TAX FOLLOW-UP</p>
 
   <h1 style="font-size:22px;color:#e4e9f4;margin:0 0 16px 0;line-height:1.3">
-    ${isEn
-      ? `${row.company_name || row.domain} — 14 days since your report`
-      : `${row.company_name || row.domain} — 14 jours depuis votre rapport`}
+    ${copy.title[loc]}
   </h1>
 
   <!-- Accumulated loss shock -->
   <div style="background:#0e1221;border:2px solid rgba(239,68,68,0.2);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px">
     <p style="font-size:10px;color:#ef4444;letter-spacing:0.12em;margin:0 0 8px 0">
-      ${isEn ? "ESTIMATED LOSS SINCE YOUR REPORT" : "PERTE ESTIMEE DEPUIS VOTRE RAPPORT"}
+      ${copy.lossLabel[loc]}
     </p>
     <p style="font-size:32px;font-family:monospace;font-weight:900;color:#ef4444;margin:0">
       ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR
     </p>
     <p style="font-size:12px;color:#8d9bb5;margin:8px 0 0 0">
-      ${isEn
-        ? `${fmtEur(nums.dailyLow)}-${fmtEur(nums.dailyHigh)} EUR/day × ${daysSince} days of inaction`
-        : `${fmtEur(nums.dailyLow)}-${fmtEur(nums.dailyHigh)} EUR/jour × ${daysSince} jours d'inaction`}
+      ${copy.dailyCalc[loc]}
     </p>
   </div>
 
   <p style="font-size:14px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
-    ${isEn
-      ? `Two weeks ago, we identified ${fmtEur(nums.exposureLow)}-${fmtEur(nums.exposureHigh)} EUR/year in financial exposure at ${row.company_name || row.domain}. Since then, an estimated ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR has been silently lost.`
-      : `Il y a deux semaines, nous avons identifié ${fmtEur(nums.exposureLow)}-${fmtEur(nums.exposureHigh)} EUR/an d'exposition financière chez ${row.company_name || row.domain}. Depuis, une perte estimée de ${fmtEur(accumulatedLow)}-${fmtEur(accumulatedHigh)} EUR s'est accumulée silencieusement.`}
+    ${copy.body[loc]}
   </p>
 
   <!-- CTA: Rail B Monitor -->
   <div style="background:linear-gradient(135deg,#0e1221,#121828);border:2px solid rgba(59,130,246,0.3);border-radius:12px;padding:24px;text-align:center;margin-bottom:16px">
     <p style="font-size:10px;color:#3b82f6;letter-spacing:0.12em;margin:0 0 10px 0">
-      ${isEn ? "STOP THE BLEEDING" : "ARRETEZ L'HEMORRAGIE"}
+      ${copy.stopBleeding[loc]}
     </p>
     <p style="font-size:16px;color:#e4e9f4;font-weight:700;margin:0 0 16px 0">
-      ${isEn
-        ? "Activate continuous drift monitoring — 2,000 EUR/month"
-        : "Activez le monitoring continu de dérive — 2 000 EUR/mois"}
+      ${copy.monitorCta[loc]}
     </p>
     <a href="${siteUrl}/pricing?ref=followup&domain=${encodeURIComponent(row.domain)}&rail=B_MONITOR" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
-      ${isEn ? "Activate Monitoring" : "Activer le Monitoring"}
+      ${copy.monitorBtn[loc]}
     </a>
-    <p style="font-size:10px;color:#55637d;margin:8px 0 0 0">${isEn ? "Instant activation. No call required." : "Activation instantanée. Aucun appel requis."}</p>
+    <p style="font-size:10px;color:#55637d;margin:8px 0 0 0">${copy.instant[loc]}</p>
   </div>
 
   <!-- CTA: Rail B Setup -->
   <div style="background:#0e1221;border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
     <p style="font-size:12px;color:#8d9bb5;margin:0 0 10px 0">
-      ${isEn
-        ? "Or get a one-time 30/60/90-day corrective plan — 2,500 EUR"
-        : "Ou obtenez un plan correctif 30/60/90 jours — 2 500 EUR"}
+      ${copy.setupCta[loc]}
     </p>
     <a href="${siteUrl}/pricing?ref=followup&domain=${encodeURIComponent(row.domain)}&rail=B_SETUP" style="color:#f59e0b;font-size:13px;font-weight:600;text-decoration:none">
-      ${isEn ? "View Stabilization Plans →" : "Voir les Plans de Stabilisation →"}
+      ${copy.setupLink[loc]}
     </a>
   </div>
 
-  <p style="font-size:11px;color:#55637d;text-align:center;margin:0">
+  <!-- Viral CTAs -->
+  ${viralBlock}
+
+  <p style="font-size:11px;color:#55637d;text-align:center;margin:24px 0 0 0">
     audits@ghost-tax.com
   </p>
 

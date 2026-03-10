@@ -7,7 +7,7 @@
  */
 
 import type { GhostTaxConnector, ConnectorCredentials, ConnectorOutput } from "../plugins/types";
-import type { CompanyContext, ProofSignal } from "../analysis";
+import type { ProofSignal } from "../analysis";
 
 // Known SaaS vendors that appear in expense reports
 const SAAS_EXPENSE_PATTERNS = [

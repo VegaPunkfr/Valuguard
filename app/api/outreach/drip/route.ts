@@ -28,7 +28,6 @@ import {
   checkRateLimit,
   recordSend,
   getNextSendDate,
-  DRIP_SCHEDULE,
 } from "@/lib/outreach";
 
 export const maxDuration = 300;

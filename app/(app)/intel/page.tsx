@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useI18n } from "@/lib/i18n";
-import { trackEvent, trackCheckoutStarted, trackReturnVisit, EVENTS } from "@/lib/events";
+import { trackEvent, trackCheckoutStarted, trackReturnVisit, setSignalContext, EVENTS } from "@/lib/events";
+import { DecisionPackTeaser } from "@/components/ui/decision-pack-teaser";
 
 /**
  * GHOST TAX — DECISION INSTRUMENT
@@ -79,6 +80,7 @@ export default function IntelPage() {
   const { t, locale } = useI18n();
 
   const [domain, setDomain] = useState("");
+  const [email, setEmail] = useState("");
   const [headcount, setHeadcount] = useState("");
   const [monthlySpend, setMonthlySpend] = useState("");
   const [industry, setIndustry] = useState("");
@@ -101,6 +103,7 @@ export default function IntelPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [activeLevers, setActiveLevers] = useState<Set<string>>(new Set());
   const [causalExpanded, setCausalExpanded] = useState(false);
+  const [unlocked, _setUnlocked] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const handleStream = useCallback(async (response: Response) => {
@@ -123,6 +126,21 @@ export default function IntelPage() {
             setCurrentPhase(parsed.phase);
             if (parsed.phase === "complete") {
               trackEvent(EVENTS.INTEL_DETECTION_COMPLETED, { confidence: parsed.data?.overallConfidence });
+              // Auto-capture lead for drip sequence if email provided
+              if (email.trim() && email.includes("@")) {
+                fetch("/api/leads/capture", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    email: email.trim(),
+                    domain: domain.trim(),
+                    company: parsed.data?.companyName || domain.trim(),
+                    headcount: headcount ? parseInt(headcount, 10) : undefined,
+                    industry: industry || undefined,
+                    source: "intel-scan",
+                  }),
+                }).catch(() => { /* non-blocking */ });
+              }
             }
           }
           if (parsed.phase === "error") {
@@ -142,6 +160,7 @@ export default function IntelPage() {
     setActiveLevers(new Set());
     setCausalExpanded(false);
     trackEvent(EVENTS.INTEL_DETECTION_STARTED, { domain: domain.trim() });
+    setSignalContext(domain.trim(), email.trim() || undefined);
     try {
       const res = await fetch("/api/intel", {
         method: "POST",
@@ -183,6 +202,7 @@ export default function IntelPage() {
         body: JSON.stringify({
           locale,
           domain,
+          email: email.trim() || undefined,
           companyName: phases.context?.name || undefined,
           headcount: phases.context?.headcount || (headcount ? parseInt(headcount, 10) : undefined),
           monthlySpendEur: phases.context?.monthlySpendEur || (monthlySpend ? parseInt(monthlySpend, 10) : undefined),
@@ -296,8 +316,8 @@ export default function IntelPage() {
             </div>
           )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel>Company Domain *</FieldLabel>
+            <div>
+              <FieldLabel>{t("intel.field.domain") !== "intel.field.domain" ? t("intel.field.domain") : "Company Domain *"}</FieldLabel>
               <input
                 type="text" value={domain} onChange={(e) => setDomain(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runAnalysis()}
@@ -306,31 +326,43 @@ export default function IntelPage() {
               />
             </div>
             <div>
-              <FieldLabel>Headcount</FieldLabel>
+              <FieldLabel>{t("intel.field.email") !== "intel.field.email" ? t("intel.field.email") : "Work Email"}</FieldLabel>
+              <input
+                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="cfo@acme.com" disabled={running}
+                className="vg-input"
+              />
+            </div>
+            <div>
+              <FieldLabel>{t("intel.field.headcount") !== "intel.field.headcount" ? t("intel.field.headcount") : "Headcount"}</FieldLabel>
               <input type="number" value={headcount} onChange={(e) => setHeadcount(e.target.value)} placeholder="120" disabled={running} className="vg-input" />
             </div>
             <div>
-              <FieldLabel>Monthly IT Spend EUR</FieldLabel>
+              <FieldLabel>{t("intel.field.spend") !== "intel.field.spend" ? t("intel.field.spend") : "Monthly IT Spend (EUR)"}</FieldLabel>
               <input type="number" value={monthlySpend} onChange={(e) => setMonthlySpend(e.target.value)} placeholder="40000" disabled={running} className="vg-input" />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <FieldLabel>Industry</FieldLabel>
+              <FieldLabel>{t("intel.field.industry") !== "intel.field.industry" ? t("intel.field.industry") : "Industry"}</FieldLabel>
               <select value={industry} onChange={(e) => setIndustry(e.target.value)} disabled={running}
                 className="vg-input" style={{ color: industry ? C.text1 : C.text4 }}>
-                <option value="">Select industry...</option>
-                <option value="Technology / SaaS">Technology / SaaS</option>
-                <option value="Financial Services">Financial Services</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Retail & E-commerce">Retail &amp; E-commerce</option>
-                <option value="Manufacturing">Manufacturing</option>
-                <option value="Media & Advertising">Media &amp; Advertising</option>
-                <option value="Professional Services">Professional Services</option>
+                <option value="">{t("intel.field.industry.select") !== "intel.field.industry.select" ? t("intel.field.industry.select") : "Select industry..."}</option>
+                <option value="Technology / SaaS">{t("intel.field.industry.tech") !== "intel.field.industry.tech" ? t("intel.field.industry.tech") : "Technology / SaaS"}</option>
+                <option value="Financial Services">{t("intel.field.industry.finance") !== "intel.field.industry.finance" ? t("intel.field.industry.finance") : "Financial Services"}</option>
+                <option value="Healthcare">{t("intel.field.industry.health") !== "intel.field.industry.health" ? t("intel.field.industry.health") : "Healthcare"}</option>
+                <option value="Retail & E-commerce">{t("intel.field.industry.retail") !== "intel.field.industry.retail" ? t("intel.field.industry.retail") : "Retail & E-commerce"}</option>
+                <option value="Manufacturing">{t("intel.field.industry.manufacturing") !== "intel.field.industry.manufacturing" ? t("intel.field.industry.manufacturing") : "Manufacturing"}</option>
+                <option value="Media & Advertising">{t("intel.field.industry.media") !== "intel.field.industry.media" ? t("intel.field.industry.media") : "Media & Advertising"}</option>
+                <option value="Professional Services">{t("intel.field.industry.services") !== "intel.field.industry.services" ? t("intel.field.industry.services") : "Professional Services"}</option>
+                <option value="Automotive">{t("intel.field.industry.automotive") !== "intel.field.industry.automotive" ? t("intel.field.industry.automotive") : "Automotive"}</option>
+                <option value="Pharma & Life Sciences">{t("intel.field.industry.pharma") !== "intel.field.industry.pharma" ? t("intel.field.industry.pharma") : "Pharma & Life Sciences"}</option>
               </select>
             </div>
           </div>
           <button onClick={runAnalysis} disabled={!domain.trim() || running}
             className={`vg-btn-primary ${running ? "vg-btn-computing" : ""}`}>
-            {running ? "ANALYZING..." : "RUN DETECTION"}
+            {running
+              ? (t("intel.btn.running") !== "intel.btn.running" ? t("intel.btn.running") : "ANALYZING...")
+              : (t("intel.btn.run") !== "intel.btn.run" ? t("intel.btn.run") : "RUN DETECTION")}
           </button>
         </div>
 
@@ -1254,11 +1286,50 @@ export default function IntelPage() {
                 <Metric label="CONFIDENCE" value={`${phases.negotiation.negotiationConfidence}/100`} color={signalColor(phases.negotiation.negotiationConfidence)} />
               </div>
 
-              {/* Leverage Points */}
+              {/* Leverage Points — first one visible, rest behind paywall */}
               {phases.negotiation.leveragePoints?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
                   <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>LEVERAGE POINTS</p>
-                  {phases.negotiation.leveragePoints.slice(0, 4).map((lp: any, i: number) => {
+                  {/* First leverage point always visible */}
+                  {phases.negotiation.leveragePoints.slice(0, 1).map((lp: any, i: number) => {
+                    const sc = lp.strength === "strong" ? C.green : lp.strength === "moderate" ? C.amber : C.text4;
+                    return (
+                      <div key={i} className="vg-inset" style={{ padding: "8px 12px", marginBottom: 4 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: C.text1 }}>{lp.vendor}</span>
+                          <div style={{ display: "flex", gap: 4 }}>
+                            <span className="vg-badge" style={{ background: sc + "10", border: `1px solid ${sc}20`, color: sc, fontSize: 7 }}>{lp.strength.toUpperCase()}</span>
+                            <span className="vg-badge" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)", color: C.blueHi, fontSize: 7 }}>{lp.leverageType.toUpperCase()}</span>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: 10, color: C.text2, lineHeight: 1.4, marginBottom: 2 }}>{lp.argument}</p>
+                        <p style={{ fontSize: 9, color: C.text4 }}>{lp.expectedOutcome}</p>
+                      </div>
+                    );
+                  })}
+                  {/* Remaining leverage points — blurred */}
+                  {!unlocked && phases.negotiation.leveragePoints.length > 1 && (
+                    <PaywallBlur label={`Unlock ${phases.negotiation.leveragePoints.length - 1} more leverage points`} onAttempt={() => {
+                      trackEvent(EVENTS.INTEL_RECOMMENDED_ACTION_CLICKED, { section: "negotiation_leverage" });
+                      handleCheckout();
+                    }}>
+                      {phases.negotiation.leveragePoints.slice(1, 4).map((lp: any, i: number) => {
+                        const sc = lp.strength === "strong" ? C.green : lp.strength === "moderate" ? C.amber : C.text4;
+                        return (
+                          <div key={i} className="vg-inset" style={{ padding: "8px 12px", marginBottom: 4 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: C.text1 }}>{lp.vendor}</span>
+                              <div style={{ display: "flex", gap: 4 }}>
+                                <span className="vg-badge" style={{ background: sc + "10", border: `1px solid ${sc}20`, color: sc, fontSize: 7 }}>{lp.strength.toUpperCase()}</span>
+                              </div>
+                            </div>
+                            <p style={{ fontSize: 10, color: C.text2, lineHeight: 1.4 }}>{lp.argument}</p>
+                          </div>
+                        );
+                      })}
+                    </PaywallBlur>
+                  )}
+                  {unlocked && phases.negotiation.leveragePoints.slice(1, 4).map((lp: any, i: number) => {
                     const sc = lp.strength === "strong" ? C.green : lp.strength === "moderate" ? C.amber : C.text4;
                     return (
                       <div key={i} className="vg-inset" style={{ padding: "8px 12px", marginBottom: 4 }}>
@@ -1277,58 +1348,94 @@ export default function IntelPage() {
                 </div>
               )}
 
-              {/* Top Economic Arguments */}
-              {phases.negotiation.topEconomicArguments?.length > 0 && (
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>ECONOMIC ARGUMENTS</p>
-                  {phases.negotiation.topEconomicArguments.map((ea: any, i: number) => (
-                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 3 }}>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: 11, fontWeight: 600, color: C.text1, marginBottom: 2 }}>{ea.headline}</p>
-                        <p style={{ fontSize: 9, color: C.text4 }}>{ea.timeframe} | {ea.internalAudience}</p>
-                      </div>
-                      <p style={{ fontFamily: MO, fontSize: 14, fontWeight: 700, color: C.green, flexShrink: 0, marginLeft: 12 }}>
-                        {fmt(ea.eurImpact[0])}&ndash;{fmt(ea.eurImpact[1])} &euro;
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Vendor Playbooks Preview */}
-              {phases.negotiation.vendorPlaybooks?.length > 0 && (
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>VENDOR PLAYBOOK PREVIEW</p>
-                  {phases.negotiation.vendorPlaybooks.slice(0, 3).map((pb: any, i: number) => (
-                    <div key={i} style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>{pb.vendor}</span>
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <span className="vg-badge" style={{ background: signalColor(pb.readinessScore) + "10", border: `1px solid ${signalColor(pb.readinessScore)}20`, color: signalColor(pb.readinessScore), fontSize: 7 }}>
-                            {pb.suggestedApproach.toUpperCase()}
-                          </span>
-                          <span style={{ fontSize: 8, fontFamily: MO, color: C.text4 }}>readiness {pb.readinessScore}</span>
-                        </div>
-                      </div>
-                      <p style={{ fontSize: 10, color: C.text3, lineHeight: 1.4, marginBottom: 6 }}>{pb.pressureFrame.pressureAngle}</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {pb.playBookPreview?.slice(0, 3).map((step: string, j: number) => (
-                          <p key={j} style={{ fontSize: 9, color: C.text4, paddingLeft: 8, borderLeft: `2px solid ${C.border}` }}>
-                            <span style={{ fontFamily: MO, fontWeight: 700, color: C.blueHi, marginRight: 4 }}>{j + 1}.</span>{step}
+              {/* Economic Arguments + Playbooks + Memo — behind paywall */}
+              {!unlocked ? (
+                <PaywallBlur label="Unlock negotiation playbooks & economic arguments" onAttempt={() => {
+                  trackEvent(EVENTS.INTEL_RECOMMENDED_ACTION_CLICKED, { section: "negotiation_playbooks" });
+                  handleCheckout();
+                }}>
+                  {/* Teaser content rendered but blurred */}
+                  {phases.negotiation.topEconomicArguments?.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>ECONOMIC ARGUMENTS</p>
+                      {phases.negotiation.topEconomicArguments.slice(0, 3).map((ea: any, i: number) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 3 }}>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: 11, fontWeight: 600, color: C.text1, marginBottom: 2 }}>{ea.headline}</p>
+                            <p style={{ fontSize: 9, color: C.text4 }}>{ea.timeframe} | {ea.internalAudience}</p>
+                          </div>
+                          <p style={{ fontFamily: MO, fontSize: 14, fontWeight: 700, color: C.green, flexShrink: 0, marginLeft: 12 }}>
+                            {fmt(ea.eurImpact[0])}&ndash;{fmt(ea.eurImpact[1])} &euro;
                           </p>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Internal memo frame */}
-              {phases.negotiation.internalMemoFrame && (
-                <div className="vg-inset" style={{ padding: "10px 14px" }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>INTERNAL DECISION FRAME</p>
-                  <p style={{ fontSize: 11, color: C.text2, lineHeight: 1.5 }}>{phases.negotiation.internalMemoFrame}</p>
-                </div>
+                  )}
+                  {phases.negotiation.vendorPlaybooks?.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>VENDOR PLAYBOOKS</p>
+                      {phases.negotiation.vendorPlaybooks.slice(0, 3).map((pb: any, i: number) => (
+                        <div key={i} style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>{pb.vendor}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </PaywallBlur>
+              ) : (
+                <>
+                  {/* Unlocked: full economic arguments */}
+                  {phases.negotiation.topEconomicArguments?.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>ECONOMIC ARGUMENTS</p>
+                      {phases.negotiation.topEconomicArguments.map((ea: any, i: number) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 3 }}>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: 11, fontWeight: 600, color: C.text1, marginBottom: 2 }}>{ea.headline}</p>
+                            <p style={{ fontSize: 9, color: C.text4 }}>{ea.timeframe} | {ea.internalAudience}</p>
+                          </div>
+                          <p style={{ fontFamily: MO, fontSize: 14, fontWeight: 700, color: C.green, flexShrink: 0, marginLeft: 12 }}>
+                            {fmt(ea.eurImpact[0])}&ndash;{fmt(ea.eurImpact[1])} &euro;
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Unlocked: full vendor playbooks */}
+                  {phases.negotiation.vendorPlaybooks?.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>VENDOR PLAYBOOK PREVIEW</p>
+                      {phases.negotiation.vendorPlaybooks.slice(0, 3).map((pb: any, i: number) => (
+                        <div key={i} style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>{pb.vendor}</span>
+                            <div style={{ display: "flex", gap: 4 }}>
+                              <span className="vg-badge" style={{ background: signalColor(pb.readinessScore) + "10", border: `1px solid ${signalColor(pb.readinessScore)}20`, color: signalColor(pb.readinessScore), fontSize: 7 }}>
+                                {pb.suggestedApproach.toUpperCase()}
+                              </span>
+                              <span style={{ fontSize: 8, fontFamily: MO, color: C.text4 }}>readiness {pb.readinessScore}</span>
+                            </div>
+                          </div>
+                          <p style={{ fontSize: 10, color: C.text3, lineHeight: 1.4, marginBottom: 6 }}>{pb.pressureFrame.pressureAngle}</p>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            {pb.playBookPreview?.slice(0, 3).map((step: string, j: number) => (
+                              <p key={j} style={{ fontSize: 9, color: C.text4, paddingLeft: 8, borderLeft: `2px solid ${C.border}` }}>
+                                <span style={{ fontFamily: MO, fontWeight: 700, color: C.blueHi, marginRight: 4 }}>{j + 1}.</span>{step}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Unlocked: internal memo frame */}
+                  {phases.negotiation.internalMemoFrame && (
+                    <div className="vg-inset" style={{ padding: "10px 14px" }}>
+                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>INTERNAL DECISION FRAME</p>
+                      <p style={{ fontSize: 11, color: C.text2, lineHeight: 1.5 }}>{phases.negotiation.internalMemoFrame}</p>
+                    </div>
+                  )}
+                </>
               )}
             </Panel>
           )}
@@ -1364,45 +1471,63 @@ export default function IntelPage() {
               </div>
 
               {activeMemo !== "consensus" ? (
-                <div style={{ padding: 16, borderRadius: "var(--r-md)", background: C.inset, border: `1px solid ${C.border}`, position: "relative" }}>
-                  <MemoBlock text={
-                    activeMemo === "cfo" ? phases.decisionPack.cfoMemo
-                      : activeMemo === "cio" ? phases.decisionPack.cioOpsMemo
-                      : activeMemo === "procurement" ? phases.decisionPack.procurementSummary
-                      : phases.decisionPack.boardOnePager
-                  } />
-                  {/* Copy + Print actions */}
-                  <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 4 }}>
-                    <button
-                      onClick={() => {
-                        const text = activeMemo === "cfo" ? phases.decisionPack.cfoMemo
+                unlocked ? (
+                  <div style={{ padding: 16, borderRadius: "var(--r-md)", background: C.inset, border: `1px solid ${C.border}`, position: "relative" }}>
+                    <MemoBlock text={
+                      activeMemo === "cfo" ? phases.decisionPack.cfoMemo
+                        : activeMemo === "cio" ? phases.decisionPack.cioOpsMemo
+                        : activeMemo === "procurement" ? phases.decisionPack.procurementSummary
+                        : phases.decisionPack.boardOnePager
+                    } />
+                    {/* Copy + Print actions — only when unlocked */}
+                    <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 4 }}>
+                      <button
+                        onClick={() => {
+                          const text = activeMemo === "cfo" ? phases.decisionPack.cfoMemo
+                            : activeMemo === "cio" ? phases.decisionPack.cioOpsMemo
+                            : activeMemo === "procurement" ? phases.decisionPack.procurementSummary
+                            : phases.decisionPack.boardOnePager;
+                          navigator.clipboard.writeText(text);
+                          const copyEvent = {
+                            cfo: EVENTS.CIRCULATION_CFO_MEMO_COPIED,
+                            cio: EVENTS.CIRCULATION_CIO_MEMO_COPIED,
+                            procurement: EVENTS.CIRCULATION_PROCUREMENT_COPIED,
+                            board: EVENTS.CIRCULATION_BOARD_COPIED,
+                          }[activeMemo as "cfo" | "cio" | "procurement" | "board"];
+                          if (copyEvent) trackEvent(copyEvent, { memo: activeMemo });
+                          setCopyFeedback(activeMemo);
+                          setTimeout(() => setCopyFeedback(null), 2000);
+                        }}
+                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "rgba(0,0,0,0.4)", color: copyFeedback === activeMemo ? C.green : C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
+                        {copyFeedback === activeMemo ? "COPIED" : "COPY"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          trackEvent(EVENTS.CIRCULATION_PRINT_OPENED, { memo: activeMemo });
+                          window.print();
+                        }}
+                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "rgba(0,0,0,0.4)", color: C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
+                        PRINT
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Locked: show teaser then blur */
+                  <PaywallBlur label={`Unlock ${activeMemo.toUpperCase()} memo`} onAttempt={() => {
+                    trackEvent(EVENTS.INTEL_RECOMMENDED_ACTION_CLICKED, { section: `memo_${activeMemo}` });
+                    handleCheckout();
+                  }}>
+                    <div style={{ padding: 16, borderRadius: "var(--r-md)", background: C.inset, border: `1px solid ${C.border}`, minHeight: 200 }}>
+                      <MemoBlock text={
+                        (activeMemo === "cfo" ? phases.decisionPack.cfoMemo
                           : activeMemo === "cio" ? phases.decisionPack.cioOpsMemo
                           : activeMemo === "procurement" ? phases.decisionPack.procurementSummary
-                          : phases.decisionPack.boardOnePager;
-                        navigator.clipboard.writeText(text);
-                        const copyEvent = {
-                          cfo: EVENTS.CIRCULATION_CFO_MEMO_COPIED,
-                          cio: EVENTS.CIRCULATION_CIO_MEMO_COPIED,
-                          procurement: EVENTS.CIRCULATION_PROCUREMENT_COPIED,
-                          board: EVENTS.CIRCULATION_BOARD_COPIED,
-                        }[activeMemo as "cfo" | "cio" | "procurement" | "board"];
-                        if (copyEvent) trackEvent(copyEvent, { memo: activeMemo });
-                        setCopyFeedback(activeMemo);
-                        setTimeout(() => setCopyFeedback(null), 2000);
-                      }}
-                      style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "rgba(0,0,0,0.4)", color: copyFeedback === activeMemo ? C.green : C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
-                      {copyFeedback === activeMemo ? "COPIED" : "COPY"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        trackEvent(EVENTS.CIRCULATION_PRINT_OPENED, { memo: activeMemo });
-                        window.print();
-                      }}
-                      style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "rgba(0,0,0,0.4)", color: C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
-                      PRINT
-                    </button>
-                  </div>
-                </div>
+                          : phases.decisionPack.boardOnePager
+                        )?.split("\n").slice(0, 6).join("\n") + "\n\n..."
+                      } />
+                    </div>
+                  </PaywallBlur>
+                )
               ) : null}
 
             </Panel>
@@ -1552,13 +1677,27 @@ export default function IntelPage() {
                     transition: "all 0.2s",
                     boxShadow: `0 0 20px ${C.green}20`,
                   }}>
-                  {checkoutLoading ? "REDIRECTING..." : "UNLOCK CORRECTIVE PROTOCOL \u2014 \u20AC490"}
+                  {checkoutLoading
+                    ? (t("intel.cta.redirecting") !== "intel.cta.redirecting" ? t("intel.cta.redirecting") : "REDIRECTING...")
+                    : (t("intel.cta.unlock") !== "intel.cta.unlock" ? t("intel.cta.unlock") : "UNLOCK DECISION PACK")}
                 </button>
                 <p style={{ fontSize: 10, color: C.text4, marginTop: 10, fontFamily: MO }}>
-                  One-time payment. Structured report delivered by email within 48h.
+                  {t("intel.cta.sub") !== "intel.cta.sub" ? t("intel.cta.sub") : "One-time payment. Full report + negotiation playbooks + board-ready memos."}
                 </p>
               </div>
             </Panel>
+          )}
+
+          {/* ═══ DECISION PACK TEASER (Growth Hack #4) ═══ */}
+
+          {phases.complete && !unlocked && (
+            <DecisionPackTeaser
+              domain={domain}
+              email={email}
+              exposureLow={phases.exposure?.annualRange?.[0]}
+              exposureHigh={phases.exposure?.annualRange?.[1]}
+              locale={locale}
+            />
           )}
 
           {/* ═══ META FOOTER ═══ */}
@@ -1711,6 +1850,48 @@ function MemoBlock({ text }: { text: string }) {
         // Regular text
         return <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.55, marginBottom: 2 }}>{line}</p>;
       })}
+    </div>
+  );
+}
+
+function PaywallBlur({ children, onAttempt, label }: { children: React.ReactNode; onAttempt: () => void; label?: string }) {
+  return (
+    <div style={{ position: "relative", overflow: "hidden" }}>
+      {children}
+      <div
+        onClick={onAttempt}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(180deg, transparent 0%, rgba(6,9,18,0.7) 20%, rgba(6,9,18,0.95) 50%, #060912 80%)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 2,
+          borderRadius: "var(--r-md)",
+        }}
+      >
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+          padding: "20px 28px", borderRadius: 12,
+          background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)",
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6", letterSpacing: "0.02em" }}>
+            {label || "Unlock Decision Pack"}
+          </span>
+          <span style={{ fontSize: 9, color: "#55637d" }}>
+            Click to unlock full actionable intelligence
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

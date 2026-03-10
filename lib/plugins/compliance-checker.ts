@@ -66,10 +66,6 @@ export const complianceCheckerPlugin: GhostTaxPlugin = {
 
     const combined = (JSON.stringify(ctx.enrichment) + " " + ctx.signals.map(s => `${s.label} ${s.description}`).join(" ") + " " + industry).toLowerCase();
 
-    // Use pipeline confidence to weight compliance risk confidence
-    const pipelineConfidence = ctx.pipeline?.confidenceModel?.overall || 50;
-    const confidenceMultiplier = pipelineConfidence / 100;
-
     // Use pipeline causal graph for governance gap detection
     const causalNodes = ctx.pipeline?.causalGraph?.nodes || [];
     const governanceGaps = causalNodes.filter(n =>
@@ -77,9 +73,6 @@ export const complianceCheckerPlugin: GhostTaxPlugin = {
       n.label.toLowerCase().includes("shadow") ||
       n.label.toLowerCase().includes("ungoverned")
     ).length;
-
-    // Use pipeline decision friction for compliance remediation difficulty
-    const frictionScore = ctx.pipeline?.decisionFriction?.frictionScore || 50;
 
     // GDPR exposure (applies to all EU companies)
     const gdprTriggered = COMPLIANCE_FRAMEWORKS.GDPR.triggers.some(t => combined.includes(t)) || governanceGaps > 0;

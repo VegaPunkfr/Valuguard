@@ -238,7 +238,7 @@ function TrustFooter({ t }: { t: (k: string) => string }) {
 // MAIN
 // ===================================================
 export default function Cockpit() {
-  const { t, formatCurrency, locale } = useI18n();
+  const { t, formatCurrency, locale: _locale } = useI18n();
   const [tab, setTab] = useState("entropy");
   const [step, setStep] = useState(0);
   const [inp, setInp] = useState({

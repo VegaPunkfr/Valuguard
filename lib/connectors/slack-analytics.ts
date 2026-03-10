@@ -6,7 +6,7 @@
  */
 
 import type { GhostTaxConnector, ConnectorCredentials, ConnectorOutput } from "../plugins/types";
-import type { CompanyContext, ProofSignal } from "../analysis";
+import type { ProofSignal } from "../analysis";
 
 export const slackConnector: GhostTaxConnector = {
   manifest: {

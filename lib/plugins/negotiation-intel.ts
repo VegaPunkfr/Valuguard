@@ -109,14 +109,6 @@ export const negotiationIntelPlugin: GhostTaxPlugin = {
 
     const combined = (JSON.stringify(ctx.enrichment) + " " + ctx.signals.map(s => `${s.label} ${s.description}`).join(" ")).toLowerCase();
 
-    // Merge pipeline negotiation intelligence (leverage, economic arguments)
-    const pipelineNeg = ctx.pipeline?.negotiationIntelligence;
-    const pipelineScenarios = ctx.pipeline?.scenarios;
-    const pipelinePressure = ctx.pipeline?.decisionPressureScore || 0;
-
-    // If pipeline already calculated negotiation leverage, boost confidence
-    const pipelineLeverageBoost = pipelineNeg ? 15 : 0;
-
     // Detect vendors and generate playbooks
     for (const [vendorKey, intel] of Object.entries(VENDOR_INTEL)) {
       if (combined.includes(vendorKey)) {

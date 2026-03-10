@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { c, f, sectionLabel } from "@/lib/tokens";
+import { c } from "@/lib/tokens";
 import Section from "@/components/ui/section";
 import Footer from "@/components/ui/footer";
 import FaqItem from "@/components/ui/faq-item";

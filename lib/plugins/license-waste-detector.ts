@@ -52,8 +52,6 @@ export const licenseWasteDetectorPlugin: GhostTaxPlugin = {
     const wasteProfiles: LicenseWasteProfile[] = [];
     const headcount = ctx.company.headcount || 200;
     const toolCount = ctx.company.saasToolCount || 40;
-    const monthlySpend = ctx.company.monthlySpendEur || 50000;
-
     // Distribute tools across categories (estimate)
     const categoryDistribution = Object.entries(WASTE_BENCHMARKS).map(([cat, bench]) => {
       const estimatedTools = Math.max(1, Math.round(toolCount / Object.keys(WASTE_BENCHMARKS).length));

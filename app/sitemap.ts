@@ -1,9 +1,17 @@
 import type { MetadataRoute } from "next";
+import { getAllVerticalSlugs } from "@/lib/verticals";
 
 const BASE = "https://ghost-tax.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
+
+  const verticalPages: MetadataRoute.Sitemap = getAllVerticalSlugs().map((slug) => ({
+    url: `${BASE}/ghost-tax/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.75,
+  }));
 
   return [
     // Core public surfaces
@@ -34,10 +42,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/sample-report`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/peer-gap`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/roi-report`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/competitor-scan`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
 
     // Legal
     { url: `${BASE}/legal/privacy`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${BASE}/legal/terms`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+
+    // Ghost Tax vertical landing pages (industry + country SEO)
+    ...verticalPages,
 
     // Post-conversion pages excluded (noindex, private user flow)
   ];

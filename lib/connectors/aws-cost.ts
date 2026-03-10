@@ -7,7 +7,7 @@
  */
 
 import type { GhostTaxConnector, ConnectorCredentials, ConnectorOutput } from "../plugins/types";
-import type { CompanyContext, ProofSignal } from "../analysis";
+import type { ProofSignal } from "../analysis";
 
 export const awsCostConnector: GhostTaxConnector = {
   manifest: {
@@ -44,7 +44,7 @@ export const awsCostConnector: GhostTaxConnector = {
     return { ok: true };
   },
 
-  async fetchData(creds: ConnectorCredentials): Promise<ConnectorOutput> {
+  async fetchData(_creds: ConnectorCredentials): Promise<ConnectorOutput> {
     const start = Date.now();
     const dataPoints: Record<string, unknown> = {};
     const errors: string[] = [];

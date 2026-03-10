@@ -43,14 +43,6 @@ export const renewalSniperPlugin: GhostTaxPlugin = {
     const monthlySpend = ctx.company.monthlySpendEur || 50000;
     const toolCount = ctx.company.saasToolCount || 40;
 
-    // Use pipeline negotiation intel if available (real leverage data)
-    const pipelineNeg = ctx.pipeline?.negotiationIntelligence;
-    const pipelinePressure = ctx.pipeline?.decisionPressureScore || 0;
-    const pipelineMomentum = ctx.pipeline?.correctionMomentum;
-
-    // Weight urgency: higher pressure → prioritize sooner renewal windows
-    const urgencyBoost = pipelinePressure > 60 ? 1.3 : pipelinePressure > 40 ? 1.1 : 1.0;
-
     // Estimate renewal distribution (industry pattern: contracts distributed across quarters)
     const avgContractValue = (monthlySpend * 12) / toolCount;
     const renewalWindows = [

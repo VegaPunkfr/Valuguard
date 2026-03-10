@@ -114,8 +114,6 @@ export const vendorRiskScorerPlugin: GhostTaxPlugin = {
       });
     }
 
-    // Use pipeline drift monitor for vendor-specific drift data
-    const driftData = ctx.pipeline?.driftMonitor;
     scores.global_exposure_score = ctx.pipeline?.globalExposureScore || 0;
     scores.decision_pressure = ctx.pipeline?.decisionPressureScore || 0;
 

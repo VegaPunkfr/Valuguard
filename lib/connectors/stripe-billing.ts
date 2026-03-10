@@ -45,7 +45,7 @@ export const stripeConnector: GhostTaxConnector = {
     }
   },
 
-  async fetchData(creds: ConnectorCredentials, company: CompanyContext): Promise<ConnectorOutput> {
+  async fetchData(creds: ConnectorCredentials, _company: CompanyContext): Promise<ConnectorOutput> {
     const start = Date.now();
     const dataPoints: Record<string, unknown> = {};
     const errors: string[] = [];

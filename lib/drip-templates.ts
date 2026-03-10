@@ -2,7 +2,7 @@
  * GHOST TAX — POST-SCAN DRIP EMAIL TEMPLATES (SERVER-ONLY)
  *
  * 5-touch nurture sequence for leads who completed a free scan
- * but have not yet purchased Rail A (490 EUR).
+ * but have not yet purchased Rail A ($990).
  *
  * Touch 1 (Day 0):  "Your free scan results" + teaser of full report
  * Touch 2 (Day 3):  "The cost of waiting" + daily leakage math
@@ -62,9 +62,9 @@ const T = {
     de: "Abmelden",
   },
   complianceText: {
-    en: "Ghost Tax SAS | Paris, France | This communication is for informational purposes only.",
-    fr: "Ghost Tax SAS | Paris, France | Cette communication est \u00e0 titre informatif uniquement.",
-    de: "Ghost Tax SAS | Paris, France | Diese Mitteilung dient ausschlie\u00dflich Informationszwecken.",
+    en: "Ghost Tax Inc. | Wilmington, DE, USA | This communication is for informational purposes only.",
+    fr: "Ghost Tax Inc. | Wilmington, DE, USA | Cette communication est \u00e0 titre informatif uniquement.",
+    de: "Ghost Tax Inc. | Wilmington, DE, USA | Diese Mitteilung dient ausschlie\u00dflich Informationszwecken.",
   },
   oneTimePayment: {
     en: "One-time payment",
@@ -148,9 +148,9 @@ const T = {
     ],
   },
   t1Cta: {
-    en: "Unlock Full Decision Pack \u2014 490 \u20ac",
-    fr: "D\u00e9bloquer le Decision Pack complet \u2014 490 \u20ac",
-    de: "Vollst\u00e4ndiges Decision Pack freischalten \u2014 490 \u20ac",
+    en: "Unlock Full Decision Pack \u2014 $990",
+    fr: "D\u00e9bloquer le Decision Pack complet \u2014 $990",
+    de: "Vollst\u00e4ndiges Decision Pack freischalten \u2014 $990",
   },
 
   // Touch 2
@@ -183,14 +183,14 @@ const T = {
     de: "Exposition w\u00e4chst nicht linear. Sie verst\u00e4rkt sich durch automatische Verl\u00e4ngerungen, Shadow-IT-Proliferation und unkontrollierte KI-Tool-Adoption. Jeder Tag ohne Korrekturprotokoll ist ein Tag beschleunigter Verluste.",
   },
   t2Compare: {
-    en: (daily: string) => `Your estimated daily exposure (<strong style="color:#ef4444">${daily} EUR</strong>) is more than the cost of the complete report (<strong style="color:#34d399">490 EUR</strong>). One day of exposure pays for the entire analysis.`,
-    fr: (daily: string) => `Votre exposition quotidienne estim\u00e9e (<strong style="color:#ef4444">${daily} EUR</strong>) d\u00e9passe le co\u00fbt du rapport complet (<strong style="color:#34d399">490 EUR</strong>). Un seul jour d'exposition finance l'analyse compl\u00e8te.`,
-    de: (daily: string) => `Ihre gesch\u00e4tzte t\u00e4gliche Exposition (<strong style="color:#ef4444">${daily} EUR</strong>) \u00fcbersteigt die Kosten des vollst\u00e4ndigen Berichts (<strong style="color:#34d399">490 EUR</strong>). Ein Tag Exposition finanziert die gesamte Analyse.`,
+    en: (daily: string) => `Your estimated daily exposure (<strong style="color:#ef4444">${daily} EUR</strong>) is more than the cost of the complete report (<strong style="color:#34d399">$990</strong>). One day of exposure pays for the entire analysis.`,
+    fr: (daily: string) => `Votre exposition quotidienne estim\u00e9e (<strong style="color:#ef4444">${daily} EUR</strong>) d\u00e9passe le co\u00fbt du rapport complet (<strong style="color:#34d399">$990</strong>). Un seul jour d'exposition finance l'analyse compl\u00e8te.`,
+    de: (daily: string) => `Ihre gesch\u00e4tzte t\u00e4gliche Exposition (<strong style="color:#ef4444">${daily} EUR</strong>) \u00fcbersteigt die Kosten des vollst\u00e4ndigen Berichts (<strong style="color:#34d399">$990</strong>). Ein Tag Exposition finanziert die gesamte Analyse.`,
   },
   t2Cta: {
-    en: "Stop the Leak \u2014 490 \u20ac",
-    fr: "Stopper la fuite \u2014 490 \u20ac",
-    de: "Leck stoppen \u2014 490 \u20ac",
+    en: "Stop the Leak \u2014 $990",
+    fr: "Stopper la fuite \u2014 $990",
+    de: "Leck stoppen \u2014 $990",
   },
 
   // Touch 3
@@ -252,9 +252,9 @@ const T = {
     ],
   },
   t3Cta: {
-    en: "See Your Full Position \u2014 490 \u20ac",
-    fr: "Voir votre position compl\u00e8te \u2014 490 \u20ac",
-    de: "Vollst\u00e4ndige Position einsehen \u2014 490 \u20ac",
+    en: "See Your Full Position \u2014 $990",
+    fr: "Voir votre position compl\u00e8te \u2014 $990",
+    de: "Vollst\u00e4ndige Position einsehen \u2014 $990",
   },
 
   // Touch 4
@@ -294,14 +294,14 @@ const T = {
     de: "Kosten der vollst\u00e4ndigen Analyse",
   },
   t4Body: {
-    en: (c: string) => `Every day that passes without corrective action at <strong style="color:#e4e9f4">${c}</strong> compounds the exposure. Auto-renewals lock in inflated rates. Shadow IT adoption accelerates. AI tool sprawl goes undetected. The 490 EUR analysis pays for itself within hours of identified savings.`,
-    fr: (c: string) => `Chaque jour qui passe sans action corrective chez <strong style="color:#e4e9f4">${c}</strong> compose l'exposition. Les renouvellements automatiques verrouillent des tarifs gonfl\u00e9s. L'adoption de Shadow IT acc\u00e9l\u00e8re. La prolif\u00e9ration des outils IA passe inaper\u00e7ue. L'analyse \u00e0 490 EUR s'amortit en quelques heures d'\u00e9conomies identifi\u00e9es.`,
-    de: (c: string) => `Jeder Tag ohne Korrekturma\u00dfnahme bei <strong style="color:#e4e9f4">${c}</strong> verst\u00e4rkt die Exposition. Automatische Verl\u00e4ngerungen zementieren \u00fcberh\u00f6hte Tarife. Shadow-IT-Adoption beschleunigt sich. KI-Tool-Wildwuchs bleibt unerkannt. Die 490-EUR-Analyse amortisiert sich innerhalb von Stunden identifizierter Einsparungen.`,
+    en: (c: string) => `Every day that passes without corrective action at <strong style="color:#e4e9f4">${c}</strong> compounds the exposure. Auto-renewals lock in inflated rates. Shadow IT adoption accelerates. AI tool sprawl goes undetected. The $990 analysis pays for itself within hours of identified savings.`,
+    fr: (c: string) => `Chaque jour qui passe sans action corrective chez <strong style="color:#e4e9f4">${c}</strong> compose l'exposition. Les renouvellements automatiques verrouillent des tarifs gonfl\u00e9s. L'adoption de Shadow IT acc\u00e9l\u00e8re. La prolif\u00e9ration des outils IA passe inaper\u00e7ue. L'analyse \u00e0 $990 s'amortit en quelques heures d'\u00e9conomies identifi\u00e9es.`,
+    de: (c: string) => `Jeder Tag ohne Korrekturma\u00dfnahme bei <strong style="color:#e4e9f4">${c}</strong> verst\u00e4rkt die Exposition. Automatische Verl\u00e4ngerungen zementieren \u00fcberh\u00f6hte Tarife. Shadow-IT-Adoption beschleunigt sich. KI-Tool-Wildwuchs bleibt unerkannt. Die $990-Analyse amortisiert sich innerhalb von Stunden identifizierter Einsparungen.`,
   },
   t4Cta: {
-    en: "Order Full Report \u2014 490 \u20ac",
-    fr: "Commander le rapport complet \u2014 490 \u20ac",
-    de: "Vollst\u00e4ndigen Bericht bestellen \u2014 490 \u20ac",
+    en: "Order Full Report \u2014 $990",
+    fr: "Commander le rapport complet \u2014 $990",
+    de: "Vollst\u00e4ndigen Bericht bestellen \u2014 $990",
   },
 
   // Touch 5
@@ -351,9 +351,9 @@ const T = {
     de: "Dies ist unsere letzte Benachrichtigung. Wir werden Sie zu diesem Scan nicht erneut kontaktieren. Sollte sich Ihr Expositionsprofil \u00e4ndern oder Sie sp\u00e4ter zur\u00fcckkehren wollen, steht ghost-tax.com jederzeit zur Verf\u00fcgung.",
   },
   t5Cta: {
-    en: "Secure Your Decision Pack \u2014 490 \u20ac",
-    fr: "Obtenir votre Decision Pack \u2014 490 \u20ac",
-    de: "Decision Pack sichern \u2014 490 \u20ac",
+    en: "Secure Your Decision Pack \u2014 $990",
+    fr: "Obtenir votre Decision Pack \u2014 $990",
+    de: "Decision Pack sichern \u2014 $990",
   },
 } as const;
 
@@ -715,7 +715,7 @@ function buildTouch4(data: DripData): DripEmailResult {
       metricRow(T.t4AtScan[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac${T.perYear[l]}`, "#8d9bb5") +
       metricRow(T.t4SinceScan[l](daysElapsed), `${fmtEur(leaked)} \u20ac`, "#ef4444", true) +
       metricRow(T.t4ProjectedAnnual[l], `${fmtEurRange(projectedLow, projectedHigh)} \u20ac${T.perYear[l]}`, "#f59e0b", true) +
-      metricRow(T.t4ReportCost[l], "490 \u20ac", "#34d399", true)
+      metricRow(T.t4ReportCost[l], "$990", "#34d399", true)
     )}
 
     <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
@@ -731,7 +731,7 @@ function buildTouch4(data: DripData): DripEmailResult {
 - ${T.t4AtScan[l]}: ${fmtEurRange(exposureLowEur, exposureHighEur)} EUR${T.perYear[l]}
 - ${T.t4SinceScan[l](daysElapsed)}: ${fmtEur(leaked)} EUR
 - ${T.t4ProjectedAnnual[l]}: ${fmtEurRange(projectedLow, projectedHigh)} EUR${T.perYear[l]}
-- ${T.t4ReportCost[l]}: 490 EUR
+- ${T.t4ReportCost[l]}: $990
 
 ${stripHtml(T.t4Body[l](companyName))}
 
@@ -757,7 +757,7 @@ function buildTouch5(data: DripData): DripEmailResult {
   const daysElapsed = Math.max(21, daysSince(scanDate));
   const leaked = accumulatedLeak(ghostTaxAnnual, scanDate, daysElapsed);
   const daily = dailyLeak(ghostTaxAnnual);
-  const roi = daily > 0 ? Math.round((daily / 490) * 100) : 0;
+  const roi = daily > 0 ? Math.round((daily / 990) * 100) : 0;
 
   const subject = T.t5Subject[l](companyName);
   const preheader = T.t5Preheader[l](fmtEur(leaked));
@@ -768,7 +768,7 @@ function buildTouch5(data: DripData): DripEmailResult {
       metricRow(T.t5DaysSinceScan[l], `${daysElapsed}`, "#8d9bb5", true) +
       metricRow(T.t5EstLeaked[l], `${fmtEur(leaked)} \u20ac`, "#ef4444", true) +
       metricRow(T.t5AnnualExposure[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#ef4444", true) +
-      metricRow(T.t5ReportCost[l], "490 \u20ac", "#34d399", true) +
+      metricRow(T.t5ReportCost[l], "$990", "#34d399", true) +
       metricRow(T.t5Roi[l], `${roi}%`, "#34d399", true)
     )}
 
@@ -785,7 +785,7 @@ function buildTouch5(data: DripData): DripEmailResult {
 - ${T.t5DaysSinceScan[l]}: ${daysElapsed}
 - ${T.t5EstLeaked[l]}: ${fmtEur(leaked)} EUR
 - ${T.t5AnnualExposure[l]}: ${fmtEurRange(exposureLowEur, exposureHighEur)} EUR
-- ${T.t5ReportCost[l]}: 490 EUR
+- ${T.t5ReportCost[l]}: $990
 - ${T.t5Roi[l]}: ${roi}%
 
 ${stripHtml(T.t5Cta[l])}: ${checkoutUrl}

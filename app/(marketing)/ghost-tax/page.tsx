@@ -409,7 +409,7 @@ export default function GhostTaxPage() {
                 className="gt-btn gt-btn-primary"
                 style={{ display: "inline-block", marginBottom: 12 }}
               >
-                Run Full Detection — 490 EUR
+                Run Full Detection — From $990
               </a>
               <p style={{ fontSize: 12, color: c.text3, margin: 0 }}>
                 21-phase analysis • Vendor-level proof • Negotiation playbooks • CFO-ready memos

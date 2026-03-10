@@ -1367,7 +1367,7 @@ function computeDecisionPressure(
   exposure: DecisionIntelligence["exposure"],
   lossVelocity: LossVelocity,
   peer: PeerComparison,
-  momentum: CorrectionMomentum,
+  _momentum: CorrectionMomentum,
   overallConfidence: number,
 ): number {
   let score = 0;
@@ -1601,7 +1601,7 @@ function buildConfidenceModel(
   exposure: DecisionIntelligence["exposure"],
   peer: PeerComparison,
   scenarios: DecisionIntelligence["scenarios"],
-  causalGraph: CausalGraph,
+  _causalGraph: CausalGraph,
   counterfactual: CounterfactualPrecompute,
   overallConfidence: number,
 ): ConfidenceModel {
@@ -1977,7 +1977,7 @@ function buildExecutiveSnapshot(
   exposure: DecisionIntelligence["exposure"],
   scenarios: DecisionIntelligence["scenarios"],
   confidence: ConfidenceModel,
-  momentum: CorrectionMomentum,
+  _momentum: CorrectionMomentum,
   pressureScore: number,
 ): ExecutiveSnapshot {
   const confLabel = confidence.overall >= 60 ? "strong" : confidence.overall >= 35 ? "moderate" : "directional";

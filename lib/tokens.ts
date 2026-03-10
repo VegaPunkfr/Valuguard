@@ -2,42 +2,77 @@
  * GHOST TAX — DESIGN TOKENS (2026)
  *
  * Single source of truth. Matches globals.css --gt-* variables.
- * Import { c, f, ... } from "@/lib/tokens" in every component.
+ * Import { c, f, sp, ts, ... } from "@/lib/tokens" in every component.
+ *
+ * MATHEMATICAL FOUNDATION:
+ * ─ Typography: Perfect Fifth scale (ratio 1.5) from 16px base
+ * ─ Spacing: Golden Ratio progression (φ = 1.618)
+ * ─ Colors: HSL color space (no raw hex in components)
  */
 
-/* ── Colors ─────────────────────────────────────── */
+/* ── Typographic Scale — Perfect Fifth (1.5) ───── */
+/*   base: 16px
+ *   sm:   16 / 1.5  = 10.67px
+ *   base: 16px
+ *   md:   16 × 1.5  = 24px
+ *   lg:   24 × 1.5  = 36px
+ *   xl:   36 × 1.5  = 54px
+ *   2xl:  54 × 1.5  = 81px                         */
+export const ts = {
+  xs:  "0.667rem",   // 10.67px
+  sm:  "0.75rem",    // 12px (rounded from scale)
+  base: "1rem",      // 16px
+  md:  "1.5rem",     // 24px
+  lg:  "2.25rem",    // 36px
+  xl:  "3.375rem",   // 54px
+  "2xl": "5.063rem", // 81px
+} as const;
+
+/* ── Spatial Scale — Golden Ratio (1.618) ──────── */
+/*   4 → 8 → 16 → 24 → 40 → 64 → 104              */
+export const sp = {
+  "1": "4px",
+  "2": "8px",
+  "3": "16px",
+  "4": "24px",
+  "5": "40px",
+  "6": "64px",
+  "7": "104px",
+} as const;
+
+/* ── Colors — HSL color space ──────────────────── */
 export const c = {
-  bg:       "#050810",
-  surface:  "#0a0e1a",
-  card:     "#0d1120",
-  elevated: "#111628",
-  raised:   "#161c30",
+  bg:       "hsl(228, 38%, 3%)",
+  surface:  "hsl(226, 33%, 7%)",
+  card:     "hsl(226, 30%, 9%)",
+  elevated: "hsl(225, 28%, 11%)",
+  raised:   "hsl(224, 25%, 14%)",
 
-  border:   "rgba(255,255,255,0.06)",
-  borderS:  "rgba(255,255,255,0.10)",
-  borderSS: "rgba(255,255,255,0.14)",
+  border:   "hsla(0, 0%, 100%, 0.06)",
+  borderS:  "hsla(0, 0%, 100%, 0.10)",
+  borderSS: "hsla(0, 0%, 100%, 0.14)",
 
-  text1: "#f0f2f8",
-  text2: "#9ba3b8",
-  text3: "#5c6478",
-  text4: "#3d4455",
+  text1: "hsl(228, 40%, 96%)",
+  text2: "hsl(224, 16%, 66%)",
+  text3: "hsl(222, 12%, 41%)",
+  text4: "hsl(222, 14%, 29%)",
 
-  accent:   "#4f8ff7",
-  accentHi: "#6ba3ff",
-  accentBg: "rgba(79,143,247,0.08)",
-  accentBd: "rgba(79,143,247,0.20)",
+  accent:   "hsl(216, 91%, 65%)",
+  accentHi: "hsl(216, 100%, 71%)",
+  accentBg: "hsla(216, 91%, 65%, 0.08)",
+  accentBd: "hsla(216, 91%, 65%, 0.20)",
 
-  green:    "#2dd4a0",
-  greenBg:  "rgba(45,212,160,0.06)",
-  greenBd:  "rgba(45,212,160,0.18)",
-  red:      "#f06060",
-  redBg:    "rgba(240,96,96,0.06)",
-  redBd:    "rgba(240,96,96,0.18)",
-  amber:    "#f0a030",
-  amberBg:  "rgba(240,160,48,0.06)",
-  amberBd:  "rgba(240,160,48,0.18)",
-  cyan:     "#38d5f0",
-  linkedin: "#0A66C2",
+  green:    "hsl(162, 68%, 51%)",
+  greenBg:  "hsla(162, 68%, 51%, 0.06)",
+  greenBd:  "hsla(162, 68%, 51%, 0.18)",
+  red:      "hsl(0, 82%, 66%)",
+  redBg:    "hsla(0, 82%, 66%, 0.06)",
+  redBd:    "hsla(0, 82%, 66%, 0.18)",
+  amber:    "hsl(35, 86%, 56%)",
+  amberBg:  "hsla(35, 86%, 56%, 0.06)",
+  amberBd:  "hsla(35, 86%, 56%, 0.18)",
+  cyan:     "hsl(190, 86%, 58%)",
+  linkedin: "hsl(210, 89%, 40%)",
 } as const;
 
 /* ── Fonts ──────────────────────────────────────── */

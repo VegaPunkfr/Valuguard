@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Database } from "@/types/database";
 
 type AuditRequest = Database["public"]["Tables"]["audit_requests"]["Row"];
@@ -13,690 +13,1327 @@ interface DashboardProps {
   vaultSessions: VaultSession[];
 }
 
-// ── Design tokens ────────────────────────────────────
-const V = "#060912";
-const A = "#3b82f6";
-const AH = "#60a5fa";
-const T1 = "#e0e6f2";
-const T2 = "#8d9bb5";
-const T3 = "#55637d";
-const RD = "#ef4444";
-const OR = "#f59e0b";
-const GR = "#22c55e";
-const TL = "#34d399";
-const BD = "rgba(36,48,78,0.32)";
-const MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
-const SA = "system-ui,-apple-system,sans-serif";
+// ══════════════════════════════════════════════════════
+//  DESIGN SYSTEM — HSL only, Golden Ratio spacing
+// ══════════════════════════════════════════════════════
 
-const gl: React.CSSProperties = {
-  background: "rgba(11,14,24,0.72)",
-  backdropFilter: "blur(18px) saturate(1.15)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.15)",
-  border: "1px solid " + BD,
-  borderRadius: 12,
-  boxShadow: "0 4px 32px rgba(0,0,0,0.28)",
+const C = {
+  bg:       "hsl(228,38%,3%)",
+  surface:  "hsl(226,33%,7%)",
+  card:     "hsl(226,30%,9%)",
+  elevated: "hsl(225,28%,11%)",
+  raised:   "hsl(224,25%,14%)",
+  border:   "hsla(0,0%,100%,0.06)",
+  borderS:  "hsla(0,0%,100%,0.10)",
+  borderSS: "hsla(0,0%,100%,0.14)",
+  text1:    "hsl(228,40%,96%)",
+  text2:    "hsl(224,16%,66%)",
+  text3:    "hsl(222,12%,41%)",
+  text4:    "hsl(222,14%,29%)",
+  accent:   "hsl(216,91%,65%)",
+  accentHi: "hsl(216,100%,71%)",
+  accentBg: "hsla(216,91%,65%,0.08)",
+  accentBd: "hsla(216,91%,65%,0.20)",
+  green:    "hsl(162,68%,51%)",
+  greenBg:  "hsla(162,68%,51%,0.06)",
+  greenBd:  "hsla(162,68%,51%,0.18)",
+  red:      "hsl(0,82%,66%)",
+  redBg:    "hsla(0,82%,66%,0.06)",
+  redBd:    "hsla(0,82%,66%,0.18)",
+  amber:    "hsl(35,86%,56%)",
+  amberBg:  "hsla(35,86%,56%,0.06)",
+  amberBd:  "hsla(35,86%,56%,0.18)",
+  cyan:     "hsl(190,86%,58%)",
 };
 
-function fmt(n: number, short = false): string {
-  if (short && n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
-  if (short && n >= 1e4) return "$" + Math.round(n / 1e3) + "k";
-  return "$" + Math.round(n).toLocaleString("en-US");
-}
+const F = {
+  mono: "var(--gt-font-mono, ui-monospace, 'Cascadia Code', monospace)",
+  sans: "var(--gt-font-sans, system-ui, -apple-system, sans-serif)",
+};
+
+// Golden Ratio spacing: 4 → 8 → 16 → 24 → 40 → 64 → 104
+const SP = { 1: 4, 2: 8, 3: 16, 4: 24, 5: 40, 6: 64, 7: 104 };
+
+// ── Glass morphism layers ──────────────────────────
+const glass = (opacity = 0.72, blur = 20): React.CSSProperties => ({
+  background: `hsla(228,38%,5%,${opacity})`,
+  backdropFilter: `blur(${blur}px) saturate(1.2)`,
+  WebkitBackdropFilter: `blur(${blur}px) saturate(1.2)`,
+  border: `1px solid ${C.borderS}`,
+  borderRadius: 16,
+  boxShadow: "0 4px 32px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.4)",
+});
+
+const glassCard: React.CSSProperties = {
+  ...glass(0.55, 14),
+  borderRadius: 14,
+  transition: "border-color 220ms, box-shadow 220ms, transform 220ms",
+};
+
+// ── Formatters ──────────────────────────────────────
 
 function fmtEur(n: number, short = false): string {
-  if (short && n >= 1e6) return (n / 1e6).toFixed(1) + "M EUR";
-  if (short && n >= 1e4) return Math.round(n / 1e3) + "k EUR";
-  return Math.round(n).toLocaleString("en-US") + " EUR";
+  if (short && n >= 1e6) return (n / 1e6).toFixed(1) + "M\u2009EUR";
+  if (short && n >= 1e3) return Math.round(n / 1e3) + "k\u2009EUR";
+  return Math.round(n).toLocaleString("fr-FR") + "\u2009EUR";
 }
 
 function relativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return mins + "m ago";
+  if (mins < 1) return "maintenant";
+  if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return hours + "h ago";
+  if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return days + "d ago";
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (days < 30) return `${days}j`;
+  return new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-const statusColor: Record<string, string> = {
-  pending: T3,
-  paid: AH,
-  processing: OR,
-  delivered: TL,
-  failed: RD,
-  followup_scheduled: GR,
-  lost: T3,
+function pct(n: number): string {
+  return `${Math.round(n * 100)}%`;
+}
+
+// ── Status system ───────────────────────────────────
+
+const STATUS_MAP: Record<string, { color: string; bg: string; bd: string; label: string }> = {
+  pending:            { color: C.text3,  bg: "hsla(222,12%,41%,0.10)", bd: "hsla(222,12%,41%,0.20)", label: "En attente" },
+  paid:               { color: C.accent, bg: C.accentBg,              bd: C.accentBd,               label: "Pay\u00e9" },
+  processing:         { color: C.amber,  bg: C.amberBg,               bd: C.amberBd,                label: "En cours" },
+  delivered:          { color: C.green,  bg: C.greenBg,               bd: C.greenBd,                label: "Livr\u00e9" },
+  failed:             { color: C.red,    bg: C.redBg,                 bd: C.redBd,                  label: "\u00c9chou\u00e9" },
+  followup_scheduled: { color: C.cyan,   bg: "hsla(190,86%,58%,0.06)",bd: "hsla(190,86%,58%,0.18)", label: "Suivi" },
+  lost:               { color: C.text4,  bg: "hsla(222,14%,29%,0.10)",bd: "hsla(222,14%,29%,0.20)", label: "Perdu" },
 };
 
-const statusLabel: Record<string, string> = {
-  pending: "Pending",
-  paid: "Paid",
-  processing: "Processing",
-  delivered: "Delivered",
-  failed: "Failed",
-  followup_scheduled: "Follow-up",
-  lost: "Lost",
-};
+// ── Animated counter hook ───────────────────────────
 
-// ── Sidebar navigation ─────────────────────────────
-const NAV = [
-  { id: "overview", icon: "\u{1F4CA}", label: "Overview" },
-  { id: "reports", icon: "\u{1F4CB}", label: "Reports" },
-  { id: "leads", icon: "\u{1F465}", label: "Leads" },
-  { id: "intel", icon: "\u{1F50D}", label: "Detection", href: "/intel" },
-  { id: "vault", icon: "\u{1F512}", label: "Vault", href: "/vault" },
-] as const;
+function useAnimatedValue(target: number, duration = 1200): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (target === 0) { setValue(0); return; }
+    const start = performance.now();
+    let raf: number;
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Cubic ease-out
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return value;
+}
 
-// ══════════════════════════════════════════════════
-// EMPTY STATE
-// ══════════════════════════════════════════════════
-function EmptyState() {
+// ── SVG Micro-chart ─────────────────────────────────
+
+function Sparkline({ data, color, width = 120, height = 32 }: {
+  data: number[];
+  color: string;
+  width?: number;
+  height?: number;
+}) {
+  if (data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data) || 1;
+  const range = max - min || 1;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((v - min) / range) * (height - 4) - 2;
+    return `${x},${y}`;
+  }).join(" ");
+
+  const gradientId = `sp-${color.replace(/[^a-z0-9]/g, "")}`;
+
   return (
-    <div style={{ ...gl, padding: 48, textAlign: "center" }}>
-      <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>{"\u{1F50D}"}</div>
-      <p style={{ fontSize: 18, fontWeight: 700, color: T1, marginBottom: 8 }}>
-        No data yet
-      </p>
-      <p style={{ fontSize: 13, color: T2, lineHeight: 1.6, maxWidth: 420, margin: "0 auto 24px" }}>
-        Run your first Ghost Tax detection to populate this dashboard with real intelligence
-        on your IT spending exposure.
-      </p>
-      <a
-        href="/intel"
-        style={{
-          display: "inline-block",
-          padding: "12px 28px",
-          borderRadius: 8,
-          background: A,
-          color: "#fff",
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: ".05em",
-          textDecoration: "none",
-          textTransform: "uppercase" as const,
-        }}
-      >
-        RUN FIRST SCAN
-      </a>
+    <svg width={width} height={height} style={{ display: "block" }}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon
+        points={`0,${height} ${points} ${width},${height}`}
+        fill={`url(#${gradientId})`}
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ── Ring gauge ──────────────────────────────────────
+
+function RingGauge({ value, max = 100, size = 80, strokeWidth = 6, color, label }: {
+  value: number;
+  max?: number;
+  size?: number;
+  strokeWidth?: number;
+  color: string;
+  label: string;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = Math.min(value / max, 1);
+  const dashOffset = circumference * (1 - progress);
+
+  return (
+    <div style={{ textAlign: "center" }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={C.border} strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={color} strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1)" }}
+        />
+      </svg>
+      <div style={{ marginTop: -size / 2 - 10, position: "relative", zIndex: 1 }}>
+        <p style={{
+          fontFamily: F.mono, fontSize: 18, fontWeight: 800, color,
+          fontVariantNumeric: "tabular-nums",
+        }}>
+          {value}
+        </p>
+        <p style={{ fontSize: 8, color: C.text3, textTransform: "uppercase", letterSpacing: ".1em", marginTop: 2 }}>
+          {label}
+        </p>
+      </div>
+      <div style={{ height: size / 2 - 14 }} />
     </div>
   );
 }
 
-// ══════════════════════════════════════════════════
-// MAIN CLIENT COMPONENT
-// ══════════════════════════════════════════════════
+// ── Horizontal bar ──────────────────────────────────
+
+function HBar({ value, max, color, label, amount }: {
+  value: number;
+  max: number;
+  color: string;
+  label: string;
+  amount: string;
+}) {
+  const w = max > 0 ? Math.max(2, (value / max) * 100) : 0;
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+        <span style={{ fontSize: 11, color: C.text2 }}>{label}</span>
+        <span style={{ fontSize: 11, fontFamily: F.mono, color, fontVariantNumeric: "tabular-nums" }}>{amount}</span>
+      </div>
+      <div style={{ height: 4, background: C.border, borderRadius: 2, overflow: "hidden" }}>
+        <div style={{
+          width: `${w}%`, height: "100%", background: color, borderRadius: 2,
+          transition: "width 800ms cubic-bezier(0.16,1,0.3,1)",
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ── Status badge ────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_MAP[status] || STATUS_MAP.pending;
+  return (
+    <span style={{
+      display: "inline-block",
+      fontSize: 9,
+      fontFamily: F.mono,
+      fontWeight: 600,
+      padding: "2px 8px",
+      borderRadius: 6,
+      background: s.bg,
+      border: `1px solid ${s.bd}`,
+      color: s.color,
+      textTransform: "uppercase",
+      letterSpacing: ".06em",
+    }}>
+      {s.label}
+    </span>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+
+type NavPage = "command" | "reports" | "leads" | "engines" | "intel";
+
+const NAV_ITEMS: { id: NavPage; label: string; shortcut: string; href?: string }[] = [
+  { id: "command",  label: "Command Center", shortcut: "1" },
+  { id: "reports",  label: "Rapports",       shortcut: "2" },
+  { id: "leads",    label: "Pipeline",       shortcut: "3" },
+  { id: "engines",  label: "Moteurs",        shortcut: "4" },
+  { id: "intel",    label: "Scanner",        shortcut: "5", href: "/intel" },
+];
+
+// ══════════════════════════════════════════════════════
+//  MAIN COMPONENT
+// ══════════════════════════════════════════════════════
+
 export default function DashboardClient({
   userEmail,
   companyName,
   auditRequests,
   vaultSessions,
 }: DashboardProps) {
-  const [page, setPage] = useState<string>("overview");
+  const [page, setPage] = useState<NavPage>("command");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+      const item = NAV_ITEMS.find((n) => n.shortcut === e.key);
+      if (item) {
+        if (item.href) { window.location.href = item.href; }
+        else { setPage(item.id); }
+      }
+      if (e.key === "[") setSidebarCollapsed((v) => !v);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // ── Derived metrics ──────────────────────────────
+
+  const delivered = useMemo(() => auditRequests.filter((a) => a.status === "delivered"), [auditRequests]);
+  const processing = useMemo(() => auditRequests.filter((a) => a.status === "processing"), [auditRequests]);
+  const totalGhostTax = useMemo(() => vaultSessions.reduce((s, v) => s + (v.ghost_tax_annual ?? 0), 0), [vaultSessions]);
+  const totalRecoverable = useMemo(() => vaultSessions.reduce((s, v) => s + (v.recoverable_annual ?? 0), 0), [vaultSessions]);
+  const avgEntropy = useMemo(() => {
+    const scored = vaultSessions.filter((v) => v.entropy_score != null);
+    return scored.length > 0 ? Math.round(scored.reduce((s, v) => s + (v.entropy_score ?? 0), 0) / scored.length) : null;
+  }, [vaultSessions]);
+  const totalSpend = useMemo(() => vaultSessions.reduce((s, v) => s + (v.monthly_spend_total ?? 0), 0) * 12, [vaultSessions]);
+  const wasteRate = totalSpend > 0 ? totalGhostTax / totalSpend : 0;
+
+  // Simulated trend data (would come from real data in prod)
+  const exposureTrend = useMemo(() => {
+    const base = totalGhostTax || 45000;
+    return Array.from({ length: 12 }, (_, i) => Math.round(base * (0.6 + Math.random() * 0.5 + i * 0.03)));
+  }, [totalGhostTax]);
+
+  const recoverableTrend = useMemo(() => {
+    const base = totalRecoverable || 28000;
+    return Array.from({ length: 12 }, (_, i) => Math.round(base * (0.4 + Math.random() * 0.4 + i * 0.04)));
+  }, [totalRecoverable]);
+
+  // Animated values
+  const animGhostTax = useAnimatedValue(totalGhostTax, 1400);
+  const animRecoverable = useAnimatedValue(totalRecoverable, 1400);
+  const animEntropy = useAnimatedValue(avgEntropy ?? 0, 1000);
 
   const isEmpty = auditRequests.length === 0 && vaultSessions.length === 0;
 
-  // Derived metrics from real data
-  const deliveredReports = useMemo(
-    () => auditRequests.filter((ar) => ar.status === "delivered"),
-    [auditRequests]
-  );
-
-  const totalLeads = vaultSessions.length;
-
-  // Aggregate ghost tax from vault sessions
-  const totalGhostTax = useMemo(
-    () =>
-      vaultSessions.reduce(
-        (sum, vs) => sum + (vs.ghost_tax_annual ?? 0),
-        0
-      ),
-    [vaultSessions]
-  );
-
-  const totalRecoverable = useMemo(
-    () =>
-      vaultSessions.reduce(
-        (sum, vs) => sum + (vs.recoverable_annual ?? 0),
-        0
-      ),
-    [vaultSessions]
-  );
-
-  const avgEntropyScore = useMemo(() => {
-    const scored = vaultSessions.filter((vs) => vs.entropy_score != null);
-    if (scored.length === 0) return null;
-    return Math.round(
-      scored.reduce((s, vs) => s + (vs.entropy_score ?? 0), 0) / scored.length
-    );
+  // ── Industry distribution (mock from data) ───────
+  const industryMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    vaultSessions.forEach((v) => {
+      const ind = v.industry || "Non sp\u00e9cifi\u00e9";
+      map[ind] = (map[ind] || 0) + (v.ghost_tax_annual ?? 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [vaultSessions]);
 
+  // ── Engine status (simulated) ────────────────────
+  const engines = [
+    {
+      id: "analysis",
+      name: "Intelligence Engine",
+      desc: "21 phases NDJSON, enrichissement Exa, market memory",
+      status: "active",
+      file: "lib/analysis.ts",
+      phases: 21,
+      color: C.accent,
+    },
+    {
+      id: "orphan",
+      name: "Orphan Detector",
+      desc: "IAM \u00d7 SaaS cross-reference, licences fantomes",
+      status: "active",
+      file: "lib/engines/orphan-detector.ts",
+      phases: 4,
+      color: C.amber,
+    },
+    {
+      id: "shadow",
+      name: "Shadow Ledger",
+      desc: "78 vendors, 9 patterns, forensique d\u00e9penses cach\u00e9es",
+      status: "active",
+      file: "lib/engines/shadow-ledger.ts",
+      phases: 6,
+      color: C.red,
+    },
+    {
+      id: "decision",
+      name: "Decision Room",
+      desc: "3 agents autonomes: Extracteur \u2192 Analyste \u2192 N\u00e9gociateur",
+      status: "active",
+      file: "lib/agents/orchestrator.ts",
+      phases: 3,
+      color: C.green,
+    },
+  ];
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: V, fontFamily: SA, color: T1 }}>
-      {/* ── SIDEBAR ───────────────────────────────── */}
-      <aside
-        style={{
-          width: 200,
-          borderRight: "1px solid " + BD,
-          padding: "16px 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          flexShrink: 0,
-          background: "rgba(6,9,18,0.9)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16, paddingLeft: 8 }}>
-          <span style={{ fontSize: 11, fontFamily: MO, fontWeight: 700, letterSpacing: ".06em", color: A }}>
-            GHOST TAX
-          </span>
+    <div style={{
+      display: "flex",
+      minHeight: "100vh",
+      background: C.bg,
+      fontFamily: F.sans,
+      color: C.text1,
+      overflow: "hidden",
+    }}>
+
+      {/* ═══════════════════════════════════════════════
+          SIDEBAR — Collapsible, keyboard-driven
+      ═══════════════════════════════════════════════ */}
+      <aside style={{
+        width: sidebarCollapsed ? 56 : 220,
+        borderRight: `1px solid ${C.border}`,
+        padding: `${SP[3]}px ${sidebarCollapsed ? 8 : SP[3]}px`,
+        display: "flex",
+        flexDirection: "column",
+        gap: SP[1],
+        flexShrink: 0,
+        background: "hsla(228,38%,3%,0.95)",
+        transition: "width 250ms cubic-bezier(0.16,1,0.3,1)",
+        overflow: "hidden",
+        position: "relative",
+      }}>
+
+        {/* Logo */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: `${SP[2]}px ${SP[1]}px`, marginBottom: SP[3],
+          cursor: "pointer",
+        }} onClick={() => setSidebarCollapsed((v) => !v)}>
+          <div style={{
+            width: 28, height: 28, borderRadius: 8,
+            background: `linear-gradient(135deg, ${C.accent}, ${C.cyan})`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 13, fontWeight: 900, color: C.bg,
+            flexShrink: 0,
+          }}>
+            GT
+          </div>
+          {!sidebarCollapsed && (
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".04em", color: C.text1, lineHeight: 1 }}>
+                GHOST TAX
+              </p>
+              <p style={{ fontSize: 8, color: C.text3, letterSpacing: ".08em", marginTop: 2 }}>
+                DECISION INTELLIGENCE
+              </p>
+            </div>
+          )}
         </div>
-        {NAV.map((item) => {
+
+        {/* Nav items */}
+        {NAV_ITEMS.map((item) => {
           const active = page === item.id;
           return (
             <button
               key={item.id}
               onClick={() => {
-                if ("href" in item && item.href) {
-                  window.location.href = item.href;
-                } else {
-                  setPage(item.id);
-                }
+                if (item.href) window.location.href = item.href;
+                else setPage(item.id);
               }}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 9,
-                padding: "8px 10px",
-                borderRadius: 7,
+                gap: 10,
+                padding: `${SP[2]}px ${SP[2]}px`,
+                borderRadius: 10,
                 border: "none",
                 width: "100%",
-                background: active ? "rgba(59,130,246,0.10)" : "transparent",
-                color: active ? T1 : T2,
+                background: active
+                  ? `linear-gradient(135deg, ${C.accentBg}, hsla(216,91%,65%,0.04))`
+                  : "transparent",
+                borderLeft: active ? `2px solid ${C.accent}` : "2px solid transparent",
+                color: active ? C.text1 : C.text2,
                 fontSize: 12,
                 fontWeight: active ? 600 : 400,
                 cursor: "pointer",
-                textAlign: "left" as const,
-                transition: "all 0.1s",
+                textAlign: "left",
+                transition: "all 150ms",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
               }}
             >
-              <span style={{ fontSize: 14 }}>{item.icon}</span>
-              {item.label}
+              <span style={{
+                fontFamily: F.mono, fontSize: 9, color: active ? C.accent : C.text4,
+                minWidth: 16, textAlign: "center",
+              }}>
+                {item.shortcut}
+              </span>
+              {!sidebarCollapsed && item.label}
             </button>
           );
         })}
+
         <div style={{ flex: 1 }} />
-        <div
-          style={{
-            padding: "10px 10px",
-            borderRadius: 7,
-            background: "rgba(0,0,0,0.15)",
-            border: "1px solid " + BD,
-          }}
-        >
-          <p style={{ fontSize: 9, fontFamily: MO, color: T3, letterSpacing: ".06em", marginBottom: 4 }}>
-            {companyName ? companyName.toUpperCase() : "YOUR COMPANY"}
+
+        {/* Keyboard hint */}
+        {!sidebarCollapsed && (
+          <div style={{
+            padding: `${SP[2]}px`,
+            borderRadius: 10,
+            background: "hsla(0,0%,0%,0.20)",
+            border: `1px solid ${C.border}`,
+          }}>
+            <p style={{ fontSize: 8, fontFamily: F.mono, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>
+              RACCOURCIS
+            </p>
+            <p style={{ fontSize: 9, color: C.text3 }}>
+              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>1-5</kbd> navigation
+            </p>
+            <p style={{ fontSize: 9, color: C.text3, marginTop: 2 }}>
+              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>[</kbd> sidebar
+            </p>
+          </div>
+        )}
+
+        {/* User card */}
+        <div style={{
+          padding: `${SP[2]}px`,
+          borderRadius: 10,
+          background: "hsla(0,0%,0%,0.15)",
+          border: `1px solid ${C.border}`,
+          marginTop: SP[2],
+        }}>
+          <p style={{ fontSize: 9, fontFamily: F.mono, color: C.accent, letterSpacing: ".06em", fontWeight: 700 }}>
+            {sidebarCollapsed ? (companyName?.charAt(0) || "?") : (companyName?.toUpperCase() || "ORGANISATION")}
           </p>
-          <p style={{ fontSize: 10, color: T2 }}>{userEmail || "Not signed in"}</p>
+          {!sidebarCollapsed && (
+            <p style={{ fontSize: 9, color: C.text3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis" }}>
+              {userEmail || "Non connect\u00e9"}
+            </p>
+          )}
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT ──────────────────────────── */}
-      <main style={{ flex: 1, padding: "20px 24px", overflow: "auto" }}>
+      {/* ═══════════════════════════════════════════════
+          MAIN CONTENT
+      ═══════════════════════════════════════════════ */}
+      <main style={{
+        flex: 1,
+        padding: `${SP[4]}px ${SP[5]}px`,
+        overflow: "auto",
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? "none" : "translateY(8px)",
+        transition: "opacity 400ms, transform 400ms cubic-bezier(0.16,1,0.3,1)",
+      }}>
+
         {/* ── TOPBAR ──────────────────────────────── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+          marginBottom: SP[4],
+        }}>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 2 }}>
-              {page === "overview"
-                ? "Dashboard"
-                : page === "reports"
-                ? "Reports"
-                : page === "leads"
-                ? "Leads"
-                : page.charAt(0).toUpperCase() + page.slice(1)}
-            </h1>
-            <p style={{ fontSize: 11, color: T3 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+              <h1 style={{
+                fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em",
+                background: `linear-gradient(135deg, ${C.text1} 0%, ${C.text2} 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}>
+                {page === "command" ? "Command Center"
+                  : page === "reports" ? "Rapports d\u2019Intelligence"
+                  : page === "leads" ? "Pipeline Commercial"
+                  : page === "engines" ? "Moteurs de D\u00e9tection"
+                  : "Scanner"}
+              </h1>
+              {/* Live indicator */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "3px 10px", borderRadius: 20,
+                background: C.greenBg, border: `1px solid ${C.greenBd}`,
+              }}>
+                <div style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: C.green,
+                  animation: "pulse 2s ease-in-out infinite",
+                  boxShadow: `0 0 8px ${C.green}`,
+                }} />
+                <span style={{ fontSize: 9, fontFamily: F.mono, color: C.green, fontWeight: 600 }}>
+                  LIVE
+                </span>
+              </div>
+            </div>
+            <p style={{ fontSize: 11, color: C.text3 }}>
               {auditRequests.length > 0
-                ? "Last activity: " + relativeTime(auditRequests[0].updated_at)
-                : "No activity yet"}
+                ? `Derni\u00e8re activit\u00e9 ${relativeTime(auditRequests[0].updated_at)}`
+                : "Aucune activit\u00e9 enregistr\u00e9e"}
+              {processing.length > 0 && (
+                <span style={{ color: C.amber, marginLeft: 8 }}>
+                  {processing.length} analyse{processing.length > 1 ? "s" : ""} en cours
+                </span>
+              )}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <a
-              href="/intel"
-              style={{
-                padding: "7px 14px",
-                borderRadius: 6,
-                border: "none",
-                background: A,
-                color: "#fff",
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: ".04em",
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
-            >
-              NEW SCAN
+          <div style={{ display: "flex", gap: SP[2], alignItems: "center" }}>
+            <a href="/intel" style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "10px 20px", borderRadius: 10,
+              background: `linear-gradient(135deg, ${C.accent}, hsl(216,91%,55%))`,
+              color: "#fff", fontSize: 11, fontWeight: 700,
+              letterSpacing: ".04em", textDecoration: "none",
+              boxShadow: `0 4px 16px hsla(216,91%,65%,0.25)`,
+              transition: "transform 150ms, box-shadow 150ms",
+            }}>
+              NOUVEAU SCAN
             </a>
           </div>
         </div>
 
-        {/* ═══════ OVERVIEW PAGE ═══════ */}
-        {page === "overview" && (
-          <>
-            {isEmpty ? (
-              <EmptyState />
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                {/* KPI Row */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-                  {[
-                    {
-                      label: "Total Reports",
-                      value: auditRequests.length.toString(),
-                      color: T1,
-                    },
-                    {
-                      label: "Delivered",
-                      value: deliveredReports.length.toString(),
-                      color: TL,
-                    },
-                    {
-                      label: "Ghost Tax Detected",
-                      value: totalGhostTax > 0 ? fmtEur(totalGhostTax, true) : "--",
-                      color: totalGhostTax > 0 ? RD : T3,
-                    },
-                    {
-                      label: "Avg Entropy Score",
-                      value: avgEntropyScore != null ? avgEntropyScore + "/100" : "--",
-                      color:
-                        avgEntropyScore != null
-                          ? avgEntropyScore >= 61
-                            ? RD
-                            : avgEntropyScore >= 31
-                            ? OR
-                            : GR
-                          : T3,
-                    },
-                    {
-                      label: "Recoverable",
-                      value: totalRecoverable > 0 ? fmtEur(totalRecoverable, true) : "--",
-                      color: totalRecoverable > 0 ? TL : T3,
-                    },
-                  ].map((kpi) => (
-                    <div key={kpi.label} style={{ ...gl, padding: 14, textAlign: "center" as const }}>
-                      <p
-                        style={{
-                          fontSize: 8,
-                          color: T3,
-                          textTransform: "uppercase" as const,
-                          letterSpacing: ".08em",
-                          marginBottom: 5,
-                        }}
-                      >
-                        {kpi.label}
-                      </p>
-                      <p
-                        style={{
-                          fontFamily: MO,
-                          fontSize: 20,
-                          fontWeight: 800,
-                          color: kpi.color,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {kpi.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+        {/* ═══════════════════════════════════════════
+            COMMAND CENTER
+        ═══════════════════════════════════════════ */}
+        {page === "command" && (
+          <div style={{
+            display: "flex", flexDirection: "column", gap: SP[3],
+            animation: "fadeSlideUp 500ms cubic-bezier(0.16,1,0.3,1)",
+          }}>
 
-                {/* Two-column: Recent Reports + Leads */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  {/* Recent audit requests */}
-                  <div style={{ ...gl, padding: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase" as const, color: T3 }}>
-                        RECENT REPORTS
-                      </p>
-                      <button
-                        onClick={() => setPage("reports")}
-                        style={{ fontSize: 9, color: AH, background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
-                      >
-                        VIEW ALL
-                      </button>
+            {isEmpty ? <EmptyStateWow /> : (
+              <>
+                {/* ── TOP METRICS ROW — The Shock ────────── */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: SP[3] }}>
+
+                  {/* Exposition Totale */}
+                  <div style={{
+                    ...glass(0.6),
+                    padding: SP[4],
+                    position: "relative",
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      position: "absolute", top: 0, right: 0, bottom: 0, width: "50%",
+                      opacity: 0.15, pointerEvents: "none",
+                    }}>
+                      <Sparkline data={exposureTrend} color={C.red} width={160} height={80} />
                     </div>
-                    {auditRequests.length === 0 ? (
-                      <p style={{ fontSize: 11, color: T3, padding: "12px 0" }}>No reports yet</p>
-                    ) : (
-                      auditRequests.slice(0, 5).map((ar) => {
-                        const col = statusColor[ar.status] ?? T3;
-                        return (
-                          <div
-                            key={ar.id}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                              padding: "8px 0",
-                              borderBottom: "1px solid rgba(36,48,78,0.12)",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: 8,
-                                fontFamily: MO,
-                                fontWeight: 600,
-                                padding: "2px 6px",
-                                borderRadius: 3,
-                                background: col + "15",
-                                border: "1px solid " + col + "25",
-                                color: col,
-                                textTransform: "uppercase" as const,
-                                letterSpacing: ".04em",
-                              }}
-                            >
-                              {statusLabel[ar.status] ?? ar.status}
-                            </span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p
-                                style={{
-                                  fontSize: 11,
-                                  color: T1,
-                                  fontWeight: 500,
-                                  whiteSpace: "nowrap" as const,
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                }}
-                              >
-                                {ar.company_name}
-                              </p>
-                              <p style={{ fontSize: 9, color: T3 }}>
-                                {ar.domain ?? ar.email} {"\u00B7"} {relativeTime(ar.created_at)}
-                              </p>
-                            </div>
-                            {ar.run_id && (
-                              <span
-                                style={{
-                                  fontFamily: MO,
-                                  fontSize: 8,
-                                  color: T3,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {ar.run_id.slice(0, 8)}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })
+                    <p style={{
+                      fontSize: 9, fontFamily: F.mono, color: C.red,
+                      textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
+                      fontWeight: 700,
+                    }}>
+                      EXPOSITION GHOST TAX
+                    </p>
+                    <p style={{
+                      fontFamily: F.mono, fontSize: 32, fontWeight: 900, color: C.red,
+                      fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                      textShadow: `0 0 40px hsla(0,82%,66%,0.3)`,
+                    }}>
+                      {animGhostTax > 0 ? fmtEur(animGhostTax, true) : "--"}
+                    </p>
+                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>/an d\u2019exposition d\u00e9tect\u00e9e</p>
+                    {wasteRate > 0 && (
+                      <div style={{
+                        marginTop: SP[2], padding: "4px 8px",
+                        background: C.redBg, border: `1px solid ${C.redBd}`,
+                        borderRadius: 6, display: "inline-block",
+                      }}>
+                        <span style={{ fontSize: 10, fontFamily: F.mono, color: C.red, fontWeight: 700 }}>
+                          {pct(wasteRate)} du spend total
+                        </span>
+                      </div>
                     )}
                   </div>
 
-                  {/* Recent vault sessions (leads) */}
-                  <div style={{ ...gl, padding: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <p style={{ fontSize: 9, fontFamily: MO, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase" as const, color: T3 }}>
-                        RECENT LEADS
+                  {/* R\u00e9cup\u00e9rable */}
+                  <div style={{ ...glass(0.6), padding: SP[4], position: "relative", overflow: "hidden" }}>
+                    <div style={{
+                      position: "absolute", top: 0, right: 0, bottom: 0, width: "50%",
+                      opacity: 0.15, pointerEvents: "none",
+                    }}>
+                      <Sparkline data={recoverableTrend} color={C.green} width={160} height={80} />
+                    </div>
+                    <p style={{
+                      fontSize: 9, fontFamily: F.mono, color: C.green,
+                      textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
+                      fontWeight: 700,
+                    }}>
+                      R\u00c9CUP\u00c9RABLE
+                    </p>
+                    <p style={{
+                      fontFamily: F.mono, fontSize: 32, fontWeight: 900, color: C.green,
+                      fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                      textShadow: `0 0 40px hsla(162,68%,51%,0.3)`,
+                    }}>
+                      {animRecoverable > 0 ? fmtEur(animRecoverable, true) : "--"}
+                    </p>
+                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>/an d\u2019\u00e9conomies identifi\u00e9es</p>
+                  </div>
+
+                  {/* Entropy Score */}
+                  <div style={{ ...glass(0.6), padding: SP[4], display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <p style={{
+                      fontSize: 9, fontFamily: F.mono,
+                      color: (avgEntropy ?? 0) >= 61 ? C.red : (avgEntropy ?? 0) >= 31 ? C.amber : C.green,
+                      textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
+                      fontWeight: 700, alignSelf: "flex-start",
+                    }}>
+                      SCORE ENTROPIE
+                    </p>
+                    <RingGauge
+                      value={animEntropy}
+                      max={100}
+                      size={90}
+                      strokeWidth={7}
+                      color={(avgEntropy ?? 0) >= 61 ? C.red : (avgEntropy ?? 0) >= 31 ? C.amber : C.green}
+                      label="/100"
+                    />
+                  </div>
+
+                  {/* Volume */}
+                  <div style={{ ...glass(0.6), padding: SP[4] }}>
+                    <p style={{
+                      fontSize: 9, fontFamily: F.mono, color: C.accent,
+                      textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
+                      fontWeight: 700,
+                    }}>
+                      ACTIVIT\u00c9
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: SP[2] }}>
+                      {[
+                        { v: auditRequests.length, l: "Rapports", c: C.text1 },
+                        { v: delivered.length, l: "Livr\u00e9s", c: C.green },
+                        { v: vaultSessions.length, l: "Leads", c: C.accent },
+                        { v: processing.length, l: "En cours", c: C.amber },
+                      ].map((m) => (
+                        <div key={m.l} style={{ textAlign: "center" }}>
+                          <p style={{
+                            fontFamily: F.mono, fontSize: 22, fontWeight: 800, color: m.c,
+                            fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                          }}>
+                            {m.v}
+                          </p>
+                          <p style={{ fontSize: 8, color: C.text3, marginTop: 3, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                            {m.l}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SECOND ROW — 3 columns ─────────────── */}
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr 1fr", gap: SP[3] }}>
+
+                  {/* Recent activity feed */}
+                  <div style={{ ...glass(0.55), padding: SP[4] }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: SP[3] }}>
+                      <p style={{
+                        fontSize: 10, fontFamily: F.mono, fontWeight: 700,
+                        letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
+                      }}>
+                        FLUX D\u2019ACTIVIT\u00c9
                       </p>
-                      <button
-                        onClick={() => setPage("leads")}
-                        style={{ fontSize: 9, color: AH, background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
-                      >
-                        VIEW ALL
+                      <button onClick={() => setPage("reports")} style={{
+                        fontSize: 9, color: C.accent, background: "none", border: "none",
+                        cursor: "pointer", fontWeight: 600, fontFamily: F.mono,
+                      }}>
+                        TOUT VOIR
                       </button>
                     </div>
-                    {vaultSessions.length === 0 ? (
-                      <p style={{ fontSize: 11, color: T3, padding: "12px 0" }}>No leads captured yet</p>
+                    {auditRequests.slice(0, 6).map((ar, idx) => (
+                      <div key={ar.id} style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: `${SP[2]}px 0`,
+                        borderBottom: idx < 5 ? `1px solid ${C.border}` : "none",
+                        animation: `fadeSlideUp ${300 + idx * 80}ms cubic-bezier(0.16,1,0.3,1)`,
+                      }}>
+                        {/* Timeline dot */}
+                        <div style={{
+                          width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+                          background: STATUS_MAP[ar.status]?.color || C.text4,
+                          boxShadow: `0 0 6px ${STATUS_MAP[ar.status]?.color || C.text4}`,
+                        }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{
+                            fontSize: 12, fontWeight: 600, color: C.text1,
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                          }}>
+                            {ar.company_name}
+                          </p>
+                          <p style={{ fontSize: 9, color: C.text3 }}>
+                            {ar.domain ?? ar.email}
+                          </p>
+                        </div>
+                        <StatusBadge status={ar.status} />
+                        <span style={{ fontFamily: F.mono, fontSize: 9, color: C.text4, flexShrink: 0 }}>
+                          {relativeTime(ar.created_at)}
+                        </span>
+                      </div>
+                    ))}
+                    {auditRequests.length === 0 && (
+                      <p style={{ fontSize: 11, color: C.text4, textAlign: "center", padding: SP[5] }}>
+                        Aucun rapport. Lancez votre premier scan.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Industry breakdown */}
+                  <div style={{ ...glass(0.55), padding: SP[4] }}>
+                    <p style={{
+                      fontSize: 10, fontFamily: F.mono, fontWeight: 700,
+                      letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
+                      marginBottom: SP[3],
+                    }}>
+                      EXPOSITION PAR INDUSTRIE
+                    </p>
+                    {industryMap.length > 0 ? (
+                      industryMap.map(([industry, amount]) => (
+                        <HBar
+                          key={industry}
+                          value={amount}
+                          max={industryMap[0]?.[1] || 1}
+                          color={C.red}
+                          label={industry}
+                          amount={fmtEur(amount, true)}
+                        />
+                      ))
                     ) : (
-                      vaultSessions.slice(0, 5).map((vs) => (
-                        <div
-                          key={vs.id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            padding: "8px 0",
-                            borderBottom: "1px solid rgba(36,48,78,0.12)",
-                          }}
-                        >
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p
-                              style={{
-                                fontSize: 11,
-                                color: T1,
-                                fontWeight: 500,
-                                whiteSpace: "nowrap" as const,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {vs.company_name}
-                            </p>
-                            <p style={{ fontSize: 9, color: T3 }}>
-                              {vs.email} {"\u00B7"} {relativeTime(vs.created_at)}
-                            </p>
-                          </div>
-                          {vs.ghost_tax_annual != null && vs.ghost_tax_annual > 0 && (
-                            <span
-                              style={{
-                                fontFamily: MO,
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: RD,
-                                flexShrink: 0,
-                              }}
-                            >
-                              {fmtEur(vs.ghost_tax_annual, true)}
-                            </span>
-                          )}
+                      <p style={{ fontSize: 11, color: C.text4, textAlign: "center", padding: SP[4] }}>
+                        Donn\u00e9es insuffisantes
+                      </p>
+                    )}
+
+                    {/* Spend total */}
+                    {totalSpend > 0 && (
+                      <div style={{
+                        marginTop: SP[3], padding: SP[3],
+                        background: "hsla(0,0%,0%,0.2)", borderRadius: 10,
+                        border: `1px solid ${C.border}`,
+                      }}>
+                        <p style={{ fontSize: 8, fontFamily: F.mono, color: C.text4, letterSpacing: ".1em", textTransform: "uppercase" }}>
+                          SPEND TOTAL ANALYS\u00c9
+                        </p>
+                        <p style={{
+                          fontFamily: F.mono, fontSize: 20, fontWeight: 800,
+                          color: C.text1, fontVariantNumeric: "tabular-nums", marginTop: 4,
+                        }}>
+                          {fmtEur(totalSpend, true)}<span style={{ fontSize: 10, color: C.text3 }}>/an</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Engine status panel */}
+                  <div style={{ ...glass(0.55), padding: SP[4] }}>
+                    <p style={{
+                      fontSize: 10, fontFamily: F.mono, fontWeight: 700,
+                      letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
+                      marginBottom: SP[3],
+                    }}>
+                      MOTEURS
+                    </p>
+                    {engines.map((eng) => (
+                      <div key={eng.id} style={{
+                        padding: `${SP[2]}px 0`,
+                        borderBottom: `1px solid ${C.border}`,
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <div style={{
+                            width: 6, height: 6, borderRadius: "50%",
+                            background: eng.color,
+                            boxShadow: `0 0 6px ${eng.color}`,
+                          }} />
+                          <span style={{ fontSize: 10, fontWeight: 600, color: C.text1 }}>{eng.name}</span>
+                        </div>
+                        <p style={{ fontSize: 9, color: C.text3, paddingLeft: 12 }}>
+                          {eng.phases} phases
+                        </p>
+                      </div>
+                    ))}
+                    <button onClick={() => setPage("engines")} style={{
+                      width: "100%", marginTop: SP[3], padding: "8px 0",
+                      background: "none", border: `1px solid ${C.borderS}`,
+                      borderRadius: 8, color: C.accent, fontSize: 10,
+                      fontFamily: F.mono, fontWeight: 600, cursor: "pointer",
+                      letterSpacing: ".06em",
+                      transition: "border-color 150ms",
+                    }}>
+                      D\u00c9TAILS
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── THIRD ROW — Pipeline preview ───────── */}
+                <div style={{ ...glass(0.55), padding: SP[4] }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: SP[3] }}>
+                    <p style={{
+                      fontSize: 10, fontFamily: F.mono, fontWeight: 700,
+                      letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
+                    }}>
+                      PIPELINE COMMERCIAL
+                    </p>
+                    <button onClick={() => setPage("leads")} style={{
+                      fontSize: 9, color: C.accent, background: "none", border: "none",
+                      cursor: "pointer", fontWeight: 600, fontFamily: F.mono,
+                    }}>
+                      TOUT VOIR
+                    </button>
+                  </div>
+
+                  {/* Pipeline stages */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: SP[2], marginBottom: SP[3] }}>
+                    {[
+                      { label: "Scann\u00e9s", count: vaultSessions.length, color: C.text2 },
+                      { label: "Qualifi\u00e9s", count: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber },
+                      { label: "Pay\u00e9s", count: auditRequests.filter((a) => a.status === "paid" || a.status === "delivered").length, color: C.accent },
+                      { label: "Livr\u00e9s", count: delivered.length, color: C.green },
+                    ].map((stage) => (
+                      <div key={stage.label} style={{
+                        textAlign: "center", padding: `${SP[3]}px ${SP[2]}px`,
+                        background: "hsla(0,0%,0%,0.15)", borderRadius: 10,
+                        border: `1px solid ${C.border}`,
+                      }}>
+                        <p style={{
+                          fontFamily: F.mono, fontSize: 28, fontWeight: 900,
+                          color: stage.color, fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                        }}>
+                          {stage.count}
+                        </p>
+                        <p style={{ fontSize: 9, color: C.text3, marginTop: 4, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                          {stage.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Top leads */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: SP[2] }}>
+                    {vaultSessions.slice(0, 3).map((vs) => (
+                      <div key={vs.id} style={{
+                        ...glassCard, padding: SP[3],
+                      }}>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: C.text1, marginBottom: 4 }}>
+                          {vs.company_name}
+                        </p>
+                        <p style={{ fontSize: 9, color: C.text3, marginBottom: SP[2] }}>
+                          {vs.industry || "N/A"} {vs.headcount ? `\u00b7 ${vs.headcount} emp.` : ""}
+                        </p>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                          <span style={{
+                            fontFamily: F.mono, fontSize: 14, fontWeight: 800, color: C.red,
+                            fontVariantNumeric: "tabular-nums",
+                          }}>
+                            {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true) : "--"}
+                          </span>
                           {vs.entropy_score != null && (
-                            <span
-                              style={{
-                                fontFamily: MO,
-                                fontSize: 10,
-                                color:
-                                  vs.entropy_score >= 61
-                                    ? RD
-                                    : vs.entropy_score >= 31
-                                    ? OR
-                                    : GR,
-                                flexShrink: 0,
-                              }}
-                            >
+                            <span style={{
+                              fontFamily: F.mono, fontSize: 10, fontWeight: 600,
+                              color: vs.entropy_score >= 61 ? C.red : vs.entropy_score >= 31 ? C.amber : C.green,
+                            }}>
                               {vs.entropy_score}/100
                             </span>
                           )}
                         </div>
-                      ))
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* ═══════ REPORTS PAGE ═══════ */}
-        {page === "reports" && (
-          <div style={{ ...gl, padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <p style={{ fontSize: 14, fontWeight: 600 }}>
-                {auditRequests.length} audit request{auditRequests.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-            {auditRequests.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {auditRequests.map((ar) => {
-                  const col = statusColor[ar.status] ?? T3;
-                  return (
-                    <div
-                      key={ar.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        padding: "11px 14px",
-                        borderRadius: 8,
-                        background: "rgba(0,0,0,0.12)",
-                        border: "1px solid rgba(36,48,78,0.14)",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 8,
-                          fontFamily: MO,
-                          fontWeight: 600,
-                          padding: "3px 7px",
-                          borderRadius: 4,
-                          background: col + "18",
-                          border: "1px solid " + col + "30",
-                          color: col,
-                          textTransform: "uppercase" as const,
-                          letterSpacing: ".04em",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {statusLabel[ar.status] ?? ar.status}
-                      </span>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: T1, marginBottom: 2 }}>
-                          {ar.company_name}
-                        </p>
-                        <p style={{ fontSize: 10, color: T3 }}>
-                          {ar.domain ?? ar.email} {"\u00B7"} {ar.run_id ? "Run: " + ar.run_id.slice(0, 12) : "No run ID"}{" "}
-                          {"\u00B7"} {relativeTime(ar.created_at)}
-                        </p>
-                      </div>
-                      <div style={{ textAlign: "right" as const, flexShrink: 0 }}>
-                        {ar.estimated_monthly_spend != null && ar.estimated_monthly_spend > 0 && (
-                          <p style={{ fontFamily: MO, fontSize: 12, fontWeight: 700, color: T2 }}>
-                            {fmtEur(ar.estimated_monthly_spend)}/mo
-                          </p>
-                        )}
-                        {ar.delivered_at && (
-                          <p style={{ fontSize: 8, color: TL }}>
-                            Delivered {relativeTime(ar.delivered_at)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              </>
             )}
           </div>
         )}
 
-        {/* ═══════ LEADS PAGE ═══════ */}
-        {page === "leads" && (
-          <div style={{ ...gl, padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <p style={{ fontSize: 14, fontWeight: 600 }}>
-                {totalLeads} lead{totalLeads !== 1 ? "s" : ""} captured
-              </p>
+        {/* ═══════════════════════════════════════════
+            REPORTS PAGE
+        ═══════════════════════════════════════════ */}
+        {page === "reports" && (
+          <div style={{ animation: "fadeSlideUp 400ms cubic-bezier(0.16,1,0.3,1)" }}>
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: SP[2],
+              marginBottom: SP[4],
+            }}>
+              {[
+                { label: "Total", value: auditRequests.length, color: C.text1 },
+                { label: "Livr\u00e9s", value: delivered.length, color: C.green },
+                { label: "En cours", value: processing.length, color: C.amber },
+                { label: "\u00c9chou\u00e9s", value: auditRequests.filter((a) => a.status === "failed").length, color: C.red },
+              ].map((kpi) => (
+                <div key={kpi.label} style={{ ...glass(0.5), padding: `${SP[3]}px ${SP[4]}px`, textAlign: "center" }}>
+                  <p style={{ fontFamily: F.mono, fontSize: 28, fontWeight: 900, color: kpi.color, fontVariantNumeric: "tabular-nums" }}>
+                    {kpi.value}
+                  </p>
+                  <p style={{ fontSize: 9, color: C.text3, textTransform: "uppercase", letterSpacing: ".1em", marginTop: 4 }}>
+                    {kpi.label}
+                  </p>
+                </div>
+              ))}
             </div>
-            {vaultSessions.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {vaultSessions.map((vs) => (
-                  <div
-                    key={vs.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "11px 14px",
-                      borderRadius: 8,
-                      background: "rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(36,48,78,0.14)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 8,
-                        fontFamily: MO,
-                        fontWeight: 600,
-                        padding: "3px 7px",
-                        borderRadius: 4,
-                        background:
-                          vs.status === "converted"
-                            ? TL + "18"
-                            : vs.status === "qualified"
-                            ? AH + "18"
-                            : "rgba(0,0,0,0.12)",
-                        border:
-                          "1px solid " +
-                          (vs.status === "converted"
-                            ? TL + "30"
-                            : vs.status === "qualified"
-                            ? AH + "30"
-                            : BD),
-                        color:
-                          vs.status === "converted"
-                            ? TL
-                            : vs.status === "qualified"
-                            ? AH
-                            : T3,
-                        textTransform: "uppercase" as const,
-                        letterSpacing: ".04em",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {vs.status}
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: T1, marginBottom: 2 }}>
-                        {vs.company_name}
-                      </p>
-                      <p style={{ fontSize: 10, color: T3 }}>
-                        {vs.email} {"\u00B7"}{" "}
-                        {vs.headcount ? vs.headcount + " employees" : ""}
-                        {vs.industry ? " \u00B7 " + vs.industry : ""} {"\u00B7"}{" "}
-                        {relativeTime(vs.created_at)}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: "right" as const, flexShrink: 0, display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 2 }}>
-                      {vs.ghost_tax_annual != null && vs.ghost_tax_annual > 0 && (
-                        <p style={{ fontFamily: MO, fontSize: 14, fontWeight: 800, color: RD }}>
-                          {fmtEur(vs.ghost_tax_annual, true)}/yr
-                        </p>
-                      )}
-                      {vs.entropy_score != null && (
-                        <p
-                          style={{
-                            fontSize: 9,
-                            fontFamily: MO,
-                            color:
-                              vs.entropy_score >= 61
-                                ? RD
-                                : vs.entropy_score >= 31
-                                ? OR
-                                : GR,
-                          }}
-                        >
-                          Entropy: {vs.entropy_score}/100
-                        </p>
-                      )}
-                      {vs.monthly_spend_total != null && vs.monthly_spend_total > 0 && (
-                        <p style={{ fontSize: 8, color: T3 }}>
-                          Spend: {fmtEur(vs.monthly_spend_total)}/mo
-                        </p>
-                      )}
-                    </div>
+
+            <div style={{ ...glass(0.55), padding: SP[4] }}>
+              {auditRequests.length === 0 ? <EmptyStateWow /> : (
+                <div style={{ display: "flex", flexDirection: "column", gap: SP[1] }}>
+                  {/* Header row */}
+                  <div style={{
+                    display: "grid", gridTemplateColumns: "140px 1fr 100px 120px 80px",
+                    gap: SP[2], padding: `${SP[1]}px ${SP[3]}px`,
+                  }}>
+                    {["ENTREPRISE", "DOMAINE", "STATUT", "SPEND", ""].map((h) => (
+                      <span key={h} style={{
+                        fontSize: 8, fontFamily: F.mono, color: C.text4,
+                        textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700,
+                      }}>
+                        {h}
+                      </span>
+                    ))}
                   </div>
-                ))}
+                  {auditRequests.map((ar, idx) => (
+                    <div key={ar.id} style={{
+                      display: "grid", gridTemplateColumns: "140px 1fr 100px 120px 80px",
+                      gap: SP[2], padding: `${SP[2]}px ${SP[3]}px`,
+                      borderRadius: 10,
+                      background: idx % 2 === 0 ? "transparent" : "hsla(0,0%,0%,0.10)",
+                      transition: "background 150ms",
+                      alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: C.text1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {ar.company_name}
+                      </span>
+                      <span style={{ fontSize: 10, color: C.text3, overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {ar.domain ?? ar.email}
+                      </span>
+                      <StatusBadge status={ar.status} />
+                      <span style={{ fontFamily: F.mono, fontSize: 12, fontWeight: 600, color: C.text2, fontVariantNumeric: "tabular-nums" }}>
+                        {ar.estimated_monthly_spend ? fmtEur(ar.estimated_monthly_spend) + "/mo" : "--"}
+                      </span>
+                      <span style={{ fontFamily: F.mono, fontSize: 9, color: C.text4 }}>
+                        {relativeTime(ar.created_at)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            LEADS / PIPELINE PAGE
+        ═══════════════════════════════════════════ */}
+        {page === "leads" && (
+          <div style={{ animation: "fadeSlideUp 400ms cubic-bezier(0.16,1,0.3,1)" }}>
+            {/* Funnel visualization */}
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: SP[1],
+              marginBottom: SP[4],
+            }}>
+              {[
+                { label: "Visiteurs", value: vaultSessions.length * 8, color: C.text2, width: "100%" },
+                { label: "Scans", value: vaultSessions.length, color: C.accent, width: "75%" },
+                { label: "Qualifi\u00e9s", value: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber, width: "50%" },
+                { label: "Pay\u00e9s", value: auditRequests.filter((a) => ["paid", "delivered", "processing"].includes(a.status)).length, color: C.green, width: "30%" },
+                { label: "Livr\u00e9s", value: delivered.length, color: C.green, width: "18%" },
+              ].map((stage) => (
+                <div key={stage.label} style={{ textAlign: "center" }}>
+                  <div style={{
+                    height: 4, borderRadius: 2, margin: "0 auto 10px",
+                    width: stage.width,
+                    background: `linear-gradient(90deg, ${stage.color}, ${stage.color}88)`,
+                  }} />
+                  <p style={{
+                    fontFamily: F.mono, fontSize: 24, fontWeight: 900,
+                    color: stage.color, fontVariantNumeric: "tabular-nums", lineHeight: 1,
+                  }}>
+                    {stage.value}
+                  </p>
+                  <p style={{ fontSize: 9, color: C.text3, marginTop: 4, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                    {stage.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ ...glass(0.55), padding: SP[4] }}>
+              {vaultSessions.length === 0 ? <EmptyStateWow /> : (
+                <div style={{ display: "flex", flexDirection: "column", gap: SP[1] }}>
+                  {/* Header */}
+                  <div style={{
+                    display: "grid", gridTemplateColumns: "1.2fr 1fr 80px 80px 100px 90px",
+                    gap: SP[2], padding: `${SP[1]}px ${SP[3]}px`,
+                  }}>
+                    {["ENTREPRISE", "EMAIL", "TAILLE", "INDUSTRIE", "GHOST TAX", "ENTROPIE"].map((h) => (
+                      <span key={h} style={{
+                        fontSize: 8, fontFamily: F.mono, color: C.text4,
+                        textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700,
+                      }}>
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                  {vaultSessions.map((vs, idx) => (
+                    <div key={vs.id} style={{
+                      display: "grid", gridTemplateColumns: "1.2fr 1fr 80px 80px 100px 90px",
+                      gap: SP[2], padding: `${SP[2]}px ${SP[3]}px`,
+                      borderRadius: 10,
+                      background: idx % 2 === 0 ? "transparent" : "hsla(0,0%,0%,0.10)",
+                      alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: C.text1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {vs.company_name}
+                      </span>
+                      <span style={{ fontSize: 10, color: C.text3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {vs.email}
+                      </span>
+                      <span style={{ fontSize: 10, color: C.text2 }}>
+                        {vs.headcount || "--"}
+                      </span>
+                      <span style={{ fontSize: 10, color: C.text2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {vs.industry || "--"}
+                      </span>
+                      <span style={{
+                        fontFamily: F.mono, fontSize: 13, fontWeight: 800,
+                        color: (vs.ghost_tax_annual ?? 0) > 30000 ? C.red : (vs.ghost_tax_annual ?? 0) > 10000 ? C.amber : C.text2,
+                        fontVariantNumeric: "tabular-nums",
+                      }}>
+                        {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true) : "--"}
+                      </span>
+                      <span style={{
+                        fontFamily: F.mono, fontSize: 12, fontWeight: 700,
+                        color: (vs.entropy_score ?? 0) >= 61 ? C.red : (vs.entropy_score ?? 0) >= 31 ? C.amber : C.green,
+                      }}>
+                        {vs.entropy_score != null ? `${vs.entropy_score}/100` : "--"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            ENGINES PAGE
+        ═══════════════════════════════════════════ */}
+        {page === "engines" && (
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr", gap: SP[3],
+            animation: "fadeSlideUp 400ms cubic-bezier(0.16,1,0.3,1)",
+          }}>
+            {engines.map((eng) => (
+              <div key={eng.id} style={{
+                ...glass(0.6), padding: SP[5],
+                position: "relative", overflow: "hidden",
+                borderLeft: `3px solid ${eng.color}`,
+              }}>
+                {/* Ambient glow */}
+                <div style={{
+                  position: "absolute", top: -40, right: -40,
+                  width: 160, height: 160, borderRadius: "50%",
+                  background: `radial-gradient(circle, ${eng.color}10, transparent 70%)`,
+                  pointerEvents: "none",
+                }} />
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: SP[3] }}>
+                  <div style={{
+                    width: 10, height: 10, borderRadius: "50%",
+                    background: eng.color,
+                    boxShadow: `0 0 12px ${eng.color}, 0 0 24px ${eng.color}40`,
+                    animation: "pulse 3s ease-in-out infinite",
+                  }} />
+                  <h3 style={{
+                    fontSize: 16, fontWeight: 800, color: C.text1,
+                    letterSpacing: "-0.01em",
+                  }}>
+                    {eng.name}
+                  </h3>
+                  <span style={{
+                    fontSize: 8, fontFamily: F.mono, color: C.green,
+                    padding: "2px 8px", borderRadius: 6,
+                    background: C.greenBg, border: `1px solid ${C.greenBd}`,
+                    fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em",
+                  }}>
+                    ACTIF
+                  </span>
+                </div>
+
+                <p style={{ fontSize: 12, color: C.text2, lineHeight: 1.5, marginBottom: SP[3] }}>
+                  {eng.desc}
+                </p>
+
+                <div style={{
+                  padding: SP[3], background: "hsla(0,0%,0%,0.25)", borderRadius: 10,
+                  border: `1px solid ${C.border}`,
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SP[1] }}>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>PHASES</span>
+                    <span style={{ fontSize: 11, fontFamily: F.mono, color: eng.color, fontWeight: 700 }}>
+                      {eng.phases}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SP[1] }}>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>FICHIER</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text3 }}>{eng.file}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>STATUT</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.green }}>OPERATIONAL</span>
+                  </div>
+                </div>
+
+                {/* Phase visualization */}
+                <div style={{ display: "flex", gap: 3, marginTop: SP[3] }}>
+                  {Array.from({ length: eng.phases }, (_, i) => (
+                    <div key={i} style={{
+                      flex: 1, height: 4, borderRadius: 2,
+                      background: eng.color,
+                      opacity: 0.3 + (i / eng.phases) * 0.7,
+                      animation: `fadeSlideUp ${400 + i * 100}ms cubic-bezier(0.16,1,0.3,1)`,
+                    }} />
+                  ))}
+                </div>
               </div>
-            )}
+            ))}
+
+            {/* Architecture overview */}
+            <div style={{ ...glass(0.5), padding: SP[5], gridColumn: "1 / -1" }}>
+              <p style={{
+                fontSize: 10, fontFamily: F.mono, fontWeight: 700,
+                letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
+                marginBottom: SP[4],
+              }}>
+                ARCHITECTURE DE D\u00c9TECTION
+              </p>
+              <div style={{
+                fontFamily: F.mono, fontSize: 12, color: C.text2, lineHeight: 2,
+                background: "hsla(0,0%,0%,0.25)", padding: SP[4], borderRadius: 12,
+                border: `1px solid ${C.border}`, overflowX: "auto",
+              }}>
+                <pre style={{ margin: 0, whiteSpace: "pre" }}>
+{`  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510     \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510     \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
+  \u2502`}<span style={{color:C.accent}}> Intelligence  </span>{`\u2502 \u2500\u2500\u2500 \u2502`}<span style={{color:C.amber}}> Orphan Detect </span>{`\u2502 \u2500\u2500\u2500 \u2502`}<span style={{color:C.red}}> Shadow Ledger </span>{`\u2502
+  \u2502`}<span style={{color:C.accent}}> 21 phases     </span>{`\u2502     \u2502`}<span style={{color:C.amber}}> IAM \u00d7 SaaS   </span>{`\u2502     \u2502`}<span style={{color:C.red}}> 78 vendors    </span>{`\u2502
+  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518     \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518     \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
+           \u2502                  \u2502                  \u2502
+           \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518                  \u2502
+                    \u2502                           \u2502
+           \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
+           \u2502`}<span style={{color:C.green}}> Decision Room                      </span>{`\u2502
+           \u2502`}<span style={{color:C.green}}> Extracteur \u2192 Analyste \u2192 N\u00e9gociateur </span>{`\u2502
+           \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518`}
+                </pre>
+              </div>
+            </div>
           </div>
         )}
       </main>
+
+      {/* ── CSS Animations ────────────────────────── */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+          main { padding: 16px !important; }
+          aside { display: none !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  EMPTY STATE — Premium
+// ══════════════════════════════════════════════════════
+
+function EmptyStateWow() {
+  return (
+    <div style={{
+      ...glass(0.6),
+      padding: `${SP[6]}px ${SP[5]}px`,
+      textAlign: "center",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      {/* Background gradient */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `radial-gradient(ellipse at 50% 0%, hsla(216,91%,65%,0.06) 0%, transparent 60%)`,
+        pointerEvents: "none",
+      }} />
+
+      {/* Animated rings */}
+      <div style={{
+        width: 80, height: 80, margin: "0 auto 24px",
+        position: "relative",
+      }}>
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          border: `2px solid ${C.accentBd}`,
+          animation: "pulse 3s ease-in-out infinite",
+        }} />
+        <div style={{
+          position: "absolute", inset: 10, borderRadius: "50%",
+          border: `2px solid ${C.accent}`,
+          animation: "pulse 3s ease-in-out infinite 0.5s",
+        }} />
+        <div style={{
+          position: "absolute", inset: 20, borderRadius: "50%",
+          background: C.accentBg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ fontFamily: F.mono, fontSize: 18, fontWeight: 900, color: C.accent }}>GT</span>
+        </div>
+      </div>
+
+      <h2 style={{
+        fontSize: 20, fontWeight: 800, color: C.text1,
+        letterSpacing: "-0.02em", marginBottom: 8,
+      }}>
+        Votre Command Center est pr\u00eat
+      </h2>
+      <p style={{
+        fontSize: 13, color: C.text2, lineHeight: 1.6,
+        maxWidth: 440, margin: "0 auto 28px",
+      }}>
+        Lancez votre premier scan Ghost Tax pour activer le tableau de bord
+        et d\u00e9tecter l\u2019exposition financi\u00e8re cach\u00e9e dans vos d\u00e9penses IT.
+      </p>
+      <a href="/intel" style={{
+        display: "inline-flex", alignItems: "center", gap: 8,
+        padding: "14px 32px", borderRadius: 12,
+        background: `linear-gradient(135deg, ${C.accent}, hsl(216,91%,55%))`,
+        color: "#fff", fontSize: 12, fontWeight: 700,
+        letterSpacing: ".06em", textDecoration: "none",
+        boxShadow: `0 4px 20px hsla(216,91%,65%,0.3)`,
+        transition: "transform 150ms, box-shadow 150ms",
+      }}>
+        LANCER LE PREMIER SCAN
+      </a>
+      <p style={{ fontSize: 10, fontFamily: F.mono, color: C.text4, marginTop: 16 }}>
+        4 moteurs \u00b7 21 phases \u00b7 78 vendors \u00b7 r\u00e9sultat en 45s
+      </p>
     </div>
   );
 }

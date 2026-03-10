@@ -46,8 +46,8 @@ function buildCurrencyFormatter(locale: Locale) {
 // ── Pricing amounts (locale-aware) ──────────────────
 // Canonical prices live in lib/pricing.ts — these are kept for backward compat.
 export const PRICES = {
-  audit: 490,
-  essentials: 490,
+  audit: 990,
+  essentials: 990,
   guardian: 990,
 };
 

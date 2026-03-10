@@ -1,17 +1,26 @@
 /**
- * GHOST TAX — STRIPE CHECKOUT SESSION (RAIL A ONLY)
+ * GHOST TAX — STRIPE CHECKOUT SESSION
  *
- * Creates a Stripe Checkout Session for Rail A (one-time payment, 490 EUR).
- * mode=payment (NOT subscription).
+ * Creates Stripe Checkout Sessions for:
+ * - Rail A: Tiered detection (headcount-based pricing, USD or EUR)
+ * - Rail B Stabilize: One-time stabilization protocol (includes detection)
  *
  * POST /api/stripe/checkout
- * Body: { locale?, email?, domain?, companyName?, headcount?, monthlySpendEur?, industry? }
- * domain is required for delivery pipeline to trigger after payment.
+ * Body: {
+ *   rail?: "A" | "B_STABILIZE",
+ *   locale?, email?, domain?, companyName?, headcount?, monthlySpendEur?, industry?
+ * }
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { RAILS, getStripePriceId } from "@/lib/pricing";
+import {
+  RAILS,
+  getRailAPrice,
+  getCurrency,
+  getHeadcountTier,
+  type PricingLocale,
+} from "@/lib/pricing";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -46,7 +55,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const locale = body.locale || "en";
+    const rail = body.rail === "B_STABILIZE" ? "B_STABILIZE" : "A";
+    const locale: PricingLocale = body.locale === "fr" ? "fr" : body.locale === "de" ? "de" : "en";
     const email = body.email || undefined;
     const domain = typeof body.domain === "string" ? body.domain.trim() : undefined;
     const companyName = typeof body.companyName === "string" ? body.companyName.trim() : undefined;
@@ -55,23 +65,89 @@ export async function POST(request: NextRequest) {
     const industry = typeof body.industry === "string" ? body.industry.trim() : undefined;
 
     const stripe = getStripe();
+    const currency = getCurrency(locale);
 
-    // Build line item — use Stripe Price ID if set, otherwise use price_data
-    const priceId = getStripePriceId();
-    const lineItem: Record<string, unknown> = priceId
-      ? { price: priceId, quantity: 1 }
-      : {
-          price_data: {
-            currency: RAILS.A.currency,
-            unit_amount: RAILS.A.price_eur * 100, // cents
-            product_data: {
-              name: locale === "fr" ? RAILS.A.name : locale === "de" ? RAILS.A.name_de : RAILS.A.name_en,
-              description: locale === "fr" ? RAILS.A.description_fr : locale === "de" ? RAILS.A.description_de : RAILS.A.description,
-              metadata: RAILS.A.metadata,
-            },
+    let lineItem: Record<string, unknown>;
+    let sessionMetadata: Record<string, string>;
+
+    if (rail === "A") {
+      // ── Rail A: Tiered pricing by headcount ──
+      const tier = getHeadcountTier(headcount);
+      const amount = getRailAPrice(headcount, locale);
+      const railConfig = RAILS.A;
+
+      const productName = locale === "fr" ? railConfig.name
+        : locale === "de" ? railConfig.name_de
+        : railConfig.name_en;
+      const productDesc = locale === "fr" ? railConfig.description_fr
+        : locale === "de" ? railConfig.description_de
+        : railConfig.description;
+
+      lineItem = {
+        price_data: {
+          currency,
+          unit_amount: amount * 100,
+          product_data: {
+            name: productName,
+            description: productDesc,
+            metadata: { ...railConfig.metadata, tier },
           },
-          quantity: 1,
-        };
+        },
+        quantity: 1,
+      };
+
+      sessionMetadata = {
+        rail: "A",
+        product: "detection",
+        tier,
+        locale,
+        currency,
+        amount: String(amount),
+        ...(domain && { domain }),
+        ...(companyName && { companyName }),
+        ...(headcount && { headcount: String(headcount) }),
+        ...(monthlySpendEur && { monthlySpendEur: String(monthlySpendEur) }),
+        ...(industry && { industry }),
+      };
+    } else {
+      // ── Rail B Stabilize: Fixed price, includes detection ──
+      const stabilize = RAILS.B_STABILIZE;
+      const amount = currency === "usd" ? stabilize.price_usd : stabilize.price_eur;
+
+      const productName = locale === "fr" ? stabilize.name
+        : locale === "de" ? stabilize.name_de
+        : stabilize.name_en;
+      const productDesc = locale === "fr" ? stabilize.description_fr
+        : locale === "de" ? stabilize.description_de
+        : stabilize.description;
+
+      lineItem = {
+        price_data: {
+          currency,
+          unit_amount: amount * 100,
+          product_data: {
+            name: productName,
+            description: productDesc,
+            metadata: stabilize.metadata,
+          },
+        },
+        quantity: 1,
+      };
+
+      sessionMetadata = {
+        rail: "B_STABILIZE",
+        product: "stabilization",
+        locale,
+        currency,
+        amount: String(amount),
+        includes_detection: "true",
+        ...(domain && { domain }),
+        ...(companyName && { companyName }),
+        ...(headcount && { headcount: String(headcount) }),
+        ...(monthlySpendEur && { monthlySpendEur: String(monthlySpendEur) }),
+        ...(industry && { industry }),
+      };
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -80,16 +156,7 @@ export async function POST(request: NextRequest) {
       success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/cancel`,
       customer_email: email,
-      metadata: {
-        rail: "A",
-        product: "detection",
-        locale,
-        ...(domain && { domain }),
-        ...(companyName && { companyName }),
-        ...(headcount && { headcount: String(headcount) }),
-        ...(monthlySpendEur && { monthlySpendEur: String(monthlySpendEur) }),
-        ...(industry && { industry }),
-      },
+      metadata: sessionMetadata,
       locale: locale === "fr" ? "fr" : locale === "de" ? "de" : "en",
     });
 

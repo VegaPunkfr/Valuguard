@@ -114,12 +114,51 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Rail B Monitor: log subscription checkout
+      // Rail B Monitor: send onboarding email + activate monitoring
       if (meta.rail === "B_MONITOR" && session.customer_email) {
         console.log("[Ghost Tax] Rail B Monitor checkout completed:", {
           email: session.customer_email,
           domain: meta.domain,
         });
+
+        // Send onboarding email via Resend
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey && meta.domain) {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+          fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "Ghost Tax <reports@ghost-tax.com>",
+              to: [session.customer_email],
+              subject: `${meta.domain} — Monitoring continu activé`,
+              html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,sans-serif">
+<div style="max-width:600px;margin:0 auto;padding:32px 20px">
+  <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;font-family:monospace">GHOST TAX — MONITORING ACTIVÉ</p>
+  <h1 style="font-size:22px;color:#e4e9f4;margin:16px 0">Bienvenue dans le monitoring continu</h1>
+  <p style="font-size:14px;color:#8d9bb5;line-height:1.7">
+    Le monitoring de <strong style="color:#e4e9f4">${meta.domain}</strong> est maintenant actif.
+    Vous recevrez des alertes automatiques en cas de dérive détectée sur votre stack technologique.
+  </p>
+  <div style="background:#0e1221;border-radius:8px;padding:20px;margin:20px 0">
+    <p style="font-size:10px;color:#34d399;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px 0;font-family:monospace">CE QUI EST INCLUS</p>
+    <p style="font-size:13px;color:#8d9bb5;line-height:1.8;margin:0">
+      • Scan OSINT hebdomadaire de votre domaine<br>
+      • Détection de nouveaux fournisseurs / fournisseurs supprimés<br>
+      • Alertes de dérive de coûts et de complexité<br>
+      • Rapport mensuel de monitoring détaillé<br>
+      • Accès au dashboard en temps réel
+    </p>
+  </div>
+  <div style="text-align:center;margin:24px 0">
+    <a href="${siteUrl}/dashboard" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Accéder au Dashboard</a>
+  </div>
+  <p style="font-size:11px;color:#55637d;text-align:center">audits@ghost-tax.com</p>
+</div></body></html>`,
+            }),
+          }).catch(err => console.error("[Ghost Tax] Rail B onboarding email failed:", err));
+        }
       }
 
       if (!meta.domain) {
@@ -179,6 +218,47 @@ export async function POST(request: NextRequest) {
         id: intent.id,
         error: intent.last_payment_error?.message,
       });
+      break;
+    }
+
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as any;
+      const subId = invoice.subscription;
+      console.log("[Ghost Tax] Invoice payment failed:", {
+        invoiceId: invoice.id,
+        subscriptionId: subId,
+        email: invoice.customer_email,
+        attemptCount: invoice.attempt_count,
+      });
+
+      // After 3 failed attempts, pause monitoring
+      if (db && subId && invoice.attempt_count >= 3) {
+        await (db as any)
+          .from("audit_requests")
+          .update({ status: "monitoring_paused" })
+          .eq("stripe_payment_intent_id", subId);
+
+        // Notify customer
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey && invoice.customer_email) {
+          fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "Ghost Tax <reports@ghost-tax.com>",
+              to: [invoice.customer_email],
+              subject: "Ghost Tax — Monitoring en pause (paiement échoué)",
+              html: `<div style="background:#060912;padding:32px;font-family:sans-serif;color:#8d9bb5">
+                <p style="font-size:10px;letter-spacing:0.2em;color:#ef4444;font-family:monospace">GHOST TAX — ACTION REQUISE</p>
+                <h1 style="font-size:20px;color:#e4e9f4;margin:12px 0">Votre monitoring est en pause</h1>
+                <p style="font-size:14px;line-height:1.7">Nous n'avons pas pu traiter votre paiement après 3 tentatives. Votre monitoring continu est temporairement suspendu.</p>
+                <p style="font-size:14px;line-height:1.7">Mettez à jour vos informations de paiement pour réactiver le monitoring :</p>
+                <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com"}/api/stripe/portal" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:16px 0">Mettre à jour le paiement</a>
+              </div>`,
+            }),
+          }).catch(() => {});
+        }
+      }
       break;
     }
 

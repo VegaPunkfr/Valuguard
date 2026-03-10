@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 }
 
 function renderTemplate(
-  template: string,
+  _template: string,
   subject: string,
   data?: Record<string, unknown>,
 ): string {

@@ -79,33 +79,6 @@ function cleanupRateLimitMap(): void {
 // INPUT VALIDATION
 // ═══════════════════════════════════════════════════════════════
 
-interface VaultPayload {
-  email: string;
-  company_name: string;
-  contact_name?: string;
-  ghost_tax_annual: number | null;
-  ghost_tax_low: number | null;
-  ghost_tax_high: number | null;
-  entropy_score: number | null;
-  entropy_kappa: number | null;
-  peer_percentile: number | null;
-  audit_roi: number | null;
-  recoverable_annual: number | null;
-  headcount: number | null;
-  industry: string | null;
-  saas_tool_count: number | null;
-  monthly_spend_saas: number | null;
-  monthly_spend_cloud: number | null;
-  monthly_spend_ai: number | null;
-  monthly_spend_total: number | null;
-  session_data: Record<string, unknown>;
-  source: string | null;
-  utm_source?: string | null;
-  utm_medium?: string | null;
-  utm_campaign?: string | null;
-  locale?: string;
-}
-
 interface ValidationResult {
   valid: boolean;
   error?: string;
@@ -308,6 +281,33 @@ export async function POST(request: NextRequest) {
         source: row.source,
         ip_hash: simpleHash(ip),
       },
+    });
+
+    // ── Auto-enroll in drip sequence ──────────────────────────
+    // Insert into outreach_leads so the cron-triggered drip sequence picks them up
+    const now = new Date();
+    const nextSend = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Touch 2 in 3 days
+    await (supabase as any).from("outreach_leads").upsert(
+      {
+        email: row.email,
+        company: row.company_name,
+        domain: row.email.split("@")[1] || null,
+        headcount: row.headcount,
+        industry: row.industry,
+        locale: row.locale || "en",
+        source: row.source || "vault-persist",
+        status: "active",
+        drip_step: 1, // Touch 1 is the vault capture itself
+        last_sent_at: now.toISOString(),
+        next_send_at: nextSend.toISOString(),
+        unsubscribed: false,
+        converted: false,
+      },
+      { onConflict: "email" },
+    ).then(() => {
+      console.log("[vault/persist] Lead auto-enrolled in drip:", row.email);
+    }).catch((err: any) => {
+      console.warn("[vault/persist] Drip enrollment failed (non-fatal):", err?.message);
     });
 
     // ── Success ──────────────────────────────────────────────

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion } from "framer-motion";
 import { CheckCircle, ArrowRight, Shield, Zap, BarChart3, FileText, Target } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { c, f, panel, card, inset, reveal, revealTransition, sectionLabel } from "@/lib/tokens";
+import { c, f, sp, ts } from "@/lib/tokens";
 import Section from "@/components/ui/section";
 import Footer from "@/components/ui/footer";
+import { LeakCounter } from "@/components/ui/leak-counter";
 
 /* ─── Main ───────────────────────────────────────────── */
 export default function LandingPage() {
@@ -68,103 +68,285 @@ export default function LandingPage() {
     <div style={{ minHeight: "100vh", background: c.bg, color: c.text1 }}>
       <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px" }}>
 
-        {/* ═══════════ HERO ═══════════ */}
-        <Section style={{ textAlign: "center", paddingTop: 80, paddingBottom: 40, position: "relative" }}>
-          {/* Ambient glow */}
+        {/* ═══════════ HERO — Algorithmic Layout ═══════════ */}
+        <section style={{ position: "relative", paddingTop: sp[7], paddingBottom: sp[6], overflow: "hidden" }}>
+
+          {/* Layer 0: Radial noise — breaks flat color */}
           <div style={{
-            position: "absolute", top: -100, left: "50%", transform: "translateX(-50%)",
-            width: 600, height: 400,
-            background: "radial-gradient(ellipse at center, rgba(79,143,247,0.06) 0%, transparent 70%)",
-            pointerEvents: "none",
+            position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+            background: [
+              "radial-gradient(ellipse 80% 50% at 70% -20%, hsla(216,91%,65%,0.07) 0%, transparent 60%)",
+              "radial-gradient(ellipse 40% 60% at 10% 80%, hsla(162,68%,51%,0.04) 0%, transparent 50%)",
+              "radial-gradient(circle at 50% 50%, hsla(0,0%,100%,0.01) 0%, transparent 80%)",
+            ].join(", "),
           }} />
 
-          <div className="gt-badge gt-badge--blue" style={{ marginBottom: 20, display: "inline-flex" }}>
-            {t("landing.hero.badge") || "Decision Intelligence Platform"}
-          </div>
+          {/* Layer 1: Grain texture overlay */}
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", opacity: 0.3,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
+          }} />
 
-          <h1 style={{
-            fontSize: "clamp(40px, 7vw, 72px)", fontWeight: 800,
-            lineHeight: 1.04, letterSpacing: "-0.04em",
-            marginBottom: 20, maxWidth: 820, margin: "0 auto 20px",
-          }}>
-            {t("landing.hero.t1")}
-            <br />
-            <span className="gt-text-gradient">{t("landing.hero.t2")}</span>
-          </h1>
+          {/* Layer 2: Asymmetric grid — tension visuelle */}
+          <div style={{
+            position: "relative", zIndex: 2,
+            display: "grid",
+            gridTemplateColumns: "1fr 0.85fr",
+            gap: sp[5],
+            alignItems: "start",
+          }}
+          className="gt-hero-grid"
+          >
 
-          <p style={{
-            fontSize: "clamp(17px, 2.2vw, 20px)", color: c.text2,
-            maxWidth: 560, margin: "0 auto 36px", lineHeight: 1.6,
-          }}>
-            {t("landing.hero.sub")}
-          </p>
-
-          {/* Domain input */}
-          <div style={{ maxWidth: 520, margin: "0 auto 14px", display: "flex", gap: 10 }}>
-            <input
-              type="text"
-              value={heroInput}
-              onChange={(e) => setHeroInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
-              placeholder="acme.com"
-              className="gt-input gt-input-mono"
-              style={{ flex: 1, padding: "14px 18px", fontSize: 16 }}
-            />
-            <button
-              type="button"
-              onClick={navigateToIntel}
-              className="gt-btn gt-btn-primary"
-              style={{ padding: "14px 28px", fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}
-            >
-              {t("landing.hero.cta")}
-            </button>
-          </div>
-
-          <p style={{ fontSize: 13, color: c.text3, fontFamily: f.mono, marginBottom: 32 }}>
-            {t("landing.hero.nologin")}
-          </p>
-
-          {/* Trust stats */}
-          <div className="gt-trust-bar" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, maxWidth: 520, margin: "0 auto 48px" }}>
-            {[
-              { val: t("landing.trust.stat1"), label: t("landing.trust.stat1d") },
-              { val: t("landing.trust.stat2"), label: t("landing.trust.stat2d") },
-              { val: t("landing.trust.stat3"), label: t("landing.trust.stat3d") },
-              { val: t("landing.trust.stat4"), label: t("landing.trust.stat4d") },
-            ].map((s) => (
-              <div key={s.label} style={{ textAlign: "center" }}>
-                <p style={{ fontFamily: f.mono, fontSize: 24, fontWeight: 800, color: c.accent, letterSpacing: "-0.02em", lineHeight: 1 }}>{s.val}</p>
-                <p style={{ fontSize: 11, color: c.text3, marginTop: 4, lineHeight: 1.3 }}>{s.label}</p>
+            {/* ── LEFT: Proposition ────────────────── */}
+            <div style={{ paddingTop: sp[5] }}>
+              <div className="gt-badge gt-badge--blue" style={{ marginBottom: sp[4] }}>
+                {t("landing.hero.badge") || "Decision Intelligence Platform"}
               </div>
-            ))}
-          </div>
 
-          {/* Product preview card */}
-          <div style={{ maxWidth: 600, margin: "0 auto", ...card, padding: "24px 28px", textAlign: "left" }}>
-            <p className="gt-section-label" style={{ fontSize: 10, marginBottom: 12 }}>
-              {t("landing.hero.sample.label")}
-            </p>
-            <p style={{ fontSize: 16, fontWeight: 600, color: c.text1, marginBottom: 12, lineHeight: 1.5 }}>
-              {t("landing.hero.sample.text")}
-            </p>
-            <div className="gt-preview-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 10 }}>
-              {[
-                { label: "EXPOSURE", value: "210k\u2013280k \u20AC", color: c.red },
-                { label: "CONFIDENCE", value: "62 / 100", color: c.amber },
-                { label: "DAILY LOSS", value: "~580 \u20AC", color: c.red },
-                { label: "READINESS", value: "72 / 100", color: c.green },
-              ].map((m) => (
-                <div key={m.label} style={{ ...inset, padding: "10px 8px", textAlign: "center" }}>
-                  <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text3, letterSpacing: ".06em", marginBottom: 4 }}>{m.label}</p>
-                  <p style={{ fontSize: 13, fontFamily: f.mono, fontWeight: 700, color: m.color, lineHeight: 1.2 }}>{m.value}</p>
-                </div>
-              ))}
+              <h1 style={{
+                fontSize: `clamp(${ts.lg}, 5.5vw, ${ts.xl})`,
+                fontWeight: 800,
+                lineHeight: 1.04,
+                letterSpacing: "-0.04em",
+                marginBottom: sp[4],
+              }}>
+                {t("landing.hero.t1")}
+                <br />
+                <span style={{
+                  background: "linear-gradient(to right, hsl(160,80%,60%), hsl(190,80%,60%))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>{t("landing.hero.t2")}</span>
+              </h1>
+
+              <p style={{
+                fontSize: ts.base,
+                color: c.text2,
+                maxWidth: 480,
+                lineHeight: 1.65,
+                marginBottom: sp[5],
+              }}>
+                {t("landing.hero.sub")}
+              </p>
+
+              {/* Domain input — horizontal */}
+              <div style={{ display: "flex", gap: sp[2], maxWidth: 480, marginBottom: sp[3] }}>
+                <input
+                  type="text"
+                  value={heroInput}
+                  onChange={(e) => setHeroInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
+                  placeholder="acme.com"
+                  className="gt-input gt-input-mono"
+                  style={{
+                    flex: 1, padding: `${sp[3]} ${sp[4]}`,
+                    fontSize: ts.base,
+                    border: "1px solid hsla(0,0%,100%,0.08)",
+                    background: "hsla(0,0%,0%,0.30)",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={navigateToIntel}
+                  className="gt-btn gt-btn-primary"
+                  style={{ padding: `${sp[3]} ${sp[5]}`, fontSize: "0.875rem", fontWeight: 700, whiteSpace: "nowrap" }}
+                >
+                  {t("landing.hero.cta")}
+                </button>
+              </div>
+
+              <p style={{
+                fontSize: ts.xs, color: c.text4, fontFamily: f.mono,
+                letterSpacing: "0.06em",
+              }}>
+                {t("landing.hero.nologin")}
+              </p>
+
+              {/* Trust row */}
+              <div className="gt-trust-bar" style={{
+                display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
+                gap: sp[3], marginTop: sp[6], maxWidth: 420,
+              }}>
+                {[
+                  { val: t("landing.trust.stat1"), label: t("landing.trust.stat1d") },
+                  { val: t("landing.trust.stat2"), label: t("landing.trust.stat2d") },
+                  { val: t("landing.trust.stat3"), label: t("landing.trust.stat3d") },
+                  { val: t("landing.trust.stat4"), label: t("landing.trust.stat4d") },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <p style={{
+                      fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
+                      color: c.accent, letterSpacing: "-0.02em", lineHeight: 1,
+                      fontVariantNumeric: "tabular-nums",
+                    }}>{s.val}</p>
+                    <p style={{ fontSize: ts.xs, color: c.text4, marginTop: sp[1], lineHeight: 1.3 }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p style={{ fontSize: 12, color: c.text3, fontFamily: f.mono, lineHeight: 1.5 }}>
-              {t("landing.hero.sample.signals")}
-            </p>
+
+            {/* ── RIGHT: Live Dashboard Bento ──────── */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gridTemplateRows: "auto auto auto",
+              gap: sp[2],
+              paddingTop: sp[4],
+            }}
+            className="gt-bento"
+            >
+              {/* Bento: Exposure Totale (span 2) */}
+              <div style={{
+                gridColumn: "1 / -1",
+                background: "hsla(0,0%,0%,0.25)",
+                backdropFilter: "blur(16px) saturate(1.2)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: sp[4],
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: sp[3] }}>
+                  <p style={{ fontSize: ts.xs, fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    EXPOSITION TOTALE DETECTEE
+                  </p>
+                  <span style={{
+                    fontSize: "9px", fontFamily: f.mono, padding: "2px 8px",
+                    borderRadius: 999, background: c.redBg, border: `1px solid ${c.redBd}`,
+                    color: c.red, fontWeight: 700, letterSpacing: "0.06em",
+                  }}>LIVE</span>
+                </div>
+                <p style={{
+                  fontFamily: f.mono, fontSize: ts.lg, fontWeight: 800,
+                  color: c.red, letterSpacing: "-0.02em",
+                  fontVariantNumeric: "tabular-nums",
+                }}>
+                  210 340 — 278 900 <span style={{ fontSize: ts.base, color: c.text3 }}>EUR/an</span>
+                </p>
+                <div style={{
+                  marginTop: sp[3], height: 4, borderRadius: 2,
+                  background: "hsla(0,0%,100%,0.04)", overflow: "hidden",
+                }}>
+                  <div style={{
+                    width: "73%", height: "100%", borderRadius: 2,
+                    background: "linear-gradient(to right, hsl(0,82%,66%), hsl(35,86%,56%))",
+                  }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: sp[1] }}>
+                  <span style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, fontVariantNumeric: "tabular-nums" }}>0</span>
+                  <span style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, fontVariantNumeric: "tabular-nums" }}>73% du spend IT</span>
+                </div>
+              </div>
+
+              {/* Bento: Licences orphelines */}
+              <div style={{
+                background: "hsla(0,0%,0%,0.25)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: sp[4],
+              }}>
+                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
+                  LICENCES ORPHELINES
+                </p>
+                <p style={{
+                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
+                  color: c.amber, fontVariantNumeric: "tabular-nums",
+                }}>47</p>
+                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
+                  ~38 400 EUR/an
+                </p>
+              </div>
+
+              {/* Bento: Chevauchements */}
+              <div style={{
+                background: "hsla(0,0%,0%,0.25)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: sp[4],
+              }}>
+                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
+                  CHEVAUCHEMENTS
+                </p>
+                <p style={{
+                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
+                  color: c.red, fontVariantNumeric: "tabular-nums",
+                }}>12</p>
+                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
+                  6 catégories
+                </p>
+              </div>
+
+              {/* Bento: Economies projetees */}
+              <div style={{
+                background: "hsla(0,0%,0%,0.25)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: sp[4],
+              }}>
+                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
+                  ECONOMIES PROJETEES
+                </p>
+                <p style={{
+                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
+                  color: c.green, fontVariantNumeric: "tabular-nums",
+                }}>+142k</p>
+                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
+                  EUR/an récupérables
+                </p>
+              </div>
+
+              {/* Bento: Confidence */}
+              <div style={{
+                background: "hsla(0,0%,0%,0.25)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: sp[4],
+              }}>
+                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
+                  SCORE CONFIANCE
+                </p>
+                <p style={{
+                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
+                  color: c.accent, fontVariantNumeric: "tabular-nums",
+                }}>62<span style={{ fontSize: ts.sm, color: c.text3, fontWeight: 400 }}>/100</span></p>
+                <p style={{ fontSize: ts.xs, color: c.text4, marginTop: sp[1], fontFamily: f.mono }}>
+                  grade: moderate
+                </p>
+              </div>
+
+              {/* Bento: Signal bar (span 2) */}
+              <div style={{
+                gridColumn: "1 / -1",
+                background: "hsla(0,0%,0%,0.25)",
+                border: "1px solid hsla(0,0%,100%,0.05)",
+                borderRadius: 14, padding: `${sp[3]} ${sp[4]}`,
+              }}>
+                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
+                  SIGNAUX DETECTES
+                </p>
+                <div style={{ display: "flex", gap: sp[2], flexWrap: "wrap" }}>
+                  {[
+                    { label: "Shadow AI", severity: c.red },
+                    { label: "Zombie SaaS", severity: c.amber },
+                    { label: "Auto-renew trap", severity: c.red },
+                    { label: "Duplicate CRM", severity: c.amber },
+                    { label: "Over-provisioned", severity: c.green },
+                  ].map((sig) => (
+                    <span key={sig.label} style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: "10px", fontFamily: f.mono, color: c.text2,
+                      padding: "3px 10px", borderRadius: 6,
+                      background: "hsla(0,0%,100%,0.03)",
+                      border: "1px solid hsla(0,0%,100%,0.05)",
+                    }}>
+                      <span style={{
+                        width: 6, height: 6, borderRadius: "50%",
+                        background: sig.severity, flexShrink: 0,
+                      }} />
+                      {sig.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </Section>
+        </section>
 
         {/* ═══════════ VALUE STRIP ═══════════ */}
         <Section style={{ paddingTop: 80 }}>
@@ -443,6 +625,11 @@ export default function LandingPage() {
           </div>
         </Section>
 
+        {/* ═══════════ LEAK COUNTER (Growth Hack #9) ═══════════ */}
+        <Section style={{ paddingTop: 60 }}>
+          <LeakCounter locale={locale} />
+        </Section>
+
         {/* ═══════════ FINAL CTA ═══════════ */}
         <Section style={{ paddingTop: 80 }}>
           <div className="gt-panel" style={{ padding: "56px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
@@ -480,6 +667,8 @@ export default function LandingPage() {
       {/* Responsive */}
       <style>{`
         @media (max-width: 768px) {
+          .gt-hero-grid { grid-template-columns: 1fr !important; }
+          .gt-bento { grid-template-columns: 1fr 1fr !important; }
           .gt-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .gt-output-grid { grid-template-columns: 1fr !important; }
           .gt-how-grid { grid-template-columns: 1fr 1fr !important; }

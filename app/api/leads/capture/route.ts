@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminSupabase();
 
     if (supabase) {
+      const now = new Date();
       const { error } = await (supabase as any).from("outreach_leads").upsert(
         {
           email: cleanEmail,
@@ -93,10 +94,16 @@ export async function POST(request: NextRequest) {
           headcount: headcount ? parseInt(headcount, 10) || null : null,
           industry: industry || null,
           source: leadSource,
+          locale: "fr",
           meta: meta || null,
           ip_hash: simpleHash(ip),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          status: "active",
+          drip_step: 0,
+          next_send_at: now.toISOString(), // Eligible for Touch 1 immediately
+          unsubscribed: false,
+          converted: false,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
         },
         { onConflict: "email" }
       );

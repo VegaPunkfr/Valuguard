@@ -463,7 +463,6 @@ export function toPDFReportData(
   runId: string,
 ): PDFReportData {
   const exposure = (result.exposure || {}) as Record<string, unknown>;
-  const lossVelocity = (result.lossVelocity || {}) as Record<string, unknown>;
   const proof = (result.proof || {}) as Record<string, unknown>;
   const peerComparison = (result.peerComparison || {}) as Record<string, unknown>;
   const confidenceModel = (result.confidenceModel || {}) as Record<string, unknown>;

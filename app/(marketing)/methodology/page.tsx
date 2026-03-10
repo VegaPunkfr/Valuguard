@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { trackEvent, EVENTS } from "@/lib/events";
-import { c, f, panel } from "@/lib/tokens";
+import { c, f } from "@/lib/tokens";
 
 /**
  * GHOST TAX — METHODOLOGY SURFACE
@@ -251,7 +251,7 @@ export default function Methodology() {
           <Lab>07 — WHAT DEEPENS IN THE PAID CORRECTIVE PROTOCOL</Lab>
           <H2>Internal data intake unlocks precision the public analysis cannot reach.</H2>
           <P>
-            The paid corrective protocol ({"\u20AC"}490) adds a structured data intake phase where the organization provides billing exports, license inventories, and vendor contracts. This enables:
+            The paid corrective protocol (from $990) adds a structured data intake phase where the organization provides billing exports, license inventories, and vendor contracts. This enables:
           </P>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
             {[

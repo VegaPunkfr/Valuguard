@@ -79,6 +79,24 @@
   --gt-shadow-lg: 0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
   --gt-shadow-xl: 0 8px 48px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
 
+  /* ── Typographic Scale — Perfect Fifth (×1.5) */
+  --gt-ts-xs:   0.667rem;
+  --gt-ts-sm:   0.75rem;
+  --gt-ts-base: 1rem;
+  --gt-ts-md:   1.5rem;
+  --gt-ts-lg:   2.25rem;
+  --gt-ts-xl:   3.375rem;
+  --gt-ts-2xl:  5.063rem;
+
+  /* ── Spatial Scale — Golden Ratio (φ 1.618) */
+  --gt-sp-1: 4px;
+  --gt-sp-2: 8px;
+  --gt-sp-3: 16px;
+  --gt-sp-4: 24px;
+  --gt-sp-5: 40px;
+  --gt-sp-6: 64px;
+  --gt-sp-7: 104px;
+
   /* ── Duration */
   --gt-fast:    120ms;
   --gt-normal:  200ms;
@@ -579,6 +597,14 @@ body::before {
 /* Mono text */
 .gt-mono {
   font-family: var(--gt-font-mono);
+}
+
+/* Financial typography — tabular nums on all mono elements */
+.gt-tabular,
+[style*="font-mono"],
+.gt-metric p,
+.gt-delta {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Muted text */

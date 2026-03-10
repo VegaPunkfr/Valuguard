@@ -91,8 +91,8 @@ export interface NegotiationIntelligenceResult {
 
 export function buildNegotiationIntelligence(
   exposure: { lowEur: number; highEur: number; confidence: number },
-  detectedSignalTypes: string[],
-  techFootprint: string[],
+  _detectedSignalTypes: string[],
+  _techFootprint: string[],
   marketMemory: MarketMemoryResult,
   driftMonitor: DriftMonitorResult,
   peerComparison: { efficiencyPercentile: number | null; benchmarkConfidence: number; insufficientBenchmark: boolean },
