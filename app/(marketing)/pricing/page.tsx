@@ -21,11 +21,7 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Prices by locale
-  const detect = {
-    starter: isUSD ? 990 : 890,
-    growth: isUSD ? 1990 : 1690,
-    scale: isUSD ? 3490 : 2990,
-  };
+  const detectPrice = 490;
   const stabilize = isUSD ? 5990 : 4990;
   const monitorMonthly = isUSD ? 2490 : 1990;
   const monitorAnnual = isUSD ? 24900 : 19900;
@@ -84,12 +80,7 @@ export default function PricingPage() {
       highlight: true,
       badgeColor: c.green,
       borderColor: c.greenBd,
-      // Tiered sub-pricing
-      subTiers: [
-        { label: t("pricing.tier1.size1"), price: detect.starter, headcount: 100 },
-        { label: t("pricing.tier1.size2"), price: detect.growth, headcount: 500 },
-        { label: t("pricing.tier1.size3"), price: detect.scale, headcount: 1500 },
-      ],
+      price: detectPrice,
     },
     {
       id: "stabilize",
@@ -187,37 +178,14 @@ export default function PricingPage() {
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: c.text1 }}>{tiers[0].name}</h3>
               </div>
 
-              {/* Tiered price selector */}
-              <div style={{ marginBottom: 14 }}>
-                <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text3, letterSpacing: ".1em", marginBottom: 8, textTransform: "uppercase" }}>
-                  {t("pricing.selectSize")}
-                </p>
-                {tiers[0].subTiers!.map((sub, i) => (
-                  <div key={i} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "10px 12px", marginBottom: 4, borderRadius: 8,
-                    background: i === 0 ? "rgba(52,211,153,0.06)" : "rgba(18,24,40,0.5)",
-                    border: `1px solid ${i === 0 ? c.greenBd : c.border}`,
-                  }}>
-                    <span style={{ fontSize: 12, color: c.text2 }}>{sub.label}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 16, fontFamily: f.mono, fontWeight: 800, color: i === 0 ? c.green : c.text1 }}>
-                        {fmtPrice(sub.price)}
-                      </span>
-                      <button
-                        onClick={() => handleCheckout("A", sub.headcount)}
-                        disabled={!!checkoutLoading}
-                        style={{
-                          fontSize: 9, fontFamily: f.mono, fontWeight: 700, padding: "5px 10px", borderRadius: 5,
-                          background: c.green, color: c.bg, border: "none", cursor: checkoutLoading ? "wait" : "pointer",
-                          letterSpacing: ".04em", textTransform: "uppercase", opacity: checkoutLoading ? 0.6 : 1,
-                        }}
-                      >
-                        {checkoutLoading?.startsWith("A_") ? "..." : t("pricing.buy")}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              {/* Flat price */}
+              <div style={{ marginBottom: 10 }}>
+                <span className="gt-metric" style={{ fontSize: 32, color: c.green, letterSpacing: "-0.02em" }}>
+                  {fmtPrice(detectPrice)}
+                </span>
+                <span style={{ fontSize: 13, color: c.text3, marginLeft: 4 }}>
+                  {t("pricing.tier1.priceLabel") || "one-time"}
+                </span>
               </div>
 
               <p style={{ fontSize: 13, color: c.text2, lineHeight: 1.6, marginBottom: 14 }}>{tiers[0].desc}</p>
@@ -231,11 +199,26 @@ export default function PricingPage() {
                 ))}
               </div>
 
-              <div style={{ ...inset, padding: "8px 10px", background: c.greenBg, borderColor: c.greenBd }}>
+              <div style={{ ...inset, padding: "8px 10px", marginBottom: 14, background: c.greenBg, borderColor: c.greenBd }}>
                 <p style={{ fontSize: 11, fontFamily: f.mono, color: c.green, letterSpacing: ".04em", textAlign: "center" }}>
                   {tiers[0].roi}
                 </p>
               </div>
+
+              <button
+                onClick={() => handleCheckout("A")}
+                disabled={!!checkoutLoading}
+                className="gt-btn"
+                style={{
+                  width: "100%", textTransform: "uppercase", letterSpacing: ".04em",
+                  background: c.green, color: c.bg, border: "none", fontWeight: 700,
+                  fontSize: 13, padding: "12px 0", borderRadius: 8,
+                  cursor: checkoutLoading ? "wait" : "pointer",
+                  opacity: checkoutLoading ? 0.7 : 1,
+                }}
+              >
+                {checkoutLoading?.startsWith("A_") ? t("pricing.loading") : t("pricing.buy")}
+              </button>
             </div>
 
             {/* ═══ TIER 2: STABILIZE ═══ */}

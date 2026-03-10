@@ -14,7 +14,7 @@
  */
 
 import { createAdminSupabase } from "@/lib/supabase";
-import { REVENUE_MODEL, RAIL_A_TIERS, RAILS } from "@/lib/pricing";
+import { REVENUE_MODEL, RAIL_A_PRICE, RAILS } from "@/lib/pricing";
 
 // ── Types ─────────────────────────────────────────────────
 
@@ -210,19 +210,13 @@ function estimateDealSize(audit: any): number {
   if (audit.price) return audit.price;
   // Infer from headcount/tier
   const headcount = audit.headcount || 0;
-  if (headcount >= 1000) return RAIL_A_TIERS.scale.eur;
-  if (headcount >= 200) return RAIL_A_TIERS.growth.eur;
-  return RAIL_A_TIERS.starter.eur;
+  return RAIL_A_PRICE.eur;
 }
 
 /** Estimate lead pipeline value based on conviction score */
 function estimateLeadValue(lead: any): number {
   const score = lead.score || 0;
-  // Base deal size from headcount
-  const headcount = lead.headcount || 50;
-  let baseDeal: number = RAIL_A_TIERS.starter.eur;
-  if (headcount >= 1000) baseDeal = RAIL_A_TIERS.scale.eur;
-  else if (headcount >= 200) baseDeal = RAIL_A_TIERS.growth.eur;
+  const baseDeal = RAIL_A_PRICE.eur;
 
   // Weight by conviction (score 0-100 maps to probability)
   return Math.round(baseDeal * (score / 100));
@@ -568,7 +562,7 @@ function computeViralMetrics(events: any[], audits: any[]): RevenueDashboard["vi
   const kFactor = Math.round(invitationsPerUser * viralConversionRate * 100) / 100;
 
   // Viral revenue estimate
-  const viralRevenue = Math.round(viralEvents.referralScans * RAIL_A_TIERS.starter.eur * 0.04); // 4% conversion
+  const viralRevenue = Math.round(viralEvents.referralScans * RAIL_A_PRICE.eur * 0.04); // 4% conversion
 
   return {
     kFactor,

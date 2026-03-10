@@ -5,15 +5,14 @@
  * No public-facing component should hardcode prices directly.
  *
  * MARKETS: US (USD) + Germany/DACH (EUR)
- * TIERED: Rail A priced by company headcount for proportional value capture
  *
- * RAIL A: Financial Exposure Detection — tiered one-time (self-serve checkout)
+ * RAIL A: Financial Exposure Detection — 490 EUR / $490 USD flat (impulse buy, no call)
  * RAIL B_STABILIZE: Stabilization Protocol 30/60/90 — one-time (self-serve checkout, includes Detection)
  * RAIL B_MONITOR: Continuous Drift Monitoring — monthly or annual subscription
  * RAIL C: Stabilization Mission — custom/enterprise (high-touch)
  */
 
-// ── Headcount tier boundaries ──
+// ── Headcount tier boundaries (kept for metadata, not pricing) ──
 export type HeadcountTier = "starter" | "growth" | "scale";
 
 export function getHeadcountTier(headcount: number | undefined): HeadcountTier {
@@ -34,38 +33,15 @@ export function getCurrencySymbol(locale: PricingLocale): string {
   return locale === "en" ? "$" : "€";
 }
 
-// ── Rail A: Tiered Detection ──
-export const RAIL_A_TIERS = {
-  starter: {
-    maxHeadcount: 200,
-    label: "1-200 employees",
-    label_de: "1-200 Mitarbeiter",
-    label_fr: "1-200 employés",
-    usd: 990,
-    eur: 890,
-  },
-  growth: {
-    maxHeadcount: 1000,
-    label: "201-1,000 employees",
-    label_de: "201-1.000 Mitarbeiter",
-    label_fr: "201-1 000 employés",
-    usd: 1990,
-    eur: 1690,
-  },
-  scale: {
-    maxHeadcount: Infinity,
-    label: "1,000+ employees",
-    label_de: "1.000+ Mitarbeiter",
-    label_fr: "1 000+ employés",
-    usd: 3490,
-    eur: 2990,
-  },
+// ── Rail A: Flat pricing (launch strategy — impulse buy) ──
+export const RAIL_A_PRICE = {
+  eur: 490,
+  usd: 490,
 } as const;
 
-export function getRailAPrice(headcount: number | undefined, locale: PricingLocale): number {
-  const tier = getHeadcountTier(headcount);
+export function getRailAPrice(_headcount: number | undefined, locale: PricingLocale): number {
   const currency = getCurrency(locale);
-  return currency === "usd" ? RAIL_A_TIERS[tier].usd : RAIL_A_TIERS[tier].eur;
+  return currency === "usd" ? RAIL_A_PRICE.usd : RAIL_A_PRICE.eur;
 }
 
 // ── All Rails ──
@@ -75,9 +51,8 @@ export const RAILS = {
     name: "Détection d'exposition financière",
     name_en: "Financial Exposure Detection",
     name_de: "Finanzielle Expositions-Erkennung",
-    // Legacy flat price kept for backward compat — use getRailAPrice() for actual pricing
-    price_eur: 890,
-    price_usd: 990,
+    price_eur: 490,
+    price_usd: 490,
     currency: "eur" as const,
     type: "one_time" as const,
     stripe_mode: "payment" as const,
@@ -242,7 +217,7 @@ export const REVENUE_MODEL = {
   target_eur: 7_000_000,
   target_months: 24,
   blended_arpu: {
-    rail_a_avg: 1500, // Weighted average across tiers (EUR)
+    rail_a_avg: 490, // Flat launch price (EUR)
     rail_b_stabilize: 4990,
     rail_b_monitor_monthly: 1990,
     rail_b_monitor_annual: 19900,
