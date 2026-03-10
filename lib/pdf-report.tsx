@@ -2,7 +2,7 @@
  * GHOST TAX — PDF DECISION PACK GENERATOR (SERVER-ONLY)
  *
  * Generates institutional-grade PDF reports for Rail A/B deliverables.
- * Output: CFO Memo, CIO Brief, Board One-Pager, Procurement Summary.
+ * Localized: EN (US/NL), FR, DE (DACH) — language, currency, CTA.
  *
  * Revenue impact: PDF = shareable artifact that sells internally.
  * CFO shares with board → board asks CIO → CIO scopes Rail B.
@@ -21,11 +21,14 @@ import {
 
 // ── Types ──────────────────────────────────────────
 
+export type PDFLocale = "en" | "fr" | "de";
+
 export interface PDFReportData {
   companyName: string;
   domain: string;
   generatedAt: string;
   runId: string;
+  locale?: PDFLocale;
   // Exposure
   exposureLowEur: number;
   exposureHighEur: number;
@@ -59,6 +62,148 @@ export interface PDFReportData {
   // Executive summary
   executiveSummary: string;
 }
+
+// ── Localization ──────────────────────────────────
+
+interface PDFStrings {
+  subtitle: string;
+  subtitleP2: string;
+  executiveSummary: string;
+  financialExposure: string;
+  estimatedAnnualExposure: string;
+  confidence: string;
+  dailyLeak: string;
+  weeklyLeak: string;
+  monthlyLeak: string;
+  peerPercentile: string;
+  confidenceModel: string;
+  overallConfidence: string;
+  observed: string;
+  inferred: string;
+  estimated: string;
+  total: string;
+  signals: string;
+  topFindings: string;
+  peerComparison: string;
+  yourPosition: string;
+  industryMedian: string;
+  peerAbove: (pct: number) => string;
+  peerNormal: string;
+  correctiveScenarios: string;
+  effort: string;
+  ctaTitle: string;
+  ctaSub: string;
+  confidential: string;
+  page: (n: number, total: number) => string;
+  currency: string;
+  currencySuffix: string;
+  perYear: string;
+}
+
+const STRINGS: Record<PDFLocale, PDFStrings> = {
+  en: {
+    subtitle: "Decision Intelligence Report",
+    subtitleP2: "Findings & Corrective Scenarios",
+    executiveSummary: "EXECUTIVE SUMMARY",
+    financialExposure: "FINANCIAL EXPOSURE",
+    estimatedAnnualExposure: "Estimated Annual Exposure",
+    confidence: "Confidence",
+    dailyLeak: "Daily Leak",
+    weeklyLeak: "Weekly Leak",
+    monthlyLeak: "Monthly Leak",
+    peerPercentile: "Peer Percentile",
+    confidenceModel: "CONFIDENCE MODEL",
+    overallConfidence: "Overall Confidence",
+    observed: "Observed",
+    inferred: "Inferred",
+    estimated: "Estimated",
+    total: "Total",
+    signals: "signals",
+    topFindings: "TOP FINDINGS",
+    peerComparison: "PEER COMPARISON",
+    yourPosition: "Your Position",
+    industryMedian: "Industry Median",
+    peerAbove: (pct) => `Your organization spends more than ${pct}% of comparable companies.`,
+    peerNormal: "Your organization is within normal spending range for your segment.",
+    correctiveScenarios: "CORRECTIVE SCENARIOS",
+    effort: "effort",
+    ctaTitle: "READY TO ACT ON THESE FINDINGS?",
+    ctaSub: "Activate a 30/60/90-day Stabilization Plan — ghost-tax.com/pricing",
+    confidential: "GHOST TAX — Confidential",
+    page: (n, total) => `Page ${n} of ${total}`,
+    currency: "USD",
+    currencySuffix: "/yr",
+    perYear: "/yr",
+  },
+  fr: {
+    subtitle: "Rapport d'Intelligence Decisionnelle",
+    subtitleP2: "Constats & Scenarios Correctifs",
+    executiveSummary: "SYNTHESE EXECUTIVE",
+    financialExposure: "EXPOSITION FINANCIERE",
+    estimatedAnnualExposure: "Exposition Annuelle Estimee",
+    confidence: "Confiance",
+    dailyLeak: "Fuite Quotidienne",
+    weeklyLeak: "Fuite Hebdomadaire",
+    monthlyLeak: "Fuite Mensuelle",
+    peerPercentile: "Percentile Pairs",
+    confidenceModel: "MODELE DE CONFIANCE",
+    overallConfidence: "Confiance Globale",
+    observed: "Observe",
+    inferred: "Infere",
+    estimated: "Estime",
+    total: "Total",
+    signals: "signaux",
+    topFindings: "PRINCIPAUX CONSTATS",
+    peerComparison: "COMPARAISON AUX PAIRS",
+    yourPosition: "Votre Position",
+    industryMedian: "Mediane Industrie",
+    peerAbove: (pct) => `Votre organisation depense plus que ${pct}% des entreprises comparables.`,
+    peerNormal: "Votre organisation se situe dans la norme de depenses de votre segment.",
+    correctiveScenarios: "SCENARIOS CORRECTIFS",
+    effort: "effort",
+    ctaTitle: "PRET A AGIR SUR CES CONSTATS ?",
+    ctaSub: "Activez un Plan de Stabilisation 30/60/90 jours — ghost-tax.com/pricing",
+    confidential: "GHOST TAX — Confidentiel",
+    page: (n, total) => `Page ${n} sur ${total}`,
+    currency: "EUR",
+    currencySuffix: "/an",
+    perYear: "/an",
+  },
+  de: {
+    subtitle: "Decision Intelligence Bericht",
+    subtitleP2: "Befunde & Korrekturszenarien",
+    executiveSummary: "ZUSAMMENFASSUNG",
+    financialExposure: "FINANZIELLE EXPOSITION",
+    estimatedAnnualExposure: "Geschaetzte Jaehrliche Exposition",
+    confidence: "Konfidenz",
+    dailyLeak: "Taeglicher Verlust",
+    weeklyLeak: "Woechentlicher Verlust",
+    monthlyLeak: "Monatlicher Verlust",
+    peerPercentile: "Peer-Perzentil",
+    confidenceModel: "KONFIDENZMODELL",
+    overallConfidence: "Gesamtkonfidenz",
+    observed: "Beobachtet",
+    inferred: "Abgeleitet",
+    estimated: "Geschaetzt",
+    total: "Gesamt",
+    signals: "Signale",
+    topFindings: "WICHTIGSTE BEFUNDE",
+    peerComparison: "PEER-VERGLEICH",
+    yourPosition: "Ihre Position",
+    industryMedian: "Branchenmedian",
+    peerAbove: (pct) => `Ihre Organisation gibt mehr aus als ${pct}% vergleichbarer Unternehmen.`,
+    peerNormal: "Ihre Organisation liegt im normalen Ausgabenbereich Ihres Segments.",
+    correctiveScenarios: "KORREKTURSZENARIEN",
+    effort: "Aufwand",
+    ctaTitle: "BEREIT, AUF DIESE BEFUNDE ZU REAGIEREN?",
+    ctaSub: "Aktivieren Sie einen 30/60/90-Tage-Stabilisierungsplan — ghost-tax.com/pricing",
+    confidential: "GHOST TAX — Vertraulich",
+    page: (n, total) => `Seite ${n} von ${total}`,
+    currency: "EUR",
+    currencySuffix: "/Jahr",
+    perYear: "/Jahr",
+  },
+};
 
 // ── Styles ─────────────────────────────────────────
 
@@ -244,6 +389,11 @@ function fmt(n: number): string {
   return n.toLocaleString("de-DE");
 }
 
+function fmtCurrency(n: number, cur: string): string {
+  if (cur === "USD") return `$${fmt(n)}`;
+  return `${fmt(n)} ${cur}`;
+}
+
 function severityColor(sev: string): string {
   switch (sev) {
     case "critical": return c.red;
@@ -253,9 +403,20 @@ function severityColor(sev: string): string {
   }
 }
 
+/** Detect locale from domain TLD */
+export function detectLocaleFromDomain(domain: string): PDFLocale {
+  const d = domain.toLowerCase();
+  if (d.endsWith(".de") || d.endsWith(".at") || d.endsWith(".ch")) return "de";
+  if (d.endsWith(".fr") || d.endsWith(".be") || d.endsWith(".lu")) return "fr";
+  return "en"; // US, NL, and all others get English
+}
+
 // ── PDF Document Component ─────────────────────────
 
 function GhostTaxReport({ data }: { data: PDFReportData }) {
+  const locale = data.locale || detectLocaleFromDomain(data.domain);
+  const t = STRINGS[locale];
+  const cur = t.currency;
   const totalSignals = data.observedSignals + data.inferredSignals + data.estimatedSignals;
   const confidenceColor = data.overallConfidence >= 60 ? c.green : data.overallConfidence >= 35 ? c.amber : c.text3;
 
@@ -266,7 +427,7 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
         <View style={s.header}>
           <View>
             <Text style={s.logo}>GHOST TAX</Text>
-            <Text style={s.subtitle}>Decision Intelligence Report</Text>
+            <Text style={s.subtitle}>{t.subtitle}</Text>
           </View>
           <View style={s.metaBlock}>
             <Text style={s.metaText}>{data.companyName}</Text>
@@ -277,39 +438,39 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
         </View>
 
         {/* Executive Summary */}
-        <Text style={s.sectionTitle}>EXECUTIVE SUMMARY</Text>
+        <Text style={s.sectionTitle}>{t.executiveSummary}</Text>
         <View style={s.panel}>
           <Text style={s.summaryText}>{data.executiveSummary}</Text>
         </View>
 
         {/* Exposure Headline */}
-        <Text style={s.sectionTitle}>FINANCIAL EXPOSURE</Text>
+        <Text style={s.sectionTitle}>{t.financialExposure}</Text>
         <View style={s.panel}>
-          <Text style={s.label}>Estimated Annual Exposure</Text>
+          <Text style={s.label}>{t.estimatedAnnualExposure}</Text>
           <Text style={s.bigNumber}>
-            {fmt(data.exposureLowEur)}-{fmt(data.exposureHighEur)} EUR/yr
+            {fmtCurrency(data.exposureLowEur, cur)}-{fmtCurrency(data.exposureHighEur, cur)}{t.perYear}
           </Text>
           <Text style={{ ...s.metaText, marginTop: 4 }}>
-            Confidence: {data.exposureConfidence}% ({data.confidenceGrade})
+            {t.confidence}: {data.exposureConfidence}% ({data.confidenceGrade})
           </Text>
         </View>
 
         {/* KPI Grid */}
         <View style={s.kpiGrid}>
           <View style={s.kpiBox}>
-            <Text style={s.label}>Daily Leak</Text>
-            <Text style={{ ...s.value, color: c.red }}>{fmt(data.dailyLeakEur)} EUR</Text>
+            <Text style={s.label}>{t.dailyLeak}</Text>
+            <Text style={{ ...s.value, color: c.red }}>{fmtCurrency(data.dailyLeakEur, cur)}</Text>
           </View>
           <View style={s.kpiBox}>
-            <Text style={s.label}>Weekly Leak</Text>
-            <Text style={{ ...s.value, color: c.amber }}>{fmt(data.weeklyLeakEur)} EUR</Text>
+            <Text style={s.label}>{t.weeklyLeak}</Text>
+            <Text style={{ ...s.value, color: c.amber }}>{fmtCurrency(data.weeklyLeakEur, cur)}</Text>
           </View>
           <View style={s.kpiBox}>
-            <Text style={s.label}>Monthly Leak</Text>
-            <Text style={{ ...s.value, color: c.amber }}>{fmt(data.monthlyLeakEur)} EUR</Text>
+            <Text style={s.label}>{t.monthlyLeak}</Text>
+            <Text style={{ ...s.value, color: c.amber }}>{fmtCurrency(data.monthlyLeakEur, cur)}</Text>
           </View>
           <View style={s.kpiBox}>
-            <Text style={s.label}>Peer Percentile</Text>
+            <Text style={s.label}>{t.peerPercentile}</Text>
             <Text style={{ ...s.value, color: data.peerPercentile > 60 ? c.red : c.green }}>
               {data.peerPercentile}th
             </Text>
@@ -317,10 +478,10 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
         </View>
 
         {/* Confidence */}
-        <Text style={s.sectionTitle}>CONFIDENCE MODEL</Text>
+        <Text style={s.sectionTitle}>{t.confidenceModel}</Text>
         <View style={s.panel}>
           <View style={s.row}>
-            <Text style={s.label}>Overall Confidence</Text>
+            <Text style={s.label}>{t.overallConfidence}</Text>
             <Text style={{ ...s.value, color: confidenceColor }}>
               {data.overallConfidence}% — {data.confidenceGrade}
             </Text>
@@ -333,17 +494,17 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
             }} />
           </View>
           <View style={{ ...s.row, marginTop: 8 }}>
-            <Text style={s.metaText}>Observed: {data.observedSignals}</Text>
-            <Text style={s.metaText}>Inferred: {data.inferredSignals}</Text>
-            <Text style={s.metaText}>Estimated: {data.estimatedSignals}</Text>
-            <Text style={s.metaText}>Total: {totalSignals} signals</Text>
+            <Text style={s.metaText}>{t.observed}: {data.observedSignals}</Text>
+            <Text style={s.metaText}>{t.inferred}: {data.inferredSignals}</Text>
+            <Text style={s.metaText}>{t.estimated}: {data.estimatedSignals}</Text>
+            <Text style={s.metaText}>{t.total}: {totalSignals} {t.signals}</Text>
           </View>
         </View>
 
         <View style={s.footer}>
-          <Text style={s.footerText}>GHOST TAX — Confidential</Text>
+          <Text style={s.footerText}>{t.confidential}</Text>
           <Text style={s.footerText}>ghost-tax.com</Text>
-          <Text style={s.footerText}>Page 1 of 2</Text>
+          <Text style={s.footerText}>{t.page(1, 2)}</Text>
         </View>
       </Page>
 
@@ -352,7 +513,7 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
         <View style={s.header}>
           <View>
             <Text style={s.logo}>GHOST TAX</Text>
-            <Text style={s.subtitle}>Findings &amp; Corrective Scenarios</Text>
+            <Text style={s.subtitle}>{t.subtitleP2}</Text>
           </View>
           <View style={s.metaBlock}>
             <Text style={s.metaText}>{data.companyName}</Text>
@@ -360,7 +521,7 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
         </View>
 
         {/* Top Findings */}
-        <Text style={s.sectionTitle}>TOP FINDINGS</Text>
+        <Text style={s.sectionTitle}>{t.topFindings}</Text>
         <View style={s.panel}>
           {data.topFindings.slice(0, 8).map((f, i) => (
             <View key={i} style={s.findingRow}>
@@ -375,36 +536,36 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
                 <Text style={{ fontSize: 8, color: c.text1, flex: 1 }}>{f.label}</Text>
               </View>
               <Text style={{ fontSize: 8, color: c.amber, fontFamily: "Helvetica-Bold" }}>
-                {fmt(f.eurImpact[0])}-{fmt(f.eurImpact[1])} EUR
+                {fmtCurrency(f.eurImpact[0], cur)}-{fmtCurrency(f.eurImpact[1], cur)}
               </Text>
             </View>
           ))}
         </View>
 
         {/* Peer Comparison */}
-        <Text style={s.sectionTitle}>PEER COMPARISON</Text>
+        <Text style={s.sectionTitle}>{t.peerComparison}</Text>
         <View style={s.panel}>
           <View style={s.row}>
             <View>
-              <Text style={s.label}>Your Position</Text>
+              <Text style={s.label}>{t.yourPosition}</Text>
               <Text style={{ ...s.value, color: data.peerPercentile > 60 ? c.red : c.green }}>
                 {data.peerPercentile}th percentile
               </Text>
             </View>
             <View>
-              <Text style={s.label}>Industry Median</Text>
-              <Text style={s.value}>{fmt(data.industryMedianEur)} EUR/yr</Text>
+              <Text style={s.label}>{t.industryMedian}</Text>
+              <Text style={s.value}>{fmtCurrency(data.industryMedianEur, cur)}{t.perYear}</Text>
             </View>
           </View>
           <Text style={{ ...s.metaText, marginTop: 6 }}>
             {data.peerPercentile > 60
-              ? `Your organization spends more than ${data.peerPercentile}% of comparable companies.`
-              : `Your organization is within normal spending range for your segment.`}
+              ? t.peerAbove(data.peerPercentile)
+              : t.peerNormal}
           </Text>
         </View>
 
         {/* Corrective Scenarios */}
-        <Text style={s.sectionTitle}>CORRECTIVE SCENARIOS</Text>
+        <Text style={s.sectionTitle}>{t.correctiveScenarios}</Text>
         <View style={s.panel}>
           {data.scenarios.slice(0, 4).map((sc, i) => (
             <View key={i} style={s.scenarioRow}>
@@ -413,11 +574,11 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
                   {sc.name}
                 </Text>
                 <Text style={s.metaText}>
-                  {sc.effort} effort | {sc.timeline}
+                  {sc.effort} {t.effort} | {sc.timeline}
                 </Text>
               </View>
               <Text style={{ fontSize: 9, color: c.green, fontFamily: "Helvetica-Bold" }}>
-                {fmt(sc.savingsEur[0])}-{fmt(sc.savingsEur[1])} EUR
+                {fmtCurrency(sc.savingsEur[0], cur)}-{fmtCurrency(sc.savingsEur[1], cur)}
               </Text>
             </View>
           ))}
@@ -425,16 +586,14 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
 
         {/* CTA */}
         <View style={s.ctaBlock}>
-          <Text style={s.ctaText}>READY TO ACT ON THESE FINDINGS?</Text>
-          <Text style={s.ctaSub}>
-            Activate a 30/60/90-day Stabilization Plan — ghost-tax.com/pricing
-          </Text>
+          <Text style={s.ctaText}>{t.ctaTitle}</Text>
+          <Text style={s.ctaSub}>{t.ctaSub}</Text>
         </View>
 
         <View style={s.footer}>
-          <Text style={s.footerText}>GHOST TAX — Confidential</Text>
+          <Text style={s.footerText}>{t.confidential}</Text>
           <Text style={s.footerText}>ghost-tax.com</Text>
-          <Text style={s.footerText}>Page 2 of 2</Text>
+          <Text style={s.footerText}>{t.page(2, 2)}</Text>
         </View>
       </Page>
     </Document>
@@ -445,7 +604,7 @@ function GhostTaxReport({ data }: { data: PDFReportData }) {
 
 /**
  * Generate a PDF buffer from report data.
- * Returns a Node.js Buffer ready for email attachment or HTTP response.
+ * Locale auto-detected from domain TLD if not specified.
  */
 export async function generatePDFReport(data: PDFReportData): Promise<Buffer> {
   const buffer = await renderToBuffer(<GhostTaxReport data={data} />);
@@ -461,6 +620,7 @@ export function toPDFReportData(
   companyName: string,
   domain: string,
   runId: string,
+  locale?: PDFLocale,
 ): PDFReportData {
   const exposure = (result.exposure || {}) as Record<string, unknown>;
   const proof = (result.proof || {}) as Record<string, unknown>;
@@ -478,6 +638,7 @@ export function toPDFReportData(
     domain,
     generatedAt: new Date().toISOString().split("T")[0],
     runId,
+    locale: locale || detectLocaleFromDomain(domain),
     exposureLowEur: exposureLow,
     exposureHighEur: exposureHigh,
     exposureConfidence: (exposure.confidence as number) || 0,

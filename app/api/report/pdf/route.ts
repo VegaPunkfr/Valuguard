@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabase } from "@/lib/supabase";
-import { generatePDFReport, toPDFReportData } from "@/lib/pdf-report";
+import { generatePDFReport, toPDFReportData, detectLocaleFromDomain, type PDFLocale } from "@/lib/pdf-report";
 
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id");
@@ -45,11 +45,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const domain = (row.domain as string) || "";
+    const locale = (row.locale as PDFLocale) || detectLocaleFromDomain(domain);
     const pdfData = toPDFReportData(
       reportData,
       (row.company_name as string) || "Unknown Company",
-      (row.domain as string) || "",
+      domain,
       (row.run_id as string) || id.slice(0, 8),
+      locale,
     );
 
     const pdfBuffer = await generatePDFReport(pdfData);
