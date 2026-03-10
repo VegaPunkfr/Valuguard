@@ -47,7 +47,10 @@ export type IntentCategory =
   | "NEW_EXEC"
   | "COMPLIANCE"
   | "M_AND_A"
-  | "RENEWAL";
+  | "RENEWAL"
+  | "DORA_REGULATION"
+  | "FINOPS_HIRING"
+  | "TENDER_RFP";
 
 export interface DetectedIntent {
   category: IntentCategory;
@@ -65,7 +68,7 @@ export interface IntentSignalResult {
   grade: "HOT" | "WARM" | "COOL";
   estimatedHeadcount: [number, number];
   industry: string;
-  geoMarket: "us" | "dach" | "fr" | "eu" | "other";
+  geoMarket: "us" | "dach" | "nl" | "fr" | "eu" | "other";
   sourceUrls: string[];
   detectedAt: string;
 }
@@ -122,15 +125,39 @@ const SIGNAL_QUERIES: SignalQuery[] = [
   { category: "RENEWAL", query: "enterprise contract renewal vendor evaluation RFP process 2026" },
   { category: "RENEWAL", query: "software vendor selection procurement process enterprise" },
   { category: "RENEWAL", query: "renegotiating SaaS contracts vendor consolidation evaluation" },
+
+  // ── GEO-SPECIFIC: US ──────────────────────────────────
+  { category: "COMPLIANCE", query: "SOC 2 Type II audit 2026 SaaS enterprise compliance certification" },
+  { category: "COMPLIANCE", query: "FedRAMP authorization cloud compliance government contractor 2026" },
+  { category: "COST_CUTTING", query: "quarterly earnings SaaS expense cloud costs operating expenses 10-Q SEC filing 2026" },
+  { category: "FUNDING", query: "raised Series B C growth round 2026 SaaS enterprise software United States" },
+
+  // ── GEO-SPECIFIC: GERMANY / DACH ──────────────────────
+  { category: "DORA_REGULATION", query: "DORA Digital Operational Resilience Act compliance bank insurance Germany 2025 2026" },
+  { category: "DORA_REGULATION", query: "DORA Verordnung IT-Risikomanagement Finanzdienstleister Deutschland Compliance" },
+  { category: "COMPLIANCE", query: "NIS2 Richtlinie Umsetzung Deutschland Cybersicherheit kritische Infrastruktur 2026" },
+  { category: "COST_CUTTING", query: "IT-Kostenoptimierung Digitalisierung Mittelstand Deutschland Cloud Kosten senken" },
+  { category: "HIRING_IT", query: "CIO CFO Leiter IT Einkaufsleiter neuer Vorstand ernannt Deutschland 2026" },
+  { category: "SAAS_COMPLAINTS", query: "zu viele SaaS Tools Software Wildwuchs Shadow IT Problem Unternehmen Deutschland" },
+  { category: "FINOPS_HIRING", query: "Cloud-Kostenoptimierung FinOps Engineer hiring Deutschland AWS Azure Kostenmanagement" },
+
+  // ── GEO-SPECIFIC: NETHERLANDS ─────────────────────────
+  { category: "TENDER_RFP", query: "IT procurement tender Netherlands Dutch company SaaS vendor selection RFP 2026" },
+  { category: "COST_CUTTING", query: "Dutch company cost reduction IT optimization Netherlands digital transformation 2026" },
+  { category: "FUNDING", query: "Dutch startup raised funding Netherlands Series A B venture capital 2026" },
+  { category: "NEW_EXEC", query: "appointed CIO CFO CTO Netherlands Dutch company new executive leadership 2026" },
+  { category: "COMPLIANCE", query: "DORA NIS2 compliance Netherlands financial services Dutch bank insurance regulation" },
 ];
 
 // ── ICP Matching ──────────────────────────────────────
 
 const GEO_INDICATORS: Record<string, string[]> = {
-  us: [".com", ".us", ".io", "united states", "usa", "california", "new york", "texas", "san francisco", "silicon valley"],
-  dach: [".de", ".ch", ".at", "germany", "switzerland", "austria", "berlin", "munich", "zurich", "vienna", "deutschland", "schweiz"],
+  // Order matters: most specific first (NL before EU, DACH before generic)
+  nl: [".nl", "netherlands", "dutch", "amsterdam", "rotterdam", "eindhoven", "utrecht", "den haag", "the hague", "nederland"],
+  dach: [".de", ".ch", ".at", "germany", "switzerland", "austria", "berlin", "munich", "zurich", "vienna", "deutschland", "schweiz", "frankfurt", "hamburg", "düsseldorf"],
   fr: [".fr", "france", "paris", "lyon", "marseille"],
-  eu: [".eu", ".nl", ".be", ".es", ".it", ".se", ".dk", ".fi", ".no", ".pt", ".ie", "europe", "european", "netherlands", "belgium", "spain", "italy", "sweden", "denmark"],
+  us: [".com", ".us", ".io", "united states", "usa", "california", "new york", "texas", "san francisco", "silicon valley"],
+  eu: [".eu", ".be", ".es", ".it", ".se", ".dk", ".fi", ".no", ".pt", ".ie", "europe", "european", "belgium", "spain", "italy", "sweden", "denmark"],
 };
 
 // ── Core Scanner ──────────────────────────────────────
@@ -430,6 +457,29 @@ function computeSignalStrength(category: IntentCategory, text: string): number {
       if (/contract renewal/i.test(lower)) strength = 60;
       break;
     }
+
+    case "DORA_REGULATION": {
+      // DORA is mandatory for EU financial services — very high intent
+      if (/bank|versicherung|insurance|finanzdienstleist/i.test(lower)) strength = 80;
+      if (/deadline|must comply|verpflichtend|mandatory/i.test(lower)) strength = Math.max(strength, 80);
+      if (/dora.*compliance|dora.*umsetzung/i.test(lower)) strength = 75;
+      break;
+    }
+
+    case "FINOPS_HIRING": {
+      // FinOps roles = active cloud cost optimization = strong ICP signal
+      if (/finops|cloud cost|kostenoptimierung/i.test(lower)) strength = 75;
+      if (/hiring|stellenangebot|vacature/i.test(lower)) strength = Math.max(strength, 70);
+      break;
+    }
+
+    case "TENDER_RFP": {
+      // Public procurement tenders = guaranteed budget + active buying
+      if (/tender|aanbesteding|ausschreibung/i.test(lower)) strength = 80;
+      if (/rfp|request for proposal/i.test(lower)) strength = 75;
+      if (/saas|cloud|software/i.test(lower)) strength = Math.max(strength, 70);
+      break;
+    }
   }
 
   // Cap at 85 per doctrine
@@ -512,13 +562,13 @@ function detectIndustry(text: string): string {
 
 // ── Geo Market Detection ──────────────────────────────
 
-function detectGeoMarket(domain: string, text: string): "us" | "dach" | "fr" | "eu" | "other" {
+function detectGeoMarket(domain: string, text: string): "us" | "dach" | "nl" | "fr" | "eu" | "other" {
   const combined = `${domain} ${text}`.toLowerCase();
 
-  // Check each geo in priority order (most specific first)
+  // Check each geo in priority order (most specific first — NL before EU)
   for (const [geo, indicators] of Object.entries(GEO_INDICATORS)) {
     if (indicators.some((ind) => combined.includes(ind.toLowerCase()))) {
-      return geo as "us" | "dach" | "fr" | "eu" | "other";
+      return geo as "us" | "dach" | "nl" | "fr" | "eu" | "other";
     }
   }
 
@@ -562,9 +612,14 @@ export function scoreIntentProspect(
   if (/\.(de|ch|at|fr|eu|nl|be)$/.test(domainLower)) icpFit = Math.max(icpFit, 0.75); // EU target market
 
   // High-value signal categories for Ghost Tax
-  const highValueCategories: IntentCategory[] = ["COST_CUTTING", "SAAS_COMPLAINTS", "NEW_EXEC", "COMPLIANCE", "RENEWAL"];
+  const highValueCategories: IntentCategory[] = ["COST_CUTTING", "SAAS_COMPLAINTS", "NEW_EXEC", "COMPLIANCE", "RENEWAL", "DORA_REGULATION", "TENDER_RFP", "FINOPS_HIRING"];
   const hasHighValue = signals.some((s) => highValueCategories.includes(s.category));
   if (hasHighValue) icpFit = Math.max(icpFit, 0.85);
+
+  // DORA + TENDER are ultra-high intent (mandatory/budget-committed)
+  const ultraHighCategories: IntentCategory[] = ["DORA_REGULATION", "TENDER_RFP"];
+  const hasUltraHigh = signals.some((s) => ultraHighCategories.includes(s.category));
+  if (hasUltraHigh) icpFit = Math.max(icpFit, 0.95);
 
   // 4. Multi-signal multiplier
   const uniqueCategories = new Set(signals.map((s) => s.category)).size;
