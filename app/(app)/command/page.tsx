@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { processEventIntoAccounts, type PlatformEvent } from '@/lib/command/bridge';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
 const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 10, padding: '20px 24px' };
@@ -10,6 +11,32 @@ const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, lette
 function fmt(n: number): string { return n >= 1000 ? `€${Math.round(n / 1000)}k` : `€${n}`; }
 
 const MAX_QUEUE = 30;
+
+// ── Incoming Signal types ────────────────────────────────
+interface IncomingSignal {
+  id: number;
+  event_type: string;
+  domain: string;
+  email?: string;
+  company_name?: string;
+  contact_name?: string;
+  headcount?: number;
+  industry?: string;
+  country?: string;
+  event_data?: Record<string, unknown>;
+  created_at: string;
+}
+
+const EVT_CLR: Record<string, string> = {
+  lead_captured: '#60a5fa',
+  scan_completed: '#22d3ee',
+  payment_completed: '#34d399',
+};
+const EVT_LABEL: Record<string, string> = {
+  lead_captured: 'LEAD',
+  scan_completed: 'SCAN',
+  payment_completed: 'PAYMENT',
+};
 
 export default function CommandOverview() {
   const [error, setError] = useState<string | null>(null);
@@ -28,13 +55,19 @@ export default function CommandOverview() {
       strengths: string[];
     }>;
   } | null>(null);
+  const [storeRef, setStoreRef] = useState<{ saveAccounts: (a: any[]) => void } | null>(null);
+  const [signals, setSignals] = useState<IncomingSignal[]>([]);
+  const [signalLoading, setSignalLoading] = useState(false);
+  const [processedIds, setProcessedIds] = useState<Set<number>>(new Set());
 
+  // Load accounts
   useEffect(() => {
     try {
       import('@/lib/command/store').then(mod => {
         try {
           const accounts = mod.loadAccounts();
           setData({ accounts: accounts as typeof data extends null ? never : NonNullable<typeof data>['accounts'] });
+          setStoreRef({ saveAccounts: mod.saveAccounts });
         } catch (e) {
           setError(`loadAccounts failed: ${e instanceof Error ? e.message : String(e)}`);
         }
@@ -44,6 +77,51 @@ export default function CommandOverview() {
     } catch (e) {
       setError(`Init failed: ${e instanceof Error ? e.message : String(e)}`);
     }
+  }, []);
+
+  // Poll for incoming signals
+  const fetchSignals = useCallback(async () => {
+    try {
+      setSignalLoading(true);
+      const res = await fetch('/api/command/ingest');
+      if (res.ok) {
+        const json = await res.json();
+        setSignals(json.events || []);
+      }
+    } catch { /* silent */ }
+    finally { setSignalLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    fetchSignals();
+    const interval = setInterval(fetchSignals, 60_000); // Poll every 60s
+    return () => clearInterval(interval);
+  }, [fetchSignals]);
+
+  // Accept a signal → process into accounts via bridge
+  const acceptSignal = useCallback((signal: IncomingSignal) => {
+    if (!data || !storeRef) return;
+    const event: PlatformEvent = {
+      type: signal.event_type as PlatformEvent['type'],
+      domain: signal.domain,
+      email: signal.email,
+      companyName: signal.company_name,
+      contactName: signal.contact_name,
+      headcount: signal.headcount,
+      industry: signal.industry,
+      country: signal.country,
+      data: signal.event_data,
+      timestamp: signal.created_at,
+    };
+    const result = processEventIntoAccounts(data.accounts as any[], event);
+    setData({ accounts: result.accounts as any });
+    storeRef.saveAccounts(result.accounts);
+    setProcessedIds(prev => new Set([...prev, signal.id]));
+  }, [data, storeRef]);
+
+  // Dismiss a signal
+  const dismissSignal = useCallback((id: number) => {
+    setProcessedIds(prev => new Set([...prev, id]));
   }, []);
 
   if (error) {
@@ -149,6 +227,55 @@ export default function CommandOverview() {
           {active.length} active · {attackNow.length} attack now · Pipeline {fmt(totalPipeline)} · Weighted {fmt(weightedPipeline)}
         </span>
       </div>
+
+      {/* INCOMING SIGNALS — Live platform events */}
+      {(() => {
+        const pending = signals.filter(s => !processedIds.has(s.id));
+        if (pending.length === 0 && !signalLoading) return null;
+        return (
+          <div style={{ ...box, borderLeft: '3px solid #22d3ee', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ ...lbl, color: '#22d3ee', margin: 0 }}>
+                INCOMING SIGNALS {pending.length > 0 && <span style={{ color: '#e4e9f4', fontWeight: 700 }}>({pending.length})</span>}
+              </div>
+              <button onClick={fetchSignals} disabled={signalLoading}
+                style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 4, background: 'rgba(34,211,238,0.06)', color: '#22d3ee', border: '1px solid rgba(34,211,238,0.12)', cursor: 'pointer', opacity: signalLoading ? 0.5 : 1 }}>
+                {signalLoading ? 'POLLING...' : 'REFRESH'}
+              </button>
+            </div>
+            {pending.length === 0 && signalLoading && (
+              <div style={{ fontSize: 12, color: '#475569' }}>Checking for new signals...</div>
+            )}
+            {pending.map(sig => {
+              const clr = EVT_CLR[sig.event_type] || '#64748b';
+              const label = EVT_LABEL[sig.event_type] || sig.event_type.toUpperCase();
+              const ago = Math.round((Date.now() - new Date(sig.created_at).getTime()) / 60000);
+              const agoStr = ago < 60 ? `${ago}m ago` : ago < 1440 ? `${Math.round(ago / 60)}h ago` : `${Math.round(ago / 1440)}d ago`;
+              return (
+                <div key={sig.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 6, background: `${clr}06`, border: `1px solid ${clr}15`, marginBottom: 6 }}>
+                  <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', padding: '3px 8px', borderRadius: 3, color: clr, background: `${clr}18` }}>
+                    {label}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4' }}>{sig.company_name || sig.domain}</span>
+                    <span style={{ fontSize: 12, color: '#64748b', marginLeft: 8 }}>{sig.domain}</span>
+                    {sig.email && <span style={{ fontSize: 11, color: '#475569', marginLeft: 8 }}>{sig.email}</span>}
+                  </div>
+                  <span style={{ fontSize: 11, color: '#3a4560' }}>{agoStr}</span>
+                  <button onClick={() => acceptSignal(sig)}
+                    style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 4, background: 'rgba(52,211,153,0.08)', color: '#34d399', border: '1px solid rgba(52,211,153,0.15)', cursor: 'pointer' }}>
+                    ACCEPT
+                  </button>
+                  <button onClick={() => dismissSignal(sig.id)}
+                    style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 4, background: 'rgba(100,116,139,0.06)', color: '#64748b', border: '1px solid rgba(100,116,139,0.10)', cursor: 'pointer' }}>
+                    DISMISS
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* ATTACK NOW + TOP EV */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>

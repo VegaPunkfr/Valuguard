@@ -288,6 +288,31 @@ export async function POST(request: NextRequest) {
             console.warn("[Ghost Tax] Drip schedule failed (non-fatal):", err instanceof Error ? err.message : err);
           });
         }
+
+        // ── BRIDGE: scan_completed → Founder Mission Control ──
+        const commandSecret = process.env.COMMAND_SECRET;
+        if (commandSecret && domain) {
+          const bridgeUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com"}/api/command/ingest?key=${commandSecret}`;
+          fetch(bridgeUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "scan_completed",
+              domain,
+              email: emailFromBody || undefined,
+              companyName: result.companyContext?.name || input.name || undefined,
+              headcount: input.headcount || undefined,
+              industry: input.industry || undefined,
+              data: {
+                exposureLow: result.exposure?.lowEur,
+                exposureHigh: result.exposure?.highEur,
+                confidence: result.exposure?.confidence,
+                signalCount: result.proof?.observedSignals?.length || 0,
+                vendorCount: result.companyContext?.techFootprint?.length || 0,
+              },
+            }),
+          }).catch(() => { /* bridge failure is non-fatal */ });
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Analysis failed";
         console.error("[Ghost Tax] Intel pipeline error:", message);
