@@ -56,19 +56,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
+    // Only use stored preference — never auto-detect from browser language.
+    // The site defaults to English. Users switch manually via language selector.
+    // This prevents French/German browsers from auto-switching and breaking
+    // the brand experience (Ghost Tax must stay Ghost Tax, not "Taxe Fantôme").
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
     if (stored && dict[stored]) {
       setLocaleState(stored);
       document.documentElement.lang = stored;
-      return;
-    }
-    // Auto-detect from browser language (fr-FR → fr, de-AT → de, etc.)
-    const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
-    if (browserLang && dict[browserLang as Locale]) {
-      const detected = browserLang as Locale;
-      setLocaleState(detected);
-      localStorage.setItem(STORAGE_KEY, detected);
-      document.documentElement.lang = detected;
     }
   }, []);
 
