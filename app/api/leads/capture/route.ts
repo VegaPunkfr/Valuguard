@@ -179,6 +179,23 @@ export async function POST(request: NextRequest) {
       console.error("[Ghost Tax] Drip enqueue fire-and-forget failed:", e?.message);
     });
 
+    // ── BRIDGE: Fire event to Founder Mission Control ──
+    const commandSecret = process.env.COMMAND_SECRET;
+    if (commandSecret && cleanDomain) {
+      fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "lead_captured",
+          domain: cleanDomain,
+          email: cleanEmail,
+          companyName: cleanCompany || undefined,
+          headcount: cleanHeadcount || undefined,
+          industry: cleanIndustry || undefined,
+        }),
+      }).catch(() => { /* bridge failure is non-fatal */ });
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {
     console.error("[Ghost Tax] Lead capture error:", err);

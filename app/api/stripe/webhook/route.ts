@@ -130,6 +130,28 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // ── BRIDGE: Fire event to Founder Mission Control ──
+      // Non-blocking, fire-and-forget. Failure is non-fatal.
+      if (meta.domain) {
+        const commandSecret = process.env.COMMAND_SECRET;
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+        if (commandSecret) {
+          fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "payment_completed",
+              domain: meta.domain,
+              email: session.customer_email || undefined,
+              companyName: meta.companyName || undefined,
+              contactName: meta.contactName || undefined,
+              headcount: meta.headcount ? parseInt(meta.headcount, 10) : undefined,
+              industry: meta.industry || undefined,
+            }),
+          }).catch(() => { /* bridge failure is non-fatal */ });
+        }
+      }
+
       // Rail B Monitor: send onboarding email + activate monitoring
       if (meta.rail === "B_MONITOR" && session.customer_email) {
         console.log("[Ghost Tax] Rail B Monitor checkout completed:", {

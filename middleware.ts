@@ -1,10 +1,24 @@
 /**
- * GHOST TAX — EDGE MIDDLEWARE (WAF + AUTH)
+ * GHOST TAX — EDGE MIDDLEWARE (WAF + AUTH + SURFACE ISOLATION)
  *
- * Layers (executed in order at the Edge, before Node.js runtime):
+ * Platform Architecture — 3 Strict Surfaces:
+ * ─────────────────────────────────────────────
+ * PUBLIC  (marketing) — No auth. Attracts, converts, captures signals.
+ *   Routes: /, /pricing, /faq, /about, /ghost-tax, /intel, /estimator, etc.
+ *
+ * CLIENT  (app)       — Supabase session. Post-conversion experience.
+ *   Routes: /dashboard, /vault, /report/*, /audit/*
+ *
+ * FOUNDER (command)   — COMMAND_SECRET only. Private cockpit.
+ *   Routes: /command/*, /admin/*
+ *   NEVER accessible to clients. NEVER exposed publicly.
+ *
+ * Layers (executed in order at the Edge):
  * 1. EDGE WAF — Block SQL injection, XSS, malicious bots
  * 2. Security Headers — CSP, HSTS, X-Frame-Options
- * 3. Auth Guard — Protect /dashboard, /vault, /admin, /report
+ * 3. Surface Router — Route to correct auth layer
+ * 4a. Client Auth — Supabase session check
+ * 4b. Founder Auth — COMMAND_SECRET check (cookie or query param)
  */
 
 import { NextResponse, type NextRequest } from "next/server";
