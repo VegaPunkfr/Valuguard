@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useState, useCallback } from 'react';
 
 const NAV: { href: string; label: string }[] = [
   { href: '/command',          label: 'OVERVIEW' },
@@ -14,12 +14,30 @@ const NAV: { href: string; label: string }[] = [
 
 export default function CommandLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [signalCount, setSignalCount] = useState(0);
 
   useEffect(() => {
     document.body.style.background = '#060912';
     document.body.style.margin = '0';
     return () => { document.body.style.background = ''; };
   }, []);
+
+  // Poll for signal count (lightweight — just the count)
+  const pollSignals = useCallback(async () => {
+    try {
+      const res = await fetch('/api/command/ingest');
+      if (res.ok) {
+        const json = await res.json();
+        setSignalCount(json.events?.length || 0);
+      }
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => {
+    pollSignals();
+    const interval = setInterval(pollSignals, 60_000);
+    return () => clearInterval(interval);
+  }, [pollSignals]);
 
   const isActive = (href: string) =>
     href === '/command' ? pathname === '/command' : pathname.startsWith(href);
@@ -59,9 +77,21 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
                     borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
                     background: active ? 'rgba(59,130,246,0.06)' : 'transparent',
                     transition: 'color 0.1s, border-color 0.1s',
+                    position: 'relative',
                   }}
                 >
                   {item.label}
+                  {/* Signal badge on OVERVIEW tab */}
+                  {item.href === '/command' && signalCount > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 10, right: 4,
+                      fontSize: 9, fontWeight: 700, lineHeight: 1,
+                      color: '#060912', background: '#ef4444',
+                      borderRadius: 8, padding: '2px 5px', minWidth: 14, textAlign: 'center',
+                    }}>
+                      {signalCount > 9 ? '9+' : signalCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

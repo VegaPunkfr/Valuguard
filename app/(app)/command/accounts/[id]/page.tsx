@@ -274,6 +274,27 @@ export default function AccountDetailPage() {
             ))}
           </div>
 
+          {/* Platform Signal History */}
+          {(() => {
+            const platformSignals = a.signals.filter(s => s.source === 'ghost-tax' || s.source === 'stripe');
+            if (platformSignals.length === 0) return null;
+            const SIG_CLR: Record<string, string> = { payment: '#34d399', scan: '#22d3ee', intent: '#f59e0b' };
+            return (
+              <div style={{ ...box, borderLeft: '3px solid #22d3ee' }}>
+                <div style={{ ...lbl, color: '#22d3ee' }}>PLATFORM SIGNALS ({platformSignals.length})</div>
+                {platformSignals.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8, padding: '8px 10px', borderRadius: 4, background: `${SIG_CLR[s.type] || '#64748b'}06`, border: `1px solid ${SIG_CLR[s.type] || '#64748b'}12` }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: SIG_CLR[s.type] || '#64748b', minWidth: 28, padding: '2px 4px', borderRadius: 3, background: `${SIG_CLR[s.type] || '#64748b'}15`, textAlign: 'center' as const }}>{s.strength}/5</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, color: '#e4e9f4' }}>{s.detail}</div>
+                      <div style={{ fontSize: 11, color: '#3a4560', marginTop: 2 }}>{s.source.toUpperCase()} · {s.type.toUpperCase()}{s.date ? ` · ${s.date}` : ''}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
           <div style={box}>
             <div style={lbl}>EXECUTION LOG</div>
             {a.executionLog.length === 0 && <div style={{ fontSize: 13, color: '#3a4560', marginBottom: 6 }}>No actions yet</div>}

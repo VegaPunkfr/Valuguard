@@ -108,7 +108,18 @@ export default function CommandOverview() {
     return () => clearInterval(interval);
   }, [fetchSignals]);
 
-  // Accept a signal → process into accounts via bridge
+  // Mark event as processed server-side
+  const markProcessed = useCallback(async (id: number) => {
+    try {
+      await fetch('/api/command/ingest', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id] }),
+      });
+    } catch { /* non-fatal */ }
+  }, []);
+
+  // Accept a signal → process into accounts via bridge + mark server-side
   const acceptSignal = useCallback((signal: IncomingSignal) => {
     if (!data || !storeRef) return;
     const event: PlatformEvent = {
@@ -127,12 +138,14 @@ export default function CommandOverview() {
     setData({ accounts: result.accounts as any });
     storeRef.saveAccounts(result.accounts);
     setProcessedIds(prev => new Set([...prev, signal.id]));
-  }, [data, storeRef]);
+    markProcessed(signal.id);
+  }, [data, storeRef, markProcessed]);
 
-  // Dismiss a signal
+  // Dismiss a signal + mark server-side
   const dismissSignal = useCallback((id: number) => {
     setProcessedIds(prev => new Set([...prev, id]));
-  }, []);
+    markProcessed(id);
+  }, [markProcessed]);
 
   if (error) {
     return (

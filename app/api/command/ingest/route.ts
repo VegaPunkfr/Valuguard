@@ -117,6 +117,48 @@ export async function POST(request: NextRequest) {
   });
 }
 
+// PATCH — mark events as processed (after ACCEPT/DISMISS in cockpit)
+export async function PATCH(request: NextRequest) {
+  const secret = process.env.COMMAND_SECRET;
+  if (!secret) {
+    return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+  }
+
+  const queryKey = request.nextUrl.searchParams.get('key');
+  const cookieKey = request.cookies.get('gt-command-key')?.value;
+
+  if (queryKey !== secret && cookieKey !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let body: { ids: number[] };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+    return NextResponse.json({ error: 'Missing ids array' }, { status: 400 });
+  }
+
+  try {
+    const { createAdminSupabase } = await import('@/lib/supabase');
+    const supabase = createAdminSupabase();
+
+    if (supabase) {
+      await (supabase as any)
+        .from('command_events')
+        .update({ processed: true, processed_at: new Date().toISOString() })
+        .in('id', body.ids);
+    }
+
+    return NextResponse.json({ ok: true, marked: body.ids.length });
+  } catch {
+    return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
+  }
+}
+
 // GET — fetch unprocessed events (for cockpit polling)
 export async function GET(request: NextRequest) {
   const secret = process.env.COMMAND_SECRET;
