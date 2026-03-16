@@ -57,12 +57,43 @@ export const CONVICTION_META: Record<Conviction, { label: string; color: string;
 
 // ── Core Entities ────────────────────────────────────────
 
+export type EmailStatus = 'verified' | 'likely_valid' | 'catch_all' | 'guessed' | 'missing' | 'invalid';
+export type EmailSource = 'lead_captured' | 'pattern_generated' | 'manual' | 'enrichment';
+export type DomainPatternStatus = 'confirmed' | 'likely' | 'guessed' | 'unknown' | 'catch_all';
+
 export interface FinanceLead {
   name: string;
   title: string;
   linkedIn?: string;
   background?: string;
+  // Email resolution
+  email?: string;
+  emailStatus?: EmailStatus;
+  emailSource?: EmailSource;
+  emailConfidence?: number; // 0-100
+  emailPattern?: string; // e.g. "firstname.lastname"
+  lastEmailCheckedAt?: string;
 }
+
+export interface DomainEmailIntel {
+  domain: string;
+  pattern?: string; // e.g. "firstname.lastname"
+  patternStatus: DomainPatternStatus;
+  patternConfidence: number; // 0-100
+  confirmedEmails: string[]; // emails known to work on this domain
+  hasMx: boolean;
+  isCatchAll: boolean;
+  lastCheckedAt: string;
+}
+
+export const EMAIL_STATUS_META: Record<EmailStatus, { label: string; color: string; gmailAllowed: boolean }> = {
+  verified:    { label: 'VERIFIED',    color: '#34d399', gmailAllowed: true },
+  likely_valid:{ label: 'LIKELY',      color: '#60a5fa', gmailAllowed: true },
+  catch_all:   { label: 'CATCH-ALL',   color: '#f59e0b', gmailAllowed: false },
+  guessed:     { label: 'UNVERIFIED',  color: '#64748b', gmailAllowed: false },
+  missing:     { label: 'NO EMAIL',    color: '#3a4560', gmailAllowed: false },
+  invalid:     { label: 'INVALID',     color: '#f87171', gmailAllowed: false },
+};
 
 export interface Signal {
   type: string;

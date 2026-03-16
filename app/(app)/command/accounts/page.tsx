@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import type { Account, AccountStatus, Country, Attackability, SortField, SortDir } from '@/types/command';
-import { STATUS_META, ATTACK_META, CONVICTION_META } from '@/types/command';
+import { STATUS_META, ATTACK_META, CONVICTION_META, EMAIL_STATUS_META } from '@/types/command';
 import { loadAccounts, filterAccounts, sortAccounts, calcProbability } from '@/lib/command/store';
+import { resolveEmail, loadDomainIntel } from '@/lib/command/email-resolver';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
 
@@ -44,6 +45,12 @@ const safetyPill = (a: Account): { text: string; color: string; bg: string } => 
   if (a.attackability === 'blocked') return { text: 'BLOCKED', color: '#f87171', bg: 'rgba(248,113,113,0.10)' };
   if (a.outreach.some(o => o.status === 'draft')) return { text: 'DRAFT', color: '#fbbf24', bg: 'rgba(251,191,36,0.10)' };
   return { text: 'CLEAR', color: '#34d399', bg: 'rgba(52,211,153,0.10)' };
+};
+
+const emailPill = (a: Account): { text: string; color: string; bg: string } => {
+  const status = a.financeLead.emailStatus || 'missing';
+  const meta = EMAIL_STATUS_META[status] || EMAIL_STATUS_META.missing;
+  return { text: meta.label, color: meta.color, bg: `${meta.color}15` };
 };
 
 export default function AccountsPage() {
@@ -117,6 +124,7 @@ export default function AccountsPage() {
                 { f: null, l: 'REV', w: 50 },
                 { f: null, l: 'SOLO', w: 44 },
                 { f: null, l: 'STATUS', w: 90 },
+                { f: null, l: 'EMAIL', w: 70 },
                 { f: null, l: 'SAFETY', w: 80 },
                 { f: null, l: 'LAST EVENT', w: 130 },
               ].map((c, i) => (
@@ -157,6 +165,7 @@ export default function AccountsPage() {
                   <td style={{ padding: '8px', fontSize: 13, fontWeight: 600, color: '#e4e9f4' }}>{fmt(a.revenueEstimate)}</td>
                   <td style={{ padding: '8px', fontSize: 11, fontWeight: 600, color: SF_C[a.solofit] || '#64748b' }}>{a.solofit.toUpperCase()}</td>
                   <td style={{ padding: '8px' }}><Pill text={st.label} color={st.color} bg={st.bg} /></td>
+                  <td style={{ padding: '8px' }}>{(() => { const ep = emailPill(a); return <Pill text={ep.text} color={ep.color} bg={ep.bg} />; })()}</td>
                   <td style={{ padding: '8px' }}><Pill text={safety.text} color={safety.color} bg={safety.bg} /></td>
                   <td style={{ padding: '8px' }}>
                     {lastEvent && <div style={{ fontSize: 12, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, maxWidth: 130 }}>{lastEvent.detail}</div>}

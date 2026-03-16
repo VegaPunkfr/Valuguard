@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { processEventIntoAccounts, type PlatformEvent } from '@/lib/command/bridge';
+import { loadDomainIntel, saveDomainIntel, learnDomainPattern, resolveAllEmails } from '@/lib/command/email-resolver';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
 const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 10, padding: '20px 24px' };
@@ -135,8 +136,20 @@ export default function CommandOverview() {
       timestamp: signal.created_at,
     };
     const result = processEventIntoAccounts(data.accounts as any[], event);
-    setData({ accounts: result.accounts as any });
-    storeRef.saveAccounts(result.accounts);
+    let updatedAccounts = result.accounts;
+
+    // Learn email pattern from incoming lead emails
+    if (signal.email && signal.domain) {
+      let domainIntel = loadDomainIntel();
+      domainIntel = learnDomainPattern(signal.email, signal.contact_name || '', domainIntel);
+      saveDomainIntel(domainIntel);
+      // Resolve emails for all accounts using updated intel
+      const resolved = resolveAllEmails(updatedAccounts as any[], domainIntel);
+      updatedAccounts = resolved.accounts;
+    }
+
+    setData({ accounts: updatedAccounts as any });
+    storeRef.saveAccounts(updatedAccounts);
     setProcessedIds(prev => new Set([...prev, signal.id]));
     markProcessed(signal.id);
   }, [data, storeRef, markProcessed]);

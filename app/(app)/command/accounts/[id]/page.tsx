@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import type { Account, AccountStatus } from '@/types/command';
-import { STATUS_META, ATTACK_META, CONVICTION_META, TIMELINE_META } from '@/types/command';
+import type { Account, AccountStatus, EmailStatus } from '@/types/command';
+import { STATUS_META, ATTACK_META, CONVICTION_META, TIMELINE_META, EMAIL_STATUS_META } from '@/types/command';
 import { loadAccounts, saveAccounts, updateAccount, addNote, calcProbability, calcExpectedValue } from '@/lib/command/store';
+import { resolveEmail, loadDomainIntel, saveDomainIntel, applyEmailResolution } from '@/lib/command/email-resolver';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
 const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 8, padding: '16px 20px' };
@@ -178,7 +179,82 @@ export default function AccountDetailPage() {
             <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4' }}>{a.financeLead.name}</div>
             <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 2 }}>{a.financeLead.title}</div>
             {a.financeLead.background && <div style={{ fontSize: 13, color: '#64748b', marginTop: 5, lineHeight: 1.5 }}>{a.financeLead.background}</div>}
-            {a.financeLead.linkedIn && <a href={a.financeLead.linkedIn} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#60a5fa', marginTop: 5, display: 'inline-block', textDecoration: 'none' }}>LinkedIn →</a>}
+
+            {/* Email Resolution */}
+            {(() => {
+              const domainIntel = loadDomainIntel();
+              const resolution = resolveEmail(a, domainIntel);
+              const emailMeta = EMAIL_STATUS_META[resolution.status];
+              return (
+                <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 6, background: `${emailMeta.color}08`, border: `1px solid ${emailMeta.color}15` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: emailMeta.color, padding: '2px 7px', borderRadius: 3, background: `${emailMeta.color}18` }}>
+                      {emailMeta.label}
+                    </span>
+                    {resolution.email ? (
+                      <span style={{ fontSize: 13, fontWeight: 500, color: '#e4e9f4' }}>{resolution.email}</span>
+                    ) : (
+                      <span style={{ fontSize: 13, color: '#3a4560' }}>No email resolved</span>
+                    )}
+                    {resolution.confidence > 0 && (
+                      <span style={{ fontSize: 11, color: '#475569' }}>{resolution.confidence}% conf.</span>
+                    )}
+                  </div>
+                  {resolution.pattern && (
+                    <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Pattern: {resolution.pattern}@{a.domain}</div>
+                  )}
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                    {emailMeta.gmailAllowed && resolution.email && (
+                      <button onClick={() => {
+                        window.open(`mailto:${resolution.email}`);
+                      }} style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 4, background: 'rgba(52,211,153,0.08)', color: '#34d399', border: '1px solid rgba(52,211,153,0.15)', cursor: 'pointer' }}>
+                        OPEN GMAIL
+                      </button>
+                    )}
+                    {resolution.email && (
+                      <button onClick={() => navigator.clipboard.writeText(resolution.email!)} style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 4, background: 'rgba(96,165,250,0.08)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.15)', cursor: 'pointer' }}>
+                        COPY EMAIL
+                      </button>
+                    )}
+                    {resolution.needsVerification && resolution.email && (
+                      <button onClick={async () => {
+                        try {
+                          const res = await fetch('/api/command/verify-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: resolution.email }),
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            const newStatus: EmailStatus = data.valid
+                              ? (data.isCatchAll ? 'catch_all' : 'likely_valid')
+                              : 'invalid';
+                            const updated = updateAccount(accounts, id, {
+                              financeLead: {
+                                ...a.financeLead,
+                                email: resolution.email!,
+                                emailStatus: newStatus,
+                                emailConfidence: data.confidence,
+                                emailSource: 'pattern_generated',
+                                lastEmailCheckedAt: new Date().toISOString(),
+                              },
+                            });
+                            persist(updated);
+                          }
+                        } catch { /* silent */ }
+                      }} style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 4, background: 'rgba(251,191,36,0.08)', color: '#f59e0b', border: '1px solid rgba(251,191,36,0.15)', cursor: 'pointer' }}>
+                        VERIFY MX
+                      </button>
+                    )}
+                    {!emailMeta.gmailAllowed && resolution.email && (
+                      <span style={{ fontSize: 11, color: '#475569', padding: '5px 0' }}>Gmail blocked — verify first</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {a.financeLead.linkedIn && <a href={a.financeLead.linkedIn} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#60a5fa', marginTop: 8, display: 'inline-block', textDecoration: 'none' }}>LinkedIn →</a>}
           </div>
 
           {/* Signals */}
