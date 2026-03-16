@@ -50,9 +50,9 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
         background: 'rgba(6,9,18,0.97)', backdropFilter: 'blur(16px)',
       }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 56 }}>
-          <Link href="/" style={{ textDecoration: 'none', color: '#3a4560', fontSize: 12, letterSpacing: '0.08em', marginRight: 24 }}>
-            ← SITE
-          </Link>
+          <a href="https://ghost-tax.com" style={{ textDecoration: 'none', color: '#3a4560', fontSize: 12, letterSpacing: '0.08em', marginRight: 24 }}>
+            ← GHOST-TAX.COM
+          </a>
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '0.10em', color: '#e4e9f4', marginRight: 8 }}>
             GHOST TAX
           </span>
