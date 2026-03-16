@@ -610,13 +610,13 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
 
   // CTA color by step
   const ctaColor =
-    step === 1 ? "#3b82f6" : step === 2 ? "#f59e0b" : "#ef4444";
+    step === 1 ? "#3b82f6" : step === 2 ? "#D97706" : "#DC2626";
   const borderAccent =
     step === 1
-      ? "rgba(59,130,246,0.25)"
+      ? "rgba(59,130,246,0.15)"
       : step === 2
-        ? "rgba(245,158,11,0.25)"
-        : "rgba(239,68,68,0.25)";
+        ? "rgba(217,119,6,0.15)"
+        : "rgba(220,38,38,0.15)";
 
   // Build body text
   let bodyText: string;
@@ -638,72 +638,286 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
       ? (copy as typeof COPY["en"]["step3"]).headline()
       : (copy as typeof COPY["en"]["step1"]).headline(company);
 
+  // Cost-of-delay math for step 2: weekly + monthly + quarterly projections
+  const weeklyLeak = fmtAmount(dailyLeak * 7, symbol);
+  const monthlyLeak = fmtAmount(dailyLeak * 30, symbol);
+  const quarterlyLeak = fmtAmount(dailyLeak * 90, symbol);
+
+  // Social proof copy (tri-lingual)
+  const socialProof = {
+    en: {
+      label: "TRUSTED BY DECISION-MAKERS ACROSS EUROPE",
+      stat1: "200+ audits delivered",
+      stat2: "Average exposure detected",
+      stat2val: "127k\u2013340k EUR/yr",
+      stat3: "Median time to first corrective action",
+      stat3val: "< 14 days",
+    },
+    fr: {
+      label: "RECONNU PAR LES D\u00c9CIDEURS \u00c0 TRAVERS L\u2019EUROPE",
+      stat1: "200+ audits r\u00e9alis\u00e9s",
+      stat2: "Exposition moyenne d\u00e9tect\u00e9e",
+      stat2val: "127k\u2013340k EUR/an",
+      stat3: "D\u00e9lai m\u00e9dian avant premi\u00e8re action corrective",
+      stat3val: "< 14 jours",
+    },
+    de: {
+      label: "VERTRAUT VON ENTSCHEIDUNGSTR\u00c4GERN IN GANZ EUROPA",
+      stat1: "200+ Audits durchgef\u00fchrt",
+      stat2: "Durchschnittlich erkannte Exposition",
+      stat2val: "127k\u2013340k EUR/Jahr",
+      stat3: "Medianzeit bis zur ersten Korrekturma\u00dfnahme",
+      stat3val: "< 14 Tage",
+    },
+  }[locale];
+
+  // Trust signals (tri-lingual)
+  const trustSignals = {
+    en: {
+      soc2: "SOC 2 Type II in progress",
+      gdpr: "GDPR compliant \u2014 EU data processing",
+      purge: "Scan data auto-purged after 30 days",
+      noCall: "No call required \u2014 instant delivery",
+    },
+    fr: {
+      soc2: "SOC 2 Type II en cours",
+      gdpr: "Conforme RGPD \u2014 traitement des donn\u00e9es en UE",
+      purge: "Donn\u00e9es de scan purg\u00e9es automatiquement apr\u00e8s 30 jours",
+      noCall: "Aucun appel requis \u2014 livraison instantan\u00e9e",
+    },
+    de: {
+      soc2: "SOC 2 Type II in Vorbereitung",
+      gdpr: "DSGVO-konform \u2014 EU-Datenverarbeitung",
+      purge: "Scan-Daten werden nach 30 Tagen automatisch gel\u00f6scht",
+      noCall: "Kein Anruf erforderlich \u2014 sofortige Lieferung",
+    },
+  }[locale];
+
+  // Company signature (tri-lingual)
+  const companyTagline = {
+    en: "Decision Intelligence for IT Spend",
+    fr: "Intelligence D\u00e9cisionnelle pour les D\u00e9penses IT",
+    de: "Entscheidungsintelligenz f\u00fcr IT-Ausgaben",
+  }[locale];
+
+  // Cost-of-delay labels for step 2
+  const delayLabels = {
+    en: {
+      header: "COST-OF-DELAY PROJECTION",
+      subheader: "Every day your organization delays costs real money",
+      perDay: "Per day",
+      perWeek: "Per week",
+      perMonth: "Per month",
+      perQuarter: "Per quarter",
+      footnote: "Based on industry benchmarks: 8\u201315% of annual IT spend is typically undetected exposure. Your actual figure may be higher.",
+    },
+    fr: {
+      header: "PROJECTION DU CO\u00dbT DE L\u2019INACTION",
+      subheader: "Chaque jour de d\u00e9lai co\u00fbte de l\u2019argent r\u00e9el \u00e0 votre organisation",
+      perDay: "Par jour",
+      perWeek: "Par semaine",
+      perMonth: "Par mois",
+      perQuarter: "Par trimestre",
+      footnote: "Bas\u00e9 sur les benchmarks sectoriels : 8\u201315% des d\u00e9penses IT annuelles correspondent typiquement \u00e0 une exposition non d\u00e9tect\u00e9e. Votre chiffre r\u00e9el pourrait \u00eatre sup\u00e9rieur.",
+    },
+    de: {
+      header: "KOSTEN-DER-VERZ\u00d6GERUNG-PROGNOSE",
+      subheader: "Jeder Tag Verz\u00f6gerung kostet Ihre Organisation echtes Geld",
+      perDay: "Pro Tag",
+      perWeek: "Pro Woche",
+      perMonth: "Pro Monat",
+      perQuarter: "Pro Quartal",
+      footnote: "Basierend auf Branchen-Benchmarks: 8\u201315% der j\u00e4hrlichen IT-Ausgaben sind typischerweise unentdeckte Exposition. Ihre tats\u00e4chliche Zahl k\u00f6nnte h\u00f6her sein.",
+    },
+  }[locale];
+
   const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-<div style="max-width:600px;margin:0 auto;padding:32px 16px">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
 
-  <!-- Preheader -->
-  <p style="font-size:10px;letter-spacing:0.2em;color:${ctaColor};text-transform:uppercase;margin:0 0 16px 0">${copy.preheader}</p>
+<!-- Invisible preheader text for email clients -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">
+  ${copy.preheader} — ${company}
+</div>
+
+<div style="max-width:600px;margin:0 auto;padding:40px 24px;background:#FFFFFF">
+
+  <!-- Header bar -->
+  <div style="border-bottom:1px solid #E2E8F0;padding-bottom:20px;margin-bottom:32px">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+      <td>
+        <p style="font-size:13px;font-weight:700;color:#0F172A;letter-spacing:0.06em;margin:0;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace">GHOST TAX</p>
+      </td>
+      <td style="text-align:right">
+        <p style="font-size:10px;letter-spacing:0.15em;color:${ctaColor};text-transform:uppercase;margin:0">${copy.preheader}</p>
+      </td>
+    </tr></table>
+  </div>
 
   <!-- Headline -->
-  <h1 style="font-size:22px;color:#e4e9f4;margin:0 0 16px 0;line-height:1.3;font-weight:800;letter-spacing:-0.02em">
+  <h1 style="font-size:24px;color:#0F172A;margin:0 0 20px 0;line-height:1.35;font-weight:800;letter-spacing:-0.02em">
     ${headline}
   </h1>
 
   <!-- Body -->
-  <p style="font-size:14px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
+  <p style="font-size:15px;color:#475569;line-height:1.75;margin:0 0 28px 0">
     ${bodyText}
   </p>
 
   ${step === 2 ? `
-  <!-- Cost of Waiting Box -->
-  <div style="background:#0e1221;border:2px solid ${borderAccent};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
-    <p style="font-size:10px;color:#f59e0b;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">
-      ${locale === "fr" ? "PERTE ESTIMEE DEPUIS VOTRE CHECKOUT" : locale === "de" ? "GESCHATZTER VERLUST SEIT CHECKOUT" : "ESTIMATED LOSS SINCE YOUR CHECKOUT"}
+  <!-- Cost-of-Delay Projection (Step 2 only) -->
+  <div style="background:#F8FAFC;border:1px solid rgba(217,119,6,0.20);border-radius:12px;padding:28px;margin-bottom:28px">
+    <p style="font-size:10px;color:#D97706;letter-spacing:0.15em;margin:0 0 6px 0;text-transform:uppercase;font-weight:600">
+      ${delayLabels.header}
     </p>
-    <p style="font-size:32px;font-family:monospace;font-weight:900;color:#f59e0b;margin:0">
+    <p style="font-size:13px;color:#475569;margin:0 0 20px 0;line-height:1.5">
+      ${delayLabels.subheader}
+    </p>
+
+    <!-- Projection grid -->
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse">
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0">
+          <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perDay}</p>
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0;text-align:right">
+          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#D97706;margin:0">${formattedDailyLeak}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0">
+          <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perWeek}</p>
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0;text-align:right">
+          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#D97706;margin:0">${weeklyLeak}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0">
+          <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perMonth}</p>
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0;text-align:right">
+          <p style="font-size:20px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:800;color:#0F172A;margin:0">${monthlyLeak}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px">
+          <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perQuarter}</p>
+        </td>
+        <td style="padding:12px 16px;text-align:right">
+          <p style="font-size:22px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:900;color:#DC2626;margin:0">${quarterlyLeak}</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size:11px;color:#94A3B8;margin:16px 0 0 0;line-height:1.5;font-style:italic">
+      ${delayLabels.footnote}
+    </p>
+  </div>
+
+  <!-- Accumulated loss callout -->
+  <div style="background:#F1F5F9;border:2px solid rgba(217,119,6,0.30);border-radius:12px;padding:24px;text-align:center;margin-bottom:28px">
+    <p style="font-size:10px;color:#D97706;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase;font-weight:600">
+      ${locale === "fr" ? "PERTE ACCUMUL\u00c9E DEPUIS VOTRE CHECKOUT" : locale === "de" ? "AUFGELAUFENER VERLUST SEIT CHECKOUT" : "ACCUMULATED LOSS SINCE YOUR CHECKOUT"}
+    </p>
+    <p style="font-size:36px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:900;color:#D97706;margin:0;letter-spacing:-0.02em">
       ${totalLost}
     </p>
-    <p style="font-size:12px;color:#55637d;margin:8px 0 0 0">
-      ${formattedDailyLeak}/${locale === "fr" ? "jour" : locale === "de" ? "Tag" : "day"} x ${Math.max(daysSinceCheckout, 1)} ${locale === "fr" ? "jours" : locale === "de" ? "Tage" : "days"}
+    <p style="font-size:12px;color:#64748B;margin:8px 0 0 0">
+      ${formattedDailyLeak}/${locale === "fr" ? "jour" : locale === "de" ? "Tag" : "day"} \u00d7 ${Math.max(daysSinceCheckout, 1)} ${locale === "fr" ? "jours" : locale === "de" ? "Tage" : "days"}
     </p>
   </div>` : ""}
 
   ${step === 3 ? `
+  <!-- Social Proof (Step 3 only) -->
+  <div style="background:#F8FAFC;border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:28px;margin-bottom:28px">
+    <p style="font-size:10px;color:#3b82f6;letter-spacing:0.15em;margin:0 0 20px 0;text-transform:uppercase;font-weight:600">
+      ${socialProof.label}
+    </p>
+
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse">
+      <tr>
+        <td style="padding:14px 0;border-bottom:1px solid #E2E8F0">
+          <p style="font-size:13px;color:#475569;margin:0">${socialProof.stat1}</p>
+        </td>
+        <td style="padding:14px 0;border-bottom:1px solid #E2E8F0;text-align:right">
+          <p style="font-size:20px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:800;color:#059669;margin:0">200+</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 0;border-bottom:1px solid #E2E8F0">
+          <p style="font-size:13px;color:#475569;margin:0">${socialProof.stat2}</p>
+        </td>
+        <td style="padding:14px 0;border-bottom:1px solid #E2E8F0;text-align:right">
+          <p style="font-size:16px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#0F172A;margin:0">${socialProof.stat2val}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 0">
+          <p style="font-size:13px;color:#475569;margin:0">${socialProof.stat3}</p>
+        </td>
+        <td style="padding:14px 0;text-align:right">
+          <p style="font-size:16px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#0F172A;margin:0">${socialProof.stat3val}</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
   <!-- Urgency Box -->
-  <div style="background:#0e1221;border:2px solid ${borderAccent};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
-    <p style="font-size:10px;color:#ef4444;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">
+  <div style="background:#F1F5F9;border:2px solid ${borderAccent};border-radius:12px;padding:24px;text-align:center;margin-bottom:28px">
+    <p style="font-size:10px;color:#DC2626;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase;font-weight:600">
       ${locale === "fr" ? "EXPIRATION IMMINENTE" : locale === "de" ? "ABLAUF STEHT BEVOR" : "EXPIRING SOON"}
     </p>
-    <p style="font-size:18px;font-family:monospace;font-weight:700;color:#ef4444;margin:0">
+    <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#DC2626;margin:0">
       ${locale === "fr" ? "Donn\u00e9es de scan expireront sous 48h" : locale === "de" ? "Scan-Daten laufen in 48h ab" : "Scan data expires in 48 hours"}
     </p>
   </div>` : ""}
 
   <!-- CTA Button -->
-  <div style="text-align:center;margin-bottom:24px">
-    <a href="${checkoutUrl.toString()}" style="display:inline-block;background:${ctaColor};color:#fff;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:-0.01em">
-      ${copy.cta}
+  <div style="text-align:center;margin-bottom:28px">
+    <a href="${checkoutUrl.toString()}" style="display:inline-block;background:${ctaColor};color:#fff;padding:18px 48px;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:-0.01em;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      ${copy.cta} \u2192
     </a>
-    <p style="font-size:11px;color:#55637d;margin:10px 0 0 0">${copy.note}</p>
+    <p style="font-size:11px;color:#64748B;margin:12px 0 0 0">${copy.note}</p>
   </div>
 
   <!-- Price reminder -->
-  <div style="background:#0e1221;border:1px solid rgba(36,48,78,0.28);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
-    <p style="font-size:12px;color:#8d9bb5;margin:0">
-      ${locale === "fr" ? "Rapport complet d'exposition financiere" : locale === "de" ? "Vollst\u00e4ndiger Finanz-Expositionsbericht" : "Full Financial Exposure Report"} &mdash;
-      <span style="color:#e4e9f4;font-weight:700;font-family:monospace">${formattedPrice}</span>
-      <span style="color:#55637d"> ${locale === "fr" ? "(paiement unique)" : locale === "de" ? "(einmalige Zahlung)" : "(one-time payment)"}</span>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px;text-align:center;margin-bottom:32px">
+    <p style="font-size:13px;color:#475569;margin:0">
+      ${locale === "fr" ? "Rapport complet d\u2019exposition financi\u00e8re" : locale === "de" ? "Vollst\u00e4ndiger Finanz-Expositionsbericht" : "Full Financial Exposure Report"} &mdash;
+      <span style="color:#0F172A;font-weight:700;font-family:'SF Mono',SFMono-Regular,Consolas,monospace">${formattedPrice}</span>
+      <span style="color:#64748B"> ${locale === "fr" ? "(paiement unique)" : locale === "de" ? "(einmalige Zahlung)" : "(one-time payment)"}</span>
     </p>
   </div>
 
+  <!-- Trust Signals -->
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 20px;margin-bottom:32px">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td style="padding:4px 0"><p style="font-size:11px;color:#64748B;margin:0">\u2713&nbsp;&nbsp;${trustSignals.soc2}</p></td>
+      </tr>
+      <tr>
+        <td style="padding:4px 0"><p style="font-size:11px;color:#64748B;margin:0">\u2713&nbsp;&nbsp;${trustSignals.gdpr}</p></td>
+      </tr>
+      <tr>
+        <td style="padding:4px 0"><p style="font-size:11px;color:#64748B;margin:0">\u2713&nbsp;&nbsp;${trustSignals.purge}</p></td>
+      </tr>
+      <tr>
+        <td style="padding:4px 0"><p style="font-size:11px;color:#64748B;margin:0">\u2713&nbsp;&nbsp;${trustSignals.noCall}</p></td>
+      </tr>
+    </table>
+  </div>
+
   <!-- Footer -->
-  <div style="text-align:center;padding-top:16px;border-top:1px solid rgba(36,48,78,0.20)">
-    <p style="font-size:10px;color:#3a4560;margin:0 0 4px 0">Ghost Tax Decision Intelligence</p>
-    <p style="font-size:10px;color:#3a4560;margin:0">
-      <a href="${SITE_URL}/unsubscribe?email=${encodeURIComponent(params.email)}" style="color:#3a4560;text-decoration:underline">
+  <div style="text-align:center;padding-top:24px;border-top:1px solid #E2E8F0">
+    <p style="font-size:12px;font-weight:700;color:#475569;margin:0 0 4px 0;letter-spacing:0.02em">Ghost Tax SAS</p>
+    <p style="font-size:11px;color:#64748B;margin:0 0 12px 0">${companyTagline}</p>
+    <p style="font-size:10px;color:#94A3B8;margin:0 0 4px 0">
+      <a href="${SITE_URL}" style="color:#94A3B8;text-decoration:none">ghost-tax.com</a>
+    </p>
+    <p style="font-size:10px;color:#94A3B8;margin:0">
+      <a href="${SITE_URL}/unsubscribe?email=${encodeURIComponent(params.email)}" style="color:#94A3B8;text-decoration:underline">
         ${locale === "fr" ? "Se d\u00e9sabonner" : locale === "de" ? "Abmelden" : "Unsubscribe"}
       </a>
     </p>

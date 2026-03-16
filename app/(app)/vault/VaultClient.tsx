@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/lib/i18n";
 import type { Database } from "@/types/database";
 
 type AuditRequest = Database["public"]["Tables"]["audit_requests"]["Row"];
@@ -11,53 +12,54 @@ interface VaultProps {
 }
 
 // ── Design tokens ────────────────────────────────────
-const V = "#060912";
-const A = "#3b82f6";
-const AH = "#60a5fa";
-const T1 = "#e0e6f2";
-const T2 = "#8d9bb5";
-const T3 = "#55637d";
-const RD = "#ef4444";
-const OR = "#f59e0b";
-const GR = "#22c55e";
-const TL = "#34d399";
-const BD = "rgba(36,48,78,0.32)";
+const V = "#FFFFFF";
+const A = "#0F172A";
+const AH = "#1E293B";
+const T1 = "#0F172A";
+const T2 = "#475569";
+const T3 = "#64748B";
+const RD = "#DC2626";
+const OR = "#D97706";
+const GR = "#059669";
+const TL = "#059669";
+const BD = "#E2E8F0";
 const MO = "ui-monospace,'Cascadia Code','Fira Code',monospace";
 const SA = "system-ui,-apple-system,sans-serif";
 
 const gl: React.CSSProperties = {
-  background: "rgba(11,14,24,0.72)",
-  backdropFilter: "blur(18px) saturate(1.15)",
-  WebkitBackdropFilter: "blur(18px) saturate(1.15)",
+  background: "#FFFFFF",
   border: "1px solid " + BD,
   borderRadius: 12,
-  boxShadow: "0 4px 32px rgba(0,0,0,0.28)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
 };
 
-function fmtEur(n: number, short = false): string {
+function fmtEur(n: number, short = false, locale = "en"): string {
   if (short && n >= 1e6) return (n / 1e6).toFixed(1) + "M EUR";
   if (short && n >= 1e4) return Math.round(n / 1e3) + "k EUR";
-  return Math.round(n).toLocaleString("en-US") + " EUR";
+  const numLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  return Math.round(n).toLocaleString(numLocale) + " EUR";
 }
 
-function relativeTime(dateStr: string): string {
+function relativeTime(dateStr: string, locale = "en"): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return mins + "m ago";
+  if (mins < 1) return locale === "fr" ? "maintenant" : locale === "de" ? "jetzt" : "just now";
+  if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return hours + "h ago";
+  if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return days + "d ago";
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  if (days < 30) return locale === "fr" ? `${days}j` : locale === "de" ? `${days}T` : `${days}d`;
+  const numLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  return new Date(dateStr).toLocaleDateString(numLocale, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
+function formatDate(dateStr: string, locale = "en"): string {
+  const numLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  return new Date(dateStr).toLocaleDateString(numLocale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -76,25 +78,25 @@ const statusColor: Record<string, string> = {
   lost: T3,
 };
 
-const statusLabel: Record<string, string> = {
-  pending: "Pending",
-  paid: "Paid",
-  processing: "Processing",
-  delivered: "Delivered",
-  failed: "Failed",
-  followup_scheduled: "Follow-up Scheduled",
-  lost: "Lost",
+const STATUS_KEYS: Record<string, string> = {
+  pending: "vault.status.pending",
+  paid: "vault.status.paid",
+  processing: "vault.status.processing",
+  delivered: "vault.status.delivered",
+  failed: "vault.status.failed",
+  followup_scheduled: "vault.status.followup",
+  lost: "vault.status.lost",
 };
 
 // ══════════════════════════════════════════════════
 // EMPTY STATE
 // ══════════════════════════════════════════════════
-function EmptyVault() {
+function EmptyVault({ t }: { t: (key: string, fallback?: string) => string }) {
   return (
     <div style={{ ...gl, padding: 48, textAlign: "center" }}>
       <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>{"\u{1F512}"}</div>
       <p style={{ fontSize: 18, fontWeight: 700, color: T1, marginBottom: 8 }}>
-        Your Vault is empty
+        {t("vault.empty.title")}
       </p>
       <p
         style={{
@@ -105,8 +107,7 @@ function EmptyVault() {
           margin: "0 auto 24px",
         }}
       >
-        Run a Ghost Tax detection to receive your first Decision Intelligence report.
-        All delivered reports are stored securely in your Vault with AES-256 encryption.
+        {t("vault.empty.desc")}
       </p>
       <a
         href="/intel"
@@ -123,7 +124,7 @@ function EmptyVault() {
           textTransform: "uppercase" as const,
         }}
       >
-        RUN DETECTION SCAN
+        {t("vault.empty.cta")}
       </a>
     </div>
   );
@@ -135,9 +136,13 @@ function EmptyVault() {
 function ReportDetail({
   report,
   onBack,
+  t,
+  locale,
 }: {
   report: AuditRequest;
   onBack: () => void;
+  t: (key: string, fallback?: string) => string;
+  locale: string;
 }) {
   const reportData = report.report_data as Record<string, unknown> | null;
 
@@ -157,7 +162,7 @@ function ReportDetail({
           padding: "4px 0",
         }}
       >
-        &larr; Back to Vault
+        &larr; {t("vault.backToVault")}
       </button>
 
       {/* Header card */}
@@ -175,14 +180,14 @@ function ReportDetail({
                 marginBottom: 6,
               }}
             >
-              DECISION INTELLIGENCE REPORT
+              {t("vault.reportLabel")}
             </p>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: T1, marginBottom: 4 }}>
               {report.company_name}
             </h2>
             <p style={{ fontSize: 11, color: T3 }}>
-              {report.domain ?? report.email} {"\u00B7"} Created{" "}
-              {formatDate(report.created_at)}
+              {report.domain ?? report.email} {"\u00B7"} {t("vault.created")}{" "}
+              {formatDate(report.created_at, locale)}
             </p>
           </div>
           <span
@@ -199,7 +204,7 @@ function ReportDetail({
               letterSpacing: ".04em",
             }}
           >
-            {statusLabel[report.status] ?? report.status}
+            {t(STATUS_KEYS[report.status] ?? "vault.status.pending")}
           </span>
         </div>
       </div>
@@ -208,26 +213,26 @@ function ReportDetail({
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
         {[
           {
-            label: "Status",
-            value: statusLabel[report.status] ?? report.status,
+            label: t("vault.detail.status"),
+            value: t(STATUS_KEYS[report.status] ?? "vault.status.pending"),
             color: statusColor[report.status] ?? T3,
           },
           {
-            label: "Monthly Spend",
+            label: t("vault.detail.monthlySpend"),
             value:
               report.estimated_monthly_spend != null && report.estimated_monthly_spend > 0
-                ? fmtEur(report.estimated_monthly_spend)
+                ? fmtEur(report.estimated_monthly_spend, false, locale)
                 : "--",
             color: T1,
           },
           {
-            label: "Headcount",
+            label: t("vault.detail.headcount"),
             value: report.headcount != null ? report.headcount.toString() : "--",
             color: T1,
           },
           {
-            label: "Delivered",
-            value: report.delivered_at ? formatDate(report.delivered_at) : "Not yet",
+            label: t("vault.detail.delivered"),
+            value: report.delivered_at ? formatDate(report.delivered_at, locale) : t("vault.detail.notYet"),
             color: report.delivered_at ? TL : T3,
           },
         ].map((item) => (
@@ -271,21 +276,21 @@ function ReportDetail({
             marginBottom: 10,
           }}
         >
-          TECHNICAL DETAILS
+          {t("vault.detail.technical")}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {[
-            { label: "Run ID", value: report.run_id ?? "N/A" },
-            { label: "Locale", value: report.locale ?? "en-us" },
-            { label: "Source", value: report.source ?? "N/A" },
-            { label: "Domain", value: report.domain ?? "N/A" },
-            { label: "SaaS Count", value: report.saas_count?.toString() ?? "N/A" },
+            { label: t("vault.detail.runId"), value: report.run_id ?? "N/A" },
+            { label: t("vault.detail.locale"), value: report.locale ?? "en-us" },
+            { label: t("vault.detail.source"), value: report.source ?? "N/A" },
+            { label: t("vault.detail.domain"), value: report.domain ?? "N/A" },
+            { label: t("vault.detail.saasCount"), value: report.saas_count?.toString() ?? "N/A" },
             {
-              label: "Follow-up",
-              value: report.followup_at ? formatDate(report.followup_at) : "Not scheduled",
+              label: t("vault.detail.followUp"),
+              value: report.followup_at ? formatDate(report.followup_at, locale) : t("vault.detail.notScheduled"),
             },
           ].map((row) => (
-            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid rgba(36,48,78,0.10)" }}>
+            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #E2E8F0" }}>
               <span style={{ fontSize: 10, color: T3 }}>{row.label}</span>
               <span style={{ fontSize: 10, fontFamily: MO, color: T2 }}>{row.value}</span>
             </div>
@@ -307,11 +312,10 @@ function ReportDetail({
               marginBottom: 10,
             }}
           >
-            REPORT DATA AVAILABLE
+            {t("vault.detail.reportAvailable")}
           </p>
           <p style={{ fontSize: 11, color: T2, lineHeight: 1.5 }}>
-            Your full Decision Intelligence report has been generated and delivered.
-            Download the full report or view the executive summary in your dashboard.
+            {t("vault.detail.reportAvailableDesc")}
           </p>
         </div>
       )}
@@ -330,7 +334,7 @@ function ReportDetail({
               marginBottom: 10,
             }}
           >
-            DECLARED PAIN POINTS
+            {t("vault.detail.painPoints")}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
             {report.pain_points.map((pp, i) => (
@@ -359,6 +363,7 @@ function ReportDetail({
 // MAIN VAULT CLIENT
 // ══════════════════════════════════════════════════
 export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
+  const { t, locale } = useI18n();
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   const selectedReport = selectedReportId
@@ -409,7 +414,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                 border: "1px solid " + BD,
               }}
             >
-              VAULT
+              {t("vault.header")}
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -424,7 +429,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                 border: "1px solid rgba(52,211,153,0.18)",
               }}
             >
-              AES-256 Encrypted
+              {t("vault.encrypted")}
             </span>
             {userEmail && (
               <span style={{ fontSize: 9, color: T3, fontFamily: MO }}>{userEmail}</span>
@@ -444,17 +449,17 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
           >
             {[
               {
-                label: "Total Reports",
+                label: t("vault.kpi.totalReports"),
                 value: auditRequests.length.toString(),
                 color: T1,
               },
               {
-                label: "Delivered",
+                label: t("vault.kpi.delivered"),
                 value: deliveredCount.toString(),
                 color: TL,
               },
               {
-                label: "Processing",
+                label: t("vault.kpi.processing"),
                 value: auditRequests
                   .filter((ar) => ar.status === "processing" || ar.status === "paid")
                   .length.toString(),
@@ -497,9 +502,11 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
           <ReportDetail
             report={selectedReport}
             onBack={() => setSelectedReportId(null)}
+            t={t}
+            locale={locale}
           />
         ) : auditRequests.length === 0 ? (
-          <EmptyVault />
+          <EmptyVault t={t} />
         ) : (
           <div style={{ ...gl, padding: 18 }}>
             <p
@@ -513,7 +520,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                 marginBottom: 14,
               }}
             >
-              YOUR REPORTS
+              {t("vault.yourReports")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {auditRequests.map((ar, idx) => {
@@ -528,8 +535,8 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                       gap: 12,
                       padding: "14px 16px",
                       borderRadius: 9,
-                      background: "rgba(0,0,0,0.15)",
-                      border: "1px solid rgba(36,48,78,0.18)",
+                      background: "#F8FAFC",
+                      border: "1px solid #E2E8F0",
                       cursor: "pointer",
                       textAlign: "left" as const,
                       width: "100%",
@@ -538,11 +545,11 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.borderColor =
-                        "rgba(59,130,246,0.30)";
+                        "#CBD5E1";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.borderColor =
-                        "rgba(36,48,78,0.18)";
+                        "#E2E8F0";
                     }}
                   >
                     <div
@@ -591,13 +598,13 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                             textTransform: "uppercase" as const,
                           }}
                         >
-                          {statusLabel[ar.status] ?? ar.status}
+                          {t(STATUS_KEYS[ar.status] ?? "vault.status.pending")}
                         </span>
                         <span style={{ fontSize: 9, color: T3 }}>
                           {ar.domain ?? ar.email}
                         </span>
                         <span style={{ fontSize: 9, color: T3 }}>
-                          {"\u00B7"} {relativeTime(ar.created_at)}
+                          {"\u00B7"} {relativeTime(ar.created_at, locale)}
                         </span>
                       </div>
                     </div>
@@ -621,7 +628,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                               color: T2,
                             }}
                           >
-                            {fmtEur(ar.estimated_monthly_spend)}/mo
+                            {fmtEur(ar.estimated_monthly_spend, false, locale)}/mo
                           </p>
                         )}
                       <p
@@ -631,7 +638,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
                           fontWeight: 600,
                         }}
                       >
-                        View details &rarr;
+                        {t("vault.viewDetails")} &rarr;
                       </p>
                     </div>
                   </button>
@@ -648,7 +655,7 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
             padding: "11px 14px",
             borderRadius: 10,
             border: "1px solid " + BD,
-            background: "rgba(11,14,24,0.35)",
+            background: "#F8FAFC",
             display: "flex",
             justifyContent: "center",
             gap: 16,
@@ -656,10 +663,10 @@ export default function VaultClient({ userEmail, auditRequests }: VaultProps) {
           }}
         >
           {[
-            { title: "SOC2 Type II Ready" },
-            { title: "Zero-Knowledge Audit" },
-            { title: "EU Data Residency" },
-            { title: "30-Day Auto-Delete" },
+            { title: t("vault.trust.soc2") },
+            { title: t("vault.trust.zeroKnowledge") },
+            { title: t("vault.trust.euData") },
+            { title: t("vault.trust.autoDelete") },
           ].map((b) => (
             <div
               key={b.title}

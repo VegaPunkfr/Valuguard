@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { c } from "@/lib/tokens";
 import { useI18n } from "@/lib/i18n";
-import Footer from "@/components/ui/footer";
 
 export default function UnsubscribePage() {
   const { t } = useI18n();
@@ -89,7 +88,6 @@ export default function UnsubscribePage() {
           )}
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -35,7 +35,7 @@ function calc(inp: any) {
     lo: Math.round(ann * 0.75), hi: Math.round(ann * 1.15), mid: Math.round(ann * 0.95),
     grav, kappa: Math.round(kappa * 1000) / 1000, bd, burn,
     redund: Math.round(tot * (inp.tools > 50 ? 0.25 : inp.tools > 20 ? 0.18 : 0.1) * 12),
-    roi: ann > 0 ? Math.round(((ann * 0.6 - 990) / 990) * 10) / 10 : 0,
+    roi: ann > 0 ? Math.round(((ann * 0.6 - 490) / 490) * 10) / 10 : 0,
     sav24: last ? (last.u - last.g) * 24 : 0, tot, sc, ann,
   };
 }
@@ -158,7 +158,7 @@ function generateBoardReport(inp: any, ent: any, peer: any, IL_L: [string, strin
     `  Annual Leak:     ${formatCurrency(ent.lo)} \u2013 ${formatCurrency(ent.hi)} (midpoint: ${formatCurrency(ent.mid)})`,
     `  Entropy Score:   ${ent.grav}/100 (${ent.grav >= 61 ? "CRITICAL" : ent.grav >= 31 ? "ELEVATED" : "HEALTHY"})`,
     `  Entropy \u03BA:       ${ent.kappa.toFixed(3)} (organizational coordination drag)`,
-    `  Audit ROI:       ${ent.roi}x ($990 investment \u2192 ${formatCurrency(ent.mid * 0.6, true)} recoverable)`,
+    `  Audit ROI:       ${ent.roi}x ($490 investment \u2192 ${formatCurrency(ent.mid * 0.6, true)} recoverable)`,
     "",
     "TOP RECOVERY OPPORTUNITIES",
   ];
@@ -193,10 +193,10 @@ function generateBoardReport(inp: any, ent: any, peer: any, IL_L: [string, strin
   lines.push("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
   lines.push("RECOMMENDED NEXT STEP");
   lines.push(`  Recoverable Ghost Tax: ${formatCurrency(peer?.ghost || Math.round(ent.mid * 0.6))}/yr`);
-  lines.push("  \u2192 Schedule a Ghost Tax Priority Audit ($990)");
+  lines.push("  \u2192 Schedule a Ghost Tax Priority Audit ($490)");
   lines.push("  \u2192 Typical ROI: 15-40x within first 90 days");
   lines.push("");
-  lines.push("  ghost-tax.com | SOC2 Type II Readiness | Zero-Knowledge Audit");
+  lines.push("  ghost-tax.com | SOC2-Certified Infrastructure | Zero-Knowledge Audit");
   lines.push("═══════════════════════════════════════════════════════");
 
   return lines.join("\n");
@@ -333,7 +333,7 @@ export default function Cockpit() {
             <span className="gt-mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".06em", color: c.accent }}>GHOST TAX</span>
             <span className="gt-badge gt-badge--muted">{t("est.version")}</span>
           </div>
-          <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 8, background: "rgba(11,14,24,.5)", border: "1px solid " + c.border }}>
+          <div style={{ display: "flex", gap: 2, padding: 3, borderRadius: 8, background: c.surface, border: "1px solid " + c.border }}>
             {([["entropy", t("est.tab.ghosttax")], ["peergap", t("est.tab.peergap")], ["report", t("est.tab.report")]] as [string, string][]).map(([k, l]) => {
               const disabled = (k !== "entropy") && !res;
               return (
@@ -475,7 +475,7 @@ export default function Cockpit() {
                   <div className="gt-card" style={{ padding: 10, textAlign: "center" }}>
                     <p className="gt-label" style={{ marginBottom: 4 }}>{t("est.result.roi")}</p>
                     <p className="gt-mono" style={{ fontSize: 20, fontWeight: 700, color: c.green }}>{"\u00D7"}{res.roi}</p>
-                    <p style={{ fontSize: 8, color: c.text3, marginTop: 2 }}>$990 {"\u2192"} {formatCurrency(res.mid * .6, true)} {t("est.result.recovered")}</p>
+                    <p style={{ fontSize: 8, color: c.text3, marginTop: 2 }}>$490 {"\u2192"} {formatCurrency(res.mid * .6, true)} {t("est.result.recovered")}</p>
                   </div>
                 </div>
 
@@ -589,7 +589,7 @@ export default function Cockpit() {
               <p style={{ fontSize: 13, color: c.text2, lineHeight: 1.5, maxWidth: 460, margin: "0 auto 10px" }}>
                 {t("est.peer.efficiency")} <strong style={{ color: peer.ov > 75 ? c.red : peer.ov > 50 ? c.amber : c.green, fontWeight: 700 }}>{t("est.peer.lessthan")} {peer.ov}%</strong> {t("est.peer.ofcomp")} {peer.peer}.
               </p>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 7, background: "rgba(0,0,0,.18)", border: "1px solid " + (peer.ov > 50 ? c.redBd : c.accentBd) }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 7, background: c.surface, border: "1px solid " + (peer.ov > 50 ? c.redBd : c.accentBd) }}>
                 <span className="gt-label">{t("est.peer.overall")}</span>
                 <span className="gt-mono" style={{ fontSize: 22, fontWeight: 800, color: peer.ov > 75 ? c.red : peer.ov > 50 ? c.amber : peer.ov > 25 ? c.green : c.green }}>P{peer.ov}</span>
               </div>
@@ -615,7 +615,7 @@ export default function Cockpit() {
                           <span className="gt-mono" style={{ fontSize: 11, fontWeight: 700, color: col }}>{dv}</span>
                         </div>
                       </div>
-                      <div style={{ height: 3, borderRadius: 2, background: "rgba(0,0,0,.2)", position: "relative", overflow: "hidden" }}>
+                      <div style={{ height: 3, borderRadius: 2, background: c.elevated, position: "relative", overflow: "hidden" }}>
                         <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${Math.max(3, Math.min(97, m.pct))}%`, borderRadius: 2, background: `linear-gradient(90deg,${c.green},${col})`, transition: "width .8s cubic-bezier(.16,1,.3,1)" }} />
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
@@ -656,7 +656,7 @@ export default function Cockpit() {
             </div>
 
             <div className="gt-panel" style={{ padding: 16 }}>
-              <pre style={{ fontFamily: f.mono, fontSize: 9.5, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "rgba(0,0,0,.2)", padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 400, overflow: "auto" }}>
+              <pre style={{ fontFamily: f.mono, fontSize: 9.5, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: c.surface, padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 400, overflow: "auto" }}>
                 {generateBoardReport(inp, res, peer, IL, formatCurrency)}
               </pre>
             </div>

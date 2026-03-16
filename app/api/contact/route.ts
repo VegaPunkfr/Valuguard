@@ -56,8 +56,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // TODO: Add persistent rate limiting (Redis/Upstash) for production-grade spam protection
+
   try {
     const body = await request.json().catch(() => ({}));
+
+    // Honeypot check — if the hidden "website" field is filled, it's a bot.
+    // Return 200 silently so bots think the submission succeeded.
+    if (body.website && typeof body.website === "string" && body.website.trim().length > 0) {
+      return NextResponse.json({ ok: true });
+    }
+
     const { name, email, company, size, message } = body;
 
     // Validation

@@ -5,7 +5,6 @@ import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { c } from "@/lib/tokens";
 import Section from "@/components/ui/section";
-import Footer from "@/components/ui/footer";
 import FaqItem from "@/components/ui/faq-item";
 
 export default function FaqPage() {
@@ -42,6 +41,16 @@ export default function FaqPage() {
       items: [
         { q: t("faq.cat4.q1"), a: t("faq.cat4.a1") },
         { q: t("faq.cat4.q2"), a: t("faq.cat4.a2") },
+      ],
+    },
+    {
+      title: t("faq.cat5.title"),
+      items: [
+        { q: t("faq.cfo1.q"), a: t("faq.cfo1.a") },
+        { q: t("faq.cfo2.q"), a: t("faq.cfo2.a") },
+        { q: t("faq.cfo3.q"), a: t("faq.cfo3.a") },
+        { q: t("faq.cfo4.q"), a: t("faq.cfo4.a") },
+        { q: t("faq.cfo5.q"), a: t("faq.cfo5.a") },
       ],
     },
   ];
@@ -100,7 +109,28 @@ export default function FaqPage() {
 
       </div>
 
-      <Footer />
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "What is Ghost Tax?", acceptedAnswer: { "@type": "Answer", text: "Ghost Tax is a Decision Intelligence platform that detects hidden financial exposure in SaaS, AI, and Cloud spending, delivering actionable corrective protocols." } },
+            { "@type": "Question", name: "What is SaaS ghost spend?", acceptedAnswer: { "@type": "Answer", text: "SaaS ghost spend refers to recurring software license payments that generate zero value: inactive users still billed, duplicate tools, auto-renewed contracts no one monitors, and shadow IT approved outside procurement. Industry data shows 23-41% of SaaS spend is ghost spend. Ghost Tax quantifies it in EUR and delivers a corrective protocol." } },
+            { "@type": "Question", name: "How does Ghost Tax detect unauthorized SaaS spending?", acceptedAnswer: { "@type": "Answer", text: "Ghost Tax uses a 21-phase OSINT intelligence pipeline. It cross-references your company domain against 200+ vendor databases, detects shadow IT signals, identifies duplicate tool categories, and surfaces contract renewal windows — all without requiring access to your internal systems. No API credentials, no agents." } },
+            { "@type": "Question", name: "How does the detection work?", acceptedAnswer: { "@type": "Answer", text: "Enter your company domain and Ghost Tax runs a 21-phase intelligence pipeline combining OSINT enrichment, market memory, peer benchmarking, drift monitoring, and negotiation playbooks to produce a full Decision Pack." } },
+            { "@type": "Question", name: "What is the ROI of a Ghost Tax analysis?", acceptedAnswer: { "@type": "Answer", text: "Typical ROI is 18-57x the analysis cost in the first year. A €490 detection identifies an average of €28,000-€180,000 in annual recoverable exposure for mid-market companies (50-500 employees). The Decision Pack includes a quantified corrective path, so the EUR impact is measurable from day one." } },
+            { "@type": "Question", name: "How long does a Ghost Tax analysis take?", acceptedAnswer: { "@type": "Answer", text: "Free scan: 2-3 minutes. Paid Detection (€490): 48 hours for the complete Decision Pack. Stabilization Protocol: 5 business days. Continuous Monitoring: monthly automated reports." } },
+            { "@type": "Question", name: "What is included in the Decision Pack?", acceptedAnswer: { "@type": "Answer", text: "The Decision Pack includes: executive exposure summary with EUR-quantified findings, causal diagram of financial leakage, peer benchmarking against 200+ similar companies, negotiation playbooks for top vendors, corrective protocol with prioritized actions, CFO memo, CIO brief, procurement action plan, and board one-pager. All designed for immediate internal circulation." } },
+            { "@type": "Question", name: "Does Ghost Tax require access to our systems?", acceptedAnswer: { "@type": "Answer", text: "No. Ghost Tax requires only a company domain to run a detection. No API access, no system agents, no SSO credentials, no internal data export. The analysis uses publicly available signals, vendor intelligence, and OSINT enrichment. For higher-tier Stabilization engagements, optional internal data upload is supported but never mandatory." } },
+            { "@type": "Question", name: "How much does it cost?", acceptedAnswer: { "@type": "Answer", text: "Detection starts at 490 EUR one-time. Stabilization plans and continuous monitoring are available at higher tiers. No subscription required for the base detection." } },
+            { "@type": "Question", name: "What do I receive?", acceptedAnswer: { "@type": "Answer", text: "A complete Decision Pack including exposure analysis, causal diagnosis, negotiation playbooks, CFO memo, CIO brief, procurement brief, and board one-pager — delivered within 48 hours." } },
+            { "@type": "Question", name: "Is my data secure?", acceptedAnswer: { "@type": "Answer", text: "Yes. AES-256 encryption at rest, zero-access architecture, GDPR compliant, SOC 2 aligned. Data is purged after delivery unless you opt into monitoring." } },
+          ],
+        }) }}
+      />
+
     </div>
   );
 }

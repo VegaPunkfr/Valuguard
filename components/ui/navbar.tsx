@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { c, f } from "@/lib/tokens";
 import LanguageSelector from "@/components/ui/language-selector";
 
 export default function Navbar() {
   const { t } = useI18n();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Hide navbar on command center — it has its own navigation
+  if (pathname?.startsWith("/command")) return null;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -24,10 +28,9 @@ export default function Navbar() {
   }, []);
 
   const links = [
-    { href: "/platform", label: t("nav.platform") },
-    { href: "/pricing", label: t("nav.pricing") },
     { href: "/intel", label: t("nav.decisionroom") },
-    { href: "/methodology", label: t("nav.methodology") },
+    { href: "/pricing", label: t("nav.pricing") },
+    { href: "/platform", label: t("nav.platform") },
     { href: "/about", label: t("nav.about") },
     { href: "/contact", label: t("nav.contact") },
   ];
@@ -41,7 +44,7 @@ export default function Navbar() {
           top: 0,
           zIndex: 100,
           padding: scrolled ? "10px 0" : "14px 0",
-          background: scrolled ? "rgba(5,8,16,0.92)" : "rgba(5,8,16,0.50)",
+          background: scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.60)",
           backdropFilter: "blur(20px) saturate(1.2)",
           WebkitBackdropFilter: "blur(20px) saturate(1.2)",
           borderBottom: scrolled ? "1px solid " + c.border : "1px solid transparent",
@@ -89,7 +92,8 @@ export default function Navbar() {
           <button
             className="gt-mobile"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
+            aria-label={t("nav.menu") || "Menu"}
+            aria-expanded={mobileOpen}
             style={{
               display: "none", background: "none", border: "1px solid " + c.borderS,
               borderRadius: 8, padding: "8px 10px", cursor: "pointer",
@@ -101,55 +105,51 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="gt-mobile"
+      {/* Mobile drawer — CSS transition instead of framer-motion */}
+      <div
+        className="gt-mobile gt-mobile-drawer"
+        style={{
+          position: "fixed", top: 56, left: 0, right: 0, zIndex: 99,
+          background: "rgba(255,255,255,0.98)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderBottom: "1px solid " + c.border,
+          padding: "16px 20px 24px",
+          display: "none",
+          flexDirection: "column",
+          gap: 4,
+          opacity: mobileOpen ? 1 : 0,
+          transform: mobileOpen ? "translateY(0)" : "translateY(-10px)",
+          pointerEvents: mobileOpen ? "auto" : "none",
+          transition: "opacity 200ms cubic-bezier(0.16,1,0.3,1), transform 200ms cubic-bezier(0.16,1,0.3,1)",
+        }}
+      >
+        {links.map((link) => (
+          <a
+            key={link.href}
+            href={link.href}
+            onClick={() => setMobileOpen(false)}
             style={{
-              position: "fixed", top: 56, left: 0, right: 0, zIndex: 99,
-              background: "rgba(5,8,16,0.97)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              borderBottom: "1px solid " + c.border,
-              padding: "16px 20px 24px",
-              display: "none",
-              flexDirection: "column",
-              gap: 4,
+              display: "block", fontSize: 16, color: c.text2, textDecoration: "none",
+              fontWeight: 500, padding: "12px 14px", borderRadius: 8,
+              transition: "background 150ms",
             }}
           >
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  display: "block", fontSize: 16, color: c.text2, textDecoration: "none",
-                  fontWeight: 500, padding: "12px 14px", borderRadius: 8,
-                  transition: "background 150ms",
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
-            <div style={{ padding: "12px 14px" }}>
-              <LanguageSelector />
-            </div>
-            <a
-              href="/intel"
-              onClick={() => setMobileOpen(false)}
-              className="gt-btn gt-btn-primary"
-              style={{ textAlign: "center", marginTop: 4 }}
-            >
-              {t("nav.runcta")}
-            </a>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {link.label}
+          </a>
+        ))}
+        <div style={{ padding: "12px 14px" }}>
+          <LanguageSelector />
+        </div>
+        <a
+          href="/intel"
+          onClick={() => setMobileOpen(false)}
+          className="gt-btn gt-btn-primary"
+          style={{ textAlign: "center", marginTop: 4 }}
+        >
+          {t("nav.runcta")}
+        </a>
+      </div>
 
       <style>{`
         .gt-nav-link:hover { color: ${c.text1} !important; }

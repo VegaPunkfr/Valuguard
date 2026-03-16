@@ -731,7 +731,7 @@ function computeExposure(
   if (hasExa) confidence += 15;
   if (hasDeclaredSpend) confidence += 20;
   if (input.headcount) confidence += 10;
-  confidence = Math.min(confidence, 95); // never claim 100
+  confidence = Math.min(confidence, 85); // doctrine: never exceed 85
 
   let benchmarkQuality: "strong" | "moderate" | "weak" = "weak";
   if (confidence >= 60) benchmarkQuality = "strong";
@@ -1281,7 +1281,7 @@ function computePeerComparison(
   if (headcount) benchmarkConf += 20;
   if (benchmark) benchmarkConf += 15;
   if (enrichment.signals.length > 0) benchmarkConf += 15;
-  benchmarkConf = Math.min(benchmarkConf, 90);
+  benchmarkConf = Math.min(benchmarkConf, 85); // doctrine: never exceed 85
 
   return {
     efficiencyPercentile: percentile,
@@ -1420,7 +1420,7 @@ function deriveConfidenceScore(
   score += Math.min(vectorMatches * 5, 20);
   score += Math.min(detectedSignals * 6, 30);
   if (hasDeclaredSpend) score += 15;
-  return Math.min(score, 95);
+  return Math.min(score, 85); // doctrine: never exceed 85
 }
 
 // ── Memory Persistence ────────────────────────────────

@@ -68,10 +68,13 @@ interface ActivateRequest {
 // ── Handler ──────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // Auth: require CRON_SECRET or admin bearer token
-  const authHeader = request.headers.get("authorization");
+  // Auth: require CRON_SECRET or admin bearer token — fail safe if neither configured
   const adminSecret = process.env.CRON_SECRET || process.env.CONNECTOR_ADMIN_SECRET;
-  if (adminSecret && authHeader !== `Bearer ${adminSecret}`) {
+  if (!adminSecret) {
+    return new Response("CRON_SECRET or CONNECTOR_ADMIN_SECRET not configured", { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${adminSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -161,9 +164,12 @@ export async function POST(request: NextRequest) {
 // ── GET: List active connectors ──────────────────────
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
   const adminSecret = process.env.CRON_SECRET || process.env.CONNECTOR_ADMIN_SECRET;
-  if (adminSecret && authHeader !== `Bearer ${adminSecret}`) {
+  if (!adminSecret) {
+    return new Response("CRON_SECRET or CONNECTOR_ADMIN_SECRET not configured", { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${adminSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

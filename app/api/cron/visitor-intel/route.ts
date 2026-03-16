@@ -19,9 +19,11 @@ export const maxDuration = 120;
 
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel sets this automatically for cron jobs)
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
   const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

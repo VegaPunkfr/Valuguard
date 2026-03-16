@@ -17,12 +17,12 @@ import { runEngine } from "@/lib/flywheel";
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const provided = request.headers.get("authorization")?.replace("Bearer ", "");
-    if (provided !== cronSecret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

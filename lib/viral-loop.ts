@@ -287,7 +287,7 @@ export async function getViralMetrics(runId: string): Promise<ViralMetrics> {
 
 /**
  * Generate the viral HTML block for delivery emails.
- * Dark theme matching brand (#060912 base, #3b82f6 accent).
+ * Enterprise light theme (#FFFFFF base, #3b82f6 accent).
  * Tri-lingual (EN/FR/DE).
  *
  * Includes:
@@ -349,17 +349,17 @@ export function generateViralEmailBlock(report: {
 
   return `
 <!-- VIRAL LOOP BLOCK -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:48px;border-top:1px solid rgba(36,48,78,0.28)">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:48px;border-top:1px solid #E2E8F0">
   <tr>
     <td style="padding:32px 0 0 0">
       <!-- Headline -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0d19;border-radius:12px;border:1px solid rgba(36,48,78,0.28)">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F8FAFC;border-radius:12px;border:1px solid #E2E8F0">
         <tr>
           <td style="padding:32px 28px">
-            <p style="margin:0 0 8px 0;font-size:18px;font-weight:800;color:#e4e9f4;letter-spacing:-0.02em">
+            <p style="margin:0 0 8px 0;font-size:18px;font-weight:800;color:#0F172A;letter-spacing:-0.02em">
               ${copy.headline[locale]}
             </p>
-            <p style="margin:0 0 24px 0;font-size:13px;color:#8d9bb5;line-height:1.6">
+            <p style="margin:0 0 24px 0;font-size:13px;color:#475569;line-height:1.6">
               ${copy.subheadline[locale]}
             </p>
 
@@ -381,7 +381,7 @@ export function generateViralEmailBlock(report: {
               </tr>
               <tr>
                 <td style="padding:0 0 0 0">
-                  <a href="${boardCTA.url}" style="display:inline-block;background:transparent;color:#f59e0b;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.01em;border:1px solid rgba(245,158,11,0.4);min-width:200px;text-align:center" target="_blank">
+                  <a href="${boardCTA.url}" style="display:inline-block;background:transparent;color:#D97706;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.01em;border:1px solid rgba(217,119,6,0.4);min-width:200px;text-align:center" target="_blank">
                     ${copy.boardButton}
                   </a>
                 </td>
@@ -389,14 +389,14 @@ export function generateViralEmailBlock(report: {
             </table>
 
             <!-- Referral Incentive -->
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;background:#060912;border-radius:8px;border:1px solid rgba(36,48,78,0.20)">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;background:#FFFFFF;border-radius:8px;border:1px solid #E2E8F0">
               <tr>
                 <td style="padding:16px 20px">
-                  <p style="margin:0 0 8px 0;font-size:12px;color:#34d399;font-weight:700;letter-spacing:0.05em;text-transform:uppercase">
+                  <p style="margin:0 0 8px 0;font-size:12px;color:#059669;font-weight:700;letter-spacing:0.05em;text-transform:uppercase">
                     ${copy.referralIncentive[locale]}
                   </p>
-                  <p style="margin:0;font-size:11px;color:#55637d">
-                    ${copy.refLabel[locale]}: <span style="color:#8d9bb5;font-family:monospace;font-size:12px;background:#0e1221;padding:2px 8px;border-radius:4px">${refCode}</span>
+                  <p style="margin:0;font-size:11px;color:#64748B">
+                    ${copy.refLabel[locale]}: <span style="color:#475569;font-family:monospace;font-size:12px;background:#F1F5F9;padding:2px 8px;border-radius:4px">${refCode}</span>
                   </p>
                 </td>
               </tr>

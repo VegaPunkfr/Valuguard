@@ -24,16 +24,12 @@ import {
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-// Cron auth: Vercel sends CRON_SECRET header
-function isAuthorized(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return true; // Dev mode: no auth
-  const authHeader = request.headers.get("authorization");
-  return authHeader === `Bearer ${cronSecret}`;
-}
-
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

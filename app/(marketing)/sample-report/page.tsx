@@ -100,7 +100,7 @@ function genSummaryText() {
   lines.push("");
   lines.push("DISCLAIMER: This is a SAMPLE report with fictional data.");
   lines.push("Your actual audit will analyze YOUR billing data.");
-  lines.push("ghost-tax.com | SOC2 Type II Ready | Zero-Knowledge Audit");
+  lines.push("ghost-tax.com | SOC2-Certified Infrastructure | Zero-Knowledge Audit");
   return lines.join("\n");
 }
 
@@ -283,7 +283,7 @@ export default function SampleReport() {
           <div className="gt-panel" style={{ padding: 18 }}>
             <p className="gt-section-label" style={{ marginBottom: 8 }}>{t("sample.export.label")}</p>
             <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t("sample.export.title")}</p>
-            <pre style={{ fontFamily: f.mono, fontSize: 9, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "rgba(0,0,0,0.2)", padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 300, overflow: "auto", marginBottom: 14 }}>
+            <pre style={{ fontFamily: f.mono, fontSize: 9, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#F8FAFC", padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 300, overflow: "auto", marginBottom: 14 }}>
               {genSummaryText()}
             </pre>
             <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
@@ -305,7 +305,7 @@ export default function SampleReport() {
           <p style={{ fontSize: 14, color: c.text2, marginBottom: 16, lineHeight: 1.5, maxWidth: 400, margin: "0 auto 16px" }}>
             {t("sample.cta.sub")}
           </p>
-          <a href="/estimator" className="gt-btn gt-btn-green">
+          <a href="/intel" className="gt-btn gt-btn-green">
             {t("sample.cta")}
           </a>
         </div>

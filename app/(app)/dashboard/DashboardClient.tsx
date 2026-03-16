@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
 import type { Database } from "@/types/database";
 
 type AuditRequest = Database["public"]["Tables"]["audit_requests"]["Row"];
@@ -18,32 +19,32 @@ interface DashboardProps {
 // ══════════════════════════════════════════════════════
 
 const C = {
-  bg:       "hsl(228,38%,3%)",
-  surface:  "hsl(226,33%,7%)",
-  card:     "hsl(226,30%,9%)",
-  elevated: "hsl(225,28%,11%)",
-  raised:   "hsl(224,25%,14%)",
-  border:   "hsla(0,0%,100%,0.06)",
-  borderS:  "hsla(0,0%,100%,0.10)",
-  borderSS: "hsla(0,0%,100%,0.14)",
-  text1:    "hsl(228,40%,96%)",
-  text2:    "hsl(224,16%,66%)",
-  text3:    "hsl(222,12%,41%)",
-  text4:    "hsl(222,14%,29%)",
-  accent:   "hsl(216,91%,65%)",
-  accentHi: "hsl(216,100%,71%)",
-  accentBg: "hsla(216,91%,65%,0.08)",
-  accentBd: "hsla(216,91%,65%,0.20)",
-  green:    "hsl(162,68%,51%)",
-  greenBg:  "hsla(162,68%,51%,0.06)",
-  greenBd:  "hsla(162,68%,51%,0.18)",
-  red:      "hsl(0,82%,66%)",
-  redBg:    "hsla(0,82%,66%,0.06)",
-  redBd:    "hsla(0,82%,66%,0.18)",
-  amber:    "hsl(35,86%,56%)",
-  amberBg:  "hsla(35,86%,56%,0.06)",
-  amberBd:  "hsla(35,86%,56%,0.18)",
-  cyan:     "hsl(190,86%,58%)",
+  bg:       "#FFFFFF",
+  surface:  "#F8FAFC",
+  card:     "#FFFFFF",
+  elevated: "#F1F5F9",
+  raised:   "#E2E8F0",
+  border:   "#E2E8F0",
+  borderS:  "#CBD5E1",
+  borderSS: "#94A3B8",
+  text1:    "#0F172A",
+  text2:    "#475569",
+  text3:    "#64748B",
+  text4:    "#94A3B8",
+  accent:   "#0F172A",
+  accentHi: "#1E293B",
+  accentBg: "rgba(15,23,42,0.06)",
+  accentBd: "rgba(15,23,42,0.15)",
+  green:    "#059669",
+  greenBg:  "rgba(5,150,105,0.06)",
+  greenBd:  "rgba(5,150,105,0.18)",
+  red:      "#DC2626",
+  redBg:    "rgba(220,38,38,0.06)",
+  redBd:    "rgba(220,38,38,0.18)",
+  amber:    "#D97706",
+  amberBg:  "rgba(217,119,6,0.06)",
+  amberBd:  "rgba(217,119,6,0.18)",
+  cyan:     "#0891B2",
 };
 
 const F = {
@@ -54,14 +55,12 @@ const F = {
 // Golden Ratio spacing: 4 → 8 → 16 → 24 → 40 → 64 → 104
 const SP = { 1: 4, 2: 8, 3: 16, 4: 24, 5: 40, 6: 64, 7: 104 };
 
-// ── Glass morphism layers ──────────────────────────
-const glass = (opacity = 0.72, blur = 20): React.CSSProperties => ({
-  background: `hsla(228,38%,5%,${opacity})`,
-  backdropFilter: `blur(${blur}px) saturate(1.2)`,
-  WebkitBackdropFilter: `blur(${blur}px) saturate(1.2)`,
-  border: `1px solid ${C.borderS}`,
+// ── Card layers ──────────────────────────────────
+const glass = (_opacity = 0.72, _blur = 20): React.CSSProperties => ({
+  background: "#FFFFFF",
+  border: `1px solid ${C.border}`,
   borderRadius: 16,
-  boxShadow: "0 4px 32px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.4)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
 });
 
 const glassCard: React.CSSProperties = {
@@ -72,22 +71,24 @@ const glassCard: React.CSSProperties = {
 
 // ── Formatters ──────────────────────────────────────
 
-function fmtEur(n: number, short = false): string {
+function fmtEur(n: number, short = false, locale = "en"): string {
   if (short && n >= 1e6) return (n / 1e6).toFixed(1) + "M\u2009EUR";
   if (short && n >= 1e3) return Math.round(n / 1e3) + "k\u2009EUR";
-  return Math.round(n).toLocaleString("fr-FR") + "\u2009EUR";
+  const numLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  return Math.round(n).toLocaleString(numLocale) + "\u2009EUR";
 }
 
-function relativeTime(dateStr: string): string {
+function relativeTime(dateStr: string, locale = "en"): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "maintenant";
+  if (mins < 1) return locale === "fr" ? "maintenant" : locale === "de" ? "jetzt" : "just now";
   if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}j`;
-  return new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  if (days < 30) return locale === "fr" ? `${days}j` : locale === "de" ? `${days}T` : `${days}d`;
+  const numLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  return new Date(dateStr).toLocaleDateString(numLocale, { day: "numeric", month: "short" });
 }
 
 function pct(n: number): string {
@@ -96,14 +97,14 @@ function pct(n: number): string {
 
 // ── Status system ───────────────────────────────────
 
-const STATUS_MAP: Record<string, { color: string; bg: string; bd: string; label: string }> = {
-  pending:            { color: C.text3,  bg: "hsla(222,12%,41%,0.10)", bd: "hsla(222,12%,41%,0.20)", label: "En attente" },
-  paid:               { color: C.accent, bg: C.accentBg,              bd: C.accentBd,               label: "Pay\u00e9" },
-  processing:         { color: C.amber,  bg: C.amberBg,               bd: C.amberBd,                label: "En cours" },
-  delivered:          { color: C.green,  bg: C.greenBg,               bd: C.greenBd,                label: "Livr\u00e9" },
-  failed:             { color: C.red,    bg: C.redBg,                 bd: C.redBd,                  label: "\u00c9chou\u00e9" },
-  followup_scheduled: { color: C.cyan,   bg: "hsla(190,86%,58%,0.06)",bd: "hsla(190,86%,58%,0.18)", label: "Suivi" },
-  lost:               { color: C.text4,  bg: "hsla(222,14%,29%,0.10)",bd: "hsla(222,14%,29%,0.20)", label: "Perdu" },
+const STATUS_MAP: Record<string, { color: string; bg: string; bd: string; key: string }> = {
+  pending:            { color: C.text3,  bg: "hsla(222,12%,41%,0.10)", bd: "hsla(222,12%,41%,0.20)", key: "dashboard.status.pending" },
+  paid:               { color: C.accent, bg: C.accentBg,              bd: C.accentBd,               key: "dashboard.status.paid" },
+  processing:         { color: C.amber,  bg: C.amberBg,               bd: C.amberBd,                key: "dashboard.status.processing" },
+  delivered:          { color: C.green,  bg: C.greenBg,               bd: C.greenBd,                key: "dashboard.status.delivered" },
+  failed:             { color: C.red,    bg: C.redBg,                 bd: C.redBd,                  key: "dashboard.status.failed" },
+  followup_scheduled: { color: C.cyan,   bg: "hsla(190,86%,58%,0.06)",bd: "hsla(190,86%,58%,0.18)", key: "dashboard.status.followup" },
+  lost:               { color: C.text4,  bg: "hsla(222,14%,29%,0.10)",bd: "hsla(222,14%,29%,0.20)", key: "dashboard.status.lost" },
 };
 
 // ── Animated counter hook ───────────────────────────
@@ -247,7 +248,7 @@ function HBar({ value, max, color, label, amount }: {
 
 // ── Status badge ────────────────────────────────────
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, t }: { status: string; t: (key: string, fallback?: string) => string }) {
   const s = STATUS_MAP[status] || STATUS_MAP.pending;
   return (
     <span style={{
@@ -263,7 +264,7 @@ function StatusBadge({ status }: { status: string }) {
       textTransform: "uppercase",
       letterSpacing: ".06em",
     }}>
-      {s.label}
+      {t(s.key)}
     </span>
   );
 }
@@ -274,12 +275,12 @@ function StatusBadge({ status }: { status: string }) {
 
 type NavPage = "command" | "reports" | "leads" | "engines" | "intel";
 
-const NAV_ITEMS: { id: NavPage; label: string; shortcut: string; href?: string }[] = [
-  { id: "command",  label: "Command Center", shortcut: "1" },
-  { id: "reports",  label: "Rapports",       shortcut: "2" },
-  { id: "leads",    label: "Pipeline",       shortcut: "3" },
-  { id: "engines",  label: "Moteurs",        shortcut: "4" },
-  { id: "intel",    label: "Scanner",        shortcut: "5", href: "/intel" },
+const NAV_ITEMS: { id: NavPage; key: string; shortcut: string; href?: string }[] = [
+  { id: "command",  key: "dashboard.nav.command",  shortcut: "1" },
+  { id: "reports",  key: "dashboard.nav.reports",  shortcut: "2" },
+  { id: "leads",    key: "dashboard.nav.leads",    shortcut: "3" },
+  { id: "engines",  key: "dashboard.nav.engines",  shortcut: "4" },
+  { id: "intel",    key: "dashboard.nav.scanner",  shortcut: "5", href: "/intel" },
 ];
 
 // ══════════════════════════════════════════════════════
@@ -292,6 +293,7 @@ export default function DashboardClient({
   auditRequests,
   vaultSessions,
 }: DashboardProps) {
+  const { t, locale } = useI18n();
   const [page, setPage] = useState<NavPage>("command");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -349,7 +351,7 @@ export default function DashboardClient({
   const industryMap = useMemo(() => {
     const map: Record<string, number> = {};
     vaultSessions.forEach((v) => {
-      const ind = v.industry || "Non sp\u00e9cifi\u00e9";
+      const ind = v.industry || t("dashboard.industry.unspecified");
       map[ind] = (map[ind] || 0) + (v.ghost_tax_annual ?? 0);
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -359,8 +361,8 @@ export default function DashboardClient({
   const engines = [
     {
       id: "analysis",
-      name: "Intelligence Engine",
-      desc: "21 phases NDJSON, enrichissement Exa, market memory",
+      name: t("dashboard.engines.engine1.name"),
+      desc: t("dashboard.engines.engine1.desc"),
       status: "active",
       file: "lib/analysis.ts",
       phases: 21,
@@ -368,8 +370,8 @@ export default function DashboardClient({
     },
     {
       id: "orphan",
-      name: "Orphan Detector",
-      desc: "IAM \u00d7 SaaS cross-reference, licences fantomes",
+      name: t("dashboard.engines.engine2.name"),
+      desc: t("dashboard.engines.engine2.desc"),
       status: "active",
       file: "lib/engines/orphan-detector.ts",
       phases: 4,
@@ -377,8 +379,8 @@ export default function DashboardClient({
     },
     {
       id: "shadow",
-      name: "Shadow Ledger",
-      desc: "78 vendors, 9 patterns, forensique d\u00e9penses cach\u00e9es",
+      name: t("dashboard.engines.engine3.name"),
+      desc: t("dashboard.engines.engine3.desc"),
       status: "active",
       file: "lib/engines/shadow-ledger.ts",
       phases: 6,
@@ -386,8 +388,8 @@ export default function DashboardClient({
     },
     {
       id: "decision",
-      name: "Decision Room",
-      desc: "3 agents autonomes: Extracteur \u2192 Analyste \u2192 N\u00e9gociateur",
+      name: t("dashboard.engines.engine4.name"),
+      desc: t("dashboard.engines.engine4.desc"),
       status: "active",
       file: "lib/agents/orchestrator.ts",
       phases: 3,
@@ -416,7 +418,7 @@ export default function DashboardClient({
         flexDirection: "column",
         gap: SP[1],
         flexShrink: 0,
-        background: "hsla(228,38%,3%,0.95)",
+        background: "#F8FAFC",
         transition: "width 250ms cubic-bezier(0.16,1,0.3,1)",
         overflow: "hidden",
         position: "relative",
@@ -443,7 +445,7 @@ export default function DashboardClient({
                 GHOST TAX
               </p>
               <p style={{ fontSize: 8, color: C.text3, letterSpacing: ".08em", marginTop: 2 }}>
-                DECISION INTELLIGENCE
+                {t("dashboard.label.decisionIntelligence")}
               </p>
             </div>
           )}
@@ -487,7 +489,7 @@ export default function DashboardClient({
               }}>
                 {item.shortcut}
               </span>
-              {!sidebarCollapsed && item.label}
+              {!sidebarCollapsed && t(item.key)}
             </button>
           );
         })}
@@ -499,17 +501,17 @@ export default function DashboardClient({
           <div style={{
             padding: `${SP[2]}px`,
             borderRadius: 10,
-            background: "hsla(0,0%,0%,0.20)",
+            background: "#F1F5F9",
             border: `1px solid ${C.border}`,
           }}>
             <p style={{ fontSize: 8, fontFamily: F.mono, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>
-              RACCOURCIS
+              {t("dashboard.shortcuts")}
             </p>
             <p style={{ fontSize: 9, color: C.text3 }}>
-              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>1-5</kbd> navigation
+              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>1-5</kbd> {t("dashboard.shortcuts.nav")}
             </p>
             <p style={{ fontSize: 9, color: C.text3, marginTop: 2 }}>
-              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>[</kbd> sidebar
+              <kbd style={{ fontFamily: F.mono, color: C.text2, background: C.elevated, padding: "1px 4px", borderRadius: 3, fontSize: 9 }}>[</kbd> {t("dashboard.shortcuts.sidebar")}
             </p>
           </div>
         )}
@@ -518,16 +520,16 @@ export default function DashboardClient({
         <div style={{
           padding: `${SP[2]}px`,
           borderRadius: 10,
-          background: "hsla(0,0%,0%,0.15)",
+          background: "#F1F5F9",
           border: `1px solid ${C.border}`,
           marginTop: SP[2],
         }}>
           <p style={{ fontSize: 9, fontFamily: F.mono, color: C.accent, letterSpacing: ".06em", fontWeight: 700 }}>
-            {sidebarCollapsed ? (companyName?.charAt(0) || "?") : (companyName?.toUpperCase() || "ORGANISATION")}
+            {sidebarCollapsed ? (companyName?.charAt(0) || "?") : (companyName?.toUpperCase() || t("dashboard.org.default"))}
           </p>
           {!sidebarCollapsed && (
             <p style={{ fontSize: 9, color: C.text3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis" }}>
-              {userEmail || "Non connect\u00e9"}
+              {userEmail || t("dashboard.org.notConnected")}
             </p>
           )}
         </div>
@@ -558,11 +560,11 @@ export default function DashboardClient({
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}>
-                {page === "command" ? "Command Center"
-                  : page === "reports" ? "Rapports d\u2019Intelligence"
-                  : page === "leads" ? "Pipeline Commercial"
-                  : page === "engines" ? "Moteurs de D\u00e9tection"
-                  : "Scanner"}
+                {page === "command" ? t("dashboard.title.command")
+                  : page === "reports" ? t("dashboard.title.reports")
+                  : page === "leads" ? t("dashboard.title.leads")
+                  : page === "engines" ? t("dashboard.title.engines")
+                  : t("dashboard.title.scanner")}
               </h1>
               {/* Live indicator */}
               <div style={{
@@ -574,20 +576,20 @@ export default function DashboardClient({
                   width: 6, height: 6, borderRadius: "50%",
                   background: C.green,
                   animation: "pulse 2s ease-in-out infinite",
-                  boxShadow: `0 0 8px ${C.green}`,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                 }} />
                 <span style={{ fontSize: 9, fontFamily: F.mono, color: C.green, fontWeight: 600 }}>
-                  LIVE
+                  {t("dashboard.live")}
                 </span>
               </div>
             </div>
             <p style={{ fontSize: 11, color: C.text3 }}>
               {auditRequests.length > 0
-                ? `Derni\u00e8re activit\u00e9 ${relativeTime(auditRequests[0].updated_at)}`
-                : "Aucune activit\u00e9 enregistr\u00e9e"}
+                ? `${t("dashboard.lastActivity")} ${relativeTime(auditRequests[0].updated_at, locale)}`
+                : t("dashboard.noActivity")}
               {processing.length > 0 && (
                 <span style={{ color: C.amber, marginLeft: 8 }}>
-                  {processing.length} analyse{processing.length > 1 ? "s" : ""} en cours
+                  {processing.length} {processing.length > 1 ? t("dashboard.analysesInProgressPlural") : t("dashboard.analysesInProgress")}
                 </span>
               )}
             </p>
@@ -602,7 +604,7 @@ export default function DashboardClient({
               boxShadow: `0 4px 16px hsla(216,91%,65%,0.25)`,
               transition: "transform 150ms, box-shadow 150ms",
             }}>
-              NOUVEAU SCAN
+              {t("dashboard.newScan")}
             </a>
           </div>
         </div>
@@ -616,7 +618,7 @@ export default function DashboardClient({
             animation: "fadeSlideUp 500ms cubic-bezier(0.16,1,0.3,1)",
           }}>
 
-            {isEmpty ? <EmptyStateWow /> : (
+            {isEmpty ? <EmptyStateWow t={t} /> : (
               <>
                 {/* ── TOP METRICS ROW — The Shock ────────── */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: SP[3] }}>
@@ -639,16 +641,16 @@ export default function DashboardClient({
                       textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
                       fontWeight: 700,
                     }}>
-                      EXPOSITION GHOST TAX
+                      {t("dashboard.ghostTaxExposure")}
                     </p>
                     <p style={{
                       fontFamily: F.mono, fontSize: 32, fontWeight: 900, color: C.red,
                       fontVariantNumeric: "tabular-nums", lineHeight: 1,
                       textShadow: `0 0 40px hsla(0,82%,66%,0.3)`,
                     }}>
-                      {animGhostTax > 0 ? fmtEur(animGhostTax, true) : "--"}
+                      {animGhostTax > 0 ? fmtEur(animGhostTax, true, locale) : "--"}
                     </p>
-                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>/an d\u2019exposition d\u00e9tect\u00e9e</p>
+                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>{t("dashboard.perYearExposure")}</p>
                     {wasteRate > 0 && (
                       <div style={{
                         marginTop: SP[2], padding: "4px 8px",
@@ -656,7 +658,7 @@ export default function DashboardClient({
                         borderRadius: 6, display: "inline-block",
                       }}>
                         <span style={{ fontSize: 10, fontFamily: F.mono, color: C.red, fontWeight: 700 }}>
-                          {pct(wasteRate)} du spend total
+                          {pct(wasteRate)} {t("dashboard.ofTotalSpend")}
                         </span>
                       </div>
                     )}
@@ -675,16 +677,16 @@ export default function DashboardClient({
                       textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
                       fontWeight: 700,
                     }}>
-                      R\u00c9CUP\u00c9RABLE
+                      {t("dashboard.recoverable")}
                     </p>
                     <p style={{
                       fontFamily: F.mono, fontSize: 32, fontWeight: 900, color: C.green,
                       fontVariantNumeric: "tabular-nums", lineHeight: 1,
                       textShadow: `0 0 40px hsla(162,68%,51%,0.3)`,
                     }}>
-                      {animRecoverable > 0 ? fmtEur(animRecoverable, true) : "--"}
+                      {animRecoverable > 0 ? fmtEur(animRecoverable, true, locale) : "--"}
                     </p>
-                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>/an d\u2019\u00e9conomies identifi\u00e9es</p>
+                    <p style={{ fontSize: 10, color: C.text3, marginTop: SP[1] }}>{t("dashboard.perYearSavings")}</p>
                   </div>
 
                   {/* Entropy Score */}
@@ -695,7 +697,7 @@ export default function DashboardClient({
                       textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
                       fontWeight: 700, alignSelf: "flex-start",
                     }}>
-                      SCORE ENTROPIE
+                      {t("dashboard.entropyScore")}
                     </p>
                     <RingGauge
                       value={animEntropy}
@@ -714,14 +716,14 @@ export default function DashboardClient({
                       textTransform: "uppercase", letterSpacing: ".12em", marginBottom: SP[2],
                       fontWeight: 700,
                     }}>
-                      ACTIVIT\u00c9
+                      {t("dashboard.activity")}
                     </p>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: SP[2] }}>
                       {[
-                        { v: auditRequests.length, l: "Rapports", c: C.text1 },
-                        { v: delivered.length, l: "Livr\u00e9s", c: C.green },
-                        { v: vaultSessions.length, l: "Leads", c: C.accent },
-                        { v: processing.length, l: "En cours", c: C.amber },
+                        { v: auditRequests.length, l: t("dashboard.activity.reports"), c: C.text1 },
+                        { v: delivered.length, l: t("dashboard.activity.delivered"), c: C.green },
+                        { v: vaultSessions.length, l: t("dashboard.activity.leads"), c: C.accent },
+                        { v: processing.length, l: t("dashboard.activity.inProgress"), c: C.amber },
                       ].map((m) => (
                         <div key={m.l} style={{ textAlign: "center" }}>
                           <p style={{
@@ -749,13 +751,13 @@ export default function DashboardClient({
                         fontSize: 10, fontFamily: F.mono, fontWeight: 700,
                         letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
                       }}>
-                        FLUX D\u2019ACTIVIT\u00c9
+                        {t("dashboard.activityFeed")}
                       </p>
                       <button onClick={() => setPage("reports")} style={{
                         fontSize: 9, color: C.accent, background: "none", border: "none",
                         cursor: "pointer", fontWeight: 600, fontFamily: F.mono,
                       }}>
-                        TOUT VOIR
+                        {t("dashboard.viewAll")}
                       </button>
                     </div>
                     {auditRequests.slice(0, 6).map((ar, idx) => (
@@ -769,7 +771,7 @@ export default function DashboardClient({
                         <div style={{
                           width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
                           background: STATUS_MAP[ar.status]?.color || C.text4,
-                          boxShadow: `0 0 6px ${STATUS_MAP[ar.status]?.color || C.text4}`,
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                         }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{
@@ -782,15 +784,15 @@ export default function DashboardClient({
                             {ar.domain ?? ar.email}
                           </p>
                         </div>
-                        <StatusBadge status={ar.status} />
+                        <StatusBadge status={ar.status} t={t} />
                         <span style={{ fontFamily: F.mono, fontSize: 9, color: C.text4, flexShrink: 0 }}>
-                          {relativeTime(ar.created_at)}
+                          {relativeTime(ar.created_at, locale)}
                         </span>
                       </div>
                     ))}
                     {auditRequests.length === 0 && (
                       <p style={{ fontSize: 11, color: C.text4, textAlign: "center", padding: SP[5] }}>
-                        Aucun rapport. Lancez votre premier scan.
+                        {t("dashboard.noReports")}
                       </p>
                     )}
                   </div>
@@ -802,7 +804,7 @@ export default function DashboardClient({
                       letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
                       marginBottom: SP[3],
                     }}>
-                      EXPOSITION PAR INDUSTRIE
+                      {t("dashboard.exposureByIndustry")}
                     </p>
                     {industryMap.length > 0 ? (
                       industryMap.map(([industry, amount]) => (
@@ -812,12 +814,12 @@ export default function DashboardClient({
                           max={industryMap[0]?.[1] || 1}
                           color={C.red}
                           label={industry}
-                          amount={fmtEur(amount, true)}
+                          amount={fmtEur(amount, true, locale)}
                         />
                       ))
                     ) : (
                       <p style={{ fontSize: 11, color: C.text4, textAlign: "center", padding: SP[4] }}>
-                        Donn\u00e9es insuffisantes
+                        {t("dashboard.insufficientData")}
                       </p>
                     )}
 
@@ -825,17 +827,17 @@ export default function DashboardClient({
                     {totalSpend > 0 && (
                       <div style={{
                         marginTop: SP[3], padding: SP[3],
-                        background: "hsla(0,0%,0%,0.2)", borderRadius: 10,
+                        background: "#F1F5F9", borderRadius: 10,
                         border: `1px solid ${C.border}`,
                       }}>
                         <p style={{ fontSize: 8, fontFamily: F.mono, color: C.text4, letterSpacing: ".1em", textTransform: "uppercase" }}>
-                          SPEND TOTAL ANALYS\u00c9
+                          {t("dashboard.totalSpendAnalyzed")}
                         </p>
                         <p style={{
                           fontFamily: F.mono, fontSize: 20, fontWeight: 800,
                           color: C.text1, fontVariantNumeric: "tabular-nums", marginTop: 4,
                         }}>
-                          {fmtEur(totalSpend, true)}<span style={{ fontSize: 10, color: C.text3 }}>/an</span>
+                          {fmtEur(totalSpend, true, locale)}<span style={{ fontSize: 10, color: C.text3 }}>/an</span>
                         </p>
                       </div>
                     )}
@@ -848,7 +850,7 @@ export default function DashboardClient({
                       letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
                       marginBottom: SP[3],
                     }}>
-                      MOTEURS
+                      {t("dashboard.engines")}
                     </p>
                     {engines.map((eng) => (
                       <div key={eng.id} style={{
@@ -859,12 +861,12 @@ export default function DashboardClient({
                           <div style={{
                             width: 6, height: 6, borderRadius: "50%",
                             background: eng.color,
-                            boxShadow: `0 0 6px ${eng.color}`,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                           }} />
                           <span style={{ fontSize: 10, fontWeight: 600, color: C.text1 }}>{eng.name}</span>
                         </div>
                         <p style={{ fontSize: 9, color: C.text3, paddingLeft: 12 }}>
-                          {eng.phases} phases
+                          {eng.phases} {t("dashboard.engines.phases")}
                         </p>
                       </div>
                     ))}
@@ -876,7 +878,7 @@ export default function DashboardClient({
                       letterSpacing: ".06em",
                       transition: "border-color 150ms",
                     }}>
-                      D\u00c9TAILS
+                      {t("dashboard.engines.details")}
                     </button>
                   </div>
                 </div>
@@ -888,27 +890,27 @@ export default function DashboardClient({
                       fontSize: 10, fontFamily: F.mono, fontWeight: 700,
                       letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
                     }}>
-                      PIPELINE COMMERCIAL
+                      {t("dashboard.commercialPipeline")}
                     </p>
                     <button onClick={() => setPage("leads")} style={{
                       fontSize: 9, color: C.accent, background: "none", border: "none",
                       cursor: "pointer", fontWeight: 600, fontFamily: F.mono,
                     }}>
-                      TOUT VOIR
+                      {t("dashboard.viewAll")}
                     </button>
                   </div>
 
                   {/* Pipeline stages */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: SP[2], marginBottom: SP[3] }}>
                     {[
-                      { label: "Scann\u00e9s", count: vaultSessions.length, color: C.text2 },
-                      { label: "Qualifi\u00e9s", count: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber },
-                      { label: "Pay\u00e9s", count: auditRequests.filter((a) => a.status === "paid" || a.status === "delivered").length, color: C.accent },
-                      { label: "Livr\u00e9s", count: delivered.length, color: C.green },
+                      { label: t("dashboard.pipeline.scanned"), count: vaultSessions.length, color: C.text2 },
+                      { label: t("dashboard.pipeline.qualified"), count: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber },
+                      { label: t("dashboard.pipeline.paid"), count: auditRequests.filter((a) => a.status === "paid" || a.status === "delivered").length, color: C.accent },
+                      { label: t("dashboard.pipeline.delivered"), count: delivered.length, color: C.green },
                     ].map((stage) => (
                       <div key={stage.label} style={{
                         textAlign: "center", padding: `${SP[3]}px ${SP[2]}px`,
-                        background: "hsla(0,0%,0%,0.15)", borderRadius: 10,
+                        background: "#F1F5F9", borderRadius: 10,
                         border: `1px solid ${C.border}`,
                       }}>
                         <p style={{
@@ -941,7 +943,7 @@ export default function DashboardClient({
                             fontFamily: F.mono, fontSize: 14, fontWeight: 800, color: C.red,
                             fontVariantNumeric: "tabular-nums",
                           }}>
-                            {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true) : "--"}
+                            {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true, locale) : "--"}
                           </span>
                           {vs.entropy_score != null && (
                             <span style={{
@@ -971,10 +973,10 @@ export default function DashboardClient({
               marginBottom: SP[4],
             }}>
               {[
-                { label: "Total", value: auditRequests.length, color: C.text1 },
-                { label: "Livr\u00e9s", value: delivered.length, color: C.green },
-                { label: "En cours", value: processing.length, color: C.amber },
-                { label: "\u00c9chou\u00e9s", value: auditRequests.filter((a) => a.status === "failed").length, color: C.red },
+                { label: t("dashboard.reports.total"), value: auditRequests.length, color: C.text1 },
+                { label: t("dashboard.reports.delivered"), value: delivered.length, color: C.green },
+                { label: t("dashboard.reports.inProgress"), value: processing.length, color: C.amber },
+                { label: t("dashboard.reports.failed"), value: auditRequests.filter((a) => a.status === "failed").length, color: C.red },
               ].map((kpi) => (
                 <div key={kpi.label} style={{ ...glass(0.5), padding: `${SP[3]}px ${SP[4]}px`, textAlign: "center" }}>
                   <p style={{ fontFamily: F.mono, fontSize: 28, fontWeight: 900, color: kpi.color, fontVariantNumeric: "tabular-nums" }}>
@@ -988,14 +990,14 @@ export default function DashboardClient({
             </div>
 
             <div style={{ ...glass(0.55), padding: SP[4] }}>
-              {auditRequests.length === 0 ? <EmptyStateWow /> : (
+              {auditRequests.length === 0 ? <EmptyStateWow t={t} /> : (
                 <div style={{ display: "flex", flexDirection: "column", gap: SP[1] }}>
                   {/* Header row */}
                   <div style={{
                     display: "grid", gridTemplateColumns: "140px 1fr 100px 120px 80px",
                     gap: SP[2], padding: `${SP[1]}px ${SP[3]}px`,
                   }}>
-                    {["ENTREPRISE", "DOMAINE", "STATUT", "SPEND", ""].map((h) => (
+                    {[t("dashboard.reports.header.company"), t("dashboard.reports.header.domain"), t("dashboard.reports.header.status"), t("dashboard.reports.header.spend"), ""].map((h) => (
                       <span key={h} style={{
                         fontSize: 8, fontFamily: F.mono, color: C.text4,
                         textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700,
@@ -1009,7 +1011,7 @@ export default function DashboardClient({
                       display: "grid", gridTemplateColumns: "140px 1fr 100px 120px 80px",
                       gap: SP[2], padding: `${SP[2]}px ${SP[3]}px`,
                       borderRadius: 10,
-                      background: idx % 2 === 0 ? "transparent" : "hsla(0,0%,0%,0.10)",
+                      background: idx % 2 === 0 ? "transparent" : "#F8FAFC",
                       transition: "background 150ms",
                       alignItems: "center",
                     }}>
@@ -1019,12 +1021,12 @@ export default function DashboardClient({
                       <span style={{ fontSize: 10, color: C.text3, overflow: "hidden", textOverflow: "ellipsis" }}>
                         {ar.domain ?? ar.email}
                       </span>
-                      <StatusBadge status={ar.status} />
+                      <StatusBadge status={ar.status} t={t} />
                       <span style={{ fontFamily: F.mono, fontSize: 12, fontWeight: 600, color: C.text2, fontVariantNumeric: "tabular-nums" }}>
-                        {ar.estimated_monthly_spend ? fmtEur(ar.estimated_monthly_spend) + "/mo" : "--"}
+                        {ar.estimated_monthly_spend ? fmtEur(ar.estimated_monthly_spend, false, locale) + "/mo" : "--"}
                       </span>
                       <span style={{ fontFamily: F.mono, fontSize: 9, color: C.text4 }}>
-                        {relativeTime(ar.created_at)}
+                        {relativeTime(ar.created_at, locale)}
                       </span>
                     </div>
                   ))}
@@ -1045,11 +1047,11 @@ export default function DashboardClient({
               marginBottom: SP[4],
             }}>
               {[
-                { label: "Visiteurs", value: vaultSessions.length * 8, color: C.text2, width: "100%" },
-                { label: "Scans", value: vaultSessions.length, color: C.accent, width: "75%" },
-                { label: "Qualifi\u00e9s", value: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber, width: "50%" },
-                { label: "Pay\u00e9s", value: auditRequests.filter((a) => ["paid", "delivered", "processing"].includes(a.status)).length, color: C.green, width: "30%" },
-                { label: "Livr\u00e9s", value: delivered.length, color: C.green, width: "18%" },
+                { label: t("dashboard.leads.visitors"), value: vaultSessions.length * 8, color: C.text2, width: "100%" },
+                { label: t("dashboard.leads.scans"), value: vaultSessions.length, color: C.accent, width: "75%" },
+                { label: t("dashboard.leads.qualified"), value: vaultSessions.filter((v) => (v.ghost_tax_annual ?? 0) > 10000).length, color: C.amber, width: "50%" },
+                { label: t("dashboard.leads.paid"), value: auditRequests.filter((a) => ["paid", "delivered", "processing"].includes(a.status)).length, color: C.green, width: "30%" },
+                { label: t("dashboard.leads.delivered"), value: delivered.length, color: C.green, width: "18%" },
               ].map((stage) => (
                 <div key={stage.label} style={{ textAlign: "center" }}>
                   <div style={{
@@ -1071,14 +1073,14 @@ export default function DashboardClient({
             </div>
 
             <div style={{ ...glass(0.55), padding: SP[4] }}>
-              {vaultSessions.length === 0 ? <EmptyStateWow /> : (
+              {vaultSessions.length === 0 ? <EmptyStateWow t={t} /> : (
                 <div style={{ display: "flex", flexDirection: "column", gap: SP[1] }}>
                   {/* Header */}
                   <div style={{
                     display: "grid", gridTemplateColumns: "1.2fr 1fr 80px 80px 100px 90px",
                     gap: SP[2], padding: `${SP[1]}px ${SP[3]}px`,
                   }}>
-                    {["ENTREPRISE", "EMAIL", "TAILLE", "INDUSTRIE", "GHOST TAX", "ENTROPIE"].map((h) => (
+                    {[t("dashboard.leads.header.company"), t("dashboard.leads.header.email"), t("dashboard.leads.header.size"), t("dashboard.leads.header.industry"), t("dashboard.leads.header.ghostTax"), t("dashboard.leads.header.entropy")].map((h) => (
                       <span key={h} style={{
                         fontSize: 8, fontFamily: F.mono, color: C.text4,
                         textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 700,
@@ -1092,7 +1094,7 @@ export default function DashboardClient({
                       display: "grid", gridTemplateColumns: "1.2fr 1fr 80px 80px 100px 90px",
                       gap: SP[2], padding: `${SP[2]}px ${SP[3]}px`,
                       borderRadius: 10,
-                      background: idx % 2 === 0 ? "transparent" : "hsla(0,0%,0%,0.10)",
+                      background: idx % 2 === 0 ? "transparent" : "#F8FAFC",
                       alignItems: "center",
                     }}>
                       <span style={{ fontSize: 12, fontWeight: 600, color: C.text1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -1112,7 +1114,7 @@ export default function DashboardClient({
                         color: (vs.ghost_tax_annual ?? 0) > 30000 ? C.red : (vs.ghost_tax_annual ?? 0) > 10000 ? C.amber : C.text2,
                         fontVariantNumeric: "tabular-nums",
                       }}>
-                        {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true) : "--"}
+                        {vs.ghost_tax_annual ? fmtEur(vs.ghost_tax_annual, true, locale) : "--"}
                       </span>
                       <span style={{
                         fontFamily: F.mono, fontSize: 12, fontWeight: 700,
@@ -1154,7 +1156,7 @@ export default function DashboardClient({
                   <div style={{
                     width: 10, height: 10, borderRadius: "50%",
                     background: eng.color,
-                    boxShadow: `0 0 12px ${eng.color}, 0 0 24px ${eng.color}40`,
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                     animation: "pulse 3s ease-in-out infinite",
                   }} />
                   <h3 style={{
@@ -1169,7 +1171,7 @@ export default function DashboardClient({
                     background: C.greenBg, border: `1px solid ${C.greenBd}`,
                     fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em",
                   }}>
-                    ACTIF
+                    {t("dashboard.engines.active")}
                   </span>
                 </div>
 
@@ -1178,22 +1180,22 @@ export default function DashboardClient({
                 </p>
 
                 <div style={{
-                  padding: SP[3], background: "hsla(0,0%,0%,0.25)", borderRadius: 10,
+                  padding: SP[3], background: "#F1F5F9", borderRadius: 10,
                   border: `1px solid ${C.border}`,
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SP[1] }}>
-                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>PHASES</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>{t("dashboard.engines.phases").toUpperCase()}</span>
                     <span style={{ fontSize: 11, fontFamily: F.mono, color: eng.color, fontWeight: 700 }}>
                       {eng.phases}
                     </span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: SP[1] }}>
-                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>FICHIER</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>{t("dashboard.engines.file")}</span>
                     <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text3 }}>{eng.file}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>STATUT</span>
-                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.green }}>OPERATIONAL</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.text4 }}>{t("dashboard.engines.statusLabel")}</span>
+                    <span style={{ fontSize: 9, fontFamily: F.mono, color: C.green }}>{t("dashboard.engines.operational")}</span>
                   </div>
                 </div>
 
@@ -1218,11 +1220,11 @@ export default function DashboardClient({
                 letterSpacing: ".12em", textTransform: "uppercase", color: C.text3,
                 marginBottom: SP[4],
               }}>
-                ARCHITECTURE DE D\u00c9TECTION
+                {t("dashboard.engines.architecture")}
               </p>
               <div style={{
                 fontFamily: F.mono, fontSize: 12, color: C.text2, lineHeight: 2,
-                background: "hsla(0,0%,0%,0.25)", padding: SP[4], borderRadius: 12,
+                background: "#F1F5F9", padding: SP[4], borderRadius: 12,
                 border: `1px solid ${C.border}`, overflowX: "auto",
               }}>
                 <pre style={{ margin: 0, whiteSpace: "pre" }}>
@@ -1267,7 +1269,7 @@ export default function DashboardClient({
 //  EMPTY STATE — Premium
 // ══════════════════════════════════════════════════════
 
-function EmptyStateWow() {
+function EmptyStateWow({ t }: { t: (key: string, fallback?: string) => string }) {
   return (
     <div style={{
       ...glass(0.6),
@@ -1311,14 +1313,13 @@ function EmptyStateWow() {
         fontSize: 20, fontWeight: 800, color: C.text1,
         letterSpacing: "-0.02em", marginBottom: 8,
       }}>
-        Votre Command Center est pr\u00eat
+        {t("dashboard.empty.title")}
       </h2>
       <p style={{
         fontSize: 13, color: C.text2, lineHeight: 1.6,
         maxWidth: 440, margin: "0 auto 28px",
       }}>
-        Lancez votre premier scan Ghost Tax pour activer le tableau de bord
-        et d\u00e9tecter l\u2019exposition financi\u00e8re cach\u00e9e dans vos d\u00e9penses IT.
+        {t("dashboard.empty.desc")}
       </p>
       <a href="/intel" style={{
         display: "inline-flex", alignItems: "center", gap: 8,
@@ -1329,10 +1330,10 @@ function EmptyStateWow() {
         boxShadow: `0 4px 20px hsla(216,91%,65%,0.3)`,
         transition: "transform 150ms, box-shadow 150ms",
       }}>
-        LANCER LE PREMIER SCAN
+        {t("dashboard.empty.cta")}
       </a>
       <p style={{ fontSize: 10, fontFamily: F.mono, color: C.text4, marginTop: 16 }}>
-        4 moteurs \u00b7 21 phases \u00b7 78 vendors \u00b7 r\u00e9sultat en 45s
+        {t("dashboard.empty.stats")}
       </p>
     </div>
   );

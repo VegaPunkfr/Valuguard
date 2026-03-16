@@ -23,6 +23,7 @@ import {
   type DecisionIntelligence,
 } from "@/lib/analysis";
 import { generateViralEmailBlock } from "@/lib/viral-loop";
+import { encryptJSON, isEncryptionConfigured } from "@/lib/crypto";
 
 // ── Types ─────────────────────────────────────────────
 
@@ -265,10 +266,15 @@ export async function executeDeliveryPipeline(
   // This ensures the report survives even if email delivery fails.
   const followupAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(); // 14 days
   if (supabase) {
+    // ALE: Encrypt financial data at rest if ENCRYPTION_MASTER_KEY is configured
+    const reportPayload = isEncryptionConfigured()
+      ? { _encrypted: true, data: encryptJSON(report) }
+      : report;
+
     const { error: reportError } = await (supabase as any)
       .from("audit_requests")
       .update({
-        report_data: report,
+        report_data: reportPayload,
         followup_at: followupAt,
       })
       .eq("run_id", runId);
@@ -501,83 +507,83 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
 
   const vendorDriftRows = report.vendorPressureMap.vendorDrifts.slice(0, 5).map(vd =>
     `<tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:#e4e9f4;font-weight:600">${vd.vendor}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:${vd.severity === 'critical' ? '#ef4444' : vd.severity === 'high' ? '#f59e0b' : '#8d9bb5'};text-transform:uppercase;font-size:11px">${vd.severity}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:#8d9bb5;font-size:12px">${vd.description}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600">${vd.vendor}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:${vd.severity === 'critical' ? '#DC2626' : vd.severity === 'high' ? '#D97706' : '#475569'};text-transform:uppercase;font-size:11px">${vd.severity}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#475569;font-size:12px">${vd.description}</td>
     </tr>`
   ).join("");
 
   const scenarioRows = (["conservative", "base", "aggressive"] as const).map(key => {
     const sc = report.correctiveRoadmap.scenarios[key];
     return `<tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:#e4e9f4;font-weight:600">${sc.label}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:#34d399;font-family:monospace;font-weight:700">${fmtEur(sc.savingsEur[0])}-${fmtEur(sc.savingsEur[1])} &euro;/yr</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #1a1f2e;color:#8d9bb5">${sc.paybackMonths} ${isEn ? "months" : "mois"}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600">${sc.label}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#059669;font-family:monospace;font-weight:700">${fmtEur(sc.savingsEur[0])}-${fmtEur(sc.savingsEur[1])} &euro;/yr</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#475569">${sc.paybackMonths} ${isEn ? "months" : "mois"}</td>
     </tr>`;
   }).join("");
 
   const playbookSections = report.negotiationPlaybooks.slice(0, 3).map(pb =>
-    `<div style="background:#0e1221;border:1px solid #1a1f2e;border-radius:8px;padding:16px;margin-bottom:12px">
+    `<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="color:#e4e9f4;font-weight:700;font-size:14px">${pb.vendor}</span>
-        <span style="background:rgba(52,211,153,0.1);color:#34d399;padding:2px 8px;border-radius:4px;font-size:11px;text-transform:uppercase">${pb.suggestedApproach}</span>
+        <span style="color:#0F172A;font-weight:700;font-size:14px">${pb.vendor}</span>
+        <span style="background:rgba(5,150,105,0.08);color:#059669;padding:2px 8px;border-radius:4px;font-size:11px;text-transform:uppercase">${pb.suggestedApproach}</span>
       </div>
-      <p style="color:#8d9bb5;font-size:12px;line-height:1.5;margin:0 0 8px 0">${pb.pressureAngle}</p>
-      ${pb.steps.map((step, i) => `<p style="color:#55637d;font-size:11px;margin:2px 0;padding-left:8px;border-left:2px solid #1a1f2e"><span style="color:#60a5fa;font-weight:700;margin-right:4px">${i + 1}.</span>${step}</p>`).join("")}
+      <p style="color:#475569;font-size:12px;line-height:1.5;margin:0 0 8px 0">${pb.pressureAngle}</p>
+      ${pb.steps.map((step, i) => `<p style="color:#64748B;font-size:11px;margin:2px 0;padding-left:8px;border-left:2px solid #E2E8F0"><span style="color:#0F172A;font-weight:700;margin-right:4px">${i + 1}.</span>${step}</p>`).join("")}
     </div>`
   ).join("");
 
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
 <div style="max-width:640px;margin:0 auto;padding:32px 16px">
 
   <!-- Header -->
   <div style="margin-bottom:24px">
-    <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;margin:0 0 8px 0">GHOST TAX CORRECTIVE PROTOCOL</p>
-    <h1 style="font-size:20px;color:#e4e9f4;margin:0 0 4px 0">${isEn ? "Financial Exposure Report" : "Rapport d'Exposition Financiere"}</h1>
-    <p style="font-size:12px;color:#55637d;margin:0">${report.company.name} | ${report.company.domain} | ${report.runId}</p>
+    <p style="font-size:10px;letter-spacing:0.2em;color:#0F172A;text-transform:uppercase;margin:0 0 8px 0">GHOST TAX CORRECTIVE PROTOCOL</p>
+    <h1 style="font-size:20px;color:#0F172A;margin:0 0 4px 0">${isEn ? "Financial Exposure Report" : "Rapport d'Exposition Financiere"}</h1>
+    <p style="font-size:12px;color:#64748B;margin:0">${report.company.name} | ${report.company.domain} | ${report.runId}</p>
   </div>
 
   <!-- Executive Snapshot -->
-  <div style="background:#0e1221;border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:20px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#3b82f6;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "EXECUTIVE SNAPSHOT" : "SYNTHESE EXECUTIVE"}</p>
-    <p style="font-size:14px;color:#e4e9f4;line-height:1.5;margin:0 0 16px 0">${report.executiveSnapshot.diagnosisSummary}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:20px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#0F172A;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "EXECUTIVE SNAPSHOT" : "SYNTHESE EXECUTIVE"}</p>
+    <p style="font-size:14px;color:#0F172A;line-height:1.5;margin:0 0 16px 0">${report.executiveSnapshot.diagnosisSummary}</p>
     <table style="width:100%;border-collapse:collapse">
       <tr>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0;letter-spacing:0.08em">${isEn ? "EXPOSURE RANGE" : "EXPOSITION"}</p>
-          <p style="font-family:monospace;font-size:18px;font-weight:800;color:#ef4444;margin:0">${fmtEur(report.executiveSnapshot.exposureRangeEur[0])}-${fmtEur(report.executiveSnapshot.exposureRangeEur[1])} &euro;/yr</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0;letter-spacing:0.08em">${isEn ? "EXPOSURE RANGE" : "EXPOSITION"}</p>
+          <p style="font-family:monospace;font-size:18px;font-weight:800;color:#DC2626;margin:0">${fmtEur(report.executiveSnapshot.exposureRangeEur[0])}-${fmtEur(report.executiveSnapshot.exposureRangeEur[1])} &euro;/yr</p>
         </td>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0;letter-spacing:0.08em">90-DAY RECOVERABLE</p>
-          <p style="font-family:monospace;font-size:18px;font-weight:800;color:#34d399;margin:0">${fmtEur(report.executiveSnapshot.ninetyDayRecoverableEur[0])}-${fmtEur(report.executiveSnapshot.ninetyDayRecoverableEur[1])} &euro;</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0;letter-spacing:0.08em">90-DAY RECOVERABLE</p>
+          <p style="font-family:monospace;font-size:18px;font-weight:800;color:#059669;margin:0">${fmtEur(report.executiveSnapshot.ninetyDayRecoverableEur[0])}-${fmtEur(report.executiveSnapshot.ninetyDayRecoverableEur[1])} &euro;</p>
         </td>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0;letter-spacing:0.08em">CONFIDENCE</p>
-          <p style="font-family:monospace;font-size:14px;font-weight:700;color:#f59e0b;margin:0">${report.executiveSnapshot.confidenceRange}</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0;letter-spacing:0.08em">CONFIDENCE</p>
+          <p style="font-family:monospace;font-size:14px;font-weight:700;color:#D97706;margin:0">${report.executiveSnapshot.confidenceRange}</p>
         </td>
       </tr>
     </table>
   </div>
 
   <!-- Cost of Delay -->
-  <div style="background:#0e1221;border:1px solid rgba(239,68,68,0.10);border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#ef4444;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "COST OF DELAY" : "COUT DU RETARD"}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#DC2626;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "COST OF DELAY" : "COUT DU RETARD"}</p>
     <table style="width:100%;border-collapse:collapse">
       <tr>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0">${isEn ? "EVERY DAY" : "PAR JOUR"}</p>
-          <p style="font-family:monospace;font-size:18px;font-weight:900;color:#ef4444;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.daily[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.daily[1])} &euro;</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0">${isEn ? "EVERY DAY" : "PAR JOUR"}</p>
+          <p style="font-family:monospace;font-size:18px;font-weight:900;color:#DC2626;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.daily[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.daily[1])} &euro;</p>
         </td>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0">${isEn ? "EVERY MONTH" : "PAR MOIS"}</p>
-          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#f59e0b;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} &euro;</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0">${isEn ? "EVERY MONTH" : "PAR MOIS"}</p>
+          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#D97706;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} &euro;</p>
         </td>
         <td style="text-align:center;padding:8px">
-          <p style="font-size:8px;color:#55637d;margin:0 0 4px 0">90-DAY</p>
-          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#f59e0b;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.projected90[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.projected90[1])} &euro;</p>
+          <p style="font-size:8px;color:#64748B;margin:0 0 4px 0">90-DAY</p>
+          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#D97706;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.projected90[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.projected90[1])} &euro;</p>
         </td>
       </tr>
     </table>
@@ -585,71 +591,92 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
 
   <!-- Vendor Pressure Map -->
   ${report.vendorPressureMap.vendorDrifts.length > 0 ? `
-  <div style="background:#0e1221;border:1px solid rgba(245,158,11,0.12);border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#f59e0b;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "VENDOR PRESSURE MAP" : "CARTE DE PRESSION FOURNISSEURS"}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#D97706;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "VENDOR PRESSURE MAP" : "CARTE DE PRESSION FOURNISSEURS"}</p>
     <table style="width:100%;border-collapse:collapse;font-size:12px">${vendorDriftRows}</table>
     ${report.vendorPressureMap.windowCompression.compressedDays < report.vendorPressureMap.windowCompression.originalDays
-      ? `<p style="font-size:11px;color:#ef4444;margin:10px 0 0 0">${isEn ? "Corrective window compressed by" : "Fenetre corrective comprimee de"} ${report.vendorPressureMap.windowCompression.originalDays - report.vendorPressureMap.windowCompression.compressedDays} ${isEn ? "days" : "jours"}</p>`
+      ? `<p style="font-size:11px;color:#DC2626;margin:10px 0 0 0">${isEn ? "Corrective window compressed by" : "Fenetre corrective comprimee de"} ${report.vendorPressureMap.windowCompression.originalDays - report.vendorPressureMap.windowCompression.compressedDays} ${isEn ? "days" : "jours"}</p>`
       : ""}
   </div>` : ""}
 
   <!-- Negotiation Playbooks -->
   ${report.negotiationPlaybooks.length > 0 ? `
   <div style="margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#34d399;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "NEGOTIATION PLAYBOOKS" : "PROTOCOLES DE NEGOCIATION"}</p>
+    <p style="font-size:9px;letter-spacing:0.1em;color:#059669;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "NEGOTIATION PLAYBOOKS" : "PROTOCOLES DE NEGOCIATION"}</p>
     ${playbookSections}
   </div>` : ""}
 
   <!-- Corrective Scenarios -->
-  <div style="background:#0e1221;border:1px solid rgba(52,211,153,0.12);border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#34d399;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "CORRECTIVE SCENARIOS" : "SCENARIOS CORRECTIFS"}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#059669;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "CORRECTIVE SCENARIOS" : "SCENARIOS CORRECTIFS"}</p>
     <table style="width:100%;border-collapse:collapse;font-size:12px">${scenarioRows}</table>
-    <p style="font-size:11px;color:#55637d;margin:10px 0 0 0">${isEn ? "Dominant cause" : "Cause dominante"}: ${report.correctiveRoadmap.causalGraph.dominantCause}</p>
+    <p style="font-size:11px;color:#64748B;margin:10px 0 0 0">${isEn ? "Dominant cause" : "Cause dominante"}: ${report.correctiveRoadmap.causalGraph.dominantCause}</p>
   </div>
 
   <!-- CFO Memo -->
-  <div style="background:#0e1221;border:1px solid #1a1f2e;border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#3b82f6;text-transform:uppercase;margin:0 0 10px 0">CFO MEMO</p>
-    <pre style="font-size:11px;color:#8d9bb5;line-height:1.6;margin:0;white-space:pre-wrap;font-family:-apple-system,sans-serif">${report.decisionPack.cfoMemo}</pre>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#0F172A;text-transform:uppercase;margin:0 0 10px 0">CFO MEMO</p>
+    <pre style="font-size:11px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;font-family:-apple-system,sans-serif">${report.decisionPack.cfoMemo}</pre>
   </div>
 
   <!-- Confidence -->
-  <div style="background:#0e1221;border:1px solid #1a1f2e;border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#3b82f6;text-transform:uppercase;margin:0 0 8px 0">${isEn ? "CONFIDENCE POSTURE" : "POSTURE DE CONFIANCE"}</p>
-    <p style="font-size:12px;color:#8d9bb5;line-height:1.5;margin:0">${report.confidenceModel.summary}</p>
-    <p style="font-size:10px;color:#55637d;margin:8px 0 0 0">${isEn ? "Overall" : "Global"}: ${report.confidenceModel.overall}/100 | ${isEn ? "Weakest" : "Plus faible"}: ${report.confidenceModel.weakestLayer} | ${isEn ? "Strongest" : "Plus fort"}: ${report.confidenceModel.strongestLayer}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.1em;color:#0F172A;text-transform:uppercase;margin:0 0 8px 0">${isEn ? "CONFIDENCE POSTURE" : "POSTURE DE CONFIANCE"}</p>
+    <p style="font-size:12px;color:#475569;line-height:1.5;margin:0">${report.confidenceModel.summary}</p>
+    <p style="font-size:10px;color:#64748B;margin:8px 0 0 0">${isEn ? "Overall" : "Global"}: ${report.confidenceModel.overall}/100 | ${isEn ? "Weakest" : "Plus faible"}: ${report.confidenceModel.weakestLayer} | ${isEn ? "Strongest" : "Plus fort"}: ${report.confidenceModel.strongestLayer}</p>
   </div>
 
   <!-- Methodology -->
-  <div style="padding:12px;border-top:1px solid #1a1f2e;margin-top:16px">
-    <p style="font-size:9px;color:#55637d;margin:0 0 4px 0">${report.proofSummary.methodologySummary}</p>
-    <p style="font-size:9px;color:#3a4560;margin:0">${isEn ? "Sources" : "Sources"}: ${report.meta.dataSources.join(", ")} | ID: ${report.meta.analysisId}</p>
-    ${report.meta.limitations.map(l => `<p style="font-size:9px;color:#3a4560;margin:2px 0">${l}</p>`).join("")}
+  <div style="padding:12px;border-top:1px solid #E2E8F0;margin-top:16px">
+    <p style="font-size:9px;color:#64748B;margin:0 0 4px 0">${report.proofSummary.methodologySummary}</p>
+    <p style="font-size:9px;color:#94A3B8;margin:0">${isEn ? "Sources" : "Sources"}: ${report.meta.dataSources.join(", ")} | ID: ${report.meta.analysisId}</p>
+    ${report.meta.limitations.map(l => `<p style="font-size:9px;color:#94A3B8;margin:2px 0">${l}</p>`).join("")}
   </div>
 
-  <!-- UPSELL: Rail B Monitor -->
-  <div style="background:linear-gradient(135deg,#0e1221 0%,#121828 100%);border:2px solid rgba(59,130,246,0.3);border-radius:12px;padding:24px;margin-bottom:16px;text-align:center">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 12px 0">${isEn ? "PROTECT THIS EXPOSURE" : "PROTEGEZ CETTE EXPOSITION"}</p>
-    <p style="font-size:16px;color:#e4e9f4;font-weight:700;margin:0 0 8px 0">${isEn ? "Your exposure drifts 15-25% per year without monitoring." : "Votre exposition derive de 15-25% par an sans monitoring."}</p>
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.6;margin:0 0 16px 0">${isEn
-      ? `At ${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} EUR/month in delay costs, continuous monitoring at 2,000 EUR/month delivers 10x+ ROI.`
-      : `A ${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} EUR/mois de cout de retard, le monitoring continu a 2 000 EUR/mois offre un ROI de 10x+.`}</p>
-    <div style="margin-bottom:12px">
-      <span style="display:inline-block;background:rgba(52,211,153,0.1);color:#34d399;padding:4px 12px;border-radius:4px;font-size:11px;margin:2px">${isEn ? "Monthly drift alerts" : "Alertes de derive mensuelles"}</span>
-      <span style="display:inline-block;background:rgba(52,211,153,0.1);color:#34d399;padding:4px 12px;border-radius:4px;font-size:11px;margin:2px">${isEn ? "Vendor pressure tracking" : "Suivi pression fournisseurs"}</span>
-      <span style="display:inline-block;background:rgba(52,211,153,0.1);color:#34d399;padding:4px 12px;border-radius:4px;font-size:11px;margin:2px">${isEn ? "Executive report" : "Rapport executif"}</span>
-    </div>
-    <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_MONITOR" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.02em">${isEn ? "Activate Continuous Monitoring" : "Activer le Monitoring Continu"}</a>
-    <p style="font-size:10px;color:#55637d;margin:10px 0 0 0">${isEn ? "Instant activation. No call required." : "Activation instantanee. Aucun appel requis."}</p>
+  <!-- Next Steps Divider -->
+  <div style="border-top:1px solid #E2E8F0;margin:24px 0 8px 0"></div>
+  <p style="font-size:9px;letter-spacing:0.2em;color:#64748B;text-transform:uppercase;text-align:center;margin:0 0 20px 0">${isEn ? "RECOMMENDED NEXT STEPS" : "PROCHAINES ETAPES RECOMMANDEES"}</p>
+
+  <!-- UPSELL: Rail B Stabilize (30/60/90 Plan) -->
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+    <table style="width:100%;border-collapse:collapse"><tr>
+      <td style="vertical-align:top;padding-right:16px">
+        <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "RAIL B — STABILIZATION PROTOCOL" : "RAIL B — PROTOCOLE DE STABILISATION"}</p>
+        <p style="font-size:15px;color:#0F172A;font-weight:700;margin:0 0 8px 0">${isEn ? "Structured 30/60/90-Day Corrective Plan" : "Plan Correctif Structure 30/60/90 Jours"}</p>
+        <p style="font-size:12px;color:#475569;line-height:1.6;margin:0 0 14px 0">${isEn
+          ? "Vendor-specific negotiation playbooks, phased execution roadmap, and internal decision packs (CFO memo, board one-pager, procurement brief)."
+          : "Protocoles de negociation par fournisseur, feuille de route d'execution phasee et dossiers de decision internes (memo CFO, one-pager board, brief procurement)."}</p>
+        <table style="border-collapse:collapse;margin-bottom:14px">
+          <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Deliverables" : "Livrables"}</td><td style="padding:3px 0;font-size:11px;color:#475569">${isEn ? "Corrective roadmap + negotiation scripts + decision packs" : "Feuille de route corrective + scripts de negociation + dossiers de decision"}</td></tr>
+          <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Timeline" : "Delai"}</td><td style="padding:3px 0;font-size:11px;color:#475569">${isEn ? "Delivered within 5 business days" : "Livre sous 5 jours ouvrables"}</td></tr>
+          <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Investment" : "Investissement"}</td><td style="padding:3px 0;font-size:11px;color:#0F172A;font-weight:700;font-family:monospace">2 500 EUR <span style="color:#64748B;font-weight:400;font-family:-apple-system,sans-serif">(${isEn ? "one-time" : "one-shot"})</span></td></tr>
+        </table>
+        <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_SETUP" style="display:inline-block;background:#D97706;color:#fff;padding:10px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.02em">${isEn ? "Request Stabilization Plan" : "Demander le Plan de Stabilisation"}</a>
+      </td>
+    </tr></table>
   </div>
 
-  <!-- UPSELL: Rail B Setup -->
-  <div style="background:#0e1221;border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:16px;margin-bottom:16px;text-align:center">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#f59e0b;text-transform:uppercase;margin:0 0 8px 0">${isEn ? "NEED A CORRECTIVE PLAN?" : "BESOIN D'UN PLAN CORRECTIF?"}</p>
-    <p style="font-size:12px;color:#8d9bb5;line-height:1.5;margin:0 0 12px 0">${isEn
-      ? "Get a structured 30/60/90-day stabilization protocol with vendor-specific negotiation playbooks. One-time: 2,500 EUR."
-      : "Obtenez un protocole de stabilisation 30/60/90 jours structure avec des protocoles de negociation par fournisseur. One-shot: 2 500 EUR."}</p>
-    <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_SETUP" style="display:inline-block;border:1px solid #f59e0b;color:#f59e0b;padding:8px 24px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none">${isEn ? "View Stabilization Plans" : "Voir les Plans de Stabilisation"}</a>
+  <!-- UPSELL: Rail B Monitor (Continuous) -->
+  <div style="background:linear-gradient(135deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid #E2E8F0;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+    <table style="width:100%;border-collapse:collapse"><tr>
+      <td style="vertical-align:top;padding-right:16px">
+        <p style="font-size:9px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "RAIL B — CONTINUOUS MONITORING" : "RAIL B — MONITORING CONTINU"}</p>
+        <p style="font-size:15px;color:#0F172A;font-weight:700;margin:0 0 8px 0">${isEn ? "Exposure drifts 15-25% annually without oversight." : "L'exposition derive de 15-25% par an sans surveillance."}</p>
+        <p style="font-size:12px;color:#475569;line-height:1.6;margin:0 0 14px 0">${isEn
+          ? `At ${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} EUR/month in compounding delay costs, continuous monitoring delivers 10x+ ROI.`
+          : `A ${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} EUR/mois de couts de retard composes, le monitoring continu offre un ROI de 10x+.`}</p>
+        <table style="border-collapse:collapse;margin-bottom:14px">
+          <tr><td style="padding:4px 0"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:8px;vertical-align:middle"></span><span style="font-size:11px;color:#475569">${isEn ? "Monthly drift analysis & vendor pressure alerts" : "Analyse de derive mensuelle et alertes pression fournisseurs"}</span></td></tr>
+          <tr><td style="padding:4px 0"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:8px;vertical-align:middle"></span><span style="font-size:11px;color:#475569">${isEn ? "Executive-ready report for CFO/board distribution" : "Rapport pret pour distribution CFO/board"}</span></td></tr>
+          <tr><td style="padding:4px 0"><span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-right:8px;vertical-align:middle"></span><span style="font-size:11px;color:#475569">${isEn ? "Renewal window targeting & negotiation timing" : "Ciblage des fenetres de renouvellement et timing de negociation"}</span></td></tr>
+        </table>
+        <table style="border-collapse:collapse;margin-bottom:14px">
+          <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Investment" : "Investissement"}</td><td style="padding:3px 0;font-size:11px;color:#0F172A;font-weight:700;font-family:monospace">2 000 EUR/mo <span style="color:#64748B;font-weight:400;font-family:-apple-system,sans-serif">(${isEn ? "cancel anytime" : "sans engagement"})</span></td></tr>
+        </table>
+        <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_MONITOR" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.02em">${isEn ? "Activate Continuous Monitoring" : "Activer le Monitoring Continu"}</a>
+        <span style="font-size:10px;color:#64748B;margin-left:12px;vertical-align:middle">${isEn ? "No call required." : "Aucun appel requis."}</span>
+      </td>
+    </tr></table>
   </div>
 
   <!-- Viral Loop CTAs -->
@@ -661,9 +688,16 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
   })}
 
   <!-- Footer -->
-  <div style="text-align:center;padding:24px 0;border-top:1px solid #1a1f2e;margin-top:16px">
-    <p style="font-size:11px;color:#55637d;margin:0 0 8px 0">${isEn ? "Questions about this report?" : "Questions sur ce rapport?"}</p>
-    <p style="font-size:11px;color:#3b82f6;margin:0">audits@ghost-tax.com</p>
+  <div style="text-align:center;padding:24px 0;border-top:1px solid #E2E8F0;margin-top:16px">
+    <p style="font-size:11px;color:#64748B;margin:0 0 8px 0">${isEn ? "Questions about this report?" : "Questions sur ce rapport?"}</p>
+    <p style="font-size:11px;color:#3b82f6;margin:0 0 20px 0">audits@ghost-tax.com</p>
+
+    <!-- Trust Footer -->
+    <div style="border-top:1px solid #E2E8F0;padding-top:16px;margin-top:8px">
+      <p style="font-size:10px;color:#94A3B8;letter-spacing:0.06em;margin:0 0 12px 0">SOC 2 in progress &middot; GDPR compliant &middot; Data deleted within 30 days</p>
+      <p style="font-size:11px;color:#64748B;font-weight:600;margin:0 0 4px 0">Ghost Tax SAS</p>
+      <p style="font-size:10px;color:#94A3B8;margin:0">Decision Intelligence for IT Spend</p>
+    </div>
   </div>
 
 </div>

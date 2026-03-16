@@ -38,15 +38,15 @@ function isAuthorized(request: NextRequest): boolean {
   const apiKey = process.env.OUTREACH_API_KEY;
   const cronSecret = process.env.CRON_SECRET;
 
+  // Fail safe: if neither secret is configured, deny all requests
+  if (!apiKey && !cronSecret) return false;
+
   const provided =
     request.headers.get("x-api-key") ||
     request.headers.get("authorization")?.replace("Bearer ", "");
 
   if (apiKey && provided === apiKey) return true;
   if (cronSecret && provided === cronSecret) return true;
-
-  // Dev mode fallback
-  if (!apiKey && !cronSecret && process.env.NODE_ENV === "development") return true;
 
   return false;
 }

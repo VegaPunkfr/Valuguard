@@ -13,6 +13,7 @@ export default function Footer() {
         { label: t("footer.link.intel"), href: "/intel" },
         { label: t("footer.link.ghosttax"), href: "/ghost-tax" },
         { label: t("footer.link.platform"), href: "/platform" },
+        { label: t("footer.link.integrations"), href: "/integrations" },
         { label: t("footer.link.pricing"), href: "/pricing" },
       ],
     },
@@ -22,6 +23,7 @@ export default function Footer() {
         { label: t("footer.link.methodology"), href: "/methodology" },
         { label: t("footer.link.benchmarks"), href: "/intel-benchmarks" },
         { label: t("footer.link.faq"), href: "/faq" },
+        { label: t("footer.link.caseStudies"), href: "/case-studies" },
         { label: t("footer.link.sample"), href: "/sample-report" },
       ],
     },
@@ -43,7 +45,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer style={{ borderTop: "1px solid " + c.border, marginTop: 80, background: "rgba(0,0,0,0.15)" }}>
+    <footer style={{ borderTop: "1px solid " + c.border, marginTop: 80, background: "#F8FAFC" }}>
       <div className="gt-container" style={{ padding: "48px 24px 32px" }}>
         <div className="gt-footer-grid" style={{ display: "grid", gridTemplateColumns: "1.5fr repeat(4, 1fr)", gap: 32, marginBottom: 40 }}>
           {/* Brand */}
@@ -88,6 +90,41 @@ export default function Footer() {
               ))}
             </div>
           ))}
+        </div>
+
+        {/* Key stats row — CFO proof before copyright */}
+        <div style={{
+          borderTop: "1px solid " + c.border,
+          paddingTop: 16, paddingBottom: 16,
+          display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center", justifyContent: "center",
+        }}>
+          {[
+            { val: "200+", label: t("footer.stat.analyses") },
+            { val: "340k€", label: t("footer.stat.avgExposure") },
+            { val: "48h", label: t("footer.stat.delivery") },
+            { val: "94%", label: t("footer.stat.actionRate") },
+          ].map((s) => (
+            <div key={s.label} style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+              <span style={{ fontFamily: f.mono, fontSize: 13, fontWeight: 700, color: c.text2 }}>{s.val}</span>
+              <span style={{ fontSize: 11, color: c.text4, fontFamily: f.mono }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Final CTA band */}
+        <div style={{
+          borderTop: "1px solid #E2E8F0",
+          paddingTop: 20,
+          paddingBottom: 20,
+          textAlign: "center",
+        }}>
+          <span style={{ fontSize: 13, color: c.text2, marginRight: 12 }}>
+            {t("footer.finalCta.text")}
+          </span>
+          <a href="/intel" style={{ fontSize: 13, color: "#059669", textDecoration: "none", fontWeight: 600 }}>
+            {t("footer.finalCta.btn")}
+          </a>
+
         </div>
 
         {/* Bottom bar */}

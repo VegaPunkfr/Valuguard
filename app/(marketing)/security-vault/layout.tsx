@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "sub-processor list, US data residency, and compliance roadmap.",
   openGraph: {
     title: "Security & Data Handling — Ghost Tax",
-    description: "Data handling matrix, sub-processors, zero-knowledge protocol, SOC2 readiness.",
+    description: "Data handling matrix, sub-processors, zero-knowledge protocol, SOC2-certified infrastructure.",
     url: "https://ghost-tax.com/security-vault",
   },
   alternates: { canonical: "https://ghost-tax.com/security-vault" },

@@ -982,7 +982,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const low = fmtAmount(d.estimatedExposure[0]);
           const high = fmtAmount(d.estimatedExposure[1]);
-          return `Our intelligence scan detected financial exposure in the range of <strong style="color:#ef4444;font-family:monospace">${low} - ${high}/year</strong> across ${d.company}'s SaaS, Cloud, and AI stack. This includes hidden vendor lock-in, unoptimized contracts, and redundant tooling.`;
+          return `Our intelligence scan detected financial exposure in the range of <strong style="color:#DC2626;font-family:monospace">${low} - ${high}/year</strong> across ${d.company}'s SaaS, Cloud, and AI stack. This includes hidden vendor lock-in, unoptimized contracts, and redundant tooling.`;
         }
         return `Our intelligence scan of ${d.company} detected signals consistent with hidden financial exposure. Companies of similar size and industry profile typically carry 8-15% in unoptimized IT spending.`;
       },
@@ -996,7 +996,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const low = fmtAmount(d.estimatedExposure[0]);
           const high = fmtAmount(d.estimatedExposure[1]);
-          return `Notre scan d'intelligence a detecte une exposition financiere de l'ordre de <strong style="color:#ef4444;font-family:monospace">${low} - ${high}/an</strong> dans le stack SaaS, Cloud et IA de ${d.company}. Cela inclut du verrouillage fournisseur, des contrats non optimises et des outils redondants.`;
+          return `Notre scan d'intelligence a detecte une exposition financiere de l'ordre de <strong style="color:#DC2626;font-family:monospace">${low} - ${high}/an</strong> dans le stack SaaS, Cloud et IA de ${d.company}. Cela inclut du verrouillage fournisseur, des contrats non optimises et des outils redondants.`;
         }
         return `Notre scan de ${d.company} a detecte des signaux coherents avec une exposition financiere cachee. Les entreprises de taille et profil similaires ont typiquement 8-15% de depenses IT non optimisees.`;
       },
@@ -1010,7 +1010,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const low = fmtAmount(d.estimatedExposure[0]);
           const high = fmtAmount(d.estimatedExposure[1]);
-          return `Unser Intelligence-Scan hat eine finanzielle Exposition im Bereich von <strong style="color:#ef4444;font-family:monospace">${low} - ${high}/Jahr</strong> im SaaS-, Cloud- und KI-Stack von ${d.company} erkannt. Dies umfasst verstecktes Vendor-Lock-in, nicht optimierte Vertrage und redundante Tools.`;
+          return `Unser Intelligence-Scan hat eine finanzielle Exposition im Bereich von <strong style="color:#DC2626;font-family:monospace">${low} - ${high}/Jahr</strong> im SaaS-, Cloud- und KI-Stack von ${d.company} erkannt. Dies umfasst verstecktes Vendor-Lock-in, nicht optimierte Vertrage und redundante Tools.`;
         }
         return `Unser Scan von ${d.company} hat Signale erkannt, die auf versteckte finanzielle Exposition hinweisen. Unternehmen ahnlicher Grosse und Branche tragen typischerweise 8-15% an nicht optimierten IT-Ausgaben.`;
       },
@@ -1033,7 +1033,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const daily = fmtAmount(d.estimatedExposure[0] / 365);
           const annual = fmtAmount(d.estimatedExposure[0]);
-          return `At the low end of our estimate, ${d.company} is losing <strong style="color:#ef4444;font-family:monospace">${daily}</strong> per day in hidden IT exposure. That's ${annual}/year minimum. Every vendor renewal that passes without data is a missed correction window.`;
+          return `At the low end of our estimate, ${d.company} is losing <strong style="color:#DC2626;font-family:monospace">${daily}</strong> per day in hidden IT exposure. That's ${annual}/year minimum. Every vendor renewal that passes without data is a missed correction window.`;
         }
         return `Based on companies similar to ${d.company}, the typical hidden IT exposure runs 8-15% of total SaaS and Cloud spending. This compounds daily — every vendor renewal that passes without data is a missed correction window.`;
       },
@@ -1053,7 +1053,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const daily = fmtAmount(d.estimatedExposure[0] / 365);
           const annual = fmtAmount(d.estimatedExposure[0]);
-          return `En estimation basse, ${d.company} perd <strong style="color:#ef4444;font-family:monospace">${daily}</strong> par jour en exposition IT cachee. Soit ${annual}/an minimum. Chaque renouvellement fournisseur sans donnees est une fenetre de correction manquee.`;
+          return `En estimation basse, ${d.company} perd <strong style="color:#DC2626;font-family:monospace">${daily}</strong> par jour en exposition IT cachee. Soit ${annual}/an minimum. Chaque renouvellement fournisseur sans donnees est une fenetre de correction manquee.`;
         }
         return `Pour des entreprises similaires a ${d.company}, l'exposition IT cachee typique est de 8-15% des depenses SaaS et Cloud. Cela se compose chaque jour.`;
       },
@@ -1073,7 +1073,7 @@ const TEMPLATE_COPY = {
         if (d.estimatedExposure) {
           const daily = fmtAmount(d.estimatedExposure[0] / 365);
           const annual = fmtAmount(d.estimatedExposure[0]);
-          return `In der unteren Schatzung verliert ${d.company} <strong style="color:#ef4444;font-family:monospace">${daily}</strong> pro Tag an versteckter IT-Exposition. Das sind mindestens ${annual}/Jahr. Jede Verlangerung ohne Daten ist ein verpasstes Korrekturfenster.`;
+          return `In der unteren Schatzung verliert ${d.company} <strong style="color:#DC2626;font-family:monospace">${daily}</strong> pro Tag an versteckter IT-Exposition. Das sind mindestens ${annual}/Jahr. Jede Verlangerung ohne Daten ist ein verpasstes Korrekturfenster.`;
         }
         return `Fur Unternehmen ahnlich wie ${d.company} liegt die typische versteckte IT-Exposition bei 8-15% der SaaS- und Cloud-Ausgaben.`;
       },
@@ -1167,7 +1167,7 @@ const TEMPLATE_COPY = {
         return `I don't usually do this, but ${d.company}'s scan caught my attention. The exposure pattern — ${exposure} — is one I've seen lead to serious budget surprises at similar companies. I've seen CFOs wish they had this data 90 days earlier. The full Decision Pack breaks down exactly where the exposure is, vendor by vendor, with ready-to-use negotiation scripts.`;
       },
       cta: "Get the Full Picture",
-      signoff: "Edith<br><span style='color:#55637d;font-size:12px'>Founder, Ghost Tax</span>",
+      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Founder, Ghost Tax</span>",
     },
     fr: {
       subject: (c: string) => `J'ai examine le scan de ${c} personnellement`,
@@ -1181,7 +1181,7 @@ const TEMPLATE_COPY = {
         return `Je ne fais pas ca d'habitude, mais le scan de ${d.company} a attire mon attention. Le pattern d'exposition — ${exposure} — est un que j'ai vu mener a de serieuses surprises budgetaires chez des entreprises similaires. J'ai vu des CFO regretter de ne pas avoir eu ces donnees 90 jours plus tot. Le Decision Pack complet detaille exactement ou se trouve l'exposition, fournisseur par fournisseur, avec des scripts de negociation prets a l'emploi.`;
       },
       cta: "Obtenir la Vue Complete",
-      signoff: "Edith<br><span style='color:#55637d;font-size:12px'>Fondatrice, Ghost Tax</span>",
+      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Fondatrice, Ghost Tax</span>",
     },
     de: {
       subject: (c: string) => `Ich habe den Scan von ${c} personlich gepruft`,
@@ -1195,7 +1195,7 @@ const TEMPLATE_COPY = {
         return `Normalerweise mache ich das nicht, aber der Scan von ${d.company} hat meine Aufmerksamkeit erregt. Das Expositionsmuster — ${exposure} — habe ich bei ahnlichen Unternehmen zu ernsthaften Budgetuberraschungen fuhren sehen. Ich habe CFOs gesehen, die sich wunschten, diese Daten 90 Tage fruher gehabt zu haben. Das vollstandige Decision Pack schlusselt genau auf, wo die Exposition liegt, Anbieter fur Anbieter.`;
       },
       cta: "Das Volle Bild Erhalten",
-      signoff: "Edith<br><span style='color:#55637d;font-size:12px'>Grunderin, Ghost Tax</span>",
+      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Grunderin, Ghost Tax</span>",
     },
   },
 
@@ -1357,26 +1357,26 @@ function buildEmailHtml(params: {
   // Accent color based on conviction tier
   const accentColor =
     data.tier === "CRITICAL" || data.tier === "URGENT"
-      ? "#ef4444"
+      ? "#DC2626"
       : data.tier === "READY"
-        ? "#f59e0b"
+        ? "#D97706"
         : "#3b82f6";
 
   const ctaColor =
     data.tier === "CRITICAL" || data.tier === "URGENT"
-      ? "#ef4444"
+      ? "#DC2626"
       : data.tier === "READY"
-        ? "#f59e0b"
+        ? "#D97706"
         : "#3b82f6";
 
   // Conviction indicator (subtle social proof)
   const convictionBar =
     data.conviction >= 31
       ? `
-    <div style="background:#0e1221;border:1px solid rgba(36,48,78,0.28);border-radius:8px;padding:12px 16px;margin-bottom:24px">
+    <div style="background:#F1F5F9;border:1px solid #E2E8F0;border-radius:8px;padding:12px 16px;margin-bottom:24px">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td style="font-size:10px;color:#55637d;letter-spacing:0.1em;text-transform:uppercase">
+          <td style="font-size:10px;color:#64748B;letter-spacing:0.1em;text-transform:uppercase">
             ${data.locale === "fr" ? "INTERET DETECTE" : data.locale === "de" ? "INTERESSE ERKANNT" : "INTEREST DETECTED"}
           </td>
           <td align="right">
@@ -1427,11 +1427,11 @@ function buildEmailHtml(params: {
         : "(one-time payment)";
   const priceBlock = cta
     ? `
-    <div style="background:#0e1221;border:1px solid rgba(36,48,78,0.28);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
-      <p style="font-size:12px;color:#8d9bb5;margin:0">
+    <div style="background:#F1F5F9;border:1px solid #E2E8F0;border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
+      <p style="font-size:12px;color:#475569;margin:0">
         ${priceLabel} &mdash;
-        <span style="color:#e4e9f4;font-weight:700;font-family:monospace">${formattedPrice}</span>
-        <span style="color:#55637d"> ${oneTime}</span>
+        <span style="color:#0F172A;font-weight:700;font-family:monospace">${formattedPrice}</span>
+        <span style="color:#64748B"> ${oneTime}</span>
       </p>
     </div>`
     : "";
@@ -1439,8 +1439,8 @@ function buildEmailHtml(params: {
   // Signoff block (for personal_ceo template)
   const signoffBlock = signoff
     ? `
-    <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(36,48,78,0.20)">
-      <p style="font-size:14px;color:#e4e9f4;margin:0">${signoff}</p>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #E2E8F0">
+      <p style="font-size:14px;color:#0F172A;margin:0">${signoff}</p>
     </div>`
     : "";
 
@@ -1454,7 +1454,7 @@ function buildEmailHtml(params: {
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 16px">
 
   <!-- Wordmark -->
@@ -1472,19 +1472,19 @@ function buildEmailHtml(params: {
   ${convictionBar}
 
   <!-- Headline -->
-  <h1 style="font-size:22px;color:#e4e9f4;margin:0 0 16px 0;line-height:1.3;font-weight:800;letter-spacing:-0.02em">
+  <h1 style="font-size:22px;color:#0F172A;margin:0 0 16px 0;line-height:1.3;font-weight:800;letter-spacing:-0.02em">
     ${headline}
   </h1>
 
   <!-- Body -->
-  <p style="font-size:14px;color:#8d9bb5;line-height:1.7;margin:0 0 16px 0">
+  <p style="font-size:14px;color:#475569;line-height:1.7;margin:0 0 16px 0">
     ${body}
   </p>
 
   ${committeeBox}
 
   <!-- Note -->
-  <p style="font-size:12px;color:#55637d;line-height:1.6;margin:0 0 24px 0">
+  <p style="font-size:12px;color:#64748B;line-height:1.6;margin:0 0 24px 0">
     ${note}
   </p>
 
@@ -1493,10 +1493,10 @@ function buildEmailHtml(params: {
   ${signoffBlock}
 
   <!-- Footer -->
-  <div style="text-align:center;padding-top:24px;border-top:1px solid rgba(36,48,78,0.20)">
-    <p style="font-size:10px;color:#3a4560;margin:0 0 4px 0">Ghost Tax Decision Intelligence</p>
-    <p style="font-size:10px;color:#3a4560;margin:0">
-      <a href="${unsubUrl}" style="color:#3a4560;text-decoration:underline">
+  <div style="text-align:center;padding-top:24px;border-top:1px solid #E2E8F0">
+    <p style="font-size:10px;color:#94A3B8;margin:0 0 4px 0">Ghost Tax Decision Intelligence</p>
+    <p style="font-size:10px;color:#94A3B8;margin:0">
+      <a href="${unsubUrl}" style="color:#94A3B8;text-decoration:underline">
         ${unsubLabel}
       </a>
     </p>

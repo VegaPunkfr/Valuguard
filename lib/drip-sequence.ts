@@ -421,7 +421,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const low = fmtAmount(d.exposureLow, d.symbol);
         const high = fmtAmount(d.exposureHigh, d.symbol);
-        return `Our scan of ${d.company} detected financial exposure in the range of <strong style="color:#ef4444;font-family:monospace">${low} – ${high}/year</strong>. This includes hidden vendor lock-in costs, redundant tooling overlap, and unoptimized licensing across your SaaS, Cloud, and AI stack.`;
+        return `Our scan of ${d.company} detected financial exposure in the range of <strong style="color:#DC2626;font-family:monospace">${low} – ${high}/year</strong>. This includes hidden vendor lock-in costs, redundant tooling overlap, and unoptimized licensing across your SaaS, Cloud, and AI stack.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `This is a preview based on publicly available signals. The full Decision Pack includes vendor-by-vendor analysis, negotiation playbooks, and a CFO-ready corrective protocol.`,
@@ -435,7 +435,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const low = fmtAmount(d.exposureLow, d.symbol);
         const high = fmtAmount(d.exposureHigh, d.symbol);
-        return `Notre scan de ${d.company} a détecté une exposition financière de l'ordre de <strong style="color:#ef4444;font-family:monospace">${low} – ${high}/an</strong>. Cela inclut des coûts de verrouillage fournisseur cachés, des chevauchements d'outils redondants et des licences non optimisées dans votre stack SaaS, Cloud et IA.`;
+        return `Notre scan de ${d.company} a détecté une exposition financière de l'ordre de <strong style="color:#DC2626;font-family:monospace">${low} – ${high}/an</strong>. Cela inclut des coûts de verrouillage fournisseur cachés, des chevauchements d'outils redondants et des licences non optimisées dans votre stack SaaS, Cloud et IA.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Ceci est un aperçu basé sur des signaux publiquement disponibles. Le Decision Pack complet inclut une analyse fournisseur par fournisseur, des protocoles de négociation et un plan correctif prêt pour le CFO.`,
@@ -449,7 +449,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const low = fmtAmount(d.exposureLow, d.symbol);
         const high = fmtAmount(d.exposureHigh, d.symbol);
-        return `Unser Scan von ${d.company} hat eine finanzielle Exposition im Bereich von <strong style="color:#ef4444;font-family:monospace">${low} – ${high}/Jahr</strong> erkannt. Dies umfasst versteckte Vendor-Lock-in-Kosten, redundante Tool-Überschneidungen und nicht optimierte Lizenzierung in Ihrem SaaS-, Cloud- und KI-Stack.`;
+        return `Unser Scan von ${d.company} hat eine finanzielle Exposition im Bereich von <strong style="color:#DC2626;font-family:monospace">${low} – ${high}/Jahr</strong> erkannt. Dies umfasst versteckte Vendor-Lock-in-Kosten, redundante Tool-Überschneidungen und nicht optimierte Lizenzierung in Ihrem SaaS-, Cloud- und KI-Stack.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Dies ist eine Vorschau basierend auf öffentlich verfügbaren Signalen. Das vollständige Decision Pack enthält eine Anbieter-für-Anbieter-Analyse, Verhandlungsleitfäden und ein CFO-fertiges Korrekturprotokoll.`,
@@ -467,7 +467,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
-        return `Since your scan ${d.daysSinceScan} days ago, an estimated <strong style="color:#ef4444;font-family:monospace">${lost}</strong> has leaked from ${d.company}. That's ${daily} per day in hidden exposure that compounds silently — vendor lock-in fees, unused licenses, unoptimized contracts.`;
+        return `Since your scan ${d.daysSinceScan} days ago, an estimated <strong style="color:#DC2626;font-family:monospace">${lost}</strong> has leaked from ${d.company}. That's ${daily} per day in hidden exposure that compounds silently — vendor lock-in fees, unused licenses, unoptimized contracts.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `The exposure doesn't pause while you evaluate. Every renewal that passes without data is a missed correction window.`,
@@ -481,7 +481,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
-        return `Depuis votre scan il y a ${d.daysSinceScan} jours, environ <strong style="color:#ef4444;font-family:monospace">${lost}</strong> a fui de ${d.company}. C'est ${daily} par jour en exposition cachée qui se compose silencieusement — frais de verrouillage fournisseur, licences inutilisées, contrats non optimisés.`;
+        return `Depuis votre scan il y a ${d.daysSinceScan} jours, environ <strong style="color:#DC2626;font-family:monospace">${lost}</strong> a fui de ${d.company}. C'est ${daily} par jour en exposition cachée qui se compose silencieusement — frais de verrouillage fournisseur, licences inutilisées, contrats non optimisés.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `L'exposition ne fait pas de pause pendant que vous évaluez. Chaque renouvellement qui passe sans données est une fenêtre de correction manquée.`,
@@ -495,7 +495,7 @@ const COPY = {
       body: (d: DripEmailData) => {
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
-        return `Seit Ihrem Scan vor ${d.daysSinceScan} Tagen sind geschätzte <strong style="color:#ef4444;font-family:monospace">${lost}</strong> bei ${d.company} verloren gegangen. Das sind ${daily} pro Tag an versteckter Exposition, die sich lautlos summiert — Vendor-Lock-in-Gebühren, ungenutzte Lizenzen, nicht optimierte Verträge.`;
+        return `Seit Ihrem Scan vor ${d.daysSinceScan} Tagen sind geschätzte <strong style="color:#DC2626;font-family:monospace">${lost}</strong> bei ${d.company} verloren gegangen. Das sind ${daily} pro Tag an versteckter Exposition, die sich lautlos summiert — Vendor-Lock-in-Gebühren, ungenutzte Lizenzen, nicht optimierte Verträge.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Die Exposition pausiert nicht, während Sie evaluieren. Jede Verlängerung ohne Daten ist ein verpasstes Korrekturfenster.`,
@@ -557,7 +557,7 @@ const COPY = {
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const projected30 = fmtAmount(d.dailyLeak * 30, d.symbol);
-        return `It has been ${d.daysSinceScan} days since we scanned ${d.company}. At ${daily}/day, the estimated cost of delay since your scan is now <strong style="color:#ef4444;font-family:monospace">${lost}</strong>. If you wait another 30 days, that becomes ${projected30}.`;
+        return `It has been ${d.daysSinceScan} days since we scanned ${d.company}. At ${daily}/day, the estimated cost of delay since your scan is now <strong style="color:#DC2626;font-family:monospace">${lost}</strong>. If you wait another 30 days, that becomes ${projected30}.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Market conditions shift. Vendor pricing power increases at renewal. The intelligence from your scan is still valid, but the correction window is narrowing. Every day without action is a day the exposure compounds.`,
@@ -572,7 +572,7 @@ const COPY = {
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const projected30 = fmtAmount(d.dailyLeak * 30, d.symbol);
-        return `Cela fait ${d.daysSinceScan} jours depuis le scan de ${d.company}. À ${daily}/jour, le coût estimé du retard depuis votre scan est maintenant de <strong style="color:#ef4444;font-family:monospace">${lost}</strong>. Si vous attendez encore 30 jours, cela devient ${projected30}.`;
+        return `Cela fait ${d.daysSinceScan} jours depuis le scan de ${d.company}. À ${daily}/jour, le coût estimé du retard depuis votre scan est maintenant de <strong style="color:#DC2626;font-family:monospace">${lost}</strong>. Si vous attendez encore 30 jours, cela devient ${projected30}.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Les conditions de marché évoluent. Le pouvoir de tarification des fournisseurs augmente au renouvellement. L'intelligence de votre scan est toujours valide, mais la fenêtre de correction se rétrécit. Chaque jour sans action est un jour où l'exposition se compose.`,
@@ -587,7 +587,7 @@ const COPY = {
         const lost = fmtAmount(d.dailyLeak * d.daysSinceScan, d.symbol);
         const daily = fmtAmount(d.dailyLeak, d.symbol);
         const projected30 = fmtAmount(d.dailyLeak * 30, d.symbol);
-        return `Es sind ${d.daysSinceScan} Tage seit dem Scan von ${d.company} vergangen. Bei ${daily}/Tag betragen die geschätzten Verzögerungskosten seit Ihrem Scan jetzt <strong style="color:#ef4444;font-family:monospace">${lost}</strong>. Wenn Sie weitere 30 Tage warten, werden es ${projected30}.`;
+        return `Es sind ${d.daysSinceScan} Tage seit dem Scan von ${d.company} vergangen. Bei ${daily}/Tag betragen die geschätzten Verzögerungskosten seit Ihrem Scan jetzt <strong style="color:#DC2626;font-family:monospace">${lost}</strong>. Wenn Sie weitere 30 Tage warten, werden es ${projected30}.`;
       },
       bodyExtra: (_d: DripEmailData) =>
         `Marktbedingungen ändern sich. Die Preismacht der Anbieter steigt bei Verlängerung. Die Intelligence aus Ihrem Scan ist noch gültig, aber das Korrekturfenster verengt sich. Jeder Tag ohne Aktion ist ein Tag, an dem sich die Exposition summiert.`,
@@ -674,9 +674,9 @@ export function getDripEmailHtml(
 
   // Colors by touch
   const accentColor =
-    touch <= 2 ? "#3b82f6" : touch === 3 ? "#3b82f6" : touch === 4 ? "#f59e0b" : "#ef4444";
+    touch <= 2 ? "#3b82f6" : touch === 3 ? "#3b82f6" : touch === 4 ? "#D97706" : "#DC2626";
   const ctaColor =
-    touch <= 3 ? "#3b82f6" : touch === 4 ? "#f59e0b" : "#ef4444";
+    touch <= 3 ? "#3b82f6" : touch === 4 ? "#D97706" : "#DC2626";
 
   const checkoutUrl = buildCheckoutUrl({
     domain: data.domain,
@@ -699,10 +699,10 @@ export function getDripEmailHtml(
       : (locale === "fr" ? "EXPOSITION CUMULÉE DEPUIS LE SCAN" : locale === "de" ? "KUMULIERTE EXPOSITION SEIT DEM SCAN" : "CUMULATIVE EXPOSURE SINCE SCAN");
 
     costBox = `
-    <div style="background:#0e1221;border:2px solid ${touch === 2 ? "rgba(59,130,246,0.25)" : "rgba(245,158,11,0.25)"};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+    <div style="background:#F8FAFC;border:2px solid ${touch === 2 ? "rgba(59,130,246,0.20)" : "rgba(217,119,6,0.20)"};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
       <p style="font-size:10px;color:${ctaColor};letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">${boxLabel}</p>
       <p style="font-size:36px;font-family:monospace;font-weight:900;color:${ctaColor};margin:0">${totalLost}</p>
-      <p style="font-size:12px;color:#55637d;margin:8px 0 0 0">${daily}/${perDayLabel} × ${data.daysSinceScan} ${dayLabel}</p>
+      <p style="font-size:12px;color:#64748B;margin:8px 0 0 0">${daily}/${perDayLabel} × ${data.daysSinceScan} ${dayLabel}</p>
     </div>`;
   }
 
@@ -717,9 +717,9 @@ export function getDripEmailHtml(
     const sevenDays = locale === "fr" ? "7 JOURS" : locale === "de" ? "7 TAGEN" : "7 DAYS";
 
     expiryBox = `
-    <div style="background:#0e1221;border:2px solid rgba(239,68,68,0.30);border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
-      <p style="font-size:10px;color:#ef4444;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">${expiryLabel}</p>
-      <p style="font-size:28px;font-family:monospace;font-weight:900;color:#ef4444;margin:0">${sevenDays}</p>
+    <div style="background:#F8FAFC;border:2px solid rgba(220,38,38,0.25);border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+      <p style="font-size:10px;color:#DC2626;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">${expiryLabel}</p>
+      <p style="font-size:28px;font-family:monospace;font-weight:900;color:#DC2626;margin:0">${sevenDays}</p>
     </div>`;
   }
 
@@ -736,25 +736,25 @@ export function getDripEmailHtml(
     const stat3 = locale === "fr" ? "agissent dans les 14 premiers jours" : locale === "de" ? "handeln innerhalb der ersten 14 Tage" : "act within the first 14 days";
 
     peerBox = `
-    <div style="background:#0e1221;border:1px solid rgba(59,130,246,0.20);border-radius:12px;padding:24px;margin-bottom:24px">
+    <div style="background:#F8FAFC;border:1px solid rgba(59,130,246,0.20);border-radius:12px;padding:24px;margin-bottom:24px">
       <p style="font-size:10px;color:#3b82f6;letter-spacing:0.12em;margin:0 0 16px 0;text-transform:uppercase">${statsLabel}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td style="padding:8px 0;border-bottom:1px solid rgba(36,48,78,0.20)">
-            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#e4e9f4">100%</span>
-            <span style="font-size:12px;color:#8d9bb5;padding-left:12px">${stat1}</span>
+          <td style="padding:8px 0;border-bottom:1px solid #E2E8F0">
+            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#0F172A">100%</span>
+            <span style="font-size:12px;color:#475569;padding-left:12px">${stat1}</span>
           </td>
         </tr>
         <tr>
-          <td style="padding:8px 0;border-bottom:1px solid rgba(36,48,78,0.20)">
-            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#34d399">3-5x</span>
-            <span style="font-size:12px;color:#8d9bb5;padding-left:12px">${stat2}</span>
+          <td style="padding:8px 0;border-bottom:1px solid #E2E8F0">
+            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#059669">3-5x</span>
+            <span style="font-size:12px;color:#475569;padding-left:12px">${stat2}</span>
           </td>
         </tr>
         <tr>
           <td style="padding:8px 0">
-            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#f59e0b">67%</span>
-            <span style="font-size:12px;color:#8d9bb5;padding-left:12px">${stat3}</span>
+            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#D97706">67%</span>
+            <span style="font-size:12px;color:#475569;padding-left:12px">${stat3}</span>
           </td>
         </tr>
       </table>
@@ -787,7 +787,7 @@ export function getDripEmailHtml(
   const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 16px">
 
   <!-- Wordmark -->
@@ -803,15 +803,15 @@ export function getDripEmailHtml(
   </table>
 
   <!-- Headline -->
-  <h1 style="font-size:22px;color:#e4e9f4;margin:0 0 16px 0;line-height:1.3;font-weight:800;letter-spacing:-0.02em">
+  <h1 style="font-size:22px;color:#0F172A;margin:0 0 16px 0;line-height:1.3;font-weight:800;letter-spacing:-0.02em">
     ${headline}
   </h1>
 
   <!-- Body -->
-  <p style="font-size:14px;color:#8d9bb5;line-height:1.7;margin:0 0 16px 0">
+  <p style="font-size:14px;color:#475569;line-height:1.7;margin:0 0 16px 0">
     ${bodyText}
   </p>
-  <p style="font-size:13px;color:#55637d;line-height:1.7;margin:0 0 24px 0">
+  <p style="font-size:13px;color:#64748B;line-height:1.7;margin:0 0 24px 0">
     ${bodyExtra}
   </p>
 
@@ -824,25 +824,25 @@ export function getDripEmailHtml(
     <a href="${checkoutUrl}" style="display:inline-block;background:${ctaColor};color:#ffffff;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:-0.01em">
       ${copy.cta}
     </a>
-    <p style="font-size:11px;color:#55637d;margin:10px 0 0 0">${copy.note}</p>
+    <p style="font-size:11px;color:#64748B;margin:10px 0 0 0">${copy.note}</p>
   </div>
 
   <!-- Price Reminder -->
-  <div style="background:#0e1221;border:1px solid rgba(36,48,78,0.28);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
-    <p style="font-size:12px;color:#8d9bb5;margin:0">
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
+    <p style="font-size:12px;color:#475569;margin:0">
       ${priceLabel} &mdash;
-      <span style="color:#e4e9f4;font-weight:700;font-family:monospace">${data.formattedPrice}</span>
-      <span style="color:#55637d"> ${oneTime}</span>
+      <span style="color:#0F172A;font-weight:700;font-family:monospace">${data.formattedPrice}</span>
+      <span style="color:#64748B"> ${oneTime}</span>
     </p>
   </div>
 
   ${viralBlock}
 
   <!-- Footer -->
-  <div style="text-align:center;padding-top:24px;border-top:1px solid rgba(36,48,78,0.20)">
-    <p style="font-size:10px;color:#3a4560;margin:0 0 4px 0">Ghost Tax Decision Intelligence</p>
-    <p style="font-size:10px;color:#3a4560;margin:0">
-      <a href="${unsubUrl}" style="color:#3a4560;text-decoration:underline">
+  <div style="text-align:center;padding-top:24px;border-top:1px solid #E2E8F0">
+    <p style="font-size:10px;color:#94A3B8;margin:0 0 4px 0">Ghost Tax Decision Intelligence</p>
+    <p style="font-size:10px;color:#94A3B8;margin:0">
+      <a href="${unsubUrl}" style="color:#94A3B8;text-decoration:underline">
         ${locale === "fr" ? "Se désabonner" : locale === "de" ? "Abmelden" : "Unsubscribe"}
       </a>
     </p>
@@ -855,4 +855,225 @@ export function getDripEmailHtml(
 </html>`;
 
   return { subject, html };
+}
+
+// ── scheduleDripSequence ──────────────────────────────
+//
+// Triggered fire-and-forget after a free scan completes (/api/intel).
+// Upserts the lead into outreach_leads (or drip_queue fallback) and
+// immediately sends Touch 1 via Resend.
+//
+// Guards:
+//   - Silently skipped if email is missing
+//   - Silently skipped if lead already converted (purchased)
+//   - Never throws — caller must not fail the scan on drip errors
+
+export async function scheduleDripSequence(input: {
+  email: string;
+  domain: string;
+  locale?: string;
+  exposureRange?: [number, number];
+  analysisId?: string;
+  companyName?: string;
+  headcount?: number;
+  industry?: string;
+}): Promise<void> {
+  const { createAdminSupabase } = await import("@/lib/supabase");
+  const supabase = createAdminSupabase();
+  if (!supabase) return;
+
+  const locale = (input.locale || "en") as PricingLocale;
+  const now = new Date().toISOString();
+
+  // ── Guard: skip if already converted (paid) ──
+  try {
+    const { data: existing } = await (supabase as any)
+      .from("audit_requests")
+      .select("id")
+      .eq("email", input.email)
+      .in("status", ["paid", "processing", "report_persisted", "delivered", "followup_scheduled"])
+      .limit(1);
+    if (existing && existing.length > 0) return;
+  } catch {
+    // non-fatal — continue
+  }
+
+  // ── Step 1: Upsert into outreach_leads ──
+  // drip_step=0 means Touch 1 has not been sent yet.
+  // next_send_at = now (Touch 1 immediate).
+  const price = getRailAPrice(input.headcount, locale);
+  const exposureLow = input.exposureRange?.[0] ?? null;
+  const exposureHigh = input.exposureRange?.[1] ?? null;
+
+  try {
+    await (supabase as any)
+      .from("outreach_leads")
+      .upsert(
+        {
+          email: input.email,
+          domain: input.domain,
+          company: input.companyName || null,
+          locale,
+          headcount: input.headcount || null,
+          industry: input.industry || null,
+          status: "active",
+          drip_step: 0,
+          next_send_at: now,
+          unsubscribed: false,
+          converted: false,
+          meta: {
+            analysis_id: input.analysisId || null,
+            exposure_low: exposureLow,
+            exposure_high: exposureHigh,
+            scan_date: now,
+            source: "free_scan",
+            rail_a_price: price,
+          },
+          created_at: now,
+          updated_at: now,
+        },
+        { onConflict: "email", ignoreDuplicates: false }
+      );
+  } catch {
+    // Table may not have all columns yet — non-fatal
+  }
+
+  // ── Step 2: Upsert into drip_queue (if table exists) ──
+  try {
+    const touch2At = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+    const touch3At = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const touch4At = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+    const touch5At = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString();
+
+    await (supabase as any)
+      .from("drip_queue")
+      .upsert(
+        {
+          email: input.email,
+          domain: input.domain,
+          locale,
+          exposure_low: exposureLow,
+          exposure_high: exposureHigh,
+          analysis_id: input.analysisId || null,
+          touch1_at: now,
+          touch2_at: touch2At,
+          touch3_at: touch3At,
+          touch4_at: touch4At,
+          touch5_at: touch5At,
+          touch1_sent: false,
+          touch2_sent: false,
+          touch3_sent: false,
+          touch4_sent: false,
+          touch5_sent: false,
+          unsubscribed: false,
+          created_at: now,
+        },
+        { onConflict: "email,domain", ignoreDuplicates: false }
+      );
+  } catch {
+    // Table may not exist yet — non-fatal
+  }
+
+  // ── Step 3: Send Touch 1 immediately ──
+  try {
+    await sendDripTouch1({
+      email: input.email,
+      domain: input.domain,
+      locale,
+      companyName: input.companyName || input.domain,
+      exposureLow: exposureLow ?? 0,
+      exposureHigh: exposureHigh ?? 0,
+      headcount: input.headcount,
+    });
+
+    // Mark touch1_sent in drip_queue
+    try {
+      await (supabase as any)
+        .from("drip_queue")
+        .update({ touch1_sent: true })
+        .eq("email", input.email)
+        .eq("domain", input.domain);
+    } catch {
+      // non-fatal
+    }
+
+    // Advance drip_step to 1 in outreach_leads (Touch 1 sent)
+    const { nextSendAt } = calculateDripSchedule(now, 1);
+    try {
+      await (supabase as any)
+        .from("outreach_leads")
+        .update({
+          drip_step: 1,
+          next_send_at: nextSendAt,
+          last_sent_at: now,
+          updated_at: now,
+        })
+        .eq("email", input.email);
+    } catch {
+      // non-fatal
+    }
+  } catch (err) {
+    console.warn("[Drip] scheduleDripSequence: Touch 1 send failed (non-fatal):", err instanceof Error ? err.message : err);
+  }
+}
+
+// ── sendDripTouch1: immediate Touch 1 via Resend ─────
+//
+// Used by scheduleDripSequence. Sends "Your free scan results are ready"
+// with exposure range, entropy teaser, and CTA to unlock full Decision Pack.
+
+async function sendDripTouch1(params: {
+  email: string;
+  domain: string;
+  locale: PricingLocale;
+  companyName: string;
+  exposureLow: number;
+  exposureHigh: number;
+  headcount?: number;
+}): Promise<void> {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) {
+    console.warn("[Drip] RESEND_API_KEY not set — Touch 1 skipped");
+    return;
+  }
+
+  const { locale, email, domain, companyName, exposureLow, exposureHigh, headcount } = params;
+  const price = getRailAPrice(headcount, locale);
+  const formattedPrice = formatPrice(price, locale);
+  const symbol = getCurrencySymbol(locale);
+  const dailyLeak = exposureHigh > 0 ? Math.round(exposureHigh / 365) : 274;
+
+  const { subject, html } = getDripEmailHtml(1, {
+    locale,
+    company: companyName,
+    email,
+    domain,
+    formattedPrice,
+    symbol,
+    dailyLeak,
+    daysSinceScan: 0,
+    headcount,
+    exposureLow: exposureLow > 0 ? exposureLow : dailyLeak * 365 * 0.7,
+    exposureHigh: exposureHigh > 0 ? exposureHigh : dailyLeak * 365 * 1.4,
+    meta: null,
+  });
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Ghost Tax <reports@ghost-tax.com>",
+      to: [email],
+      subject,
+      html,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "unknown");
+    throw new Error(`Resend ${res.status}: ${errText}`);
+  }
 }

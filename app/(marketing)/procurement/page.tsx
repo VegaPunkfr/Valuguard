@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { trackEvent, EVENTS } from "@/lib/events";
 import { c, f, inset } from "@/lib/tokens";
-import Footer from "@/components/ui/footer";
 
 /* ── GHOST TAX — PROCUREMENT & DECISION SCOPE ────────────────────────
    Buyer-enablement surface for procurement, finance, and security reviewers.
@@ -75,7 +74,7 @@ function StageRow({
         gap: 10,
         padding: "12px 14px",
         borderRadius: 8,
-        background: "rgba(0,0,0,0.12)",
+        background: "#F8FAFC",
         border: `1px solid ${c.border}`,
         alignItems: "start",
         fontSize: 11,
@@ -103,6 +102,29 @@ export default function ProcurementPage() {
     trackEvent(EVENTS.PROCUREMENT_VIEWED);
   }, []);
 
+  const buyers = [
+    { role: t("procurement.buyers.cfo.role"), reason: t("procurement.buyers.cfo.reason") },
+    { role: t("procurement.buyers.cio.role"), reason: t("procurement.buyers.cio.reason") },
+    { role: t("procurement.buyers.procurement.role"), reason: t("procurement.buyers.procurement.reason") },
+    { role: t("procurement.buyers.ciso.role"), reason: t("procurement.buyers.ciso.reason") },
+  ];
+
+  const productFacts = [
+    { label: t("procurement.product.category.label"), value: t("procurement.product.category.value") },
+    { label: t("procurement.product.deployment.label"), value: t("procurement.product.deployment.value") },
+    { label: t("procurement.product.data.label"), value: t("procurement.product.data.value") },
+  ];
+
+  const securityFacts = [
+    { label: t("procurement.security.internalAccess.label"), value: t("procurement.security.internalAccess.value") },
+    { label: t("procurement.security.agent.label"), value: t("procurement.security.agent.value") },
+    { label: t("procurement.security.sso.label"), value: t("procurement.security.sso.value") },
+    { label: t("procurement.security.residency.label"), value: t("procurement.security.residency.value") },
+  ];
+
+  const beforeItems = Array.from({ length: 7 }, (_, i) => t(`procurement.before.item${i + 1}`));
+  const afterItems = Array.from({ length: 7 }, (_, i) => t(`procurement.after.item${i + 1}`));
+
   return (
     <div
       style={{
@@ -124,7 +146,7 @@ export default function ProcurementPage() {
         {/* Hero */}
         <header style={{ textAlign: "center", padding: "36px 0 40px" }}>
           <p className="gt-section-label" style={{ marginBottom: 14 }}>
-            PROCUREMENT &amp; DECISION SCOPE
+            {t("procurement.label")}
           </p>
           <h1
             style={{
@@ -135,36 +157,19 @@ export default function ProcurementPage() {
               marginBottom: 14,
             }}
           >
-            Vendor Review &amp; Product Scope
+            {t("procurement.title")}
           </h1>
-          <P>
-            Everything a procurement lead, finance controller, or security reviewer needs to evaluate
-            Ghost Tax. Designed to be forwarded or printed.
-          </P>
+          <P>{t("procurement.subtitle")}</P>
         </header>
 
         {/* 1. PRODUCT SUMMARY */}
         <section style={{ marginBottom: 32 }}>
           <Card>
-            <Lab>PRODUCT SUMMARY</Lab>
-            <H2>What Ghost Tax Does</H2>
-            <P>
-              Ghost Tax is a decision acceleration system for SaaS, AI, and cloud spend. It detects
-              financial exposure from redundant subscriptions, unmanaged AI tools, and unoptimized
-              cloud contracts — then structures the path to correction.
-            </P>
+            <Lab>{t("procurement.product.label")}</Lab>
+            <H2>{t("procurement.product.title")}</H2>
+            <P>{t("procurement.product.desc")}</P>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-              {[
-                { label: "Category", value: "SaaS & Cloud Financial Intelligence" },
-                {
-                  label: "Deployment",
-                  value: "Web application — no agent install, no integration required",
-                },
-                {
-                  label: "Data access",
-                  value: "Public sources only at self-serve stage. No internal system access.",
-                },
-              ].map(function (item) {
+              {productFacts.map(function (item) {
                 return (
                   <div
                     key={item.label}
@@ -189,12 +194,9 @@ export default function ProcurementPage() {
         {/* 2. COMMERCIAL STAGES */}
         <section style={{ marginBottom: 32 }}>
           <Card>
-            <Lab>COMMERCIAL STAGES</Lab>
-            <H2>Product Ladder</H2>
-            <P>
-              Four stages, each with clear scope, data requirements, and deliverables. You decide how
-              deep to go.
-            </P>
+            <Lab>{t("procurement.stages.label")}</Lab>
+            <H2>{t("procurement.stages.title")}</H2>
+            <P>{t("procurement.stages.desc")}</P>
             {/* Header */}
             <div
               style={{
@@ -210,45 +212,45 @@ export default function ProcurementPage() {
                 marginBottom: 4,
               }}
             >
-              <span>Stage</span>
-              <span>Name</span>
-              <span>Price</span>
-              <span>Scope</span>
-              <span>Data Required</span>
-              <span>Delivery</span>
+              <span>{t("procurement.stages.col.stage")}</span>
+              <span>{t("procurement.stages.col.name")}</span>
+              <span>{t("procurement.stages.col.price")}</span>
+              <span>{t("procurement.stages.col.scope")}</span>
+              <span>{t("procurement.stages.col.data")}</span>
+              <span>{t("procurement.stages.col.delivery")}</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <StageRow
                 stage="PUBLIC"
-                name="Decision Room"
-                price="Free"
-                scope="Automated exposure detection from public signals. Diagnosis, loss velocity, peer benchmark, scenarios."
-                data="Company domain only. Optional: name, industry, headcount, spend."
-                delivery="Real-time streaming — instant"
+                name={t("procurement.stages.public.name")}
+                price={t("procurement.stages.public.price")}
+                scope={t("procurement.stages.public.scope")}
+                data={t("procurement.stages.public.data")}
+                delivery={t("procurement.stages.public.delivery")}
               />
               <StageRow
                 stage="RAIL A"
-                name="Corrective Protocol"
-                price="From $990"
-                scope="Deep corrective analysis. Structured remediation plan with prioritized actions, ownership mapping, payback projections."
-                data="Same as public + optional internal context shared during intake."
-                delivery="48 hours"
+                name={t("procurement.stages.railA.name")}
+                price={t("procurement.stages.railA.price")}
+                scope={t("procurement.stages.railA.scope")}
+                data={t("procurement.stages.railA.data")}
+                delivery={t("procurement.stages.railA.delivery")}
               />
               <StageRow
                 stage="RAIL B"
-                name="Stabilization 30/60/90"
-                price="Scoped"
-                scope="Hands-on stabilization plan. 30/60/90-day intervention roadmap. Vendor renegotiation guidance. Budget reallocation."
-                data="Internal spend data, contract inventory, org context."
-                delivery="Scoped engagement"
+                name={t("procurement.stages.railB.name")}
+                price={t("procurement.stages.railB.price")}
+                scope={t("procurement.stages.railB.scope")}
+                data={t("procurement.stages.railB.data")}
+                delivery={t("procurement.stages.railB.delivery")}
               />
               <StageRow
                 stage="RAIL C"
-                name="Stabilization Mission"
-                price="Custom"
-                scope="Private institutional engagement. Full operational correction. Embedded advisory."
-                data="Full access as agreed under NDA."
-                delivery="Custom timeline"
+                name={t("procurement.stages.railC.name")}
+                price={t("procurement.stages.railC.price")}
+                scope={t("procurement.stages.railC.scope")}
+                data={t("procurement.stages.railC.data")}
+                delivery={t("procurement.stages.railC.delivery")}
               />
             </div>
           </Card>
@@ -257,31 +259,10 @@ export default function ProcurementPage() {
         {/* 3. TYPICAL BUYERS */}
         <section style={{ marginBottom: 32 }}>
           <Card>
-            <Lab>TYPICAL BUYERS</Lab>
-            <H2>Who Evaluates This</H2>
+            <Lab>{t("procurement.buyers.label")}</Lab>
+            <H2>{t("procurement.buyers.title")}</H2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {[
-                {
-                  role: "CFO / VP Finance",
-                  reason:
-                    "Needs visibility into unmanaged spend categories (SaaS, AI, cloud) that sit outside traditional ERP reporting.",
-                },
-                {
-                  role: "CIO / IT Director",
-                  reason:
-                    "Wants to detect shadow IT and tool sprawl without deploying agents or requiring SSO integration.",
-                },
-                {
-                  role: "Procurement Lead",
-                  reason:
-                    "Evaluating vendor for initial detection before committing to a full SaaS management platform.",
-                },
-                {
-                  role: "CISO / Security",
-                  reason:
-                    "Needs to verify data handling, sub-processors, and access scope before approval.",
-                },
-              ].map(function (item) {
+              {buyers.map(function (item) {
                 return (
                   <div
                     key={item.role}
@@ -305,19 +286,11 @@ export default function ProcurementPage() {
         <section style={{ marginBottom: 32 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Card>
-              <Lab>BEFORE PURCHASE</Lab>
-              <H2>Free Detection Output</H2>
-              <P>What the public Decision Room delivers — no account, no payment.</P>
+              <Lab>{t("procurement.before.label")}</Lab>
+              <H2>{t("procurement.before.title")}</H2>
+              <P>{t("procurement.before.desc")}</P>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {[
-                  "Signal-based exposure diagnosis",
-                  "Annual exposure range (low\u2013high)",
-                  "Loss velocity: daily through yearly leakage",
-                  "Peer benchmark positioning (when data permits)",
-                  "Correction momentum & decision pressure score",
-                  "Three forward scenarios (drift / partial / full correction)",
-                  "Evidence-tiered confidence (observed / inferred / estimated)",
-                ].map(function (item) {
+                {beforeItems.map(function (item) {
                   return (
                     <div
                       key={item}
@@ -346,19 +319,11 @@ export default function ProcurementPage() {
               </div>
             </Card>
             <Card>
-              <Lab>AFTER PURCHASE — RAIL A</Lab>
-              <H2>Corrective Protocol</H2>
-              <P>What deepens when you commit to the paid detection (from $990).</P>
+              <Lab>{t("procurement.after.label")}</Lab>
+              <H2>{t("procurement.after.title")}</H2>
+              <P>{t("procurement.after.desc")}</P>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {[
-                  "Deeper signal sourcing with extended enrichment window",
-                  "Prioritized corrective action list with ownership mapping",
-                  "Vendor-specific remediation guidance",
-                  "Payback timeline projections",
-                  "Exportable decision pack for internal distribution",
-                  "Confidence uplift from additional data sources",
-                  "48-hour delivery — structured for executive presentation",
-                ].map(function (item) {
+                {afterItems.map(function (item) {
                   return (
                     <div
                       key={item}
@@ -392,26 +357,23 @@ export default function ProcurementPage() {
         {/* 5. SECURITY HANDOFF */}
         <section style={{ marginBottom: 32 }}>
           <Card>
-            <Lab>SECURITY &amp; COMPLIANCE</Lab>
-            <H2>Security Review Pointers</H2>
-            <P>
-              For detailed security posture, data handling matrix, sub-processor list, and compliance
-              roadmap:
-            </P>
+            <Lab>{t("procurement.security.label")}</Lab>
+            <H2>{t("procurement.security.title")}</H2>
+            <P>{t("procurement.security.desc")}</P>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <a
                 href="/security-vault"
                 className="gt-btn gt-btn-accent-ghost"
                 style={{ textDecoration: "none", fontSize: 12 }}
               >
-                Security &amp; Data Handling &rarr;
+                {t("procurement.security.btn")} &rarr;
               </a>
               <a
                 href="/methodology"
                 className="gt-btn gt-btn-ghost"
                 style={{ textDecoration: "none", fontSize: 12 }}
               >
-                Methodology &amp; Model Transparency &rarr;
+                {t("procurement.security.methodology")} &rarr;
               </a>
             </div>
             <div
@@ -422,12 +384,7 @@ export default function ProcurementPage() {
                 gap: 10,
               }}
             >
-              {[
-                { label: "Internal access", value: "None at self-serve stage" },
-                { label: "Agent install", value: "Not required" },
-                { label: "SSO / integration", value: "Not required" },
-                { label: "Data residency", value: "US (AWS us-east-1)" },
-              ].map(function (item) {
+              {securityFacts.map(function (item) {
                 return (
                   <div
                     key={item.label}
@@ -451,26 +408,26 @@ export default function ProcurementPage() {
         <section style={{ marginBottom: 32 }}>
           <Card>
             <p className="gt-label" style={{ marginBottom: 10 }}>
-              Related research
+              {t("procurement.research.label")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <a
                 href="/intel-benchmarks/saas-ai-cost-exposure"
                 style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}
               >
-                SaaS &amp; AI Cost Exposure by Industry &rarr;
+                {t("procurement.research.saas")} &rarr;
               </a>
               <a
                 href="/intel-benchmarks/shadow-ai-governance"
                 style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}
               >
-                Shadow AI Governance: Detection &amp; Cost Impact &rarr;
+                {t("procurement.research.shadowAi")} &rarr;
               </a>
               <a
                 href="/intel-benchmarks/cfo-technology-spend-guide"
                 style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}
               >
-                CFO Guide to Technology Spend Exposure &rarr;
+                {t("procurement.research.cfo")} &rarr;
               </a>
             </div>
             <div
@@ -487,19 +444,19 @@ export default function ProcurementPage() {
                 href="/methodology"
                 style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}
               >
-                Detection Methodology &rarr;
+                {t("procurement.research.methodology")} &rarr;
               </a>
               <a
                 href="/security-vault"
                 style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}
               >
-                Security &amp; Data Handling &rarr;
+                {t("procurement.research.security")} &rarr;
               </a>
               <a
                 href="/intel-benchmarks"
                 style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}
               >
-                All Intelligence Benchmarks &rarr;
+                {t("procurement.research.benchmarks")} &rarr;
               </a>
             </div>
           </Card>
@@ -509,26 +466,23 @@ export default function ProcurementPage() {
         <section>
           <Card style={{ textAlign: "center" as const, padding: "28px 22px" }}>
             <p style={{ fontSize: 15, fontWeight: 700, color: c.text1, marginBottom: 6 }}>
-              Ready to evaluate?
+              {t("procurement.cta.title")}
             </p>
-            <P>
-              Start with the free detection. If the output is useful, the paid protocol is one click
-              away.
-            </P>
+            <P>{t("procurement.cta.desc")}</P>
             <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 8 }}>
               <a
                 href="/intel"
                 className="gt-btn gt-btn-primary"
                 style={{ textDecoration: "none", fontSize: 11 }}
               >
-                Run Detection
+                {t("procurement.cta.run")}
               </a>
               <a
                 href="mailto:audits@ghost-tax.com"
                 className="gt-btn gt-btn-ghost"
                 style={{ textDecoration: "none", fontSize: 11 }}
               >
-                Contact for Rail B/C &rarr;
+                {t("procurement.cta.contact")} &rarr;
               </a>
             </div>
           </Card>
@@ -542,7 +496,6 @@ export default function ProcurementPage() {
           }
         `}</style>
       </div>
-      <Footer />
     </div>
   );
 }

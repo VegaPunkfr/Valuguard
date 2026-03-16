@@ -7,6 +7,8 @@
  * NOTE: Report delivery emails are sent directly from lib/delivery.ts
  * via the Resend API. This route is for other transactional emails.
  *
+ * Security: requires CRON_SECRET or INTERNAL_API_KEY header.
+ * Rate limited: 3 req/min per IP.
  * Required env: RESEND_API_KEY
  */
 
@@ -19,7 +21,74 @@ interface EmailPayload {
   data?: Record<string, unknown>;
 }
 
+// ── Rate Limiting ─────────────────────────────────────────
+const RATE_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_MAX_REQUESTS = 3;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (entry && now > entry.resetAt) {
+    rateLimitMap.delete(ip);
+  }
+  const current = rateLimitMap.get(ip);
+  if (!current) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return { allowed: true, retryAfter: 0 };
+  }
+  if (current.count >= RATE_MAX_REQUESTS) {
+    const retryAfter = Math.ceil((current.resetAt - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  current.count++;
+  return { allowed: true, retryAfter: 0 };
+}
+
+// ── HTML Escape ───────────────────────────────────────────
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// ── Auth ──────────────────────────────────────────────────
+function isAuthorized(request: NextRequest): boolean {
+  const cronSecret = process.env.CRON_SECRET;
+  const internalKey = process.env.INTERNAL_API_KEY;
+
+  // Fail safe: if neither secret is configured, deny all requests
+  if (!cronSecret && !internalKey) return false;
+
+  const authHeader = request.headers.get("authorization")?.replace("Bearer ", "");
+  const apiKeyHeader = request.headers.get("x-api-key");
+
+  if (cronSecret && authHeader === cronSecret) return true;
+  if (internalKey && (authHeader === internalKey || apiKeyHeader === internalKey)) return true;
+
+  return false;
+}
+
 export async function POST(request: NextRequest) {
+  // ── Auth check ──────────────────────────────────────────
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  // ── Rate limiting ───────────────────────────────────────
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded?.split(",")[0]?.trim() || "unknown";
+  const rateCheck = checkRateLimit(ip);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429, headers: { "Retry-After": String(rateCheck.retryAfter) } },
+    );
+  }
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     console.warn("[Ghost Tax] RESEND_API_KEY not set. Email not sent.");
@@ -86,13 +155,14 @@ function renderTemplate(
   data?: Record<string, unknown>,
 ): string {
   // Minimal transactional template. Extend per template type as needed.
-  const body = data?.body || subject;
+  const rawBody = data?.body || subject;
+  const body = escapeHtml(String(rawBody));
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:32px;background:#060912;font-family:-apple-system,sans-serif">
 <div style="max-width:560px;margin:0 auto">
   <p style="font-size:10px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 16px">GHOST TAX</p>
-  <p style="font-size:14px;color:#e4e9f4;line-height:1.6">${String(body)}</p>
+  <p style="font-size:14px;color:#e4e9f4;line-height:1.6">${body}</p>
   <hr style="border:none;border-top:1px solid #1a1f2e;margin:24px 0">
   <p style="font-size:11px;color:#55637d">audits@ghost-tax.com</p>
 </div>

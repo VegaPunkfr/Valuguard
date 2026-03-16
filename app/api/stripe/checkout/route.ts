@@ -4,10 +4,11 @@
  * Creates Stripe Checkout Sessions for:
  * - Rail A: Tiered detection (headcount-based pricing, USD or EUR)
  * - Rail B Stabilize: One-time stabilization protocol (includes detection)
+ * - Rail B Monitor: Recurring subscription for continuous drift monitoring
  *
  * POST /api/stripe/checkout
  * Body: {
- *   rail?: "A" | "B_STABILIZE",
+ *   rail?: "A" | "B_STABILIZE" | "B_MONITOR",
  *   locale?, email?, domain?, companyName?, headcount?, monthlySpendEur?, industry?
  * }
  */
@@ -19,6 +20,7 @@ import {
   getRailAPrice,
   getCurrency,
   getHeadcountTier,
+  getStripePriceId,
   type PricingLocale,
 } from "@/lib/pricing";
 
@@ -55,9 +57,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const rail = body.rail === "B_STABILIZE" ? "B_STABILIZE" : "A";
+    const rail = body.rail === "B_STABILIZE" ? "B_STABILIZE" : body.rail === "B_MONITOR" ? "B_MONITOR" : "A";
     const locale: PricingLocale = body.locale === "fr" ? "fr" : body.locale === "de" ? "de" : "en";
-    const email = body.email || undefined;
+    const rawEmail = typeof body.email === "string" ? body.email.trim() : undefined;
+    const email = rawEmail && rawEmail.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(rawEmail) ? rawEmail : undefined;
     const domain = typeof body.domain === "string" ? body.domain.trim() : undefined;
     const companyName = typeof body.companyName === "string" ? body.companyName.trim() : undefined;
     const headcount = typeof body.headcount === "number" ? body.headcount : undefined;
@@ -69,6 +72,8 @@ export async function POST(request: NextRequest) {
 
     let lineItem: Record<string, unknown>;
     let sessionMetadata: Record<string, string>;
+    let checkoutMode: "payment" | "subscription" = "payment";
+    let successUrl = `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`;
 
     if (rail === "A") {
       // ── Rail A: Tiered pricing by headcount ──
@@ -103,6 +108,56 @@ export async function POST(request: NextRequest) {
         locale,
         currency,
         amount: String(amount),
+        ...(domain && { domain }),
+        ...(companyName && { companyName }),
+        ...(headcount && { headcount: String(headcount) }),
+        ...(monthlySpendEur && { monthlySpendEur: String(monthlySpendEur) }),
+        ...(industry && { industry }),
+      };
+    } else if (rail === "B_MONITOR") {
+      // ── Rail B Monitor: Recurring subscription ──
+      checkoutMode = "subscription";
+      successUrl = `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}&rail=B_MONITOR`;
+      const monitor = RAILS.B_MONITOR;
+      const amount = currency === "usd" ? monitor.price_usd : monitor.price_eur;
+
+      const productName = locale === "fr" ? monitor.name
+        : locale === "de" ? monitor.name_de
+        : monitor.name_en;
+      const productDesc = locale === "fr" ? monitor.description_fr
+        : locale === "de" ? monitor.description_de
+        : monitor.description;
+
+      // Use pre-created Stripe Price ID if available, otherwise build price_data
+      const stripePriceId = getStripePriceId("B_MONITOR");
+      if (stripePriceId) {
+        lineItem = {
+          price: stripePriceId,
+          quantity: 1,
+        };
+      } else {
+        lineItem = {
+          price_data: {
+            currency,
+            unit_amount: amount * 100,
+            recurring: { interval: "month" as const },
+            product_data: {
+              name: productName,
+              description: productDesc,
+              metadata: monitor.metadata,
+            },
+          },
+          quantity: 1,
+        };
+      }
+
+      sessionMetadata = {
+        rail: "B_MONITOR",
+        product: "monitoring",
+        locale,
+        currency,
+        amount: String(amount),
+        ...(email && { email }),
         ...(domain && { domain }),
         ...(companyName && { companyName }),
         ...(headcount && { headcount: String(headcount) }),
@@ -150,28 +205,25 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: checkoutMode,
       payment_method_types: ["card"],
       line_items: [lineItem as never],
-      success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successUrl,
       cancel_url: `${SITE_URL}/cancel`,
       customer_email: email,
       metadata: sessionMetadata,
+      ...(checkoutMode === "subscription" && {
+        subscription_data: { metadata: sessionMetadata },
+      }),
       locale: locale === "fr" ? "fr" : locale === "de" ? "de" : "en",
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Checkout session creation failed";
+    const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[Ghost Tax] Stripe checkout error:", message);
 
-    if (message.includes("STRIPE_SECRET_KEY")) {
-      return NextResponse.json(
-        { error: "Payment system not configured. Please contact support." },
-        { status: 503 }
-      );
-    }
-
+    // Return generic error — never leak Stripe internals to client
     return NextResponse.json(
       { error: "Unable to create checkout session. Please try again." },
       { status: 500 }

@@ -14,7 +14,7 @@ const DEFAULT_LOCALE: Locale = "en";
 type I18nCtx = {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
   formatCurrency: (amount: number, compact?: boolean) => string;
 };
 
@@ -60,6 +60,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (stored && dict[stored]) {
       setLocaleState(stored);
       document.documentElement.lang = stored;
+      return;
+    }
+    // Auto-detect from browser language (fr-FR → fr, de-AT → de, etc.)
+    const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
+    if (browserLang && dict[browserLang as Locale]) {
+      const detected = browserLang as Locale;
+      setLocaleState(detected);
+      localStorage.setItem(STORAGE_KEY, detected);
+      document.documentElement.lang = detected;
     }
   }, []);
 
@@ -69,8 +78,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = l;
   }, []);
 
-  const t = useCallback((key: string): string => {
-    return dict[locale]?.[key] ?? dict.en[key] ?? key;
+  const t = useCallback((key: string, fallback?: string): string => {
+    return dict[locale]?.[key] ?? dict.en[key] ?? fallback ?? key;
   }, [locale]);
 
   const formatCurrency = useCallback(

@@ -59,4 +59,26 @@ Disallow: /success
 Disallow: /cancel
 Disallow: /unsubscribe
 
+# Common Crawl — trains most open-weight LLMs
+User-agent: CCBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
+# OpenAI search & browsing agents
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /vault
+Disallow: /api/
+Disallow: /success
+Disallow: /cancel
+Disallow: /unsubscribe
+
 Sitemap: https://ghost-tax.com/sitemap.xml

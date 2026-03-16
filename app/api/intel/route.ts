@@ -33,29 +33,64 @@ import {
   type PluginOutput,
   type PipelineResult,
 } from "@/lib/plugins";
+import { scheduleDripSequence } from "@/lib/drip-sequence";
 
 // Vercel serverless: analysis pipeline takes 10-30s (Exa + OpenAI + vectors)
 export const maxDuration = 60;
 
-// ── Rate limiter ──────────────────────────────────────
+// ── Rate limiter (sliding window, in-memory) ─────────
+//
+// TODO: Replace with Redis/Vercel KV when scaling beyond a single instance.
+// In-memory state resets on every deploy and is not shared across serverless
+// isolates. Acceptable for early-stage traffic (<100 RPM) but will need a
+// distributed store (Vercel KV, Upstash Redis, or Supabase row-level check)
+// once we hit multi-instance concurrency.
+//
 
-const RATE_WINDOW_MS = 60 * 1000;
-const RATE_MAX = 5;
-const rateMap = new Map<string, { count: number; resetAt: number }>();
+/** Max requests per window per IP */
+const RATE_MAX = parseInt(process.env.RATE_LIMIT_MAX || "5", 10);
+/** Sliding window size in ms */
+const RATE_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10);
+/** Evict stale entries every N checks to prevent unbounded memory growth */
+const EVICT_INTERVAL = 50;
 
-function checkRate(ip: string): boolean {
+let checkCounter = 0;
+
+/** Per-IP sliding window: store an array of request timestamps */
+const rateMap = new Map<string, number[]>();
+
+function checkRate(ip: string): { allowed: boolean; remaining: number; resetMs: number } {
   const now = Date.now();
-  const entry = rateMap.get(ip);
-  if (entry && now > entry.resetAt) rateMap.delete(ip);
+  const windowStart = now - RATE_WINDOW_MS;
 
-  const current = rateMap.get(ip);
-  if (!current) {
-    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
+  // Periodic eviction of stale IPs to bound memory
+  checkCounter++;
+  if (checkCounter % EVICT_INTERVAL === 0) {
+    for (const [key, timestamps] of rateMap) {
+      if (timestamps.length === 0 || timestamps[timestamps.length - 1] < windowStart) {
+        rateMap.delete(key);
+      }
+    }
   }
-  if (current.count >= RATE_MAX) return false;
-  current.count++;
-  return true;
+
+  let timestamps = rateMap.get(ip);
+  if (!timestamps) {
+    timestamps = [];
+    rateMap.set(ip, timestamps);
+  }
+
+  // Drop timestamps outside the sliding window
+  while (timestamps.length > 0 && timestamps[0] < windowStart) {
+    timestamps.shift();
+  }
+
+  if (timestamps.length >= RATE_MAX) {
+    const resetMs = timestamps[0] + RATE_WINDOW_MS - now;
+    return { allowed: false, remaining: 0, resetMs };
+  }
+
+  timestamps.push(now);
+  return { allowed: true, remaining: RATE_MAX - timestamps.length, resetMs: RATE_WINDOW_MS };
 }
 
 // ── Validation ────────────────────────────────────────
@@ -71,13 +106,22 @@ function validateDomain(domain: unknown): string | null {
 // ── Route Handler ─────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // Rate limit
+  // Rate limit (sliding window per IP)
   const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || "unknown";
-  if (!checkRate(ip)) {
+  const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+  const rate = checkRate(ip);
+  if (!rate.allowed) {
     return NextResponse.json(
       { error: "Too many requests. Please wait before trying again." },
-      { status: 429 },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(rate.resetMs / 1000)),
+          "X-RateLimit-Limit": String(RATE_MAX),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.ceil((Date.now() + rate.resetMs) / 1000)),
+        },
+      },
     );
   }
 
@@ -87,6 +131,12 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  // ── Honeypot: hidden field "corporate_id" — bots fill it, humans send "" ──
+  if (typeof body.corporate_id === "string" && body.corporate_id.trim().length > 0) {
+    // Bot detected: return fake 200 to waste its time, process nothing
+    return NextResponse.json({ phase: "complete", status: "complete", data: null });
   }
 
   // Validate domain
@@ -216,6 +266,28 @@ export async function POST(request: NextRequest) {
         }
 
         send("complete", "complete", result.meta);
+
+        // ── Drip: fire-and-forget post-scan nurture ────────────────
+        // Triggered only when email is provided AND lead has not purchased.
+        // Never blocks the stream. Silently swallowed on any error.
+        const emailFromBody = typeof body.email === "string" && body.email.trim() ? body.email.trim() : null;
+        if (emailFromBody) {
+          scheduleDripSequence({
+            email: emailFromBody,
+            domain,
+            locale: typeof body.locale === "string" ? body.locale : undefined,
+            exposureRange: result.exposure
+              ? [result.exposure.lowEur ?? 0, result.exposure.highEur ?? 0]
+              : undefined,
+            analysisId: result.meta?.analysisId,
+            companyName: result.companyContext?.name || input.name,
+            headcount: input.headcount,
+            industry: input.industry,
+          }).catch((err) => {
+            // Non-fatal — scan must never fail for drip errors
+            console.warn("[Ghost Tax] Drip schedule failed (non-fatal):", err instanceof Error ? err.message : err);
+          });
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Analysis failed";
         console.error("[Ghost Tax] Intel pipeline error:", message);

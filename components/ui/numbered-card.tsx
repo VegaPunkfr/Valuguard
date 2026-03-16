@@ -17,7 +17,7 @@ export default function NumberedCard({
     <div className="gt-card gt-card-interactive" style={{ padding: "24px 18px", position: "relative" }}>
       <span style={{
         fontFamily: f.mono, fontSize: 32, fontWeight: 800,
-        color: "rgba(79,143,247,0.06)", position: "absolute", top: 10, right: 14,
+        color: "rgba(15,23,42,0.04)", position: "absolute", top: 10, right: 14,
       }}>
         {num}
       </span>

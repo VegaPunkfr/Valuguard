@@ -3,10 +3,10 @@ import { useState, useMemo } from "react";
 import { useI18n } from "@/lib/i18n";
 import { c, f } from "@/lib/tokens";
 
-/*  GHOST TAX — PEER-GAP ANALYSIS (US 2026 FINAL)
+/*  GHOST TAX — PEER-GAP ANALYSIS (2026)
     Self-contained. Renders immediately with demo data.
     SVG radar + percentile bars + RECLAIM CTA.
-    100% USD. Zero French. Zero Euro. */
+    Locale-aware: USD ($) for EN, EUR (€) for FR/DE. */
 
 // -- US Industry benchmarks [P10, P25, P50, P75, P90] --
 const BENCH: Record<string, Record<string, number[]>> = {
@@ -20,21 +20,21 @@ const BENCH: Record<string, Record<string, number[]>> = {
 };
 
 const METRIC_DEFS = [
-  { id: "spe",    nameKey: "peergap.m.spe",    unit: "/mo", lowerBetter: true },
+  { id: "spe",    nameKey: "peergap.m.spe",    unitKey: "peergap.unit.mo", lowerBetter: true },
   { id: "tools",  nameKey: "peergap.m.tools",  unit: "",    lowerBetter: true },
   { id: "util",   nameKey: "peergap.m.util",   unit: "%",   lowerBetter: false },
   { id: "shadow", nameKey: "peergap.m.shadow", unit: "%",   lowerBetter: true },
   { id: "ai",     nameKey: "peergap.m.ai",     unit: "%",   lowerBetter: true },
 ];
 
-const IND_NAMES: Record<string, string> = {
-  saas_tech: "SaaS / Tech scale-ups",
-  finance: "finance companies",
-  healthcare: "healthcare organizations",
-  retail: "retail / DTC companies",
-  services: "professional services firms",
-  manufacturing: "manufacturers",
-  other: "companies in your sector",
+const IND_NAME_KEYS: Record<string, string> = {
+  saas_tech: "peergap.ind.saas",
+  finance: "peergap.ind.finance",
+  healthcare: "peergap.ind.healthcare",
+  retail: "peergap.ind.retail",
+  services: "peergap.ind.services",
+  manufacturing: "peergap.ind.manufacturing",
+  other: "peergap.ind.other",
 };
 
 const IND_OPTION_KEYS: [string, string][] = [
@@ -78,6 +78,7 @@ interface MetricResult {
   id: string;
   nameKey: string;
   unit: string;
+  unitKey?: string;
   lowerBetter: boolean;
   value: number;
   percentile: number;
@@ -107,7 +108,8 @@ function analyze(input: any) {
     return {
       id: def.id,
       nameKey: def.nameKey,
-      unit: def.unit,
+      unit: ("unit" in def) ? (def as any).unit : "",
+      unitKey: ("unitKey" in def && def.unitKey) ? def.unitKey as string : undefined,
       lowerBetter: def.lowerBetter,
       value: Math.round(val * 100) / 100,
       percentile: pct,
@@ -122,7 +124,7 @@ function analyze(input: any) {
   return {
     overall: overallPct,
     metrics: results,
-    peerName: IND_NAMES[input.industry] || "peers",
+    peerNameKey: IND_NAME_KEYS[input.industry] || "peergap.ind.other",
     ghostTax: ghostTax,
   };
 }
@@ -187,13 +189,15 @@ function MetricBar({ metric: m, t, formatCurrency: fc }: { metric: MetricResult;
   const bg = VERDICT_BG[m.verdict];
   const barW = Math.max(3, Math.min(97, m.percentile));
 
+  const unitStr = m.unitKey ? t(m.unitKey) : m.unit;
+
   const displayVal = m.id === "spe"
-    ? fc(m.value) + m.unit
-    : (m.id === "tools" ? m.value.toFixed(1) : Math.round(m.value)) + m.unit;
+    ? fc(m.value) + unitStr
+    : (m.id === "tools" ? m.value.toFixed(1) : Math.round(m.value)) + unitStr;
 
   const medianVal = m.id === "spe"
-    ? fc(m.median) + m.unit
-    : m.median + m.unit;
+    ? fc(m.median) + unitStr
+    : m.median + unitStr;
 
   return (
     <div style={{ padding: "9px 11px", borderRadius: 7, background: bg, border: "1px solid " + col + "14" }}>
@@ -208,7 +212,7 @@ function MetricBar({ metric: m, t, formatCurrency: fc }: { metric: MetricResult;
           </span>
         </div>
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: "rgba(0,0,0,0.22)", position: "relative", overflow: "hidden" }}>
+      <div style={{ height: 4, borderRadius: 2, background: "#F1F5F9", position: "relative", overflow: "hidden" }}>
         <div style={{
           position: "absolute", left: 0, top: 0, height: "100%",
           width: barW + "%", borderRadius: 2,
@@ -277,7 +281,7 @@ export default function PeerGapAnalysis() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span className="gt-mono" style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".06em", color: c.accent }}>GHOST TAX</span>
-            <span className="gt-badge gt-badge--muted">PEER-GAP</span>
+            <span className="gt-badge gt-badge--muted">{t("peergap.badge")}</span>
           </div>
           <span className="gt-badge gt-badge--muted">
             {t("peergap.stealth")}
@@ -326,9 +330,9 @@ export default function PeerGapAnalysis() {
             <strong style={{ color: overallCol, fontWeight: 700 }}>
               {t("peergap.lessthan")} {result.overall}%
             </strong>{" "}
-            {t("peergap.ofcomp")} {result.peerName}.
+            {t("peergap.ofcomp")} {t(result.peerNameKey)}.
           </p>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "7px 16px", borderRadius: 8, background: "rgba(0,0,0,0.2)", border: "1px solid " + overallCol + "25" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "7px 16px", borderRadius: 8, background: "#F8FAFC", border: "1px solid " + overallCol + "25" }}>
             <span className="gt-label">{t("peergap.overall")}</span>
             <span className="gt-mono" style={{ fontSize: 26, fontWeight: 800, color: overallCol }}>P{result.overall}</span>
           </div>

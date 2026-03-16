@@ -368,7 +368,7 @@ export function getNextSendDate(nextStep: number): Date {
 // ── Price Display Helper ─────────────────────────────────
 
 export function getCtaPrice(geoMarket: string): string {
-  return geoMarket === "us" ? "$990" : "€890";
+  return geoMarket === "us" ? "$490" : "€490";
 }
 
 export function getCtaCurrency(geoMarket: string): "USD" | "EUR" {

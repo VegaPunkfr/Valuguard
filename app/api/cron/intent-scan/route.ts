@@ -17,12 +17,12 @@ import { NextRequest, NextResponse } from "next/server";
 export const maxDuration = 300; // 5 minutes for batch scanning
 
 export async function GET(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const provided = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (provided !== cronSecret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

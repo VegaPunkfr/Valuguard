@@ -64,6 +64,22 @@ export async function POST(request: NextRequest) {
         domain: meta.domain || "(missing)",
       });
 
+      // Audit report checkout: update osint_prospects to PAID
+      if (meta.source === "audit_report" && meta.auditId && db) {
+        try {
+          await (db as any)
+            .from("osint_prospects")
+            .update({
+              status: "PAID",
+              status_changed_at: new Date().toISOString(),
+            })
+            .eq("domain", meta.auditId);
+          console.log("[Ghost Tax] Audit prospect marked PAID:", meta.auditId);
+        } catch (err) {
+          console.error("[Ghost Tax] Failed to mark prospect PAID:", err);
+        }
+      }
+
       // Rail A: trigger full delivery pipeline (with retry on failure)
       if (meta.rail === "A" && session.customer_email && meta.domain) {
         const retryPayload: WebhookRetryPayload = {
@@ -133,28 +149,28 @@ export async function POST(request: NextRequest) {
               to: [session.customer_email],
               subject: `${meta.domain} — Monitoring continu activé`,
               html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,sans-serif">
 <div style="max-width:600px;margin:0 auto;padding:32px 20px">
-  <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;font-family:monospace">GHOST TAX — MONITORING ACTIVÉ</p>
-  <h1 style="font-size:22px;color:#e4e9f4;margin:16px 0">Bienvenue dans le monitoring continu</h1>
-  <p style="font-size:14px;color:#8d9bb5;line-height:1.7">
-    Le monitoring de <strong style="color:#e4e9f4">${meta.domain}</strong> est maintenant actif.
-    Vous recevrez des alertes automatiques en cas de dérive détectée sur votre stack technologique.
+  <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;font-family:monospace">GHOST TAX — MONITORING ACTIV\u00c9</p>
+  <h1 style="font-size:22px;color:#0F172A;margin:16px 0">Bienvenue dans le monitoring continu</h1>
+  <p style="font-size:14px;color:#475569;line-height:1.7">
+    Le monitoring de <strong style="color:#0F172A">${meta.domain}</strong> est maintenant actif.
+    Vous recevrez des alertes automatiques en cas de d\u00e9rive d\u00e9tect\u00e9e sur votre stack technologique.
   </p>
-  <div style="background:#0e1221;border-radius:8px;padding:20px;margin:20px 0">
-    <p style="font-size:10px;color:#34d399;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px 0;font-family:monospace">CE QUI EST INCLUS</p>
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.8;margin:0">
-      • Scan OSINT hebdomadaire de votre domaine<br>
-      • Détection de nouveaux fournisseurs / fournisseurs supprimés<br>
-      • Alertes de dérive de coûts et de complexité<br>
-      • Rapport mensuel de monitoring détaillé<br>
-      • Accès au dashboard en temps réel
+  <div style="background:#F1F5F9;border-radius:8px;padding:20px;margin:20px 0">
+    <p style="font-size:10px;color:#059669;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px 0;font-family:monospace">CE QUI EST INCLUS</p>
+    <p style="font-size:13px;color:#475569;line-height:1.8;margin:0">
+      \u2022 Scan OSINT hebdomadaire de votre domaine<br>
+      \u2022 D\u00e9tection de nouveaux fournisseurs / fournisseurs supprim\u00e9s<br>
+      \u2022 Alertes de d\u00e9rive de co\u00fbts et de complexit\u00e9<br>
+      \u2022 Rapport mensuel de monitoring d\u00e9taill\u00e9<br>
+      \u2022 Acc\u00e8s au dashboard en temps r\u00e9el
     </p>
   </div>
   <div style="text-align:center;margin:24px 0">
-    <a href="${siteUrl}/dashboard" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Accéder au Dashboard</a>
+    <a href="${siteUrl}/dashboard" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Acc\u00e9der au Dashboard</a>
   </div>
-  <p style="font-size:11px;color:#55637d;text-align:center">audits@ghost-tax.com</p>
+  <p style="font-size:11px;color:#64748B;text-align:center">audits@ghost-tax.com</p>
 </div></body></html>`,
             }),
           }).catch(err => console.error("[Ghost Tax] Rail B onboarding email failed:", err));
@@ -248,12 +264,12 @@ export async function POST(request: NextRequest) {
               from: "Ghost Tax <reports@ghost-tax.com>",
               to: [invoice.customer_email],
               subject: "Ghost Tax — Monitoring en pause (paiement échoué)",
-              html: `<div style="background:#060912;padding:32px;font-family:sans-serif;color:#8d9bb5">
-                <p style="font-size:10px;letter-spacing:0.2em;color:#ef4444;font-family:monospace">GHOST TAX — ACTION REQUISE</p>
-                <h1 style="font-size:20px;color:#e4e9f4;margin:12px 0">Votre monitoring est en pause</h1>
-                <p style="font-size:14px;line-height:1.7">Nous n'avons pas pu traiter votre paiement après 3 tentatives. Votre monitoring continu est temporairement suspendu.</p>
-                <p style="font-size:14px;line-height:1.7">Mettez à jour vos informations de paiement pour réactiver le monitoring :</p>
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com"}/api/stripe/portal" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:16px 0">Mettre à jour le paiement</a>
+              html: `<div style="background:#FFFFFF;padding:32px;font-family:sans-serif;color:#475569">
+                <p style="font-size:10px;letter-spacing:0.2em;color:#DC2626;font-family:monospace">GHOST TAX — ACTION REQUISE</p>
+                <h1 style="font-size:20px;color:#0F172A;margin:12px 0">Votre monitoring est en pause</h1>
+                <p style="font-size:14px;line-height:1.7">Nous n'avons pas pu traiter votre paiement apr\u00e8s 3 tentatives. Votre monitoring continu est temporairement suspendu.</p>
+                <p style="font-size:14px;line-height:1.7">Mettez \u00e0 jour vos informations de paiement pour r\u00e9activer le monitoring :</p>
+                <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com"}/api/stripe/portal" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin:16px 0">Mettre \u00e0 jour le paiement</a>
               </div>`,
             }),
           }).catch(() => {});

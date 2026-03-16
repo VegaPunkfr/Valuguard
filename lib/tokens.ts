@@ -4,10 +4,12 @@
  * Single source of truth. Matches globals.css --gt-* variables.
  * Import { c, f, sp, ts, ... } from "@/lib/tokens" in every component.
  *
+ * THEME: Enterprise Light (B2B Audit)
+ *
  * MATHEMATICAL FOUNDATION:
  * ─ Typography: Perfect Fifth scale (ratio 1.5) from 16px base
  * ─ Spacing: Golden Ratio progression (φ = 1.618)
- * ─ Colors: HSL color space (no raw hex in components)
+ * ─ Colors: Enterprise light palette
  */
 
 /* ── Typographic Scale — Perfect Fifth (1.5) ───── */
@@ -40,39 +42,39 @@ export const sp = {
   "7": "104px",
 } as const;
 
-/* ── Colors — HSL color space ──────────────────── */
+/* ── Colors — Enterprise Light ───────────────────── */
 export const c = {
-  bg:       "hsl(228, 38%, 3%)",
-  surface:  "hsl(226, 33%, 7%)",
-  card:     "hsl(226, 30%, 9%)",
-  elevated: "hsl(225, 28%, 11%)",
-  raised:   "hsl(224, 25%, 14%)",
+  bg:       "#FFFFFF",
+  surface:  "#F8FAFC",
+  card:     "#F8FAFC",
+  elevated: "#F1F5F9",
+  raised:   "#E2E8F0",
 
-  border:   "hsla(0, 0%, 100%, 0.06)",
-  borderS:  "hsla(0, 0%, 100%, 0.10)",
-  borderSS: "hsla(0, 0%, 100%, 0.14)",
+  border:   "#E2E8F0",
+  borderS:  "#CBD5E1",
+  borderSS: "#94A3B8",
 
-  text1: "hsl(228, 40%, 96%)",
-  text2: "hsl(224, 16%, 66%)",
-  text3: "hsl(222, 12%, 41%)",
-  text4: "hsl(222, 14%, 29%)",
+  text1: "#0F172A",
+  text2: "#475569",
+  text3: "#64748B",
+  text4: "#94A3B8",
 
-  accent:   "hsl(216, 91%, 65%)",
-  accentHi: "hsl(216, 100%, 71%)",
-  accentBg: "hsla(216, 91%, 65%, 0.08)",
-  accentBd: "hsla(216, 91%, 65%, 0.20)",
+  accent:   "#0F172A",
+  accentHi: "#1E293B",
+  accentBg: "rgba(15,23,42,0.04)",
+  accentBd: "rgba(15,23,42,0.12)",
 
-  green:    "hsl(162, 68%, 51%)",
-  greenBg:  "hsla(162, 68%, 51%, 0.06)",
-  greenBd:  "hsla(162, 68%, 51%, 0.18)",
-  red:      "hsl(0, 82%, 66%)",
-  redBg:    "hsla(0, 82%, 66%, 0.06)",
-  redBd:    "hsla(0, 82%, 66%, 0.18)",
-  amber:    "hsl(35, 86%, 56%)",
-  amberBg:  "hsla(35, 86%, 56%, 0.06)",
-  amberBd:  "hsla(35, 86%, 56%, 0.18)",
-  cyan:     "hsl(190, 86%, 58%)",
-  linkedin: "hsl(210, 89%, 40%)",
+  green:    "#059669",
+  greenBg:  "rgba(5,150,105,0.06)",
+  greenBd:  "rgba(5,150,105,0.18)",
+  red:      "#DC2626",
+  redBg:    "rgba(220,38,38,0.06)",
+  redBd:    "rgba(220,38,38,0.18)",
+  amber:    "#D97706",
+  amberBg:  "rgba(217,119,6,0.06)",
+  amberBd:  "rgba(217,119,6,0.18)",
+  cyan:     "#0891B2",
+  linkedin: "#0A66C2",
 } as const;
 
 /* ── Fonts ──────────────────────────────────────── */
@@ -81,14 +83,12 @@ export const f = {
   sans: "var(--gt-font-sans, system-ui, -apple-system, sans-serif)",
 } as const;
 
-/* ── Panel style (modern glass — lighter blur) ─── */
+/* ── Panel style (enterprise — flat, no glass) ──── */
 export const panel: React.CSSProperties = {
-  background: "rgba(13,17,32,0.80)",
-  backdropFilter: "blur(16px) saturate(1.2)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.2)",
-  border: "1px solid " + c.borderS,
+  background: "#FFFFFF",
+  border: "1px solid " + c.border,
   borderRadius: 18,
-  boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
 };
 
 /* ── Card style ─────────────────────────────────── */
@@ -96,12 +96,12 @@ export const card: React.CSSProperties = {
   background: c.card,
   border: "1px solid " + c.border,
   borderRadius: 18,
-  boxShadow: "0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
 };
 
 /* ── Inset box ──────────────────────────────────── */
 export const inset: React.CSSProperties = {
-  background: "rgba(0,0,0,0.20)",
+  background: "#F1F5F9",
   border: "1px solid " + c.border,
   borderRadius: 10,
 };
@@ -145,7 +145,7 @@ export const inputBase: React.CSSProperties = {
   padding: "12px 16px",
   borderRadius: 10,
   border: "1px solid " + c.borderS,
-  background: "rgba(0,0,0,0.30)",
+  background: "#FFFFFF",
   color: c.text1,
   fontSize: 15,
   outline: "none",

@@ -3,78 +3,254 @@ import { useState, useMemo, useCallback } from "react";
 import { useI18n } from "@/lib/i18n";
 import { c, f } from "@/lib/tokens";
 
-/*  GHOST TAX — BOARD REPORT GENERATOR (US 2026)
+/*  GHOST TAX — BOARD REPORT GENERATOR (2026)
     Creates a downloadable executive summary for the C-suite.
     Pre-filled with Ghost Tax diagnostic data.
     Formats: preview on-screen + download as .txt
-    100% USD. Zero EUR. Zero French. */
+    Locale-aware: USD ($) for EN, EUR (€) for FR/DE. */
 
-function fmt(n: number, short?: boolean) {
-  if (short && n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
-  if (short && n >= 1e4) return "$" + Math.round(n / 1e3) + "k";
-  return "$" + Math.round(n).toLocaleString("en-US");
+type FmtLocale = "en" | "fr" | "de";
+
+function fmt(n: number, short?: boolean, locale: FmtLocale = "en") {
+  if (locale === "en") {
+    if (short && n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
+    if (short && n >= 1e4) return "$" + Math.round(n / 1e3) + "k";
+    return "$" + Math.round(n).toLocaleString("en-US");
+  }
+  // FR/DE → EUR
+  if (short && n >= 1e6) return (n / 1e6).toFixed(1) + "M €";
+  if (short && n >= 1e4) return Math.round(n / 1e3) + "k €";
+  const numStr = locale === "fr"
+    ? Math.round(n).toLocaleString("fr-FR")
+    : Math.round(n).toLocaleString("de-DE");
+  return numStr + " €";
 }
 
+// -- Report labels by locale --
+const REPORT_LABELS: Record<FmtLocale, Record<string, string>> = {
+  en: {
+    title: "GHOST TAX — EXECUTIVE GHOST TAX SUMMARY",
+    confidential: "Confidential — Prepared",
+    profile: "COMPANY PROFILE",
+    company: "Company:",
+    industry: "Industry:",
+    headcount: "Headcount:",
+    employees: "employees",
+    saasTools: "SaaS Tools:",
+    activeSubs: "active subscriptions",
+    monthlyIT: "Monthly IT:",
+    assessment: "GHOST TAX ASSESSMENT",
+    annualGT: "Annual Ghost Tax:",
+    midpoint: "midpoint",
+    entropyScore: "Entropy Score:",
+    critical: "CRITICAL",
+    elevated: "ELEVATED",
+    healthy: "HEALTHY",
+    entropyCoeff: "Entropy Coeff:",
+    coordDrag: "organizational coordination drag",
+    peerPos: "Peer Position:",
+    lessEfficient: "less efficient than",
+    auditROI: "Audit ROI:",
+    investment: "investment",
+    recoverable: "recoverable",
+    topActions: "TOP RECOVERY ACTIONS (ranked by savings/effort)",
+    savings: "Savings:",
+    effort: "Effort:",
+    timeline: "Timeline:",
+    days: "days",
+    totalRecoverable: "Total Recoverable (conservative 60%):",
+    shadowAI: "Shadow AI Redundancy:",
+    trajectory: "24-MONTH COST TRAJECTORY",
+    colTimeline: "Timeline",
+    colWithout: "Without Action",
+    colWith: "With Governance",
+    colDelta: "Delta",
+    now: "Now",
+    months6: "6 months",
+    months12: "12 months",
+    months24: "24 months",
+    cumSavings: "Cumulative 24-month savings:",
+    costMultiple: "x the cost of an initial audit.",
+    nextStep: "RECOMMENDED NEXT STEP",
+    step1: "1. Schedule a Ghost Tax Priority Audit",
+    step2: "2. Receive full anomaly report within 48 hours",
+    step3: "3. Implement top 3 quick wins (est.",
+    step3suffix: "/yr recovered)",
+    step4: "4. Typical first-quarter ROI: 15-40x",
+    contact: "Contact: audits@ghost-tax.com | ghost-tax.com",
+    trust: "SOC2-Certified Infrastructure | Zero-Knowledge Audit | EU + US Data Residency",
+  },
+  fr: {
+    title: "GHOST TAX — RÉSUMÉ EXÉCUTIF",
+    confidential: "Confidentiel — Préparé le",
+    profile: "PROFIL DE L'ENTREPRISE",
+    company: "Entreprise :",
+    industry: "Secteur :",
+    headcount: "Effectif :",
+    employees: "employés",
+    saasTools: "Outils SaaS :",
+    activeSubs: "abonnements actifs",
+    monthlyIT: "IT Mensuel :",
+    assessment: "ÉVALUATION GHOST TAX",
+    annualGT: "Ghost Tax Annuelle :",
+    midpoint: "médiane",
+    entropyScore: "Score d'Entropie :",
+    critical: "CRITIQUE",
+    elevated: "ÉLEVÉ",
+    healthy: "SAIN",
+    entropyCoeff: "Coeff. Entropie :",
+    coordDrag: "friction de coordination organisationnelle",
+    peerPos: "Position Peer :",
+    lessEfficient: "moins efficient que",
+    auditROI: "ROI Audit :",
+    investment: "investissement",
+    recoverable: "récupérable",
+    topActions: "ACTIONS DE RÉCUPÉRATION PRIORITAIRES (classées par économies/effort)",
+    savings: "Économies :",
+    effort: "Effort :",
+    timeline: "Délai :",
+    days: "jours",
+    totalRecoverable: "Total Récupérable (conservateur 60%) :",
+    shadowAI: "Redondance IA Fantôme :",
+    trajectory: "TRAJECTOIRE DE COÛTS 24 MOIS",
+    colTimeline: "Période",
+    colWithout: "Sans Action",
+    colWith: "Avec Gouvernance",
+    colDelta: "Écart",
+    now: "Maintenant",
+    months6: "6 mois",
+    months12: "12 mois",
+    months24: "24 mois",
+    cumSavings: "Économies cumulées sur 24 mois :",
+    costMultiple: "x le coût d'un audit initial.",
+    nextStep: "PROCHAINE ÉTAPE RECOMMANDÉE",
+    step1: "1. Planifier un Audit Prioritaire Ghost Tax",
+    step2: "2. Recevoir le rapport complet sous 48 heures",
+    step3: "3. Implémenter les 3 gains rapides (est.",
+    step3suffix: "/an récupérés)",
+    step4: "4. ROI typique au premier trimestre : 15-40x",
+    contact: "Contact : audits@ghost-tax.com | ghost-tax.com",
+    trust: "Infrastructure SOC2 | Audit Zero-Knowledge | Hébergement EU",
+  },
+  de: {
+    title: "GHOST TAX — EXECUTIVE ZUSAMMENFASSUNG",
+    confidential: "Vertraulich — Erstellt am",
+    profile: "UNTERNEHMENSPROFIL",
+    company: "Unternehmen:",
+    industry: "Branche:",
+    headcount: "Mitarbeiter:",
+    employees: "Mitarbeiter",
+    saasTools: "SaaS-Tools:",
+    activeSubs: "aktive Abonnements",
+    monthlyIT: "Monatliche IT:",
+    assessment: "GHOST TAX BEWERTUNG",
+    annualGT: "Jährliche Ghost Tax:",
+    midpoint: "Mittelwert",
+    entropyScore: "Entropie-Score:",
+    critical: "KRITISCH",
+    elevated: "ERHÖHT",
+    healthy: "GESUND",
+    entropyCoeff: "Entropie-Koeff.:",
+    coordDrag: "organisatorischer Koordinationswiderstand",
+    peerPos: "Peer-Position:",
+    lessEfficient: "weniger effizient als",
+    auditROI: "Audit-ROI:",
+    investment: "Investition",
+    recoverable: "rückholbar",
+    topActions: "TOP-RÜCKGEWINNUNGSMASSNAHMEN (nach Einsparung/Aufwand)",
+    savings: "Einsparung:",
+    effort: "Aufwand:",
+    timeline: "Zeitrahmen:",
+    days: "Tage",
+    totalRecoverable: "Gesamt Rückholbar (konservativ 60%):",
+    shadowAI: "Schatten-KI-Redundanz:",
+    trajectory: "24-MONATS-KOSTENPROGNOSE",
+    colTimeline: "Zeitraum",
+    colWithout: "Ohne Maßnahmen",
+    colWith: "Mit Governance",
+    colDelta: "Differenz",
+    now: "Jetzt",
+    months6: "6 Monate",
+    months12: "12 Monate",
+    months24: "24 Monate",
+    cumSavings: "Kumulative 24-Monats-Einsparungen:",
+    costMultiple: "x die Kosten eines initialen Audits.",
+    nextStep: "EMPFOHLENER NÄCHSTER SCHRITT",
+    step1: "1. Ghost Tax Prioritäts-Audit planen",
+    step2: "2. Vollständigen Anomaliebericht in 48h erhalten",
+    step3: "3. Top 3 Quick Wins umsetzen (ca.",
+    step3suffix: "/Jahr rückholbar)",
+    step4: "4. Typischer ROI im ersten Quartal: 15-40x",
+    contact: "Kontakt: audits@ghost-tax.com | ghost-tax.com",
+    trust: "SOC2-Infrastruktur | Zero-Knowledge-Audit | EU-Hosting",
+  },
+};
+
 // -- Report generator --
-function buildReport(cfg: any) {
-  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+function buildReport(cfg: any, locale: FmtLocale = "en") {
+  const L = REPORT_LABELS[locale];
+  const f = (n: number, short?: boolean) => fmt(n, short, locale);
+  const auditPrice = locale === "en" ? "$490" : "490 €";
+
+  const dateLocale = locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US";
+  const date = new Date().toLocaleDateString(dateLocale, { year: "numeric", month: "long", day: "numeric" });
   const lines: string[] = [];
 
   lines.push("══════════════════════════════════════════════════════════");
-  lines.push("   GHOST TAX — EXECUTIVE GHOST TAX SUMMARY");
-  lines.push("   Confidential — Prepared " + date);
+  lines.push("   " + L.title);
+  lines.push("   " + L.confidential + " " + date);
   lines.push("══════════════════════════════════════════════════════════");
   lines.push("");
-  lines.push("COMPANY PROFILE");
-  lines.push("  Company:         " + cfg.company);
-  lines.push("  Industry:        " + cfg.industry);
-  lines.push("  Headcount:       " + cfg.headcount + " employees");
-  lines.push("  SaaS Tools:      " + cfg.tools + " active subscriptions");
-  lines.push("  Monthly IT:      " + fmt(cfg.monthlyIT) + " (SaaS " + fmt(cfg.saas) + " + Cloud " + fmt(cfg.cloud) + " + AI " + fmt(cfg.ai) + ")");
+  lines.push(L.profile);
+  lines.push("  " + pad(L.company, 19) + cfg.company);
+  lines.push("  " + pad(L.industry, 19) + cfg.industry);
+  lines.push("  " + pad(L.headcount, 19) + cfg.headcount + " " + L.employees);
+  lines.push("  " + pad(L.saasTools, 19) + cfg.tools + " " + L.activeSubs);
+  lines.push("  " + pad(L.monthlyIT, 19) + f(cfg.monthlyIT) + " (SaaS " + f(cfg.saas) + " + Cloud " + f(cfg.cloud) + " + AI " + f(cfg.ai) + ")");
   lines.push("");
   lines.push("──────────────────────────────────────────────────────────");
-  lines.push("GHOST TAX ASSESSMENT");
-  lines.push("  Annual Ghost Tax:   " + fmt(cfg.ghostTaxLow) + " – " + fmt(cfg.ghostTaxHigh) + " (midpoint: " + fmt(cfg.ghostTaxMid) + ")");
-  lines.push("  Entropy Score:      " + cfg.entropyScore + "/100 (" + (cfg.entropyScore >= 61 ? "CRITICAL" : cfg.entropyScore >= 31 ? "ELEVATED" : "HEALTHY") + ")");
-  lines.push("  Entropy Coeff:      kappa = " + cfg.kappa.toFixed(3) + " (organizational coordination drag)");
-  lines.push("  Peer Position:      P" + cfg.peerPct + " — less efficient than " + cfg.peerPct + "% of " + cfg.peerLabel);
-  lines.push("  Audit ROI:          " + cfg.roi + "x ($990 investment -> " + fmt(cfg.recoverable, true) + " recoverable)");
+  lines.push(L.assessment);
+  lines.push("  " + L.annualGT + "   " + f(cfg.ghostTaxLow) + " – " + f(cfg.ghostTaxHigh) + " (" + L.midpoint + ": " + f(cfg.ghostTaxMid) + ")");
+  lines.push("  " + L.entropyScore + "      " + cfg.entropyScore + "/100 (" + (cfg.entropyScore >= 61 ? L.critical : cfg.entropyScore >= 31 ? L.elevated : L.healthy) + ")");
+  lines.push("  " + L.entropyCoeff + "      kappa = " + cfg.kappa.toFixed(3) + " (" + L.coordDrag + ")");
+  lines.push("  " + L.peerPos + "      P" + cfg.peerPct + " — " + L.lessEfficient + " " + cfg.peerPct + "% of " + cfg.peerLabel);
+  lines.push("  " + L.auditROI + "          " + cfg.roi + "x (" + auditPrice + " " + L.investment + " -> " + f(cfg.recoverable, true) + " " + L.recoverable + ")");
   lines.push("");
   lines.push("──────────────────────────────────────────────────────────");
-  lines.push("TOP RECOVERY ACTIONS (ranked by savings/effort)");
+  lines.push(L.topActions);
   lines.push("");
 
   cfg.actions.forEach((a: any, i: number) => {
     lines.push("  " + (i + 1) + ". " + a.label);
-    lines.push("     Savings: " + fmt(a.savings, true) + "/yr | Effort: " + a.effort + " | Timeline: ~" + a.days + " days");
+    lines.push("     " + L.savings + " " + f(a.savings, true) + "/yr | " + L.effort + " " + a.effort + " | " + L.timeline + " ~" + a.days + " " + L.days);
     lines.push("");
   });
 
-  lines.push("  Total Recoverable (conservative 60%): " + fmt(cfg.recoverable) + "/yr");
-  lines.push("  Shadow AI Redundancy:                  " + fmt(cfg.shadowRedundancy, true) + "/yr");
+  lines.push("  " + L.totalRecoverable + " " + f(cfg.recoverable) + "/yr");
+  lines.push("  " + L.shadowAI + "                  " + f(cfg.shadowRedundancy, true) + "/yr");
   lines.push("");
   lines.push("──────────────────────────────────────────────────────────");
-  lines.push("24-MONTH COST TRAJECTORY");
+  lines.push(L.trajectory);
   lines.push("");
-  lines.push("  Timeline        Without Action    With Governance    Delta");
-  lines.push("  Now              " + pad(fmt(cfg.burnNow), 18) + pad(fmt(cfg.burnNow), 19) + "—");
-  lines.push("  6 months         " + pad(fmt(cfg.burn6u), 18) + pad(fmt(cfg.burn6g), 19) + fmt(cfg.burn6u - cfg.burn6g, true));
-  lines.push("  12 months        " + pad(fmt(cfg.burn12u), 18) + pad(fmt(cfg.burn12g), 19) + fmt(cfg.burn12u - cfg.burn12g, true));
-  lines.push("  24 months        " + pad(fmt(cfg.burn24u), 18) + pad(fmt(cfg.burn24g), 19) + fmt(cfg.burn24u - cfg.burn24g, true));
+  lines.push("  " + pad(L.colTimeline, 18) + pad(L.colWithout, 18) + pad(L.colWith, 19) + L.colDelta);
+  lines.push("  " + pad(L.now, 18) + pad(f(cfg.burnNow), 18) + pad(f(cfg.burnNow), 19) + "—");
+  lines.push("  " + pad(L.months6, 18) + pad(f(cfg.burn6u), 18) + pad(f(cfg.burn6g), 19) + f(cfg.burn6u - cfg.burn6g, true));
+  lines.push("  " + pad(L.months12, 18) + pad(f(cfg.burn12u), 18) + pad(f(cfg.burn12g), 19) + f(cfg.burn12u - cfg.burn12g, true));
+  lines.push("  " + pad(L.months24, 18) + pad(f(cfg.burn24u), 18) + pad(f(cfg.burn24g), 19) + f(cfg.burn24u - cfg.burn24g, true));
   lines.push("");
-  lines.push("  Cumulative 24-month savings: " + fmt(cfg.savings24));
-  lines.push("  That's " + Math.round(cfg.savings24 / 990) + "x the cost of an initial audit.");
+  lines.push("  " + L.cumSavings + " " + f(cfg.savings24));
+  lines.push("  " + Math.round(cfg.savings24 / 490) + L.costMultiple);
   lines.push("");
   lines.push("──────────────────────────────────────────────────────────");
-  lines.push("RECOMMENDED NEXT STEP");
+  lines.push(L.nextStep);
   lines.push("");
-  lines.push("  1. Schedule a Ghost Tax Priority Audit ($990)");
-  lines.push("  2. Receive full anomaly report within 48 hours");
-  lines.push("  3. Implement top 3 quick wins (est. " + fmt(cfg.actions.slice(0, 3).reduce((s: number, a: any) => s + a.savings, 0), true) + "/yr recovered)");
-  lines.push("  4. Typical first-quarter ROI: 15-40x");
+  lines.push("  " + L.step1 + " (" + auditPrice + ")");
+  lines.push("  " + L.step2);
+  lines.push("  " + L.step3 + " " + f(cfg.actions.slice(0, 3).reduce((s: number, a: any) => s + a.savings, 0), true) + L.step3suffix);
+  lines.push("  " + L.step4);
   lines.push("");
-  lines.push("  Contact: audits@ghost-tax.com | ghost-tax.com");
-  lines.push("  SOC2 Type II Readiness | Zero-Knowledge Audit | US Data Residency");
+  lines.push("  " + L.contact);
+  lines.push("  " + L.trust);
   lines.push("══════════════════════════════════════════════════════════");
 
   return lines.join("\n");
@@ -100,7 +276,7 @@ function downloadTxt(content: string, filename: string) {
 // MAIN
 // ====================================================
 export default function BoardReport() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [cfg, setCfg] = useState({
     company: "Acme Corp",
     industry: "SaaS / Tech",
@@ -134,7 +310,7 @@ export default function BoardReport() {
     ],
   });
 
-  const reportText = useMemo(() => buildReport(cfg), [cfg]);
+  const reportText = useMemo(() => buildReport(cfg, locale as FmtLocale), [cfg, locale]);
 
   const handleDownload = useCallback(() => {
     const filename = "ghost-tax-report-" + cfg.company.toLowerCase().replace(/[^a-z0-9]/g, "-") + "-" + new Date().toISOString().slice(0, 10) + ".txt";
@@ -204,7 +380,7 @@ export default function BoardReport() {
             color: c.text2,
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-            background: "rgba(0,0,0,0.22)",
+            background: "#F8FAFC",
             padding: 16,
             borderRadius: 9,
             border: "1px solid " + c.border,

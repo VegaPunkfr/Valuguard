@@ -286,7 +286,7 @@ export async function POST(request: NextRequest) {
     // ── Auto-enroll in drip sequence ──────────────────────────
     // Insert into outreach_leads so the cron-triggered drip sequence picks them up
     const now = new Date();
-    const nextSend = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Touch 2 in 3 days
+    const nextSend = now.toISOString(); // Touch 1 sends immediately via drip cron
     await (supabase as any).from("outreach_leads").upsert(
       {
         email: row.email,
@@ -297,9 +297,8 @@ export async function POST(request: NextRequest) {
         locale: row.locale || "en",
         source: row.source || "vault-persist",
         status: "active",
-        drip_step: 1, // Touch 1 is the vault capture itself
-        last_sent_at: now.toISOString(),
-        next_send_at: nextSend.toISOString(),
+        drip_step: 0, // Start at 0 so Touch 1 email fires on next cron run
+        next_send_at: nextSend,
         unsubscribed: false,
         converted: false,
       },

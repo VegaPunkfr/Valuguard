@@ -2,7 +2,7 @@
  * GHOST TAX — POST-SCAN DRIP EMAIL TEMPLATES (SERVER-ONLY)
  *
  * 5-touch nurture sequence for leads who completed a free scan
- * but have not yet purchased Rail A ($990).
+ * but have not yet purchased Rail A ($490).
  *
  * Touch 1 (Day 0):  "Your free scan results" + teaser of full report
  * Touch 2 (Day 3):  "The cost of waiting" + daily leakage math
@@ -14,7 +14,7 @@
  * Accumulated leak since scan = dailyCost * daysSinceScan.
  *
  * Locale support: EN, FR, DE (full translations).
- * Design: dark theme (#060912), monospace data, #3b82f6 CTAs.
+ * Design: enterprise light theme (#FFFFFF), monospace data, #3b82f6 CTAs.
  * Compliance: CAN-SPAM + GDPR (unsubscribe link in every email).
  */
 
@@ -62,9 +62,14 @@ const T = {
     de: "Abmelden",
   },
   complianceText: {
-    en: "Ghost Tax Inc. | Wilmington, DE, USA | This communication is for informational purposes only.",
-    fr: "Ghost Tax Inc. | Wilmington, DE, USA | Cette communication est \u00e0 titre informatif uniquement.",
-    de: "Ghost Tax Inc. | Wilmington, DE, USA | Diese Mitteilung dient ausschlie\u00dflich Informationszwecken.",
+    en: "Ghost Tax SAS \u2014 Decision Intelligence for IT Spend",
+    fr: "Ghost Tax SAS \u2014 Intelligence D\u00e9cisionnelle pour les D\u00e9penses IT",
+    de: "Ghost Tax SAS \u2014 Entscheidungsintelligenz f\u00fcr IT-Ausgaben",
+  },
+  trustSignals: {
+    en: "SOC 2 Type II (in progress) \u00b7 GDPR Compliant \u00b7 Data purged after 30 days",
+    fr: "SOC 2 Type II (en cours) \u00b7 Conforme RGPD \u00b7 Donn\u00e9es purg\u00e9es apr\u00e8s 30 jours",
+    de: "SOC 2 Type II (in Vorbereitung) \u00b7 DSGVO-konform \u00b7 Daten nach 30 Tagen gel\u00f6scht",
   },
   oneTimePayment: {
     en: "One-time payment",
@@ -118,9 +123,9 @@ const T = {
     de: "PEER-PERZENTIL",
   },
   t1Body: {
-    en: (c: string) => `This is a preliminary estimate for <strong style="color:#e4e9f4">${c}</strong> based on publicly available data. The full Decision Pack includes 21 intelligence phases, vendor-level attribution, negotiation playbooks, and an executive-ready CFO memo.`,
-    fr: (c: string) => `Il s'agit d'une estimation pr\u00e9liminaire pour <strong style="color:#e4e9f4">${c}</strong> bas\u00e9e sur les donn\u00e9es publiquement accessibles. Le Decision Pack complet comprend 21 phases d'intelligence, l'attribution par fournisseur, les protocoles de n\u00e9gociation et un m\u00e9mo CFO pr\u00eat \u00e0 l'emploi.`,
-    de: (c: string) => `Dies ist eine vorl\u00e4ufige Sch\u00e4tzung f\u00fcr <strong style="color:#e4e9f4">${c}</strong> basierend auf \u00f6ffentlich verf\u00fcgbaren Daten. Das vollst\u00e4ndige Decision Pack umfasst 21 Intelligence-Phasen, Anbieter-Attribution, Verhandlungsleitf\u00e4den und ein Executive-CFO-Memo.`,
+    en: (c: string) => `This is a preliminary estimate for <strong style="color:#0F172A">${c}</strong> based on publicly available data. The full Decision Pack includes 21 intelligence phases, vendor-level attribution, negotiation playbooks, and an executive-ready CFO memo.`,
+    fr: (c: string) => `Il s'agit d'une estimation pr\u00e9liminaire pour <strong style="color:#0F172A">${c}</strong> bas\u00e9e sur les donn\u00e9es publiquement accessibles. Le Decision Pack complet comprend 21 phases d'intelligence, l'attribution par fournisseur, les protocoles de n\u00e9gociation et un m\u00e9mo CFO pr\u00eat \u00e0 l'emploi.`,
+    de: (c: string) => `Dies ist eine vorl\u00e4ufige Sch\u00e4tzung f\u00fcr <strong style="color:#0F172A">${c}</strong> basierend auf \u00f6ffentlich verf\u00fcgbaren Daten. Das vollst\u00e4ndige Decision Pack umfasst 21 Intelligence-Phasen, Anbieter-Attribution, Verhandlungsleitf\u00e4den und ein Executive-CFO-Memo.`,
   },
   t1TeaserLabel: {
     en: "WHAT THE FULL REPORT REVEALS",
@@ -148,9 +153,9 @@ const T = {
     ],
   },
   t1Cta: {
-    en: "Unlock Full Decision Pack \u2014 $990",
-    fr: "D\u00e9bloquer le Decision Pack complet \u2014 $990",
-    de: "Vollst\u00e4ndiges Decision Pack freischalten \u2014 $990",
+    en: "Unlock Full Decision Pack \u2014 $490",
+    fr: "Obtenir le Decision Pack complet \u2014 490\u00a0\u20ac",
+    de: "Vollst\u00e4ndiges Decision Pack anfordern \u2014 490\u00a0\u20ac",
   },
 
   // Touch 2
@@ -183,14 +188,14 @@ const T = {
     de: "Exposition w\u00e4chst nicht linear. Sie verst\u00e4rkt sich durch automatische Verl\u00e4ngerungen, Shadow-IT-Proliferation und unkontrollierte KI-Tool-Adoption. Jeder Tag ohne Korrekturprotokoll ist ein Tag beschleunigter Verluste.",
   },
   t2Compare: {
-    en: (daily: string) => `Your estimated daily exposure (<strong style="color:#ef4444">${daily} EUR</strong>) is more than the cost of the complete report (<strong style="color:#34d399">$990</strong>). One day of exposure pays for the entire analysis.`,
-    fr: (daily: string) => `Votre exposition quotidienne estim\u00e9e (<strong style="color:#ef4444">${daily} EUR</strong>) d\u00e9passe le co\u00fbt du rapport complet (<strong style="color:#34d399">$990</strong>). Un seul jour d'exposition finance l'analyse compl\u00e8te.`,
-    de: (daily: string) => `Ihre gesch\u00e4tzte t\u00e4gliche Exposition (<strong style="color:#ef4444">${daily} EUR</strong>) \u00fcbersteigt die Kosten des vollst\u00e4ndigen Berichts (<strong style="color:#34d399">$990</strong>). Ein Tag Exposition finanziert die gesamte Analyse.`,
+    en: (daily: string) => `Your estimated daily exposure (<strong style="color:#DC2626">${daily} EUR</strong>) exceeds the cost of the complete Decision Pack (<strong style="color:#059669">$490</strong>). A single day of unaddressed exposure covers the cost of the full analysis.`,
+    fr: (daily: string) => `Votre exposition quotidienne estim\u00e9e (<strong style="color:#DC2626">${daily}\u00a0\u20ac</strong>) d\u00e9passe le co\u00fbt du Decision Pack complet (<strong style="color:#059669">490\u00a0\u20ac</strong>). Un seul jour d\u2019exposition non trait\u00e9e couvre le co\u00fbt de l\u2019analyse compl\u00e8te.`,
+    de: (daily: string) => `Ihre gesch\u00e4tzte t\u00e4gliche Exposition (<strong style="color:#DC2626">${daily}\u00a0\u20ac</strong>) \u00fcbersteigt die Kosten des vollst\u00e4ndigen Decision Packs (<strong style="color:#059669">490\u00a0\u20ac</strong>). Ein einziger Tag unbehandelter Exposition deckt die Kosten der gesamten Analyse.`,
   },
   t2Cta: {
-    en: "Stop the Leak \u2014 $990",
-    fr: "Stopper la fuite \u2014 $990",
-    de: "Leck stoppen \u2014 $990",
+    en: "Stop the Leak \u2014 Get Your Decision Pack",
+    fr: "Stopper la fuite \u2014 Obtenir votre Decision Pack",
+    de: "Verluste stoppen \u2014 Decision Pack anfordern",
   },
 
   // Touch 3
@@ -252,9 +257,9 @@ const T = {
     ],
   },
   t3Cta: {
-    en: "See Your Full Position \u2014 $990",
-    fr: "Voir votre position compl\u00e8te \u2014 $990",
-    de: "Vollst\u00e4ndige Position einsehen \u2014 $990",
+    en: "See Your Full Position \u2014 $490",
+    fr: "Voir votre positionnement complet \u2014 490\u00a0\u20ac",
+    de: "Vollst\u00e4ndige Positionsanalyse \u2014 490\u00a0\u20ac",
   },
 
   // Touch 4
@@ -294,14 +299,14 @@ const T = {
     de: "Kosten der vollst\u00e4ndigen Analyse",
   },
   t4Body: {
-    en: (c: string) => `Every day that passes without corrective action at <strong style="color:#e4e9f4">${c}</strong> compounds the exposure. Auto-renewals lock in inflated rates. Shadow IT adoption accelerates. AI tool sprawl goes undetected. The $990 analysis pays for itself within hours of identified savings.`,
-    fr: (c: string) => `Chaque jour qui passe sans action corrective chez <strong style="color:#e4e9f4">${c}</strong> compose l'exposition. Les renouvellements automatiques verrouillent des tarifs gonfl\u00e9s. L'adoption de Shadow IT acc\u00e9l\u00e8re. La prolif\u00e9ration des outils IA passe inaper\u00e7ue. L'analyse \u00e0 $990 s'amortit en quelques heures d'\u00e9conomies identifi\u00e9es.`,
-    de: (c: string) => `Jeder Tag ohne Korrekturma\u00dfnahme bei <strong style="color:#e4e9f4">${c}</strong> verst\u00e4rkt die Exposition. Automatische Verl\u00e4ngerungen zementieren \u00fcberh\u00f6hte Tarife. Shadow-IT-Adoption beschleunigt sich. KI-Tool-Wildwuchs bleibt unerkannt. Die $990-Analyse amortisiert sich innerhalb von Stunden identifizierter Einsparungen.`,
+    en: (c: string) => `Every day that passes without corrective action at <strong style="color:#0F172A">${c}</strong> compounds the exposure. Auto-renewals lock in inflated rates. Shadow IT adoption accelerates. AI tool sprawl goes undetected. The Decision Pack pays for itself within hours of identified savings.`,
+    fr: (c: string) => `Chaque jour sans action corrective chez <strong style="color:#0F172A">${c}</strong> compose l\u2019exposition. Les renouvellements automatiques verrouillent des tarifs gonfl\u00e9s. L\u2019adoption de Shadow IT acc\u00e9l\u00e8re. La prolif\u00e9ration des outils IA passe inaper\u00e7ue. Le Decision Pack s\u2019amortit en quelques heures d\u2019\u00e9conomies identifi\u00e9es.`,
+    de: (c: string) => `Jeder Tag ohne Korrekturma\u00dfnahme bei <strong style="color:#0F172A">${c}</strong> verst\u00e4rkt die Exposition. Automatische Verl\u00e4ngerungen zementieren \u00fcberh\u00f6hte Tarife. Shadow-IT-Adoption beschleunigt sich. KI-Tool-Wildwuchs bleibt unerkannt. Das Decision Pack amortisiert sich innerhalb von Stunden identifizierter Einsparungen.`,
   },
   t4Cta: {
-    en: "Order Full Report \u2014 $990",
-    fr: "Commander le rapport complet \u2014 $990",
-    de: "Vollst\u00e4ndigen Bericht bestellen \u2014 $990",
+    en: "Order Full Decision Pack \u2014 $490",
+    fr: "Commander le Decision Pack complet \u2014 490\u00a0\u20ac",
+    de: "Vollst\u00e4ndiges Decision Pack bestellen \u2014 490\u00a0\u20ac",
   },
 
   // Touch 5
@@ -351,9 +356,9 @@ const T = {
     de: "Dies ist unsere letzte Benachrichtigung. Wir werden Sie zu diesem Scan nicht erneut kontaktieren. Sollte sich Ihr Expositionsprofil \u00e4ndern oder Sie sp\u00e4ter zur\u00fcckkehren wollen, steht ghost-tax.com jederzeit zur Verf\u00fcgung.",
   },
   t5Cta: {
-    en: "Secure Your Decision Pack \u2014 $990",
-    fr: "Obtenir votre Decision Pack \u2014 $990",
-    de: "Decision Pack sichern \u2014 $990",
+    en: "Secure Your Decision Pack \u2014 $490",
+    fr: "Obtenir votre Decision Pack \u2014 490\u00a0\u20ac",
+    de: "Decision Pack sichern \u2014 490\u00a0\u20ac",
   },
 } as const;
 
@@ -409,15 +414,15 @@ function emailWrapper(content: string, preheader: string, unsubscribeUrl: string
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>Ghost Tax</title>
   <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
 </head>
-<body style="margin:0;padding:0;background:#060912;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased">
 
   <!-- Preheader (hidden) -->
-  <div style="display:none;font-size:1px;color:#060912;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">
+  <div style="display:none;font-size:1px;color:#FFFFFF;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">
     ${preheader}
     ${"&nbsp;&zwnj;".repeat(30)}
   </div>
@@ -425,18 +430,25 @@ function emailWrapper(content: string, preheader: string, unsubscribeUrl: string
   <div style="max-width:600px;margin:0 auto;padding:32px 20px">
 
     <!-- Header -->
-    <div style="margin-bottom:28px;border-bottom:1px solid #1a1f2e;padding-bottom:16px">
-      <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;margin:0 0 4px 0;font-family:'Courier New',Courier,monospace">${T.ghostTaxLabel[locale]}</p>
-      <p style="font-size:9px;letter-spacing:0.12em;color:#55637d;text-transform:uppercase;margin:0;font-family:'Courier New',Courier,monospace">${T.briefingLabel[locale]}</p>
+    <div style="margin-bottom:28px;border-bottom:1px solid #E2E8F0;padding-bottom:16px">
+      <p style="font-size:11px;letter-spacing:0.22em;color:#3b82f6;text-transform:uppercase;margin:0 0 6px 0;font-family:'Courier New',Courier,monospace;font-weight:700">${T.ghostTaxLabel[locale]}</p>
+      <p style="font-size:9px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0;font-family:'Courier New',Courier,monospace">${T.briefingLabel[locale]}</p>
     </div>
 
     ${content}
 
     <!-- Footer -->
-    <div style="border-top:1px solid #1a1f2e;margin-top:32px;padding-top:20px">
-      <p style="font-size:10px;color:#3a4560;line-height:1.6;margin:0 0 8px 0">${T.unsubText[locale]}</p>
-      <a href="${unsubscribeUrl}" style="font-size:10px;color:#55637d;text-decoration:underline">${T.unsubLink[locale]}</a>
-      <p style="font-size:9px;color:#2a3347;margin:12px 0 0 0">${T.complianceText[locale]}</p>
+    <div style="border-top:1px solid #E2E8F0;margin-top:32px;padding-top:24px">
+      <!-- Trust Signals -->
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:12px 16px;margin:0 0 16px 0;text-align:center">
+        <p style="font-size:9px;letter-spacing:0.08em;color:#64748B;margin:0;font-family:'Courier New',Courier,monospace">${T.trustSignals[locale]}</p>
+      </div>
+      <!-- Unsubscribe -->
+      <p style="font-size:10px;color:#94A3B8;line-height:1.6;margin:0 0 8px 0">${T.unsubText[locale]}</p>
+      <a href="${unsubscribeUrl}" style="font-size:10px;color:#64748B;text-decoration:underline">${T.unsubLink[locale]}</a>
+      <!-- Company Signature -->
+      <p style="font-size:10px;color:#94A3B8;margin:16px 0 0 0;font-weight:600">${T.complianceText[locale]}</p>
+      <p style="font-size:9px;color:#94A3B8;margin:4px 0 0 0">ghost-tax.com</p>
     </div>
 
   </div>
@@ -447,38 +459,44 @@ function emailWrapper(content: string, preheader: string, unsubscribeUrl: string
 // ── CTA Button ───────────────────────────────────────────
 
 function ctaButton(text: string, url: string, color: string = "#3b82f6"): string {
+  const bgGradient = color === "#ef4444"
+    ? "background:linear-gradient(135deg,#DC2626 0%,#B91C1C 100%)"
+    : "background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)";
+  const shadow = "box-shadow:0 1px 3px rgba(0,0,0,0.06)";
   return `<div style="text-align:center;margin:0 0 24px 0">
-  <a href="${url}" style="display:inline-block;background:${color};color:#fff;padding:14px 36px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.02em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">${text}</a>
+  <a href="${url}" style="display:inline-block;${bgGradient};color:#ffffff;padding:16px 40px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.03em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;${shadow};border:none">${text}</a>
 </div>`;
 }
 
 function paymentTerms(locale: L): string {
-  return `<p style="font-size:11px;color:#55637d;text-align:center;margin:0">
-  ${T.oneTimePayment[locale]} | ${T.reportIn48h[locale]} | ${T.noCommitment[locale]}
-</p>`;
+  return `<div style="text-align:center;margin:0">
+  <p style="font-size:10px;color:#64748B;letter-spacing:0.04em;margin:0;font-family:'Courier New',Courier,monospace">
+    ${T.oneTimePayment[locale]} &nbsp;\u00b7&nbsp; ${T.reportIn48h[locale]} &nbsp;\u00b7&nbsp; ${T.noCommitment[locale]}
+  </p>
+</div>`;
 }
 
 // ── Data Card Components ─────────────────────────────────
 
 function exposureCard(label: string, lowEur: number, highEur: number, subtext: string): string {
-  return `<div style="background:#0e1221;border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:20px;margin:0 0 24px 0;text-align:center">
-  <p style="font-size:9px;letter-spacing:0.12em;color:#ef4444;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${label}</p>
-  <p style="font-family:'Courier New',Courier,monospace;font-size:28px;font-weight:800;color:#ef4444;margin:0 0 4px 0">${fmtEurRange(lowEur, highEur)} &euro;</p>
-  <p style="font-size:11px;color:#55637d;margin:0">${subtext}</p>
+  return `<div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin:0 0 24px 0;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+  <p style="font-size:9px;letter-spacing:0.14em;color:#DC2626;text-transform:uppercase;margin:0 0 10px 0;font-family:'Courier New',Courier,monospace">${label}</p>
+  <p style="font-family:'Courier New',Courier,monospace;font-size:30px;font-weight:800;color:#DC2626;margin:0 0 6px 0;letter-spacing:-0.01em">${fmtEurRange(lowEur, highEur)} &euro;</p>
+  <p style="font-size:11px;color:#64748B;margin:0">${subtext}</p>
 </div>`;
 }
 
-function metricRow(label: string, value: string, valueColor: string = "#8d9bb5", bold: boolean = false): string {
+function metricRow(label: string, value: string, valueColor: string = "#475569", bold: boolean = false): string {
   const fw = bold ? "font-weight:700;" : "";
   return `<tr>
-  <td style="padding:10px;border-bottom:1px solid #1a1f2e;color:#55637d;font-size:13px">${label}</td>
-  <td style="padding:10px;border-bottom:1px solid #1a1f2e;color:${valueColor};font-family:'Courier New',Courier,monospace;text-align:right;font-size:13px;${fw}">${value}</td>
+  <td style="padding:11px 10px;border-bottom:1px solid #E2E8F0;color:#475569;font-size:13px">${label}</td>
+  <td style="padding:11px 10px;border-bottom:1px solid #E2E8F0;color:${valueColor};font-family:'Courier New',Courier,monospace;text-align:right;font-size:13px;${fw}">${value}</td>
 </tr>`;
 }
 
 function dataTable(label: string, labelColor: string, rows: string): string {
-  return `<div style="background:#0e1221;border:1px solid rgba(${labelColor === "#ef4444" ? "239,68,68" : labelColor === "#3b82f6" ? "59,130,246" : "55,99,125"},0.15);border-radius:8px;padding:20px;margin:0 0 24px 0">
-  <p style="font-size:9px;letter-spacing:0.12em;color:${labelColor};text-transform:uppercase;margin:0 0 16px 0;font-family:'Courier New',Courier,monospace">${label}</p>
+  return `<div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin:0 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+  <p style="font-size:9px;letter-spacing:0.14em;color:${labelColor};text-transform:uppercase;margin:0 0 16px 0;font-family:'Courier New',Courier,monospace;font-weight:600">${label}</p>
   <table style="width:100%;border-collapse:collapse">${rows}</table>
 </div>`;
 }
@@ -494,7 +512,7 @@ function buildTouch1(data: DripData): DripEmailResult {
   const preheader = T.t1Preheader[l](fmtEur(exposureLowEur), fmtEur(exposureHighEur));
 
   const teaserItems = T.t1TeaserItems[l]
-    .map(item => `<tr><td style="padding:6px 0 6px 0;vertical-align:top;color:#3b82f6;font-family:'Courier New',Courier,monospace;font-size:12px;width:16px">&bull;</td><td style="padding:6px 0 6px 8px;color:#8d9bb5;font-size:12px;line-height:1.5">${item}</td></tr>`)
+    .map(item => `<tr><td style="padding:6px 0 6px 0;vertical-align:top;color:#3b82f6;font-family:'Courier New',Courier,monospace;font-size:12px;width:16px">&bull;</td><td style="padding:6px 0 6px 8px;color:#475569;font-size:12px;line-height:1.5">${item}</td></tr>`)
     .join("");
 
   const subtext = l === "en" ? `Based on scan of ${domain}`
@@ -502,7 +520,7 @@ function buildTouch1(data: DripData): DripEmailResult {
     : `Basierend auf dem Scan von ${domain}`;
 
   const html = emailWrapper(`
-    <p style="font-size:14px;color:#e4e9f4;line-height:1.7;margin:0 0 20px 0">
+    <p style="font-size:14px;color:#0F172A;line-height:1.7;margin:0 0 20px 0">
       ${T.t1Greeting[l]}
     </p>
 
@@ -510,23 +528,23 @@ function buildTouch1(data: DripData): DripEmailResult {
 
     <!-- Metrics Row -->
     <div style="display:flex;margin:0 0 24px 0">
-      <div style="flex:1;background:#0e1221;border-radius:8px;padding:16px;margin-right:8px;text-align:center">
-        <p style="font-size:8px;letter-spacing:0.1em;color:#55637d;text-transform:uppercase;margin:0 0 6px 0;font-family:'Courier New',Courier,monospace">${T.t1EntropyLabel[l]}</p>
-        <p style="font-family:'Courier New',Courier,monospace;font-size:22px;font-weight:800;color:#f59e0b;margin:0">${entropyScore}</p>
+      <div style="flex:1;background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border-radius:10px;padding:18px;margin-right:8px;text-align:center;border:1px solid #E2E8F0">
+        <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t1EntropyLabel[l]}</p>
+        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#D97706;margin:0">${entropyScore}</p>
       </div>
-      <div style="flex:1;background:#0e1221;border-radius:8px;padding:16px;margin-left:8px;text-align:center">
-        <p style="font-size:8px;letter-spacing:0.1em;color:#55637d;text-transform:uppercase;margin:0 0 6px 0;font-family:'Courier New',Courier,monospace">${T.t1PercentileLabel[l]}</p>
-        <p style="font-family:'Courier New',Courier,monospace;font-size:22px;font-weight:800;color:#f59e0b;margin:0">P${peerPercentile}</p>
+      <div style="flex:1;background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border-radius:10px;padding:18px;margin-left:8px;text-align:center;border:1px solid #E2E8F0">
+        <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t1PercentileLabel[l]}</p>
+        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#D97706;margin:0">P${peerPercentile}</p>
       </div>
     </div>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">
       ${T.t1Body[l](companyName)}
     </p>
 
     <!-- Teaser List -->
-    <div style="background:#0e1221;border:1px solid rgba(59,130,246,0.15);border-radius:8px;padding:20px;margin:0 0 24px 0">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#3b82f6;text-transform:uppercase;margin:0 0 14px 0;font-family:'Courier New',Courier,monospace">${T.t1TeaserLabel[l]}</p>
+    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin:0 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <p style="font-size:9px;letter-spacing:0.14em;color:#3b82f6;text-transform:uppercase;margin:0 0 14px 0;font-family:'Courier New',Courier,monospace;font-weight:600">${T.t1TeaserLabel[l]}</p>
       <table style="width:100%;border-collapse:collapse">${teaserItems}</table>
     </div>
 
@@ -573,23 +591,23 @@ function buildTouch2(data: DripData): DripEmailResult {
   const preheader = T.t2Preheader[l](fmtEur(leaked));
 
   const html = emailWrapper(`
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 20px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 20px 0">
       ${T.t2Body[l]}
     </p>
 
-    ${dataTable(T.t2CostLabel[l], "#ef4444",
-      metricRow(T.t2DailyLabel[l], `${fmtEur(Math.round(daily))} \u20ac`, "#ef4444", true) +
-      metricRow(T.t2MonthlyLabel[l], `${fmtEur(monthlyLeak)} \u20ac`, "#f59e0b", true) +
-      metricRow(T.t2AnnualLabel[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#ef4444", true)
+    ${dataTable(T.t2CostLabel[l], "#DC2626",
+      metricRow(T.t2DailyLabel[l], `${fmtEur(Math.round(daily))} \u20ac`, "#DC2626", true) +
+      metricRow(T.t2MonthlyLabel[l], `${fmtEur(monthlyLeak)} \u20ac`, "#D97706", true) +
+      metricRow(T.t2AnnualLabel[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true)
     )}
 
     <!-- Leaked Since Scan -->
-    <div style="background:#0e1221;border:2px solid rgba(239,68,68,0.25);border-radius:8px;padding:24px;margin:0 0 24px 0;text-align:center">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#ef4444;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t2SinceScanLabel[l](daysElapsed)}</p>
-      <p style="font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:900;color:#ef4444;margin:0">${fmtEur(leaked)} &euro;</p>
+    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:2px solid #E2E8F0;border-radius:10px;padding:28px;margin:0 0 24px 0;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <p style="font-size:9px;letter-spacing:0.14em;color:#DC2626;text-transform:uppercase;margin:0 0 10px 0;font-family:'Courier New',Courier,monospace">${T.t2SinceScanLabel[l](daysElapsed)}</p>
+      <p style="font-family:'Courier New',Courier,monospace;font-size:34px;font-weight:900;color:#DC2626;margin:0;letter-spacing:-0.01em">${fmtEur(leaked)} &euro;</p>
     </div>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">
       ${T.t2Compare[l](fmtEur(Math.round(daily)))}
     </p>
 
@@ -631,31 +649,31 @@ function buildTouch3(data: DripData): DripEmailResult {
   const preheader = T.t3Preheader[l](peerPercentile);
 
   const socialItems = T.t3SocialProofItems[l]
-    .map(item => `<tr><td style="padding:8px 0 8px 0;vertical-align:top;width:20px"><div style="width:6px;height:6px;background:#34d399;border-radius:50%;margin-top:6px"></div></td><td style="padding:8px 0 8px 8px;color:#8d9bb5;font-size:12px;line-height:1.6">${item}</td></tr>`)
+    .map(item => `<tr><td style="padding:8px 0 8px 0;vertical-align:top;width:20px"><div style="width:6px;height:6px;background:#059669;border-radius:50%;margin-top:6px"></div></td><td style="padding:8px 0 8px 8px;color:#475569;font-size:12px;line-height:1.6">${item}</td></tr>`)
     .join("");
 
   // Percentile bar
   const barFill = Math.min(100, Math.max(5, peerPercentile));
-  const barColor = peerPercentile >= 70 ? "#ef4444" : peerPercentile >= 40 ? "#f59e0b" : "#34d399";
+  const barColor = peerPercentile >= 70 ? "#DC2626" : peerPercentile >= 40 ? "#D97706" : "#059669";
 
   const html = emailWrapper(`
     ${dataTable(T.t3BenchmarkLabel[l], "#3b82f6",
-      metricRow(T.t3YourExposure[l](companyName), `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#ef4444", true) +
-      metricRow(T.t3IndustryAvg[l], `${fmtEur(industryAvg)} \u20ac`, "#8d9bb5") +
-      metricRow(T.t3EntropyScore[l], `${entropyScore}/100`, "#f59e0b", true)
+      metricRow(T.t3YourExposure[l](companyName), `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true) +
+      metricRow(T.t3IndustryAvg[l], `${fmtEur(industryAvg)} \u20ac`, "#475569") +
+      metricRow(T.t3EntropyScore[l], `${entropyScore}/100`, "#D97706", true)
     )}
 
     <!-- Percentile Bar -->
-    <div style="background:#0e1221;border-radius:8px;padding:20px;margin:0 0 24px 0">
-      <p style="font-size:11px;color:#8d9bb5;margin:0 0 10px 0">${T.t3Percentile[l](peerPercentile)}</p>
-      <div style="background:#171e30;border-radius:4px;height:8px;width:100%">
+    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border-radius:10px;padding:20px;margin:0 0 24px 0;border:1px solid #E2E8F0">
+      <p style="font-size:11px;color:#475569;margin:0 0 10px 0">${T.t3Percentile[l](peerPercentile)}</p>
+      <div style="background:#E2E8F0;border-radius:4px;height:8px;width:100%">
         <div style="background:${barColor};border-radius:4px;height:8px;width:${barFill}%"></div>
       </div>
     </div>
 
     <!-- Social Proof -->
-    <div style="background:#0e1221;border:1px solid rgba(52,211,153,0.12);border-radius:8px;padding:20px;margin:0 0 24px 0">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#34d399;text-transform:uppercase;margin:0 0 14px 0;font-family:'Courier New',Courier,monospace">${T.t3SocialProofLabel[l]}</p>
+    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin:0 0 24px 0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <p style="font-size:9px;letter-spacing:0.14em;color:#059669;text-transform:uppercase;margin:0 0 14px 0;font-family:'Courier New',Courier,monospace;font-weight:600">${T.t3SocialProofLabel[l]}</p>
       <table style="width:100%;border-collapse:collapse">${socialItems}</table>
     </div>
 
@@ -706,19 +724,19 @@ function buildTouch4(data: DripData): DripEmailResult {
 
   const html = emailWrapper(`
     <!-- Accumulated Loss Hero -->
-    <div style="background:#0e1221;border:2px solid rgba(239,68,68,0.3);border-radius:8px;padding:28px;margin:0 0 24px 0;text-align:center">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#ef4444;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t4AccumulatedLabel[l](daysElapsed)}</p>
-      <p style="font-family:'Courier New',Courier,monospace;font-size:36px;font-weight:900;color:#ef4444;margin:0">${fmtEur(leaked)} &euro;</p>
+    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:2px solid #E2E8F0;border-radius:10px;padding:32px;margin:0 0 24px 0;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <p style="font-size:9px;letter-spacing:0.14em;color:#DC2626;text-transform:uppercase;margin:0 0 10px 0;font-family:'Courier New',Courier,monospace">${T.t4AccumulatedLabel[l](daysElapsed)}</p>
+      <p style="font-family:'Courier New',Courier,monospace;font-size:36px;font-weight:900;color:#DC2626;margin:0;letter-spacing:-0.01em">${fmtEur(leaked)} &euro;</p>
     </div>
 
-    ${dataTable(T.t4AccumulatedLabel[l](daysElapsed), "#ef4444",
-      metricRow(T.t4AtScan[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac${T.perYear[l]}`, "#8d9bb5") +
-      metricRow(T.t4SinceScan[l](daysElapsed), `${fmtEur(leaked)} \u20ac`, "#ef4444", true) +
-      metricRow(T.t4ProjectedAnnual[l], `${fmtEurRange(projectedLow, projectedHigh)} \u20ac${T.perYear[l]}`, "#f59e0b", true) +
-      metricRow(T.t4ReportCost[l], "$990", "#34d399", true)
+    ${dataTable(T.t4AccumulatedLabel[l](daysElapsed), "#DC2626",
+      metricRow(T.t4AtScan[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac${T.perYear[l]}`, "#475569") +
+      metricRow(T.t4SinceScan[l](daysElapsed), `${fmtEur(leaked)} \u20ac`, "#DC2626", true) +
+      metricRow(T.t4ProjectedAnnual[l], `${fmtEurRange(projectedLow, projectedHigh)} \u20ac${T.perYear[l]}`, "#D97706", true) +
+      metricRow(T.t4ReportCost[l], l === "en" ? "$490" : "490\u00a0\u20ac", "#059669", true)
     )}
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">
       ${T.t4Body[l](companyName)}
     </p>
 
@@ -731,7 +749,7 @@ function buildTouch4(data: DripData): DripEmailResult {
 - ${T.t4AtScan[l]}: ${fmtEurRange(exposureLowEur, exposureHighEur)} EUR${T.perYear[l]}
 - ${T.t4SinceScan[l](daysElapsed)}: ${fmtEur(leaked)} EUR
 - ${T.t4ProjectedAnnual[l]}: ${fmtEurRange(projectedLow, projectedHigh)} EUR${T.perYear[l]}
-- ${T.t4ReportCost[l]}: $990
+- ${T.t4ReportCost[l]}: $490
 
 ${stripHtml(T.t4Body[l](companyName))}
 
@@ -757,24 +775,24 @@ function buildTouch5(data: DripData): DripEmailResult {
   const daysElapsed = Math.max(21, daysSince(scanDate));
   const leaked = accumulatedLeak(ghostTaxAnnual, scanDate, daysElapsed);
   const daily = dailyLeak(ghostTaxAnnual);
-  const roi = daily > 0 ? Math.round((daily / 990) * 100) : 0;
+  const roi = daily > 0 ? Math.round((daily / 490) * 100) : 0;
 
   const subject = T.t5Subject[l](companyName);
   const preheader = T.t5Preheader[l](fmtEur(leaked));
 
   const html = emailWrapper(`
     <!-- Final Summary Card -->
-    ${dataTable(T.t5UrgencyLabel[l], "#ef4444",
-      metricRow(T.t5DaysSinceScan[l], `${daysElapsed}`, "#8d9bb5", true) +
-      metricRow(T.t5EstLeaked[l], `${fmtEur(leaked)} \u20ac`, "#ef4444", true) +
-      metricRow(T.t5AnnualExposure[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#ef4444", true) +
-      metricRow(T.t5ReportCost[l], "$990", "#34d399", true) +
-      metricRow(T.t5Roi[l], `${roi}%`, "#34d399", true)
+    ${dataTable(T.t5UrgencyLabel[l], "#DC2626",
+      metricRow(T.t5DaysSinceScan[l], `${daysElapsed}`, "#475569", true) +
+      metricRow(T.t5EstLeaked[l], `${fmtEur(leaked)} \u20ac`, "#DC2626", true) +
+      metricRow(T.t5AnnualExposure[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true) +
+      metricRow(T.t5ReportCost[l], l === "en" ? "$490" : "490\u00a0\u20ac", "#059669", true) +
+      metricRow(T.t5Roi[l], `${roi}%`, "#059669", true)
     )}
 
     ${ctaButton(T.t5Cta[l], checkoutUrl, "#ef4444")}
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.7;margin:0 0 24px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">
       ${T.t5FinalBody[l]}
     </p>
 
@@ -785,7 +803,7 @@ function buildTouch5(data: DripData): DripEmailResult {
 - ${T.t5DaysSinceScan[l]}: ${daysElapsed}
 - ${T.t5EstLeaked[l]}: ${fmtEur(leaked)} EUR
 - ${T.t5AnnualExposure[l]}: ${fmtEurRange(exposureLowEur, exposureHighEur)} EUR
-- ${T.t5ReportCost[l]}: $990
+- ${T.t5ReportCost[l]}: $490
 - ${T.t5Roi[l]}: ${roi}%
 
 ${stripHtml(T.t5Cta[l])}: ${checkoutUrl}

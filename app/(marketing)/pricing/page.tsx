@@ -6,7 +6,6 @@ import { useI18n } from "@/lib/i18n";
 import { c, f, inset } from "@/lib/tokens";
 import { type PricingLocale } from "@/lib/pricing";
 import Section from "@/components/ui/section";
-import Footer from "@/components/ui/footer";
 import FaqItem from "@/components/ui/faq-item";
 
 type BillingCycle = "monthly" | "annual";
@@ -146,7 +145,7 @@ export default function PricingPage() {
           </p>
 
           {/* Currency indicator */}
-          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 8, background: "rgba(18,24,40,0.5)", border: `1px solid ${c.border}` }}>
+          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 8, background: "#F1F5F9", border: `1px solid #E2E8F0` }}>
             <span style={{ fontSize: 11, fontFamily: f.mono, color: c.text3 }}>
               {t("pricing.currencyNote").replace("{currency}", isUSD ? "USD" : "EUR")}
             </span>
@@ -156,6 +155,55 @@ export default function PricingPage() {
           </div>
         </Section>
 
+        {/* ═══ CFO ROI Math Banner — 3 lignes, immédiat ═══ */}
+        <Section style={{ paddingTop: 24, paddingBottom: 0 }}>
+          <div style={{
+            maxWidth: 780, margin: "0 auto",
+            display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr",
+            alignItems: "center", gap: 0,
+            padding: "20px 28px", borderRadius: 12,
+            background: "rgba(52,211,153,0.03)", border: `1px solid ${c.greenBd}`,
+          }}>
+            {/* Col 1: Investissement */}
+            <div style={{ textAlign: "center", padding: "0 12px" }}>
+              <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text4, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 6 }}>
+                {t("pricing.roiMath.invest")}
+              </p>
+              <p style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: c.text1, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {isUSD ? "$490" : "490 €"}
+              </p>
+              <p style={{ fontSize: 11, color: c.text3, fontFamily: f.mono, marginTop: 4 }}>{t("pricing.roiMath.investSub")}</p>
+            </div>
+            {/* Separator */}
+            <div style={{ padding: "0 8px", color: c.text4, fontFamily: f.mono, fontSize: 18, fontWeight: 300 }}>→</div>
+            {/* Col 2: Retour moyen */}
+            <div style={{ textAlign: "center", padding: "0 12px" }}>
+              <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text4, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 6 }}>
+                {t("pricing.roiMath.return")}
+              </p>
+              <p style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: c.green, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {isUSD ? "127k" : "127k€"}
+              </p>
+              <p style={{ fontSize: 11, color: c.text3, fontFamily: f.mono, marginTop: 4 }}>{t("pricing.roiMath.returnSub")}</p>
+            </div>
+            {/* Separator */}
+            <div style={{ padding: "0 8px", color: c.text4, fontFamily: f.mono, fontSize: 18, fontWeight: 300 }}>→</div>
+            {/* Col 3: Délai */}
+            <div style={{ textAlign: "center", padding: "0 12px" }}>
+              <p style={{ fontSize: 9, fontFamily: f.mono, color: c.text4, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 6 }}>
+                {t("pricing.roiMath.delay")}
+              </p>
+              <p style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: c.accent, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                48h
+              </p>
+              <p style={{ fontSize: 11, color: c.text3, fontFamily: f.mono, marginTop: 4 }}>{t("pricing.roiMath.delaySub")}</p>
+            </div>
+          </div>
+          <p style={{ fontSize: 10, fontFamily: f.mono, color: c.text4, textAlign: "center", marginTop: 10, letterSpacing: ".04em" }}>
+            {t("pricing.roiMath.source")}
+          </p>
+        </Section>
+
         {/* Pricing cards — 3-column grid */}
         <Section style={{ paddingTop: 40, paddingBottom: 0 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
@@ -163,7 +211,7 @@ export default function PricingPage() {
             {/* ═══ TIER 1: DETECT (tiered pricing) ═══ */}
             <div className="gt-card" style={{
               padding: "28px 22px", borderColor: c.greenBd, position: "relative", display: "flex", flexDirection: "column",
-              boxShadow: `0 0 40px rgba(52,211,153,0.06)`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)", overflow: "visible",
             }}>
               <div style={{
                 position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
@@ -223,7 +271,7 @@ export default function PricingPage() {
 
             {/* ═══ TIER 2: STABILIZE ═══ */}
             <div className="gt-card" style={{
-              padding: "28px 22px", borderColor: c.accentBd, position: "relative", display: "flex", flexDirection: "column",
+              padding: "28px 22px", borderColor: c.accentBd, position: "relative", display: "flex", flexDirection: "column", overflow: "visible",
             }}>
               <div style={{
                 position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
@@ -290,7 +338,7 @@ export default function PricingPage() {
 
             {/* ═══ TIER 3: MONITOR ═══ */}
             <div className="gt-card" style={{
-              padding: "28px 22px", borderColor: c.accentBd, position: "relative", display: "flex", flexDirection: "column",
+              padding: "28px 22px", borderColor: c.accentBd, position: "relative", display: "flex", flexDirection: "column", overflow: "visible",
             }}>
               <div style={{
                 position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
@@ -306,7 +354,7 @@ export default function PricingPage() {
               </div>
 
               {/* Billing toggle */}
-              <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 7, background: "rgba(18,24,40,0.5)", border: `1px solid ${c.border}`, marginBottom: 12, alignSelf: "stretch" }}>
+              <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 7, background: "#F1F5F9", border: `1px solid #E2E8F0`, marginBottom: 12, alignSelf: "stretch" }}>
                 <button
                   onClick={() => setBillingCycle("monthly")}
                   style={{
@@ -411,6 +459,50 @@ export default function PricingPage() {
               {t("pricing.valueNote")}
             </p>
           </div>
+          <p style={{ fontSize: 12, fontFamily: f.mono, color: c.text4, textAlign: "center", marginTop: 16, letterSpacing: ".04em" }}>
+            {t("pricing.socialProof")}
+          </p>
+        </Section>
+
+        {/* Guarantee */}
+        <Section style={{ paddingTop: 40, paddingBottom: 0 }}>
+          <div className="gt-panel" style={{
+            padding: "32px 36px", maxWidth: 720, margin: "0 auto",
+            border: `1px solid ${c.greenBd}`,
+            background: "linear-gradient(135deg, rgba(52,211,153,0.04) 0%, #F8FAFC 100%)",
+            borderRadius: 14,
+            textAlign: "center",
+          }}>
+            {/* Badge */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "5px 14px", borderRadius: 20,
+              background: "rgba(52,211,153,0.10)", border: `1px solid ${c.greenBd}`,
+              marginBottom: 16,
+            }}>
+              <Shield size={13} color={c.green} strokeWidth={2.5} />
+              <span style={{ fontSize: 10, fontFamily: f.mono, fontWeight: 700, color: c.green, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                {t("pricing.guarantee.badge")}
+              </span>
+            </div>
+
+            {/* Shield icon */}
+            <div style={{
+              width: 56, height: 56, borderRadius: 14, margin: "0 auto 16px",
+              background: c.greenBg, border: `1px solid ${c.greenBd}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}>
+              <Shield size={26} color={c.green} strokeWidth={2} />
+            </div>
+
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: c.text1, marginBottom: 10, letterSpacing: "-0.02em" }}>
+              {t("pricing.guarantee.title")}
+            </h3>
+            <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.65, maxWidth: 520, margin: "0 auto" }}>
+              {t("pricing.guarantee.desc")}
+            </p>
+          </div>
         </Section>
 
         {/* Comparison table */}
@@ -448,6 +540,41 @@ export default function PricingPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </Section>
+
+        {/* VS Alternatives */}
+        <Section style={{ paddingTop: 60, paddingBottom: 0 }}>
+          <div className="gt-panel" style={{ padding: "32px 28px", overflowX: "auto" }}>
+            <p className="gt-section-label">{t("pricing.vs.label")}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 20, letterSpacing: "-0.02em" }}>
+              {t("pricing.vs.title")}
+            </h3>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid " + c.border }}>
+                  <th style={{ textAlign: "left", padding: "12px 8px", color: c.text3, fontFamily: f.mono, fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 600 }}>{t("pricing.vs.col.criteria")}</th>
+                  <th style={{ textAlign: "center", padding: "12px 8px", color: c.green, fontFamily: f.mono, fontSize: 9, letterSpacing: ".08em", fontWeight: 700 }}>{t("pricing.vs.col.ghosttax")}</th>
+                  <th style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontFamily: f.mono, fontSize: 9, letterSpacing: ".08em", fontWeight: 600 }}>{t("pricing.vs.col.saastools")}</th>
+                  <th style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontFamily: f.mono, fontSize: 9, letterSpacing: ".08em", fontWeight: 600 }}>{t("pricing.vs.col.big4")}</th>
+                  <th style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontFamily: f.mono, fontSize: 9, letterSpacing: ".08em", fontWeight: 600 }}>{t("pricing.vs.col.internal")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+                  <tr key={n} style={{ borderBottom: "1px solid " + c.border }}>
+                    <td style={{ padding: "12px 8px", color: c.text2, fontWeight: 600 }}>{t(`pricing.vs.r${n}.criteria`)}</td>
+                    <td style={{ textAlign: "center", padding: "12px 8px", color: c.green, fontFamily: f.mono, fontSize: 11, fontWeight: 600 }}>{t(`pricing.vs.r${n}.gt`)}</td>
+                    <td style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontSize: 11 }}>{t(`pricing.vs.r${n}.saas`)}</td>
+                    <td style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontSize: 11 }}>{t(`pricing.vs.r${n}.big4`)}</td>
+                    <td style={{ textAlign: "center", padding: "12px 8px", color: c.text3, fontSize: 11 }}>{t(`pricing.vs.r${n}.internal`)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p style={{ fontSize: 10, color: c.text4, marginTop: 14, fontStyle: "italic", lineHeight: 1.5 }}>
+              {t("pricing.vs.footnote")}
+            </p>
           </div>
         </Section>
 
@@ -494,7 +621,52 @@ export default function PricingPage() {
 
       </div>
 
-      <Footer />
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "Ghost Tax — Decision Intelligence",
+          description: "Financial exposure detection and corrective intelligence for SaaS, AI, and Cloud spending.",
+          brand: {
+            "@type": "Brand",
+            name: "Ghost Tax",
+          },
+          offers: [
+            {
+              "@type": "Offer",
+              name: "Detection",
+              price: "490",
+              priceCurrency: "EUR",
+              priceValidUntil: "2026-12-31",
+              availability: "https://schema.org/InStock",
+              url: "https://ghost-tax.com/pricing",
+              description: "One-time financial exposure detection with full Decision Pack delivery.",
+            },
+            {
+              "@type": "Offer",
+              name: "Stabilization",
+              price: "4990",
+              priceCurrency: "EUR",
+              priceValidUntil: "2026-12-31",
+              availability: "https://schema.org/InStock",
+              url: "https://ghost-tax.com/pricing",
+              description: "30/60/90-day corrective stabilization plan including detection.",
+            },
+            {
+              "@type": "Offer",
+              name: "Monitoring",
+              price: "1990",
+              priceCurrency: "EUR",
+              priceValidUntil: "2026-12-31",
+              availability: "https://schema.org/InStock",
+              url: "https://ghost-tax.com/pricing",
+              description: "Continuous monthly drift monitoring and cost optimization.",
+            },
+          ],
+        }) }}
+      />
 
       {/* Mobile grid override */}
       <style>{`

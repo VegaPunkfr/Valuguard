@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 import { trackEvent } from "@/lib/events";
 import Script from "next/script";
 import { c, f } from "@/lib/tokens";
 import Section from "@/components/ui/section";
-import Footer from "@/components/ui/footer";
 
 /**
  * GHOST TAX — GHOST TAX CALCULATOR
@@ -14,17 +14,20 @@ import Footer from "@/components/ui/footer";
  * One page, zero friction, instant result. Designed to be shared on LinkedIn.
  *
  * Strategy: free value -> shock number -> CTA to full scan
+ * Fully i18n via ghosttax.* keys (EN/FR/DE)
  */
 
 // Industry waste benchmarks (% of total IT spend that is typically wasted)
-const BENCHMARKS: Record<string, { wastePercent: [number, number]; label: string }> = {
-  tech: { wastePercent: [18, 32], label: "Tech / SaaS" },
-  finance: { wastePercent: [15, 28], label: "Financial Services" },
-  healthcare: { wastePercent: [20, 35], label: "Healthcare" },
-  retail: { wastePercent: [22, 38], label: "Retail / E-commerce" },
-  manufacturing: { wastePercent: [16, 30], label: "Manufacturing" },
-  services: { wastePercent: [19, 33], label: "Professional Services" },
-  other: { wastePercent: [18, 32], label: "Other" },
+const INDUSTRY_KEYS = ["tech", "finance", "healthcare", "retail", "manufacturing", "services", "other"] as const;
+
+const BENCHMARKS: Record<string, { wastePercent: [number, number] }> = {
+  tech: { wastePercent: [18, 32] },
+  finance: { wastePercent: [15, 28] },
+  healthcare: { wastePercent: [20, 35] },
+  retail: { wastePercent: [22, 38] },
+  manufacturing: { wastePercent: [16, 30] },
+  services: { wastePercent: [19, 33] },
+  other: { wastePercent: [18, 32] },
 };
 
 function fmtEur(n: number): string {
@@ -105,6 +108,7 @@ const faqJsonLd = {
 };
 
 export default function GhostTaxPage() {
+  const { t } = useI18n();
   const [headcount, setHeadcount] = useState("");
   const [monthlySpend, setMonthlySpend] = useState("");
   const [industry, setIndustry] = useState("tech");
@@ -129,9 +133,6 @@ export default function GhostTaxPage() {
     const dailyLow = Math.round(wasteLow / 365);
     const dailyHigh = Math.round(wasteHigh / 365);
 
-    // Peer position (random-ish but deterministic based on inputs)
-    const peerPercentile = Math.min(92, Math.max(45, Math.round((hc * 7 + spend * 3) % 50) + 42));
-
     return {
       annualSpend,
       wasteLow,
@@ -140,8 +141,6 @@ export default function GhostTaxPage() {
       dailyHigh,
       monthlyLow: Math.round(wasteLow / 12),
       monthlyHigh: Math.round(wasteHigh / 12),
-      peerPercentile,
-      benchLabel: bench.label,
       wastePercent: bench.wastePercent,
     };
   }, [headcount, monthlySpend, industry]);
@@ -163,7 +162,7 @@ export default function GhostTaxPage() {
 
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRe.test(leadEmail.trim())) {
-      setLeadError("Please enter a valid email address.");
+      setLeadError(t("ghosttax.lead.error.email"));
       return;
     }
 
@@ -196,14 +195,16 @@ export default function GhostTaxPage() {
           headcount: parseInt(headcount) || 0,
         });
       } else {
-        setLeadError("Something went wrong. Please try again.");
+        setLeadError(t("ghosttax.lead.error.generic"));
       }
     } catch {
-      setLeadError("Network error. Please try again.");
+      setLeadError(t("ghosttax.lead.error.network"));
     } finally {
       setLeadSubmitting(false);
     }
-  }, [leadEmail, leadSubmitting, headcount, industry, monthlySpend, result]);
+  }, [leadEmail, leadSubmitting, headcount, industry, monthlySpend, result, t]);
+
+  const industryLabel = (key: string) => t(`ghosttax.industry.${key}`);
 
   return (
     <div style={{ minHeight: "100vh", background: c.bg, color: c.text1 }}>
@@ -222,14 +223,14 @@ export default function GhostTaxPage() {
         {/* Header */}
         <Section style={{ textAlign: "center", marginBottom: 48 }}>
           <p className="gt-section-label" style={{ color: c.red }}>
-            THE GHOST TAX
+            {t("ghosttax.label")}
           </p>
           <h1 style={{ fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 800, lineHeight: 1.15, letterSpacing: "-0.03em", marginBottom: 16 }}>
-            How much is your company<br />
-            <span style={{ color: c.red }}>silently losing</span> to IT waste?
+            {t("ghosttax.title")}<br />
+            <span style={{ color: c.red }}>{t("ghosttax.titleHighlight")}</span> {t("ghosttax.titleEnd")}
           </h1>
           <p style={{ fontSize: 17, color: c.text2, lineHeight: 1.65, maxWidth: 480, margin: "0 auto" }}>
-            The average mid-market company loses 18-32% of its SaaS/Cloud/AI budget to invisible waste. Calculate yours in 10 seconds.
+            {t("ghosttax.subtitle")}
           </p>
         </Section>
 
@@ -238,7 +239,7 @@ export default function GhostTaxPage() {
           <div className="gt-card" style={{ padding: "32px 28px", marginBottom: 32 }}>
             <div className="gt-calc-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
               <div>
-                <label className="gt-label">EMPLOYEES</label>
+                <label className="gt-label">{t("ghosttax.employeesLabel")}</label>
                 <input
                   type="number"
                   value={headcount}
@@ -248,7 +249,7 @@ export default function GhostTaxPage() {
                 />
               </div>
               <div>
-                <label className="gt-label">MONTHLY IT SPEND (EUR)</label>
+                <label className="gt-label">{t("ghosttax.spendLabel")}</label>
                 <input
                   type="number"
                   value={monthlySpend}
@@ -260,14 +261,14 @@ export default function GhostTaxPage() {
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <label className="gt-label">INDUSTRY</label>
+              <label className="gt-label">{t("ghosttax.industryLabel")}</label>
               <select
                 value={industry}
                 onChange={(e) => { setIndustry(e.target.value); setCalculated(false); }}
                 className="gt-input gt-input-mono"
               >
-                {Object.entries(BENCHMARKS).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
+                {INDUSTRY_KEYS.map((k) => (
+                  <option key={k} value={k}>{industryLabel(k)}</option>
                 ))}
               </select>
             </div>
@@ -290,7 +291,7 @@ export default function GhostTaxPage() {
                 opacity: !headcount && !monthlySpend ? 0.5 : 1,
               }}
             >
-              Calculate my Ghost Tax
+              {t("ghosttax.calculate")}
             </button>
           </div>
         </Section>
@@ -300,37 +301,41 @@ export default function GhostTaxPage() {
           <div style={{ animation: "fadeIn 0.4s ease" }}>
             {/* Shock Number */}
             <div className="gt-card" style={{ border: "2px solid " + c.redBd, padding: "32px", textAlign: "center", marginBottom: 20 }}>
-              <p className="gt-label" style={{ color: c.red, marginBottom: 12 }}>YOUR ESTIMATED GHOST TAX</p>
+              <p className="gt-label" style={{ color: c.red, marginBottom: 12 }}>{t("ghosttax.result.label")}</p>
               <p className="gt-metric" style={{ fontSize: "clamp(36px, 7vw, 56px)", color: c.red, margin: "0 0 8px", lineHeight: 1 }}>
                 {fmtEur(result.wasteLow)}-{fmtEur(result.wasteHigh)} EUR
               </p>
-              <p style={{ fontSize: 14, color: c.text2, margin: 0 }}>per year in invisible IT waste</p>
+              <p style={{ fontSize: 14, color: c.text2, margin: 0 }}>{t("ghosttax.result.perYear")}</p>
             </div>
 
             {/* Breakdown */}
             <div className="gt-calc-breakdown" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
               <div className="gt-card" style={{ padding: "20px 16px", textAlign: "center" }}>
-                <p className="gt-label" style={{ margin: "0 0 8px" }}>PER DAY</p>
+                <p className="gt-label" style={{ margin: "0 0 8px" }}>{t("ghosttax.result.daily")}</p>
                 <p className="gt-metric" style={{ fontSize: 22, color: c.red, margin: 0 }}>{fmtEur(result.dailyLow)}-{fmtEur(result.dailyHigh)} EUR</p>
               </div>
               <div className="gt-card" style={{ padding: "20px 16px", textAlign: "center" }}>
-                <p className="gt-label" style={{ margin: "0 0 8px" }}>PER MONTH</p>
+                <p className="gt-label" style={{ margin: "0 0 8px" }}>{t("ghosttax.result.monthly")}</p>
                 <p className="gt-metric" style={{ fontSize: 22, color: c.amber, margin: 0 }}>{fmtEur(result.monthlyLow)}-{fmtEur(result.monthlyHigh)} EUR</p>
               </div>
               <div className="gt-card" style={{ padding: "20px 16px", textAlign: "center" }}>
-                <p className="gt-label" style={{ margin: "0 0 8px" }}>WASTE RATE</p>
+                <p className="gt-label" style={{ margin: "0 0 8px" }}>{t("ghosttax.result.wasteRate")}</p>
                 <p className="gt-metric" style={{ fontSize: 22, color: c.amber, margin: 0 }}>{result.wastePercent[0]}-{result.wastePercent[1]}%</p>
               </div>
             </div>
 
             {/* Context */}
             <div className="gt-card" style={{ padding: "20px 24px", marginBottom: 20 }}>
-              <p className="gt-section-label" style={{ marginBottom: 10 }}>CONTEXT</p>
+              <p className="gt-section-label" style={{ marginBottom: 10 }}>{t("ghosttax.result.contextLabel")}</p>
               <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.7, margin: 0 }}>
-                Based on <strong style={{ color: c.text1 }}>{result.benchLabel}</strong> industry benchmarks,
-                companies your size typically waste {result.wastePercent[0]}-{result.wastePercent[1]}% of their IT budget
-                on unused licenses, shadow AI, over-provisioned cloud, redundant tools, and unfavorable renewals.
-                This is <strong style={{ color: c.red }}>{fmtEur(result.dailyLow)}-{fmtEur(result.dailyHigh)} EUR leaving your company every single day</strong>.
+                {t("ghosttax.result.contextPre")}{" "}
+                <strong style={{ color: c.text1 }}>{industryLabel(industry)}</strong>{" "}
+                {t("ghosttax.result.contextMid")}{" "}
+                {result.wastePercent[0]}-{result.wastePercent[1]}%{" "}
+                {t("ghosttax.result.contextMidPct")}{" "}
+                <strong style={{ color: c.red }}>
+                  {fmtEur(result.dailyLow)}-{fmtEur(result.dailyHigh)} EUR {t("ghosttax.result.contextPost")}
+                </strong>.
               </p>
             </div>
 
@@ -338,19 +343,19 @@ export default function GhostTaxPage() {
             <div className="gt-card" style={{ background: c.surface, padding: "24px", marginBottom: 20 }}>
               {!leadSubmitted ? (
                 <>
-                  <p className="gt-section-label" style={{ color: c.green, marginBottom: 10 }}>FREE DETAILED BREAKDOWN</p>
+                  <p className="gt-section-label" style={{ color: c.green, marginBottom: 10 }}>{t("ghosttax.lead.label")}</p>
                   <p style={{ fontSize: 15, color: c.text1, fontWeight: 600, marginBottom: 4 }}>
-                    Get a detailed breakdown sent to your inbox
+                    {t("ghosttax.lead.title")}
                   </p>
                   <p style={{ fontSize: 13, color: c.text2, lineHeight: 1.6, marginBottom: 16 }}>
-                    Receive your Ghost Tax analysis with industry comparisons, waste category estimates, and actionable next steps.
+                    {t("ghosttax.lead.desc")}
                   </p>
                   <div style={{ display: "flex", gap: 10 }}>
                     <input
                       type="email"
                       value={leadEmail}
                       onChange={(e) => { setLeadEmail(e.target.value); setLeadError(""); }}
-                      placeholder="you@company.com"
+                      placeholder={t("ghosttax.lead.placeholder")}
                       onKeyDown={(e) => e.key === "Enter" && handleLeadCapture()}
                       className="gt-input gt-input-mono"
                       style={{
@@ -368,22 +373,22 @@ export default function GhostTaxPage() {
                         cursor: leadSubmitting ? "wait" : "pointer",
                       }}
                     >
-                      {leadSubmitting ? "Sending..." : "Send Report"}
+                      {leadSubmitting ? t("ghosttax.lead.sending") : t("ghosttax.lead.submit")}
                     </button>
                   </div>
                   {leadError && (
                     <p style={{ fontSize: 12, color: c.red, marginTop: 8, marginBottom: 0 }}>{leadError}</p>
                   )}
                   <p style={{ fontSize: 11, color: c.text3, marginTop: 10, marginBottom: 0 }}>
-                    No spam. Unsubscribe anytime. Your data stays private.
+                    {t("ghosttax.lead.privacy")}
                   </p>
                 </>
               ) : (
                 <div style={{ textAlign: "center", padding: "12px 0" }}>
                   <p style={{ fontSize: 22, marginBottom: 8, color: c.green }}>&#10003;</p>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: c.green, marginBottom: 4 }}>Report sent!</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: c.green, marginBottom: 4 }}>{t("ghosttax.lead.sent.title")}</p>
                   <p style={{ fontSize: 13, color: c.text2, margin: 0 }}>
-                    Check your inbox at <strong style={{ color: c.text1 }}>{leadEmail}</strong> for your detailed Ghost Tax breakdown.
+                    {t("ghosttax.lead.sent.desc")} <strong style={{ color: c.text1 }}>{leadEmail}</strong> {t("ghosttax.lead.sent.desc2")}
                   </p>
                 </div>
               )}
@@ -396,12 +401,14 @@ export default function GhostTaxPage() {
               textAlign: "center",
               marginBottom: 20,
             }}>
-              <p className="gt-section-label" style={{ marginBottom: 10 }}>STOP GUESSING. GET PROOF.</p>
+              <p className="gt-section-label" style={{ marginBottom: 10 }}>{t("ghosttax.cta.label")}</p>
               <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: c.text1 }}>
-                Get your exact exposure in 48 hours
+                {t("ghosttax.cta.title")}
               </p>
               <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6, marginBottom: 20 }}>
-                The Ghost Tax Calculator uses industry averages. Our Decision Intelligence engine analyzes <strong style={{ color: c.text1 }}>your actual vendors, contracts, and usage patterns</strong> to find the real number — with proof.
+                {t("ghosttax.cta.desc").split(t("ghosttax.cta.descBold"))[0]}
+                <strong style={{ color: c.text1 }}>{t("ghosttax.cta.descBold")}</strong>
+                {t("ghosttax.cta.desc").split(t("ghosttax.cta.descBold"))[1]}
               </p>
               <a
                 href="/intel"
@@ -409,26 +416,28 @@ export default function GhostTaxPage() {
                 className="gt-btn gt-btn-primary"
                 style={{ display: "inline-block", marginBottom: 12 }}
               >
-                Run Full Detection — From $990
+                {t("ghosttax.cta.btn")}
               </a>
               <p style={{ fontSize: 12, color: c.text3, margin: 0 }}>
-                21-phase analysis • Vendor-level proof • Negotiation playbooks • CFO-ready memos
+                {t("ghosttax.cta.sub")}
               </p>
             </div>
 
             {/* Share prompt */}
             <div style={{ textAlign: "center", padding: "16px 0" }}>
-              <p style={{ fontSize: 12, color: c.text3, marginBottom: 8 }}>Think your peers should know their Ghost Tax?</p>
+              <p style={{ fontSize: 12, color: c.text3, marginBottom: 8 }}>{t("ghosttax.share.prompt")}</p>
               <button
                 onClick={() => {
-                  const text = `I just calculated my company's Ghost Tax — we're losing ${fmtEur(result.wasteLow)}-${fmtEur(result.wasteHigh)} EUR/year to invisible IT waste. Calculate yours:`;
+                  const text = t("ghosttax.share.text")
+                    .replace("{low}", fmtEur(result.wasteLow))
+                    .replace("{high}", fmtEur(result.wasteHigh));
                   const url = "https://ghost-tax.com/ghost-tax";
                   window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodeURIComponent(text)}`, "_blank");
                   trackEvent("ghost_tax_shared", { platform: "linkedin" });
                 }}
                 className="gt-btn gt-btn-accent-ghost"
               >
-                Share on LinkedIn
+                {t("ghosttax.share.linkedin")}
               </button>
             </div>
           </div>
@@ -437,13 +446,11 @@ export default function GhostTaxPage() {
         {/* Bottom trust */}
         <div style={{ textAlign: "center", padding: "40px 0 20px", borderTop: calculated ? "none" : "1px solid " + c.border }}>
           <p style={{ fontSize: 11, color: c.text3, lineHeight: 1.7 }}>
-            Based on industry data from Gartner, Flexera, Zylo, and 200+ Ghost Tax analyses.
-            <br />Benchmarks updated March 2026. No data is collected until you run a full scan.
+            {t("ghosttax.trust")}
+            <br />{t("ghosttax.trust2")}
           </p>
         </div>
       </div>
-
-      <Footer />
 
       <style>{`
         @keyframes fadeIn {

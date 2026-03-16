@@ -20,26 +20,27 @@ export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
   // ── Auth: Vercel Cron sends Authorization header ───
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const provided = request.headers.get("authorization")?.replace("Bearer ", "");
-    if (provided !== cronSecret) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const incomingAuth = request.headers.get("authorization");
+  if (incomingAuth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   console.log("[Ghost Tax Cron] Outreach drip processing started");
 
   // ── Delegate to the drip handler ───────────────────
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
-  const authHeader = cronSecret || process.env.OUTREACH_API_KEY || "";
+  const apiKey = cronSecret || process.env.OUTREACH_API_KEY || "";
 
   try {
     const response = await fetch(`${siteUrl}/api/outreach/drip`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": authHeader,
+        "x-api-key": apiKey,
       },
     });
 

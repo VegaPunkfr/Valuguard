@@ -17,9 +17,11 @@ export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel sets this automatically for cron jobs)
+  if (!process.env.CRON_SECRET) {
+    return new Response("CRON_SECRET not configured", { status: 503 });
+  }
   const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -35,7 +37,6 @@ export async function GET(request: NextRequest) {
       deadLettered: results.filter((r) => r.status === "dead_letter").length,
       skipped: results.filter((r) => r.status === "skipped").length,
       durationMs: Date.now() - startTime,
-      results,
     };
 
     // Log dead letter count for monitoring visibility

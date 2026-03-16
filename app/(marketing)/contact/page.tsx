@@ -4,13 +4,13 @@ import { useState } from "react";
 import { c, f } from "@/lib/tokens";
 import { useI18n } from "@/lib/i18n";
 import Section from "@/components/ui/section";
-import Footer from "@/components/ui/footer";
 
 export default function ContactPage() {
   const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", company: "", size: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const [upsellContext] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -27,6 +27,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot) return; // Bot detected
     if (!form.email || !form.name) return;
     setSending(true);
 
@@ -36,6 +37,7 @@ export default function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          website: honeypot,
           ...(upsellContext && { rail: upsellContext.rail, domain: upsellContext.domain, ref: upsellContext.ref }),
         }),
       });
@@ -69,7 +71,6 @@ export default function ContactPage() {
             </a>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -109,6 +110,21 @@ export default function ContactPage() {
                 </p>
               </div>
             )}
+            {upsellContext?.rail === "C" && (
+              <div style={{
+                background: "rgba(56,213,240,0.06)", border: "1px solid rgba(56,213,240,0.18)",
+                borderRadius: 10, padding: "14px 18px", marginBottom: 20,
+              }}>
+                <p style={{ fontSize: 12, fontFamily: f.mono, color: c.cyan, fontWeight: 600, margin: 0 }}>
+                  {t("contact.missionBadge")}
+                </p>
+                <p style={{ fontSize: 13, color: c.text2, margin: "6px 0 0", lineHeight: 1.5 }}>
+                  {upsellContext.domain
+                    ? t("contact.subMission").replace("{domain}", upsellContext.domain)
+                    : t("contact.subMissionGeneric")}
+                </p>
+              </div>
+            )}
 
             <p className="gt-section-label">{t("contact.label")}</p>
 
@@ -116,9 +132,46 @@ export default function ContactPage() {
               {upsellContext ? t("contact.title") : t("contact.titleAlt")}
             </h1>
 
-            <p style={{ fontSize: 17, color: c.text2, lineHeight: 1.65, marginBottom: 32 }}>
+            <p style={{ fontSize: 17, color: c.text2, lineHeight: 1.65, marginBottom: 20 }}>
               {t("contact.sub")}
             </p>
+
+            {/* Price Range Signal — visible on all contact paths without a specific rail badge */}
+            {!upsellContext && (
+              <div style={{
+                background: "rgba(52,211,153,0.06)",
+                border: "1px solid rgba(52,211,153,0.18)",
+                borderRadius: 10,
+                padding: "14px 18px",
+                marginBottom: 28,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}>
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 9,
+                  background: "rgba(52,211,153,0.10)",
+                  border: "1px solid rgba(52,211,153,0.25)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                  flexShrink: 0,
+                }}>
+                  &#x1F4B0;
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, fontFamily: f.mono, color: "rgba(52,211,153,0.8)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.10em", marginBottom: 3 }}>
+                    {t("contact.priceRangeLabel")}
+                  </p>
+                  <p style={{ fontSize: 13, color: "#8d9bb5", lineHeight: 1.45, margin: 0 }}>
+                    {t("contact.priceRange")}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit}>
               <div className="gt-contact-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
@@ -150,6 +203,11 @@ export default function ContactPage() {
                 </div>
               </div>
 
+              {/* Honeypot field — hidden from real users, visible to bots */}
+              <div style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+              </div>
+
               <div style={{ marginBottom: 24 }}>
                 <label className="gt-label">{t("contact.field.message")}</label>
                 <textarea value={form.message} onChange={update("message")} rows={4} className="gt-input" style={{ resize: "vertical", fontFamily: "inherit" }} />
@@ -160,6 +218,69 @@ export default function ContactPage() {
               </button>
             </form>
 
+            {/* ── Book a Call CTA ── */}
+            <div style={{
+              marginTop: 32, padding: "28px 24px", borderRadius: 14,
+              background: "linear-gradient(135deg, rgba(59,130,246,0.10) 0%, rgba(34,211,238,0.06) 100%)",
+              border: "1px solid rgba(59,130,246,0.22)",
+              textAlign: "center",
+            }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                marginBottom: 14, fontSize: 20,
+              }}>
+                &#x1F4C5;
+              </div>
+              <h3 style={{ fontSize: 19, fontWeight: 700, marginBottom: 6, letterSpacing: "-0.01em" }}>
+                {t("contact.bookCall")}
+              </h3>
+              <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.55, marginBottom: 18 }}>
+                {t("contact.bookCallDesc")}
+              </p>
+              <a
+                href="https://cal.com/ghost-tax/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gt-btn gt-btn-primary"
+                style={{ display: "inline-block", padding: "12px 32px", fontSize: 15, fontWeight: 700 }}
+              >
+                {t("contact.bookCall")} &rarr;
+              </a>
+            </div>
+
+            {/* ── Phone + SLA ── */}
+            <div style={{
+              marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14,
+            }}>
+              <div style={{
+                padding: "20px 18px", borderRadius: 12,
+                background: c.elevated, border: "1px solid " + c.border,
+                textAlign: "center",
+              }}>
+                <p style={{ fontSize: 10, fontFamily: f.mono, color: c.text3, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>
+                  {t("contact.phone")}
+                </p>
+                <a href="tel:+33XXXXXXXXX" style={{ fontSize: 16, fontWeight: 700, color: c.text1, textDecoration: "none", fontFamily: f.mono }}>
+                  +33 X XX XX XX XX
+                </a>
+              </div>
+              <div style={{
+                padding: "20px 18px", borderRadius: 12,
+                background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)",
+                textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              }}>
+                <div style={{ width: 22, height: 22, borderRadius: 11, background: "rgba(52,211,153,0.15)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, fontSize: 12, color: c.green }}>
+                  &#x2713;
+                </div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: c.green, lineHeight: 1.4, margin: 0 }}>
+                  {t("contact.responseSla")}
+                </p>
+              </div>
+            </div>
+
+            {/* ── Email + ROI footer ── */}
             <div style={{ marginTop: 28, paddingTop: 24, borderTop: "1px solid " + c.border }}>
               <p style={{ fontSize: 12, color: c.text3, lineHeight: 1.6, textAlign: "center" }}>
                 {t("contact.emailDirect")} <a href="mailto:audits@ghost-tax.com" style={{ color: c.accentHi, textDecoration: "none" }}>audits@ghost-tax.com</a>
@@ -171,8 +292,6 @@ export default function ContactPage() {
           </div>
         </Section>
       </div>
-
-      <Footer />
 
       <style>{`
         @media (max-width: 640px) {

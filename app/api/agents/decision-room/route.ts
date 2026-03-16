@@ -27,10 +27,12 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth guard
+    // Auth guard — fail safe if CRON_SECRET not configured
+    if (!process.env.CRON_SECRET) {
+      return new Response("CRON_SECRET not configured", { status: 503 });
+    }
     const authHeader = req.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

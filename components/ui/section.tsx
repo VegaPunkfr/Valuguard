@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { reveal, revealTransition } from "@/lib/tokens";
+import { useEffect, useRef } from "react";
 
 export default function Section({
   delay = 0,
@@ -14,17 +13,37 @@ export default function Section({
   className?: string;
   children: React.ReactNode;
 }) {
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (delay) {
+      el.style.transitionDelay = `${delay}ms`;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("gt-scroll-reveal--visible");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.06 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
   return (
-    <motion.section
-      variants={reveal}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.06 }}
-      transition={revealTransition(delay)}
+    <section
+      ref={ref}
+      className={`gt-scroll-reveal ${className || ""}`}
       style={{ marginBottom: 0, ...style }}
-      className={className}
     >
       {children}
-    </motion.section>
+    </section>
   );
 }

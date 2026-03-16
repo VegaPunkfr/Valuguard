@@ -15,7 +15,7 @@
  *   - Stage 0: Payment Recovery (retry failed webhook deliveries)
  *   - Locale detection from vault_session data + email TLD
  *   - Tri-lingual emails (EN/FR/DE)
- *   - Locale-aware pricing in CTAs ($990 for US, €890 for EU)
+ *   - Locale-aware pricing in CTAs ($490 for US, €490 for EU)
  *   - 16 industry signals with 2026 market intelligence
  *   - US tech + DACH compliance + vertical-specific signals
  *
@@ -161,8 +161,8 @@ function isUSLocale(session: Record<string, unknown>): boolean {
 // ── Locale Strings ─────────────────────────────────
 
 function getLocaleStrings(locale: Locale, isUS: boolean): LocaleStrings {
-  const price = isUS ? "$990" : "€890";
-  const priceLabel = isUS ? "$990" : "890 €";
+  const price = isUS ? "$490" : "€490";
+  const priceLabel = isUS ? "$490" : "490 €";
 
   const strings: Record<Locale, LocaleStrings> = {
     en: {
@@ -1084,6 +1084,25 @@ function getIndustrySignals(): MarketSignal[] {
       },
       industries: ["startup", "scaleup", "venture", "seed", "series"],
     },
+    // ── AI Spend Governance (Cross-Industry) ──
+    {
+      headlines: {
+        en: "AI spend ungoverned: 83% of companies have zero visibility on AI tool costs",
+        fr: "Dépenses IA non gouvernées : 83 % des entreprises n'ont aucune visibilité sur les coûts IA",
+        de: "KI-Ausgaben ohne Governance: 83 % der Unternehmen haben null Transparenz über KI-Tool-Kosten",
+      },
+      body: {
+        en: "ChatGPT Enterprise, Copilot, Claude, Midjourney, Gemini — AI tools are proliferating across departments with zero procurement oversight. The average company now has 6-14 AI subscriptions purchased on individual credit cards or buried in departmental budgets. CFOs report AI as their #1 blind spot in 2026 IT spend. Shadow AI is the new shadow IT, but growing 5x faster.",
+        fr: "ChatGPT Enterprise, Copilot, Claude, Midjourney, Gemini — les outils IA prolifèrent dans tous les départements sans aucun contrôle des achats. L'entreprise moyenne a désormais 6-14 abonnements IA achetés sur des cartes bancaires individuelles ou noyés dans les budgets départementaux. Les CFO déclarent l'IA comme leur angle mort #1 des dépenses IT 2026. Le shadow AI est le nouveau shadow IT, mais croît 5x plus vite.",
+        de: "ChatGPT Enterprise, Copilot, Claude, Midjourney, Gemini — KI-Tools verbreiten sich abteilungsübergreifend ohne jegliche Beschaffungskontrolle. Das durchschnittliche Unternehmen hat inzwischen 6-14 KI-Abonnements auf Einzelkreditkarten oder in Abteilungsbudgets versteckt. CFOs nennen KI als ihren #1-Blindspot bei IT-Ausgaben 2026. Shadow AI ist das neue Shadow IT — wächst aber 5x schneller.",
+      },
+      impact: {
+        en: "AI spend governance typically reveals 40-60% redundancy across overlapping AI tools. Companies consolidating AI subscriptions save 25-45% while standardizing on fewer, better-governed platforms.",
+        fr: "La gouvernance des dépenses IA révèle typiquement 40-60 % de redondance entre outils IA chevauchants. Les entreprises consolidant leurs abonnements IA économisent 25-45 % en standardisant sur moins de plateformes mieux gouvernées.",
+        de: "KI-Ausgaben-Governance deckt typisch 40-60 % Redundanz bei überlappenden KI-Tools auf. Unternehmen, die KI-Abonnements konsolidieren, sparen 25-45 % durch Standardisierung auf weniger, besser kontrollierte Plattformen.",
+      },
+      industries: ["tech", "saas", "software", "ai", "machine", "data", "consulting", "professional", "finance", "fintech", "banking"],
+    },
   ];
 }
 
@@ -1095,22 +1114,22 @@ function buildRecoveryEmail(ar: Record<string, unknown>, locale: Locale, isUS: b
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:system-ui,-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:system-ui,-apple-system,sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 20px">
 
   <div style="text-align:center;margin-bottom:28px">
     <span style="font-size:16px;font-weight:800;color:#3b82f6;letter-spacing:2px">GHOST TAX</span>
-    <p style="font-size:8px;letter-spacing:0.2em;color:#55637d;text-transform:uppercase;margin:4px 0 0 0">${t.decisionIntelligence}</p>
+    <p style="font-size:8px;letter-spacing:0.2em;color:#64748B;text-transform:uppercase;margin:4px 0 0 0">${t.decisionIntelligence}</p>
   </div>
 
-  <div style="background:#0a0d19;border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#f59e0b;text-transform:uppercase;margin:0 0 16px 0">PAYMENT RECOVERY</p>
+  <div style="background:#F8FAFC;border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:28px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 16px 0">PAYMENT RECOVERY</p>
 
-    <p style="font-size:16px;font-weight:700;color:#e4e9f4;line-height:1.4;margin:0 0 16px 0">
+    <p style="font-size:16px;font-weight:700;color:#0F172A;line-height:1.4;margin:0 0 16px 0">
       ${company}
     </p>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.65;margin:0 0 20px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.65;margin:0 0 20px 0">
       ${t.recoveryBody}
     </p>
 
@@ -1118,12 +1137,12 @@ function buildRecoveryEmail(ar: Record<string, unknown>, locale: Locale, isUS: b
       <a href="${siteUrl}/pricing?ref=recovery&domain=${encodeURIComponent((ar.domain as string) || '')}" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 40px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.02em">
         ${t.recoveryCtaText}
       </a>
-      <p style="font-size:10px;color:#55637d;margin:8px 0 0 0">${t.ctaInstant}</p>
+      <p style="font-size:10px;color:#64748B;margin:8px 0 0 0">${t.ctaInstant}</p>
     </div>
   </div>
 
-  <p style="font-size:10px;color:#3a4560;text-align:center;margin:0">
-    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(ar.email as string)}" style="color:#3a4560;text-decoration:underline">${t.unsubscribe}</a>
+  <p style="font-size:10px;color:#94A3B8;text-align:center;margin:0">
+    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(ar.email as string)}" style="color:#94A3B8;text-decoration:underline">${t.unsubscribe}</a>
     &nbsp;|&nbsp; ghost-tax.com
   </p>
 </div></body></html>`;
@@ -1142,38 +1161,38 @@ function buildScanResultEmail(s: Record<string, unknown>, locale: Locale, isUS: 
   const fmtDaily = fmtCurrency(Math.round(((low + high) / 2) / 365), isUS);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:system-ui,-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:system-ui,-apple-system,sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 20px">
 
   <div style="text-align:center;margin-bottom:28px">
     <span style="font-size:16px;font-weight:800;color:#3b82f6;letter-spacing:2px">GHOST TAX</span>
-    <p style="font-size:8px;letter-spacing:0.2em;color:#55637d;text-transform:uppercase;margin:4px 0 0 0">${t.decisionIntelligence}</p>
+    <p style="font-size:8px;letter-spacing:0.2em;color:#64748B;text-transform:uppercase;margin:4px 0 0 0">${t.decisionIntelligence}</p>
   </div>
 
-  <div style="background:#0a0d19;border:1px solid #1e2a42;border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#ef4444;text-transform:uppercase;margin:0 0 16px 0">${t.exposureDetected}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:28px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.15em;color:#DC2626;text-transform:uppercase;margin:0 0 16px 0">${t.exposureDetected}</p>
 
-    <p style="font-size:28px;font-weight:800;color:#ef4444;margin:0 0 4px 0;font-family:'Courier New',monospace;letter-spacing:-0.02em">
+    <p style="font-size:28px;font-weight:800;color:#DC2626;margin:0 0 4px 0;font-family:'Courier New',monospace;letter-spacing:-0.02em">
       ${fmtLow}-${fmtHigh}/${locale === "de" ? "Jahr" : locale === "fr" ? "an" : "yr"}
     </p>
-    <p style="font-size:12px;color:#55637d;margin:0 0 20px 0">${company}</p>
+    <p style="font-size:12px;color:#64748B;margin:0 0 20px 0">${company}</p>
 
     <div style="display:flex;gap:12px;margin-bottom:20px">
-      <div style="flex:1;background:#0e1221;border-radius:6px;padding:12px;text-align:center">
-        <p style="font-size:8px;letter-spacing:0.12em;color:#55637d;text-transform:uppercase;margin:0 0 4px 0">${t.entropy}</p>
-        <p style="font-size:16px;font-weight:700;color:${entropy > 60 ? '#ef4444' : '#f59e0b'};margin:0;font-family:'Courier New',monospace">${entropy}/100</p>
+      <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
+        <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.entropy}</p>
+        <p style="font-size:16px;font-weight:700;color:${entropy > 60 ? '#DC2626' : '#D97706'};margin:0;font-family:'Courier New',monospace">${entropy}/100</p>
       </div>
-      <div style="flex:1;background:#0e1221;border-radius:6px;padding:12px;text-align:center">
-        <p style="font-size:8px;letter-spacing:0.12em;color:#55637d;text-transform:uppercase;margin:0 0 4px 0">${t.peerRank}</p>
-        <p style="font-size:16px;font-weight:700;color:${percentile > 60 ? '#ef4444' : '#34d399'};margin:0;font-family:'Courier New',monospace">${percentile}th</p>
+      <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
+        <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.peerRank}</p>
+        <p style="font-size:16px;font-weight:700;color:${percentile > 60 ? '#DC2626' : '#059669'};margin:0;font-family:'Courier New',monospace">${percentile}th</p>
       </div>
-      <div style="flex:1;background:#0e1221;border-radius:6px;padding:12px;text-align:center">
-        <p style="font-size:8px;letter-spacing:0.12em;color:#55637d;text-transform:uppercase;margin:0 0 4px 0">${t.dailyLeak}</p>
-        <p style="font-size:16px;font-weight:700;color:#f59e0b;margin:0;font-family:'Courier New',monospace">${fmtDaily}</p>
+      <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
+        <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.dailyLeak}</p>
+        <p style="font-size:16px;font-weight:700;color:#D97706;margin:0;font-family:'Courier New',monospace">${fmtDaily}</p>
       </div>
     </div>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.65;margin:0 0 20px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.65;margin:0 0 20px 0">
       ${t.previewNote}
     </p>
 
@@ -1181,12 +1200,12 @@ function buildScanResultEmail(s: Record<string, unknown>, locale: Locale, isUS: 
       <a href="${siteUrl}/pricing?ref=scan_result&domain=${encodeURIComponent((s.domain as string) || '')}" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 40px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.02em">
         ${t.ctaFull}
       </a>
-      <p style="font-size:10px;color:#55637d;margin:8px 0 0 0">${t.ctaInstant}</p>
+      <p style="font-size:10px;color:#64748B;margin:8px 0 0 0">${t.ctaInstant}</p>
     </div>
   </div>
 
-  <p style="font-size:10px;color:#3a4560;text-align:center;margin:0">
-    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#3a4560;text-decoration:underline">${t.unsubscribe}</a>
+  <p style="font-size:10px;color:#94A3B8;text-align:center;margin:0">
+    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#94A3B8;text-decoration:underline">${t.unsubscribe}</a>
     &nbsp;|&nbsp; ghost-tax.com
   </p>
 </div></body></html>`;
@@ -1203,33 +1222,33 @@ function buildMarketSignalEmail(s: Record<string, unknown>, signal: MarketSignal
   const perYear = locale === "de" ? "Jahr" : locale === "fr" ? "an" : "year";
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:system-ui,-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:system-ui,-apple-system,sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 20px">
 
   <div style="text-align:center;margin-bottom:28px">
     <span style="font-size:16px;font-weight:800;color:#3b82f6;letter-spacing:2px">GHOST TAX</span>
-    <p style="font-size:8px;letter-spacing:0.2em;color:#55637d;text-transform:uppercase;margin:4px 0 0 0">${t.marketIntelligence}</p>
+    <p style="font-size:8px;letter-spacing:0.2em;color:#64748B;text-transform:uppercase;margin:4px 0 0 0">${t.marketIntelligence}</p>
   </div>
 
-  <div style="background:#0a0d19;border:1px solid #1e2a42;border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#f59e0b;text-transform:uppercase;margin:0 0 12px 0">${t.marketSignal}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:28px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 12px 0">${t.marketSignal}</p>
 
-    <p style="font-size:18px;font-weight:700;color:#e4e9f4;line-height:1.3;margin:0 0 16px 0">
+    <p style="font-size:18px;font-weight:700;color:#0F172A;line-height:1.3;margin:0 0 16px 0">
       ${signal.headlines[locale]}
     </p>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.65;margin:0 0 16px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.65;margin:0 0 16px 0">
       ${signal.body[locale]}
     </p>
 
-    <div style="background:#0e1221;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:14px 16px;margin-bottom:20px">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#f59e0b;text-transform:uppercase;margin:0 0 6px 0">${t.impactOn} ${company.toUpperCase()}</p>
-      <p style="font-size:12px;color:#e4e9f4;line-height:1.5;margin:0">
+    <div style="background:#F1F5F9;border-left:3px solid #D97706;border-radius:0 6px 6px 0;padding:14px 16px;margin-bottom:20px">
+      <p style="font-size:9px;letter-spacing:0.12em;color:#D97706;text-transform:uppercase;margin:0 0 6px 0">${t.impactOn} ${company.toUpperCase()}</p>
+      <p style="font-size:12px;color:#0F172A;line-height:1.5;margin:0">
         ${signal.impact[locale]} ${fmtLow}-${fmtHigh}/${perYear}.
       </p>
     </div>
 
-    <p style="font-size:12px;color:#8d9bb5;line-height:1.6;margin:0 0 20px 0">
+    <p style="font-size:12px;color:#475569;line-height:1.6;margin:0 0 20px 0">
       ${t.fullPackNote}
     </p>
 
@@ -1240,8 +1259,8 @@ function buildMarketSignalEmail(s: Record<string, unknown>, signal: MarketSignal
     </div>
   </div>
 
-  <p style="font-size:10px;color:#3a4560;text-align:center;margin:0">
-    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#3a4560;text-decoration:underline">${t.unsubscribe}</a>
+  <p style="font-size:10px;color:#94A3B8;text-align:center;margin:0">
+    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#94A3B8;text-decoration:underline">${t.unsubscribe}</a>
     &nbsp;|&nbsp; ghost-tax.com
   </p>
 </div></body></html>`;
@@ -1259,27 +1278,27 @@ function buildExpirationEmail(s: Record<string, unknown>, locale: Locale, isUS: 
   const perYear = locale === "de" ? "Jahr" : locale === "fr" ? "an" : "yr";
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:system-ui,-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:system-ui,-apple-system,sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 20px">
 
   <div style="text-align:center;margin-bottom:28px">
     <span style="font-size:16px;font-weight:800;color:#3b82f6;letter-spacing:2px">GHOST TAX</span>
   </div>
 
-  <div style="background:#0a0d19;border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#55637d;text-transform:uppercase;margin:0 0 12px 0">${t.dataExpiration}</p>
+  <div style="background:#F8FAFC;border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:28px;margin-bottom:16px">
+    <p style="font-size:9px;letter-spacing:0.15em;color:#64748B;text-transform:uppercase;margin:0 0 12px 0">${t.dataExpiration}</p>
 
-    <p style="font-size:16px;font-weight:700;color:#e4e9f4;line-height:1.4;margin:0 0 16px 0">
+    <p style="font-size:16px;font-weight:700;color:#0F172A;line-height:1.4;margin:0 0 16px 0">
       ${t.scanDataOld} (${scanDate})
     </p>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.65;margin:0 0 16px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.65;margin:0 0 16px 0">
       ${t.saasExposureShifting}
-      <span style="color:#ef4444;font-weight:600;font-family:'Courier New',monospace">${fmtLow}-${fmtHigh}/${perYear}</span>
+      <span style="color:#DC2626;font-weight:600;font-family:'Courier New',monospace">${fmtLow}-${fmtHigh}/${perYear}</span>
       — ${company}.
     </p>
 
-    <p style="font-size:13px;color:#8d9bb5;line-height:1.65;margin:0 0 20px 0">
+    <p style="font-size:13px;color:#475569;line-height:1.65;margin:0 0 20px 0">
       ${t.twoOptions}
     </p>
 
@@ -1295,9 +1314,9 @@ function buildExpirationEmail(s: Record<string, unknown>, locale: Locale, isUS: 
     </div>
   </div>
 
-  <p style="font-size:10px;color:#3a4560;text-align:center;margin:0">
+  <p style="font-size:10px;color:#94A3B8;text-align:center;margin:0">
     ${t.lastEmail}
-    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#3a4560;text-decoration:underline">${t.unsubscribe}</a>
+    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(s.email as string)}" style="color:#94A3B8;text-decoration:underline">${t.unsubscribe}</a>
   </p>
 </div></body></html>`;
 }
@@ -1314,23 +1333,23 @@ function buildMonitoringEmail(
   const fmt = (n: number) => fmtCurrency(n, isUS);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;padding:0;background:#060912;font-family:system-ui,-apple-system,sans-serif">
+<body style="margin:0;padding:0;background:#FFFFFF;font-family:system-ui,-apple-system,sans-serif">
 <div style="max-width:580px;margin:0 auto;padding:32px 20px">
 
   <div style="text-align:center;margin-bottom:24px">
     <span style="font-size:16px;font-weight:800;color:#3b82f6;letter-spacing:2px">GHOST TAX</span>
-    <p style="font-size:8px;letter-spacing:0.2em;color:#34d399;text-transform:uppercase;margin:4px 0 0 0">
+    <p style="font-size:8px;letter-spacing:0.2em;color:#059669;text-transform:uppercase;margin:4px 0 0 0">
       ${t.monitoringActive}
     </p>
   </div>
 
-  <div style="background:#0a0d19;border:1px solid #1e2a42;border-radius:8px;padding:24px;margin-bottom:16px">
-    <p style="font-size:12px;color:#8d9bb5;margin:0 0 16px 0">${company}</p>
+  <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:24px;margin-bottom:16px">
+    <p style="font-size:12px;color:#475569;margin:0 0 16px 0">${company}</p>
 
     <table style="width:100%;border-collapse:collapse;font-family:'Courier New',monospace;margin-bottom:16px">
-      <tr><td style="font-size:9px;color:#55637d;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.previous}</td><td style="font-size:13px;color:#8d9bb5;font-weight:700;text-align:right">${fmt(drift.previousLow)}-${fmt(drift.previousHigh)}</td></tr>
-      <tr><td style="font-size:9px;color:#55637d;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.current}</td><td style="font-size:13px;color:#ef4444;font-weight:700;text-align:right">${fmt(drift.currentLow)}-${fmt(drift.currentHigh)}</td></tr>
-      <tr style="border-top:1px solid #1e2a42"><td style="font-size:9px;color:#55637d;padding:8px 0 4px;text-transform:uppercase;letter-spacing:0.1em">${t.drift}</td><td style="font-size:13px;color:#f59e0b;font-weight:700;text-align:right">+${fmt(drift.deltaLow)}-${fmt(drift.deltaHigh)} (+${drift.driftPct}%)</td></tr>
+      <tr><td style="font-size:9px;color:#64748B;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.previous}</td><td style="font-size:13px;color:#475569;font-weight:700;text-align:right">${fmt(drift.previousLow)}-${fmt(drift.previousHigh)}</td></tr>
+      <tr><td style="font-size:9px;color:#64748B;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.current}</td><td style="font-size:13px;color:#DC2626;font-weight:700;text-align:right">${fmt(drift.currentLow)}-${fmt(drift.currentHigh)}</td></tr>
+      <tr style="border-top:1px solid #E2E8F0"><td style="font-size:9px;color:#64748B;padding:8px 0 4px;text-transform:uppercase;letter-spacing:0.1em">${t.drift}</td><td style="font-size:13px;color:#D97706;font-weight:700;text-align:right">+${fmt(drift.deltaLow)}-${fmt(drift.deltaHigh)} (+${drift.driftPct}%)</td></tr>
     </table>
 
     <div style="text-align:center">
@@ -1340,8 +1359,8 @@ function buildMonitoringEmail(
     </div>
   </div>
 
-  <p style="font-size:10px;color:#3a4560;text-align:center;margin:0">
-    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(sub.email as string)}" style="color:#3a4560;text-decoration:underline">${t.manageSubscription}</a>
+  <p style="font-size:10px;color:#94A3B8;text-align:center;margin:0">
+    <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(sub.email as string)}" style="color:#94A3B8;text-decoration:underline">${t.manageSubscription}</a>
   </p>
 </div></body></html>`;
 }

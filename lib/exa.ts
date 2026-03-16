@@ -541,6 +541,10 @@ function buildSearchQueries(geo: GeoMarket): SearchQuery[] {
       template: (d) => `${d} contract renewal vendor switch procurement RFP`,
       category: "renewal",
     },
+    {
+      template: (d) => `${d} AI tools spending governance policy shadow AI enterprise cost`,
+      category: "financial",
+    },
   ];
 
   // -- Geo-specific queries --

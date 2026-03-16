@@ -6,7 +6,7 @@ import { trackEvent, EVENTS } from "@/lib/events";
 import { c, f } from "@/lib/tokens";
 
 /*  GHOST TAX — SECURITY VAULT (US 2026)
-    Trust architecture page. SOC2 Type II Readiness.
+    Trust architecture page. SOC2-Ready Infrastructure.
     Zero-Knowledge Audit protocol. US data residency.
     Converts skeptical CISOs and compliance officers. */
 
@@ -228,41 +228,41 @@ export default function SecurityVault() {
         {/* -- DATA HANDLING MATRIX -- */}
         <section style={{ marginBottom: 40 }}>
           <Panel>
-            <SectionLabel>DATA HANDLING</SectionLabel>
-            <SectionTitle>Data Handling Matrix</SectionTitle>
+            <SectionLabel>{t("vault.dh.label")}</SectionLabel>
+            <SectionTitle>{t("vault.dh.title")}</SectionTitle>
             <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.6, marginBottom: 16 }}>
-              Every data point the system touches during the self-serve detection stage. No internal systems are accessed. No credentials are required.
+              {t("vault.dh.desc")}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {/* Header */}
               <div className="gt-label" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 60px", gap: 8, padding: "8px 10px" }}>
-                <span>Data Type</span><span>Source</span><span>Use</span><span>Storage</span><span>Required</span>
+                <span>{t("vault.dh.col.type")}</span><span>{t("vault.dh.col.source")}</span><span>{t("vault.dh.col.use")}</span><span>{t("vault.dh.col.storage")}</span><span>{t("vault.dh.col.required")}</span>
               </div>
               {[
-                { type: "Company domain", source: "User input", use: "Seed for public enrichment", storage: "Session only — not persisted", req: true },
-                { type: "Company name", source: "User input", use: "Label in report output", storage: "Session only", req: false },
-                { type: "Industry", source: "User input", use: "Peer benchmark calibration", storage: "Session only", req: false },
-                { type: "Headcount", source: "User input", use: "Per-employee exposure calculation", storage: "Session only", req: false },
-                { type: "Monthly SaaS spend", source: "User input", use: "Baseline for waste estimation", storage: "Session only", req: false },
-                { type: "SaaS tool count", source: "User input", use: "Portfolio density signal", storage: "Session only", req: false },
-                { type: "Public web content", source: "Exa (search API)", use: "Signal detection for tech stack, hiring, growth", storage: "Server-side during analysis — discarded after", req: "Auto" as const },
-                { type: "AI-generated analysis", source: "OpenAI API", use: "Structured diagnosis, scenarios, decision pack", storage: "Server-side during analysis — discarded after", req: "Auto" as const },
-                { type: "Payment details", source: "Stripe (redirect)", use: "Checkout for paid protocol", storage: "Stripe-managed — never touches our servers", req: false },
+                { type: t("vault.dh.r1.type"), source: t("vault.dh.r1.source"), use: t("vault.dh.r1.use"), storage: t("vault.dh.r1.storage"), req: true },
+                { type: t("vault.dh.r2.type"), source: t("vault.dh.r2.source"), use: t("vault.dh.r2.use"), storage: t("vault.dh.r2.storage"), req: false },
+                { type: t("vault.dh.r3.type"), source: t("vault.dh.r3.source"), use: t("vault.dh.r3.use"), storage: t("vault.dh.r3.storage"), req: false },
+                { type: t("vault.dh.r4.type"), source: t("vault.dh.r4.source"), use: t("vault.dh.r4.use"), storage: t("vault.dh.r4.storage"), req: false },
+                { type: t("vault.dh.r5.type"), source: t("vault.dh.r5.source"), use: t("vault.dh.r5.use"), storage: t("vault.dh.r5.storage"), req: false },
+                { type: t("vault.dh.r6.type"), source: t("vault.dh.r6.source"), use: t("vault.dh.r6.use"), storage: t("vault.dh.r6.storage"), req: false },
+                { type: t("vault.dh.r7.type"), source: t("vault.dh.r7.source"), use: t("vault.dh.r7.use"), storage: t("vault.dh.r7.storage"), req: "Auto" as const },
+                { type: t("vault.dh.r8.type"), source: t("vault.dh.r8.source"), use: t("vault.dh.r8.use"), storage: t("vault.dh.r8.storage"), req: "Auto" as const },
+                { type: t("vault.dh.r9.type"), source: t("vault.dh.r9.source"), use: t("vault.dh.r9.use"), storage: t("vault.dh.r9.storage"), req: false },
               ].map((row, i) => (
-                <div key={i} className="gt-inset" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 60px", gap: 8, padding: "8px 10px", fontSize: 11, alignItems: "center", background: i % 2 === 0 ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.06)" }}>
+                <div key={i} className="gt-inset" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 60px", gap: 8, padding: "8px 10px", fontSize: 11, alignItems: "center", background: i % 2 === 0 ? "#F8FAFC" : "#F1F5F9" }}>
                   <span style={{ color: c.text1, fontWeight: 600 }}>{row.type}</span>
                   <span style={{ color: c.text2 }}>{row.source}</span>
                   <span style={{ color: c.text2, fontSize: 10 }}>{row.use}</span>
                   <span style={{ color: c.text3, fontSize: 10 }}>{row.storage}</span>
                   <span className="gt-mono" style={{ textAlign: "center", fontSize: 9, fontWeight: 600, color: row.req === true ? c.green : row.req === "Auto" ? c.accentHi : c.text3 }}>
-                    {row.req === true ? "Yes" : row.req === "Auto" ? "Auto" : "No"}
+                    {row.req === true ? t("vault.dh.yes") : row.req === "Auto" ? t("vault.dh.auto") : t("vault.dh.no")}
                   </span>
                 </div>
               ))}
             </div>
             <div className="gt-card" style={{ marginTop: 14, padding: "10px 14px", background: c.greenBg, borderColor: c.greenBd }}>
               <p style={{ fontSize: 10, color: c.text2, lineHeight: 1.5 }}>
-                <strong style={{ color: c.text1 }}>Retention posture:</strong> User-entered data exists only for the duration of the server-side analysis session. No artifacts are stored after the response stream completes. Paid protocol outputs are delivered to the customer and retained only if the customer opts in. Environment secrets (API keys) are server-side only and never exposed to the client.
+                <strong style={{ color: c.text1 }}>{t("vault.dh.retention.label")}</strong> {t("vault.dh.retention.desc")}
               </p>
             </div>
           </Panel>
@@ -330,7 +330,7 @@ export default function SecurityVault() {
               {FAQ_ITEMS.map((faq, i) => {
                 const isOpen = openFaq === i;
                 return (
-                  <div key={i} style={{ borderRadius: 8, border: "1px solid " + (isOpen ? c.accentBd : c.border), background: isOpen ? c.accentBg : "rgba(0,0,0,0.10)", overflow: "hidden", transition: "all 0.2s" }}>
+                  <div key={i} style={{ borderRadius: 8, border: "1px solid " + (isOpen ? c.accentBd : c.border), background: isOpen ? c.accentBg : "#F8FAFC", overflow: "hidden", transition: "all 0.2s" }}>
                     <button
                       onClick={() => { setOpenFaq(isOpen ? -1 : i); }}
                       style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "none", border: "none", cursor: "pointer", color: c.text1, fontSize: 13, fontWeight: 600, textAlign: "left", fontFamily: f.sans }}
@@ -346,6 +346,73 @@ export default function SecurityVault() {
                   </div>
                 );
               })}
+            </div>
+          </Panel>
+        </section>
+
+        {/* -- DPA — Data Processing Agreement -- */}
+        <section style={{ marginBottom: 40 }}>
+          <Panel>
+            <SectionLabel>{t("vault.dpa.label")}</SectionLabel>
+            <SectionTitle>{t("vault.dpa.title")}</SectionTitle>
+            <div className="gt-card" style={{ marginTop: 12, padding: "14px 16px", background: c.accentBg, borderColor: c.accentBd, borderRadius: 8 }}>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.7 }}>
+                {t("vault.dpa.desc")}
+              </p>
+            </div>
+          </Panel>
+        </section>
+
+        {/* -- EU DATA FLOW -- */}
+        <section style={{ marginBottom: 40 }}>
+          <Panel delay={40}>
+            <SectionLabel>{t("vault.subprocessors.eu.label")}</SectionLabel>
+            <SectionTitle>{t("vault.subprocessors.eu.title")}</SectionTitle>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
+              <div className="gt-label" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8, padding: "6px 10px" }}>
+                <span>{t("vault.table.provider")}</span><span>{t("vault.table.role")}</span>
+              </div>
+              {[
+                { name: t("vault.subprocessors.eu.sub1.name"), role: t("vault.subprocessors.eu.sub1.role") },
+                { name: t("vault.subprocessors.eu.sub2.name"), role: t("vault.subprocessors.eu.sub2.role") },
+                { name: t("vault.subprocessors.eu.sub3.name"), role: t("vault.subprocessors.eu.sub3.role") },
+                { name: t("vault.subprocessors.eu.sub4.name"), role: t("vault.subprocessors.eu.sub4.role") },
+              ].map((sp) => (
+                <div key={sp.name} className="gt-inset" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8, padding: "8px 10px", fontSize: 11, alignItems: "center" }}>
+                  <span style={{ color: c.text1, fontWeight: 600, fontFamily: f.mono }}>{sp.name}</span>
+                  <span style={{ color: c.text2 }}>{sp.role}</span>
+                </div>
+              ))}
+            </div>
+            <div className="gt-card" style={{ marginTop: 12, padding: "10px 14px", background: c.greenBg, borderColor: c.greenBd }}>
+              <p style={{ fontSize: 10, color: c.text3, lineHeight: 1.5 }}>
+                Input: Domain (public) {"\u2192"} Exa Neural Search (public data) {"\u2192"} Analysis Pipeline (21 phases, server-side) {"\u2192"} Report (Supabase, AES-256) {"\u2192"} Delivery (Resend). Retention: 90 days, automatic deletion. No client system data accessed.
+              </p>
+            </div>
+          </Panel>
+        </section>
+
+        {/* -- EU AI ACT -- */}
+        <section style={{ marginBottom: 40 }}>
+          <Panel delay={80}>
+            <SectionLabel>{t("vault.euai.label")}</SectionLabel>
+            <SectionTitle>{t("vault.euai.title")}</SectionTitle>
+            <div className="gt-card" style={{ marginTop: 12, padding: "14px 16px", background: c.greenBg, borderColor: c.greenBd, borderRadius: 8 }}>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.7 }}>
+                {t("vault.euai.desc")}
+              </p>
+            </div>
+          </Panel>
+        </section>
+
+        {/* -- SOC2 ETA -- */}
+        <section style={{ marginBottom: 40 }}>
+          <Panel delay={120}>
+            <div className="gt-card" style={{ padding: "14px 16px", background: c.amberBg, border: "1px solid " + c.amberBd, borderRadius: 8, display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>{"\u231B"}</span>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.7 }}>
+                {t("security.soc2eta")}
+              </p>
             </div>
           </Panel>
         </section>
@@ -373,17 +440,17 @@ export default function SecurityVault() {
         {/* -- Related research -- */}
         <section style={{ marginBottom: 40, marginTop: 20 }}>
           <Panel>
-            <p className="gt-label" style={{ marginBottom: 10 }}>Related research</p>
+            <p className="gt-label" style={{ marginBottom: 10 }}>{t("vault.related.label")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <a href="/intel-benchmarks/saas-ai-cost-exposure" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>SaaS & AI Cost Exposure by Industry {"\u2192"}</a>
-              <a href="/intel-benchmarks/shadow-ai-governance" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>Shadow AI Governance: Detection & Cost Impact {"\u2192"}</a>
-              <a href="/intel-benchmarks/cfo-technology-spend-guide" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>CFO Guide to Technology Spend Exposure {"\u2192"}</a>
+              <a href="/intel-benchmarks/saas-ai-cost-exposure" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>{t("vault.related.link1")} {"\u2192"}</a>
+              <a href="/intel-benchmarks/shadow-ai-governance" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>{t("vault.related.link2")} {"\u2192"}</a>
+              <a href="/intel-benchmarks/cfo-technology-spend-guide" style={{ fontSize: 12, color: c.accentHi, textDecoration: "none" }}>{t("vault.related.link3")} {"\u2192"}</a>
             </div>
             <div className="gt-divider" style={{ margin: "12px 0 10px" }} />
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              <a href="/methodology" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>Detection Methodology {"\u2192"}</a>
-              <a href="/procurement" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>Procurement Guide {"\u2192"}</a>
-              <a href="/intel-benchmarks" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>All Intelligence Benchmarks {"\u2192"}</a>
+              <a href="/methodology" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>{t("vault.related.link4")} {"\u2192"}</a>
+              <a href="/procurement" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>{t("vault.related.link5")} {"\u2192"}</a>
+              <a href="/intel-benchmarks" style={{ fontSize: 11, color: c.text3, textDecoration: "none" }}>{t("vault.related.link6")} {"\u2192"}</a>
             </div>
           </Panel>
         </section>

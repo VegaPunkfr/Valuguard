@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { useI18n } from "@/lib/i18n";
 import { c, f, inset, sectionLabel } from "@/lib/tokens";
-import Footer from "@/components/ui/footer";
 
 /* ── Referral code generator (client-side, deterministic from session) ── */
 function deriveRefCode(sessionId: string): string {
@@ -155,7 +154,7 @@ function ReferralProgress({ count }: { count: number }) {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: i < count ? c.greenBg : "rgba(0,0,0,0.25)",
+            background: i < count ? c.greenBg : "#F1F5F9",
             border: `2px solid ${i < count ? c.green : c.border}`,
             display: "flex",
             alignItems: "center",
@@ -174,6 +173,60 @@ function ReferralProgress({ count }: { count: number }) {
   );
 }
 
+/* ── Deliverable Row ──────────────────────────────────────── */
+function DeliverableRow({
+  icon,
+  title,
+  desc,
+  accentColor,
+  borderColor,
+  noBorder,
+}: {
+  icon: string;
+  title: string;
+  desc: string;
+  accentColor: string;
+  borderColor: string;
+  noBorder?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 14,
+        padding: "16px 0",
+        borderBottom: noBorder ? "none" : `1px solid ${c.border}`,
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 9,
+          background: `${borderColor}12`,
+          border: `1px solid ${borderColor}30`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 16,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: accentColor, marginBottom: 3, lineHeight: 1.3 }}>
+          {title}
+        </p>
+        <p style={{ fontSize: 12, color: c.text3, lineHeight: 1.5, margin: 0 }}>
+          {desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Content ─────────────────────────────────────────── */
 function SuccessContent() {
   const { t } = useI18n();
@@ -184,12 +237,26 @@ function SuccessContent() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [deliveryStatus, setDeliveryStatus] = useState<"processing" | "ready" | "error">("processing");
   const [runId, setRunId] = useState<string | null>(null);
-  const [referralCount] = useState(0); // Will be fetched from API in future
+  const [referralCount, setReferralCount] = useState(0);
 
   const refCode = useMemo(
     () => (sessionId ? deriveRefCode(sessionId) : "GHOST"),
     [sessionId]
   );
+
+  // Load referral count from localStorage (incremented when a referred session converts)
+  useEffect(() => {
+    if (!refCode || refCode === "GHOST") return;
+    try {
+      const stored = localStorage.getItem(`vg-ref-count-${refCode}`);
+      if (stored) {
+        const n = parseInt(stored, 10);
+        if (!isNaN(n) && n > 0) setReferralCount(Math.min(n, 3));
+      }
+      // Also persist this session's refCode so referred visitors can credit it
+      localStorage.setItem("ghost-tax-refcode", refCode);
+    } catch { /* localStorage unavailable */ }
+  }, [refCode]);
 
   const referralLink = `${SITE_URL}/intel?ref=${refCode}`;
 
@@ -257,6 +324,21 @@ function SuccessContent() {
           >
             &#x2713;
           </div>
+
+          {/* Payment amount confirmation */}
+          <p style={{
+            fontSize: 14,
+            fontFamily: f.mono,
+            color: c.green,
+            marginBottom: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}>
+            <span style={{ fontSize: 12 }}>&#x2713;</span>
+            {t("success.paymentConfirm")}
+          </p>
 
           <p className="gt-section-label" style={{ color: c.green }}>
             {t("success.badge")}
@@ -394,7 +476,149 @@ function SuccessContent() {
         </div>
 
         {/* ═══════════════════════════════════════════════════
-            SECTION 2: Viral CTAs — "While You Wait"
+            SECTION 2: What's Included — Deliverables
+            ═══════════════════════════════════════════════════ */}
+        <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24 }}>
+          <p style={{ ...sectionLabel, fontSize: 10, color: c.green, marginBottom: 6, textAlign: "center" }}>
+            {t("success.deliverables.title")}
+          </p>
+          <p style={{ fontSize: 14, color: c.text2, textAlign: "center", marginBottom: 24, lineHeight: 1.5 }}>
+            {t("success.deliverables.subtitle")}
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <DeliverableRow
+              icon="\uD83D\uDCB0"
+              title={t("success.deliverables.cfoMemo")}
+              desc={t("success.deliverables.cfoMemoDesc")}
+              accentColor={c.green}
+              borderColor="hsl(160, 64%, 50%)"
+            />
+            <DeliverableRow
+              icon="\uD83D\uDDA5\uFE0F"
+              title={t("success.deliverables.cioBrief")}
+              desc={t("success.deliverables.cioBriefDesc")}
+              accentColor={c.accent}
+              borderColor="hsl(216, 91%, 65%)"
+            />
+            <DeliverableRow
+              icon="\uD83D\uDCCA"
+              title={t("success.deliverables.boardOnePager")}
+              desc={t("success.deliverables.boardOnePagerDesc")}
+              accentColor={c.cyan}
+              borderColor="hsl(190, 86%, 58%)"
+            />
+            <DeliverableRow
+              icon="\uD83E\uDD1D"
+              title={t("success.deliverables.procurementPlan")}
+              desc={t("success.deliverables.procurementPlanDesc")}
+              accentColor={c.amber}
+              borderColor="hsl(35, 86%, 56%)"
+              noBorder
+            />
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════
+            SECTION 3: Rail B Upsell (non-intrusive)
+            ═══════════════════════════════════════════════════ */}
+        <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24, border: `1px solid rgba(52,211,153,0.15)` }}>
+          <p style={{ ...sectionLabel, fontSize: 10, color: c.accent, marginBottom: 6, textAlign: "center" }}>
+            {t("success.upsell.label")}
+          </p>
+          <h2 style={{
+            fontSize: 20,
+            fontWeight: 800,
+            textAlign: "center",
+            marginBottom: 8,
+            letterSpacing: "-0.02em",
+          }}>
+            {t("success.upsell.title")}
+          </h2>
+          <p style={{ fontSize: 14, color: c.text2, textAlign: "center", marginBottom: 24, lineHeight: 1.5, maxWidth: 440, margin: "0 auto 24px" }}>
+            {t("success.upsell.desc")}
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <ViralCard
+              icon="\uD83D\uDCC8"
+              title={t("success.upsell.stabilize")}
+              desc={`${t("success.upsell.stabilizeDesc")} — ${t("success.upsell.stabilizePrice")}`}
+              href="/contact?rail=B_STABILIZE"
+              accentColor={c.green}
+              borderColor="hsl(160, 64%, 50%)"
+            />
+            <ViralCard
+              icon="\uD83D\uDEE1\uFE0F"
+              title={t("success.upsell.monitor")}
+              desc={`${t("success.upsell.monitorDesc")} — ${t("success.upsell.monitorPrice")}`}
+              href="/contact?rail=B_MONITOR"
+              accentColor={c.cyan}
+              borderColor="hsl(190, 86%, 58%)"
+            />
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════
+            SECTION 4: Social Proof
+            ═══════════════════════════════════════════════════ */}
+        <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24 }}>
+          <p style={{ ...sectionLabel, fontSize: 10, color: c.text3, marginBottom: 20, textAlign: "center" }}>
+            {t("success.proof.title")}
+          </p>
+
+          {/* Stats grid */}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24, justifyContent: "center" }}>
+            <StatBox value={t("success.proof.stat1")} label={t("success.proof.stat1Label")} />
+            <StatBox value={t("success.proof.stat2")} label={t("success.proof.stat2Label")} />
+            <StatBox value={t("success.proof.stat3")} label={t("success.proof.stat3Label")} />
+            <StatBox value={t("success.proof.stat4")} label={t("success.proof.stat4Label")} />
+          </div>
+
+          {/* Testimonial quote */}
+          <div style={{
+            ...inset,
+            padding: "20px 24px",
+            maxWidth: 440,
+            margin: "0 auto",
+            position: "relative",
+          }}>
+            <div style={{
+              position: "absolute",
+              top: 12,
+              left: 18,
+              fontSize: 32,
+              color: c.text4,
+              fontFamily: "Georgia, serif",
+              lineHeight: 1,
+              opacity: 0.5,
+            }}>
+              &#x201C;
+            </div>
+            <p style={{
+              fontSize: 14,
+              color: c.text2,
+              lineHeight: 1.65,
+              fontStyle: "italic",
+              paddingLeft: 20,
+              marginBottom: 12,
+            }}>
+              {t("success.proof.quote")}
+            </p>
+            <p style={{
+              fontSize: 11,
+              color: c.text3,
+              fontWeight: 600,
+              paddingLeft: 20,
+              margin: 0,
+            }}>
+              -- {t("success.proof.quoteRole")}
+            </p>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════
+            SECTION 5: Viral CTAs — "While You Wait"
             ═══════════════════════════════════════════════════ */}
         <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24 }}>
           <p style={{ ...sectionLabel, fontSize: 10, color: c.accent, marginBottom: 6, textAlign: "center" }}>
@@ -406,7 +630,7 @@ function SuccessContent() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <ViralCard
-              icon={"\uD83D\uDC65"}
+              icon="\uD83D\uDC65"
               title={t("success.viral.colleagueScan")}
               desc={t("success.viral.colleagueScanDesc")}
               href={`${SITE_URL}/intel?ref=${refCode}&utm_source=success&utm_medium=viral&utm_campaign=colleague`}
@@ -414,7 +638,7 @@ function SuccessContent() {
               borderColor="hsl(216, 91%, 65%)"
             />
             <ViralCard
-              icon={"\uD83C\uDFAF"}
+              icon="\uD83C\uDFAF"
               title={t("success.viral.competitorScan")}
               desc={t("success.viral.competitorScanDesc")}
               href={`${SITE_URL}/intel?ref=${refCode}&utm_source=success&utm_medium=viral&utm_campaign=competitor`}
@@ -422,7 +646,7 @@ function SuccessContent() {
               borderColor="hsl(35, 86%, 56%)"
             />
             <ViralCard
-              icon={"\uD83D\uDCCA"}
+              icon="\uD83D\uDCCA"
               title={t("success.viral.boardShare")}
               desc={t("success.viral.boardShareDesc")}
               href={runId ? `${SITE_URL}/report/${runId}/share?type=board` : `${SITE_URL}/intel?ref=${refCode}&utm_source=success&utm_medium=viral&utm_campaign=board`}
@@ -433,7 +657,7 @@ function SuccessContent() {
         </div>
 
         {/* ═══════════════════════════════════════════════════
-            SECTION 3: Referral Program
+            SECTION 6: Referral Program
             ═══════════════════════════════════════════════════ */}
         <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24 }}>
           <p style={{ ...sectionLabel, fontSize: 10, color: c.green, marginBottom: 6, textAlign: "center" }}>
@@ -576,65 +800,7 @@ function SuccessContent() {
         </div>
 
         {/* ═══════════════════════════════════════════════════
-            SECTION 4: Social Proof
-            ═══════════════════════════════════════════════════ */}
-        <div className="gt-panel" style={{ padding: "36px 32px", marginBottom: 24 }}>
-          <p style={{ ...sectionLabel, fontSize: 10, color: c.text3, marginBottom: 20, textAlign: "center" }}>
-            {t("success.proof.title")}
-          </p>
-
-          {/* Stats grid */}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24, justifyContent: "center" }}>
-            <StatBox value={t("success.proof.stat1")} label={t("success.proof.stat1Label")} />
-            <StatBox value={t("success.proof.stat2")} label={t("success.proof.stat2Label")} />
-            <StatBox value={t("success.proof.stat3")} label={t("success.proof.stat3Label")} />
-            <StatBox value={t("success.proof.stat4")} label={t("success.proof.stat4Label")} />
-          </div>
-
-          {/* Testimonial quote */}
-          <div style={{
-            ...inset,
-            padding: "20px 24px",
-            maxWidth: 440,
-            margin: "0 auto",
-            position: "relative",
-          }}>
-            <div style={{
-              position: "absolute",
-              top: 12,
-              left: 18,
-              fontSize: 32,
-              color: c.text4,
-              fontFamily: "Georgia, serif",
-              lineHeight: 1,
-              opacity: 0.5,
-            }}>
-              &#x201C;
-            </div>
-            <p style={{
-              fontSize: 14,
-              color: c.text2,
-              lineHeight: 1.65,
-              fontStyle: "italic",
-              paddingLeft: 20,
-              marginBottom: 12,
-            }}>
-              {t("success.proof.quote")}
-            </p>
-            <p style={{
-              fontSize: 11,
-              color: c.text3,
-              fontWeight: 600,
-              paddingLeft: 20,
-              margin: 0,
-            }}>
-              -- {t("success.proof.quoteRole")}
-            </p>
-          </div>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════
-            SECTION 5: Role Qualification
+            SECTION 7: Role Qualification
             ═══════════════════════════════════════════════════ */}
         <div className="gt-panel" style={{ padding: "28px 32px", textAlign: "center", marginBottom: 24 }}>
           <p style={{ fontSize: 13, color: c.text2, marginBottom: 14 }}>
@@ -652,7 +818,7 @@ function SuccessContent() {
                 style={{
                   padding: "7px 18px",
                   borderRadius: 20,
-                  background: selectedRole === role ? c.accentBg : "rgba(0,0,0,0.22)",
+                  background: selectedRole === role ? c.accentBg : "#F8FAFC",
                   border: selectedRole === role ? `1.5px solid ${c.accent}` : `1px solid ${c.border}`,
                   color: selectedRole === role ? c.text1 : c.text3,
                   fontSize: 12,
@@ -672,7 +838,6 @@ function SuccessContent() {
           </a>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

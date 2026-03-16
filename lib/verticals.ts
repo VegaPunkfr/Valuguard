@@ -774,7 +774,7 @@ export const VERTICALS: VerticalData[] = [
     type: "country",
     title: "Ghost Tax USA — Hidden SaaS & Cloud Waste in US Companies",
     description:
-      "US companies waste 23-41% of SaaS spend on enterprise sprawl, shadow AI, and vendor lock-in. The largest Ghost Tax market. Full detection from $990.",
+      "US companies waste 23-41% of SaaS spend on enterprise sprawl, shadow AI, and vendor lock-in. The largest Ghost Tax market. Full detection from $490.",
     ogTitle: "Ghost Tax USA: American Companies Waste $4,200 Per Employee Per Year on IT",
     hero: {
       label: "US MARKET EXPOSURE",
@@ -832,7 +832,7 @@ export const VERTICALS: VerticalData[] = [
       {
         question: "What does Ghost Tax cost for US companies?",
         answer:
-          "Ghost Tax's Detection Scan costs $990 for the US market. The average US detection finds $800k-$2M in recoverable annual spend. ROI is typically 800-2,000x the scan cost. No integration required — results in 48 hours.",
+          "Ghost Tax's Detection Scan costs $490 for the US market. The average US detection finds $800k-$2M in recoverable annual spend. ROI is typically 800-2,000x the scan cost. No integration required — results in 48 hours.",
       },
       {
         question: "How is the US market different from Europe?",
