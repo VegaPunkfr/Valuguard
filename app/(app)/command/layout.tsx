@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { type ReactNode, useEffect, useState, useCallback } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { type ReactNode, useEffect, useState, useCallback, Suspense } from 'react';
 
 const NAV: { href: string; label: string }[] = [
   { href: '/command',          label: 'OVERVIEW' },
@@ -12,9 +12,41 @@ const NAV: { href: string; label: string }[] = [
   { href: '/command/brief',    label: 'BRIEF' },
 ];
 
-export default function CommandLayout({ children }: { children: ReactNode }) {
+const AUTH_KEY = 'gt-command-auth';
+const EXPECTED_SECRET = 'ghost-command-2026';
+
+function CommandLayoutInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [authed, setAuthed] = useState(false);
   const [signalCount, setSignalCount] = useState(0);
+
+  // Auth gate: check URL key or localStorage
+  useEffect(() => {
+    const urlKey = searchParams.get('key');
+    const storedKey = localStorage.getItem(AUTH_KEY);
+    if (urlKey === EXPECTED_SECRET) {
+      localStorage.setItem(AUTH_KEY, EXPECTED_SECRET);
+      setAuthed(true);
+      // Clean key from URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('key');
+      window.history.replaceState({}, '', url.toString());
+    } else if (storedKey === EXPECTED_SECRET) {
+      setAuthed(true);
+    }
+  }, [searchParams]);
+
+  if (!authed) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#060912', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'monospace', color: '#f87171', fontSize: 14, textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>UNAUTHORIZED</div>
+          <div style={{ color: '#64748b' }}>Access requires valid key parameter.</div>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     document.body.style.background = '#060912';
@@ -107,5 +139,13 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
     </div>
+  );
+}
+
+export default function CommandLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#060912' }} />}>
+      <CommandLayoutInner>{children}</CommandLayoutInner>
+    </Suspense>
   );
 }
