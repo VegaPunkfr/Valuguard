@@ -129,7 +129,12 @@ function runWAF(request: NextRequest): { blocked: boolean; reason?: string } {
   }
 
   // 2. Check URL path for traversal/injection
-  const fullPath = decodeURIComponent(url.pathname) + (url.search || "");
+  let fullPath: string;
+  try {
+    fullPath = decodeURIComponent(url.pathname) + (url.search || "");
+  } catch {
+    return { blocked: true, reason: "malformed_url" };
+  }
   const pathThreat = detectThreat(fullPath);
   if (pathThreat) {
     return { blocked: true, reason: `url:${pathThreat}` };
@@ -277,9 +282,17 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Command routes: if COMMAND_SECRET check failed above, block access
+  if (pathname.startsWith("/command")) {
+    return new NextResponse("Unauthorized — command access requires valid key", {
+      status: 401,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   if (!hasValidCookie) {
-    const loginUrl = new URL("/intel", request.url);
-    loginUrl.searchParams.set("auth", "required");
+    // For non-command protected routes, redirect to homepage
+    const loginUrl = new URL("/", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
