@@ -54,6 +54,20 @@ export type PlatformEventType =
   | 'return_visit'
   | 'memo_copied';
 
+// Signal strength by event type — determines impact on account
+const EVENT_STRENGTH: Record<PlatformEventType, number> = {
+  lead_captured: 3,
+  scan_requested: 2,
+  scan_completed: 4,
+  payment_completed: 5,
+  checkout_abandoned: 3,
+  report_generated: 4,
+  contact_form_submitted: 4,
+  high_intent_detected: 3,
+  return_visit: 2,
+  memo_copied: 4,
+};
+
 export interface PlatformEvent {
   type: PlatformEventType;
   domain: string;
@@ -163,10 +177,37 @@ export function createAccountFromEvent(event: PlatformEvent): Account {
     case 'high_intent_detected':
       signals.push({
         type: 'intent',
-        detail: `High-intent behavior: ${(event.data?.pages as string[])?.join(', ') || 'multiple pages visited'}`,
+        detail: `High-intent behavior: ${(event.data?.source_event as string) || (event.data?.pages as string[])?.join(', ') || 'checkout or deep engagement'}`,
         source: 'ghost-tax',
         date: event.timestamp.split('T')[0],
         strength: 3,
+      });
+      break;
+    case 'contact_form_submitted':
+      signals.push({
+        type: 'intent',
+        detail: `Contact form submitted — Rail B/C inquiry (${event.contactName || 'unknown'})`,
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 4,
+      });
+      break;
+    case 'return_visit':
+      signals.push({
+        type: 'intent',
+        detail: 'Return visit to Ghost-Tax — sustained interest',
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 2,
+      });
+      break;
+    case 'memo_copied':
+      signals.push({
+        type: 'intent',
+        detail: `Copied decision memo from free scan — likely sharing internally with ${event.data?.source_event === 'circulation.board_copied' ? 'board' : 'finance team'}`,
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 4,
       });
       break;
     default:
@@ -175,7 +216,7 @@ export function createAccountFromEvent(event: PlatformEvent): Account {
         detail: `Platform event: ${event.type}`,
         source: 'ghost-tax',
         date: event.timestamp.split('T')[0],
-        strength: 2,
+        strength: EVENT_STRENGTH[event.type as PlatformEventType] || 2,
       });
   }
 
@@ -284,18 +325,47 @@ export function enrichAccountWithEvent(
       break;
 
     case 'return_visit':
+      newSignals.push({
+        type: 'intent',
+        detail: 'Return visit to Ghost-Tax',
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 2,
+      });
       newTimeline.push({ type: 'signal_detected', detail: 'Return visit to Ghost-Tax', date: now });
       break;
 
     case 'memo_copied':
       newSignals.push({
         type: 'intent',
-        detail: 'Copied CFO memo from free scan — sharing internally',
+        detail: `Decision memo copied — likely sharing internally`,
         source: 'ghost-tax',
         date: event.timestamp.split('T')[0],
         strength: 4,
       });
-      newTimeline.push({ type: 'signal_detected', detail: 'CFO memo copied — internal sharing likely', date: now });
+      newTimeline.push({ type: 'signal_detected', detail: 'Decision memo copied — internal sharing likely', date: now });
+      break;
+
+    case 'contact_form_submitted':
+      newSignals.push({
+        type: 'intent',
+        detail: `Contact form submitted — direct inquiry (${event.contactName || 'unknown'})`,
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 4,
+      });
+      newTimeline.push({ type: 'signal_detected', detail: 'Contact form submitted — Rail B/C interest', date: now });
+      break;
+
+    case 'high_intent_detected':
+      newSignals.push({
+        type: 'intent',
+        detail: `High-intent behavior: ${(event.data?.source_event as string) || 'deep engagement'}`,
+        source: 'ghost-tax',
+        date: event.timestamp.split('T')[0],
+        strength: 3,
+      });
+      newTimeline.push({ type: 'signal_detected', detail: 'High-intent behavior detected', date: now });
       break;
   }
 

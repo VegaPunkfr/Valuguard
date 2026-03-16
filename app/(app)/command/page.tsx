@@ -31,11 +31,21 @@ const EVT_CLR: Record<string, string> = {
   lead_captured: '#60a5fa',
   scan_completed: '#22d3ee',
   payment_completed: '#34d399',
+  checkout_abandoned: '#f59e0b',
+  contact_form_submitted: '#a78bfa',
+  high_intent_detected: '#f59e0b',
+  return_visit: '#64748b',
+  memo_copied: '#ef4444',
 };
 const EVT_LABEL: Record<string, string> = {
   lead_captured: 'LEAD',
   scan_completed: 'SCAN',
   payment_completed: 'PAYMENT',
+  checkout_abandoned: 'ABANDON',
+  contact_form_submitted: 'CONTACT',
+  high_intent_detected: 'INTENT',
+  return_visit: 'RETURN',
+  memo_copied: 'MEMO',
 };
 
 export default function CommandOverview() {

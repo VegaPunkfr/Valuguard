@@ -117,6 +117,25 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ── BRIDGE: contact_form_submitted → Founder Mission Control ──
+    const commandSecret = process.env.COMMAND_SECRET;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+    if (commandSecret) {
+      const domain = safeEmail.split("@")[1] || undefined;
+      fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "contact_form_submitted",
+          domain: domain,
+          email: safeEmail,
+          companyName: safeCompany !== "N/A" ? safeCompany : undefined,
+          contactName: safeName,
+          headcount: safeSize !== "N/A" ? parseInt(safeSize) || undefined : undefined,
+        }),
+      }).catch(() => { /* bridge failure is non-fatal */ });
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {
     console.error("[Ghost Tax] Contact form error:", err);

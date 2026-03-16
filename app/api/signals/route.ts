@@ -215,6 +215,46 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ── BRIDGE: relay high-conviction signals to Founder Mission Control ──
+  const BRIDGE_EVENTS: Record<string, string> = {
+    "intel.memo_copied": "memo_copied",
+    "circulation.cfo_memo_copied": "memo_copied",
+    "circulation.cio_memo_copied": "memo_copied",
+    "circulation.board_copied": "memo_copied",
+    "circulation.procurement_copied": "memo_copied",
+    "intel.return_visit": "return_visit",
+    "conversion.checkout_started": "high_intent_detected",
+    "conversion.checkout_after_trust": "high_intent_detected",
+    "conversion.checkout_after_memo": "high_intent_detected",
+  };
+
+  const commandSecret = process.env.COMMAND_SECRET;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+  if (commandSecret) {
+    // Deduplicate: one bridge call per domain per event type
+    const bridged = new Set<string>();
+    for (const evt of events) {
+      const bridgeType = BRIDGE_EVENTS[evt.event];
+      if (!bridgeType) continue;
+      const domain = extractDomain(evt.domain || "");
+      if (!domain) continue;
+      const key = `${domain}:${bridgeType}`;
+      if (bridged.has(key)) continue;
+      bridged.add(key);
+
+      fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: bridgeType,
+          domain,
+          email: evt.email || undefined,
+          data: { source_event: evt.event },
+        }),
+      }).catch(() => { /* bridge failure is non-fatal */ });
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     processed: persisted,

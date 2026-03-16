@@ -256,6 +256,25 @@ export async function runCheckoutRecovery(): Promise<RecoveryResult> {
         step,
         action: "sent",
       });
+
+      // ── BRIDGE: checkout_abandoned → Founder Mission Control (step 1 only) ──
+      if (step === 1) {
+        const commandSecret = process.env.COMMAND_SECRET;
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+        if (commandSecret && session.domain) {
+          fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "checkout_abandoned",
+              domain: session.domain,
+              email: session.email,
+              companyName: session.companyName || undefined,
+              headcount: session.headcount || undefined,
+            }),
+          }).catch(() => { /* bridge failure is non-fatal */ });
+        }
+      }
     } catch (err) {
       result.errors++;
       const message = err instanceof Error ? err.message : "Unknown error";
