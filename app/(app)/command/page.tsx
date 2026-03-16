@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
-const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 8, padding: '16px 20px' };
-const lbl: React.CSSProperties = { ...mono, fontSize: 8, fontWeight: 600, letterSpacing: '0.16em', color: '#475569', marginBottom: 10, textTransform: 'uppercase' as const };
+const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 10, padding: '20px 24px' };
+const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', color: '#475569', marginBottom: 12, textTransform: 'uppercase' as const };
 
 function fmt(n: number): string { return n >= 1000 ? `€${Math.round(n / 1000)}k` : `€${n}`; }
+
+const MAX_QUEUE = 30;
 
 export default function CommandOverview() {
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +31,6 @@ export default function CommandOverview() {
 
   useEffect(() => {
     try {
-      // Dynamic import to isolate any module errors
       import('@/lib/command/store').then(mod => {
         try {
           const accounts = mod.loadAccounts();
@@ -48,10 +49,10 @@ export default function CommandOverview() {
   if (error) {
     return (
       <div style={{ ...mono, color: '#f87171', padding: 40 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Command Center Error</div>
-        <pre style={{ fontSize: 11, color: '#f87171', background: '#0a0d19', padding: 16, borderRadius: 8, whiteSpace: 'pre-wrap' as const }}>{error}</pre>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Command Center Error</div>
+        <pre style={{ fontSize: 13, color: '#f87171', background: '#0a0d19', padding: 16, borderRadius: 8, whiteSpace: 'pre-wrap' as const }}>{error}</pre>
         <button onClick={() => { try { localStorage.clear(); } catch {} window.location.reload(); }}
-          style={{ ...mono, marginTop: 16, fontSize: 10, padding: '8px 16px', background: 'rgba(96,165,250,0.1)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 6, cursor: 'pointer' }}>
+          style={{ ...mono, marginTop: 16, fontSize: 12, padding: '10px 20px', background: 'rgba(96,165,250,0.1)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 6, cursor: 'pointer' }}>
           CLEAR CACHE & RELOAD
         </button>
       </div>
@@ -59,7 +60,7 @@ export default function CommandOverview() {
   }
 
   if (!data) {
-    return <div style={{ ...mono, color: '#475569', padding: 40 }}>Loading Mission Control...</div>;
+    return <div style={{ ...mono, color: '#475569', padding: 40, fontSize: 14 }}>Loading Mission Control...</div>;
   }
 
   const accounts = data.accounts;
@@ -69,7 +70,6 @@ export default function CommandOverview() {
   const outreachReady = active.filter(a => a.outreach.length > 0 && a.outreach.some(o => o.status === 'draft') && a.attackability === 'now');
   const killCandidates = active.filter(a => a.conviction === 'low' || a.attackability === 'blocked' || a.weaknesses.length > a.strengths.length);
 
-  // Simple probability calc inline (no external dependency)
   const calcProb = (a: typeof accounts[0]) => {
     const atkP: Record<string, number> = { now: 28, soon: 16, later: 7, blocked: 2 };
     const conP: Record<string, number> = { very_high: 22, high: 16, moderate: 8, low: 3 };
@@ -82,6 +82,57 @@ export default function CommandOverview() {
   };
   const calcEV = (a: typeof accounts[0]) => Math.round(calcProb(a) / 100 * a.revenueEstimate);
 
+  // --- HOT QUEUE: inline heat score ---
+  const calcHeat = (a: typeof accounts[0]) => {
+    let heat = 0;
+    // Signal strength (0-15)
+    const avgStr = a.signals.length > 0 ? a.signals.reduce((s, sig) => s + sig.strength, 0) / a.signals.length : 0;
+    const maxStr = a.signals.length > 0 ? Math.max(...a.signals.map(s => s.strength)) : 0;
+    heat += Math.min(15, Math.round(avgStr * 2 + maxStr));
+    // Conviction (0-15)
+    const convScores: Record<string, number> = { very_high: 15, high: 11, moderate: 6, low: 2 };
+    heat += convScores[a.conviction] || 5;
+    // Attackability (0-10)
+    const atkScores: Record<string, number> = { now: 10, soon: 6, later: 3, blocked: 0 };
+    heat += atkScores[a.attackability] || 3;
+    // Contact quality (0-10)
+    heat += (a.financeLead.name.split(' ').length >= 2 ? 4 : 1) + (a.outreach.length > 0 ? 3 : 0) + (a.status !== 'contacted' ? 3 : 0);
+    // Solofit (0-10)
+    const sfScores: Record<string, number> = { ideal: 10, good: 7, stretch: 3, hard: 0 };
+    heat += sfScores[a.solofit] || 5;
+    // EV (0-10)
+    const ev = Math.round(calcProb(a) / 100 * a.revenueEstimate);
+    heat += ev >= 10000 ? 10 : ev >= 5000 ? 8 : ev >= 2000 ? 6 : ev >= 1000 ? 4 : 2;
+    // Proof (0-5)
+    heat += a.scan?.strengthensHypothesis ? 5 : a.scan ? 3 : 1;
+    // Signal freshness (0-15)
+    heat += 10; // approximate for overview
+    return Math.min(100, heat);
+  };
+
+  // HOT QUEUE classification
+  const classifyHeat = (score: number): 'hot' | 'warm' | 'hold' => {
+    if (score >= 60) return 'hot';
+    if (score >= 35) return 'warm';
+    return 'hold';
+  };
+
+  const queueEntries = active.map(a => ({
+    ...a,
+    heat: calcHeat(a),
+    tier: classifyHeat(calcHeat(a)),
+  })).sort((a, b) => b.heat - a.heat);
+
+  const hotCount = queueEntries.filter(e => e.tier === 'hot').length;
+  const warmCount = queueEntries.filter(e => e.tier === 'warm').length;
+  const holdCount = queueEntries.filter(e => e.tier === 'hold').length;
+  const slotsFree = Math.max(0, MAX_QUEUE - queueEntries.length);
+  const coolingCount = accounts.filter(a => a.status === 'contacted').length;
+  const awaitingCount = active.filter(a => !a.scan && a.attackability !== 'now').length;
+
+  const HEAT_CLR = (score: number) => score >= 60 ? '#ef4444' : score >= 35 ? '#f59e0b' : '#64748b';
+  const HEAT_BG = (score: number) => score >= 60 ? 'rgba(239,68,68,0.12)' : score >= 35 ? 'rgba(245,158,11,0.12)' : 'rgba(100,116,139,0.08)';
+
   const totalPipeline = active.reduce((s, a) => s + a.revenueEstimate, 0);
   const weightedPipeline = active.reduce((s, a) => s + calcEV(a), 0);
   const topEV = [...active].sort((a, b) => calcEV(b) - calcEV(a)).slice(0, 3);
@@ -92,9 +143,9 @@ export default function CommandOverview() {
 
   return (
     <div style={mono}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 20 }}>
-        <span style={{ fontSize: 16, fontWeight: 700, color: '#e4e9f4' }}>Mission Control</span>
-        <span style={{ fontSize: 10, color: '#475569' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 24 }}>
+        <span style={{ fontSize: 24, fontWeight: 700, color: '#e4e9f4' }}>Mission Control</span>
+        <span style={{ fontSize: 13, color: '#475569' }}>
           {active.length} active · {attackNow.length} attack now · Pipeline {fmt(totalPipeline)} · Weighted {fmt(weightedPipeline)}
         </span>
       </div>
@@ -103,25 +154,25 @@ export default function CommandOverview() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ ...box, borderLeft: '3px solid #34d399' }}>
           <div style={{ ...lbl, color: '#34d399' }}>ATTACK NOW</div>
-          {attackNow.length === 0 ? <div style={{ fontSize: 10, color: '#3a4560' }}>No accounts ready</div> : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {attackNow.length === 0 ? <div style={{ fontSize: 13, color: '#3a4560' }}>No accounts ready</div> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {attackNow.slice(0, 4).map((a, i) => {
                 const prob = calcProb(a);
                 const ev = calcEV(a);
                 return (
-                  <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 6, background: i === 0 ? 'rgba(52,211,153,0.04)' : 'rgba(14,18,33,0.3)', border: i === 0 ? '1px solid rgba(52,211,153,0.12)' : '1px solid rgba(36,48,78,0.08)' }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: i === 0 ? '#34d399' : '#3a4560', width: 22, textAlign: 'center' as const }}>{i + 1}</span>
+                  <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 8, background: i === 0 ? 'rgba(52,211,153,0.04)' : 'rgba(14,18,33,0.3)', border: i === 0 ? '1px solid rgba(52,211,153,0.12)' : '1px solid rgba(36,48,78,0.08)' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: i === 0 ? '#34d399' : '#3a4560', width: 26, textAlign: 'center' as const }}>{i + 1}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#e4e9f4' }}>{a.company}</span>
-                        <span style={{ fontSize: 8, color: '#475569' }}>{a.country}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4' }}>{a.company}</span>
+                        <span style={{ fontSize: 12, color: '#475569' }}>{a.country}</span>
                       </div>
-                      <div style={{ fontSize: 9, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{a.mainSignal}</div>
+                      <div style={{ fontSize: 12, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{a.mainSignal}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 12, fontWeight: 700, color: prob >= 40 ? '#34d399' : '#60a5fa' }}>{prob}%</div><div style={{ fontSize: 7, color: '#3a4560' }}>PROB</div></div>
-                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 12, fontWeight: 700, color: '#e4e9f4' }}>{fmt(a.revenueEstimate)}</div><div style={{ fontSize: 7, color: '#3a4560' }}>REV</div></div>
-                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 12, fontWeight: 700, color: ev >= 5000 ? '#34d399' : '#60a5fa' }}>{fmt(ev)}</div><div style={{ fontSize: 7, color: '#3a4560' }}>EV</div></div>
+                    <div style={{ display: 'flex', gap: 14, flexShrink: 0 }}>
+                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 15, fontWeight: 700, color: prob >= 40 ? '#34d399' : '#60a5fa' }}>{prob}%</div><div style={{ fontSize: 10, color: '#3a4560' }}>PROB</div></div>
+                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 15, fontWeight: 700, color: '#e4e9f4' }}>{fmt(a.revenueEstimate)}</div><div style={{ fontSize: 10, color: '#3a4560' }}>REV</div></div>
+                      <div style={{ textAlign: 'center' as const }}><div style={{ fontSize: 15, fontWeight: 700, color: ev >= 5000 ? '#34d399' : '#60a5fa' }}>{fmt(ev)}</div><div style={{ fontSize: 10, color: '#3a4560' }}>EV</div></div>
                     </div>
                   </Link>
                 );
@@ -131,15 +182,15 @@ export default function CommandOverview() {
         </div>
         <div style={{ ...box, borderLeft: '3px solid #a78bfa' }}>
           <div style={{ ...lbl, color: '#a78bfa' }}>TOP EXPECTED VALUE</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {topEV.map(a => {
               const prob = calcProb(a);
               const ev = calcEV(a);
               return (
-                <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 4, background: 'rgba(14,18,33,0.3)', border: '1px solid rgba(36,48,78,0.08)' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#e4e9f4', flex: 1 }}>{a.company}</span>
-                  <span style={{ fontSize: 10, color: '#64748b' }}>{prob}% × {fmt(a.revenueEstimate)}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#a78bfa' }}>{fmt(ev)}</span>
+                <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 6, background: 'rgba(14,18,33,0.3)', border: '1px solid rgba(36,48,78,0.08)' }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', flex: 1 }}>{a.company}</span>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>{prob}% × {fmt(a.revenueEstimate)}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#a78bfa' }}>{fmt(ev)}</span>
                 </Link>
               );
             })}
@@ -147,32 +198,125 @@ export default function CommandOverview() {
         </div>
       </div>
 
+      {/* HOT QUEUE LIVE */}
+      <div style={{ ...box, borderLeft: '3px solid #ef4444', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', color: '#ef4444', textTransform: 'uppercase' as const }}>
+            HOT QUEUE LIVE ({queueEntries.length}/{MAX_QUEUE})
+          </div>
+          <Link href="/command/outreach" style={{ ...mono, fontSize: 12, color: '#ef4444', textDecoration: 'none' }}>
+            View Hot Queue →
+          </Link>
+        </div>
+
+        {/* Stats bar */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16, fontSize: 13, flexWrap: 'wrap' as const }}>
+          <span><span style={{ fontWeight: 700, color: '#ef4444' }}>{hotCount}</span> <span style={{ color: '#64748b' }}>hot</span></span>
+          <span><span style={{ fontWeight: 700, color: '#f59e0b' }}>{warmCount}</span> <span style={{ color: '#64748b' }}>warm</span></span>
+          <span><span style={{ fontWeight: 700, color: '#64748b' }}>{holdCount}</span> <span style={{ color: '#64748b' }}>hold</span></span>
+          <span style={{ color: '#3a4560' }}>|</span>
+          <span><span style={{ fontWeight: 700, color: '#475569' }}>{slotsFree}</span> <span style={{ color: '#64748b' }}>slots free</span></span>
+          <span><span style={{ fontWeight: 700, color: '#475569' }}>{coolingCount}</span> <span style={{ color: '#64748b' }}>cooling</span></span>
+          <span><span style={{ fontWeight: 700, color: '#475569' }}>{awaitingCount}</span> <span style={{ color: '#64748b' }}>awaiting</span></span>
+        </div>
+
+        {/* Top 5 hot accounts */}
+        {queueEntries.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#3a4560' }}>No accounts in queue</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {queueEntries.slice(0, 5).map((a, i) => {
+              const heatClr = HEAT_CLR(a.heat);
+              const heatBg = HEAT_BG(a.heat);
+              const hasSent = a.outreach.some(o => o.status === 'sent');
+              const isContacted = a.status === 'contacted';
+              const channelRec = a.attackability === 'now' ? 'EMAIL' : a.attackability === 'soon' ? 'LINKEDIN' : 'HOLD';
+
+              return (
+                <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, background: 'rgba(14,18,33,0.3)', border: '1px solid rgba(36,48,78,0.08)' }}>
+                  {/* Rank */}
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#3a4560', width: 20, textAlign: 'center' as const }}>{i + 1}</span>
+
+                  {/* Heat badge */}
+                  <span style={{
+                    fontSize: 14, fontWeight: 700, color: heatClr,
+                    background: heatBg, padding: '2px 8px', borderRadius: 4,
+                    minWidth: 36, textAlign: 'center' as const,
+                  }}>
+                    {a.heat}
+                  </span>
+
+                  {/* Company + Contact */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                      {a.company}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                      {a.financeLead.name}{a.financeLead.title ? ` — ${a.financeLead.title}` : ''}
+                    </div>
+                  </div>
+
+                  {/* Channel recommendation */}
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, letterSpacing: '0.08em',
+                    color: channelRec === 'EMAIL' ? '#34d399' : channelRec === 'LINKEDIN' ? '#60a5fa' : '#64748b',
+                    padding: '2px 8px', borderRadius: 4,
+                    background: channelRec === 'EMAIL' ? 'rgba(52,211,153,0.08)' : channelRec === 'LINKEDIN' ? 'rgba(96,165,250,0.08)' : 'rgba(100,116,139,0.06)',
+                  }}>
+                    {channelRec}
+                  </span>
+
+                  {/* Status pills */}
+                  {isContacted ? (
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: '#64748b', background: 'rgba(100,116,139,0.1)', padding: '2px 8px', borderRadius: 4 }}>
+                      CONTACTED
+                    </span>
+                  ) : hasSent ? (
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: '#34d399', background: 'rgba(52,211,153,0.1)', padding: '2px 8px', borderRadius: 4 }}>
+                      SENT
+                    </span>
+                  ) : a.outreach.length > 0 ? (
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: '#34d399', background: 'rgba(52,211,153,0.1)', padding: '2px 8px', borderRadius: 4 }}>
+                      READY
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: '#64748b', background: 'rgba(100,116,139,0.06)', padding: '2px 8px', borderRadius: 4 }}>
+                      NOT READY
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* SCAN + OUTREACH + KILL */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div style={{ ...box, borderLeft: '3px solid #22d3ee' }}>
           <div style={{ ...lbl, color: '#22d3ee' }}>SCAN NEXT ({scanNeeded.length})</div>
           {scanNeeded.slice(0, 3).map(a => (
-            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: CONV_CLR[a.conviction] || '#64748b', width: 20 }}>{a.score}</span>
-              <span style={{ fontSize: 10, color: '#e4e9f4' }}>{a.company}</span>
-              <span style={{ fontSize: 8, color: '#475569' }}>{a.domain}</span>
+            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: CONV_CLR[a.conviction] || '#64748b', width: 24 }}>{a.score}</span>
+              <span style={{ fontSize: 13, color: '#e4e9f4' }}>{a.company}</span>
+              <span style={{ fontSize: 11, color: '#475569' }}>{a.domain}</span>
             </Link>
           ))}
-          <Link href="/command/scan" style={{ ...mono, fontSize: 9, color: '#22d3ee', textDecoration: 'none', marginTop: 4, display: 'block' }}>Scan Center →</Link>
+          <Link href="/command/scan" style={{ ...mono, fontSize: 12, color: '#22d3ee', textDecoration: 'none', marginTop: 6, display: 'block' }}>Scan Center →</Link>
         </div>
         <div style={{ ...box, borderLeft: '3px solid #a78bfa' }}>
           <div style={{ ...lbl, color: '#a78bfa' }}>OUTREACH READY ({outreachReady.length})</div>
-          {outreachReady.length === 0 ? <div style={{ fontSize: 9, color: '#3a4560' }}>Scan first, qualify, then outreach</div> : outreachReady.slice(0, 3).map(a => (
-            <div key={a.id} style={{ fontSize: 10, color: '#e4e9f4', marginBottom: 4 }}>{a.company} <span style={{ fontSize: 8, color: '#64748b' }}>{a.outreach.filter(o => o.status === 'draft').length} drafts</span></div>
+          {outreachReady.length === 0 ? <div style={{ fontSize: 12, color: '#3a4560' }}>Scan first, qualify, then outreach</div> : outreachReady.slice(0, 3).map(a => (
+            <div key={a.id} style={{ fontSize: 13, color: '#e4e9f4', marginBottom: 6 }}>{a.company} <span style={{ fontSize: 11, color: '#64748b' }}>{a.outreach.filter(o => o.status === 'draft').length} drafts</span></div>
           ))}
-          <Link href="/command/outreach" style={{ ...mono, fontSize: 9, color: '#a78bfa', textDecoration: 'none', marginTop: 4, display: 'block' }}>Outreach Console →</Link>
+          <Link href="/command/outreach" style={{ ...mono, fontSize: 12, color: '#a78bfa', textDecoration: 'none', marginTop: 6, display: 'block' }}>Outreach Console →</Link>
         </div>
         <div style={{ ...box, borderLeft: '3px solid #f87171' }}>
           <div style={{ ...lbl, color: '#f87171' }}>KILL FAST ({killCandidates.length})</div>
-          {killCandidates.length === 0 ? <div style={{ fontSize: 9, color: '#34d399' }}>Pipeline clean</div> : killCandidates.map(a => (
-            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span style={{ fontSize: 10, color: '#94a3b8' }}>{a.company}</span>
-              <span style={{ fontSize: 8, color: '#f87171' }}>{a.conviction === 'low' ? 'Low conv.' : 'Weak hyp.'}</span>
+          {killCandidates.length === 0 ? <div style={{ fontSize: 12, color: '#34d399' }}>Pipeline clean</div> : killCandidates.map(a => (
+            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 13, color: '#94a3b8' }}>{a.company}</span>
+              <span style={{ fontSize: 11, color: '#f87171' }}>{a.conviction === 'low' ? 'Low conv.' : 'Weak hyp.'}</span>
             </Link>
           ))}
         </div>
@@ -182,7 +326,7 @@ export default function CommandOverview() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={box}>
           <div style={lbl}>PIPELINE</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             {[
               { n: active.length, l: 'Active', c: '#e4e9f4' },
               { n: attackNow.length, l: 'Attack Now', c: '#34d399' },
@@ -190,8 +334,8 @@ export default function CommandOverview() {
               { n: accounts.filter(a => a.status === 'dropped').length, l: 'Dropped', c: '#f87171' },
             ].map(m => (
               <div key={m.l} style={{ textAlign: 'center' as const }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: m.c, lineHeight: 1 }}>{m.n}</div>
-                <div style={{ fontSize: 7, color: '#475569', letterSpacing: '0.1em', marginTop: 3 }}>{m.l.toUpperCase()}</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: m.c, lineHeight: 1 }}>{m.n}</div>
+                <div style={{ fontSize: 10, color: '#475569', letterSpacing: '0.1em', marginTop: 4 }}>{m.l.toUpperCase()}</div>
               </div>
             ))}
           </div>
@@ -199,10 +343,10 @@ export default function CommandOverview() {
         <div style={box}>
           <div style={lbl}>NEXT ACTIONS</div>
           {[...active].sort((a, b) => b.score - a.score).slice(0, 5).map(a => (
-            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: CONV_CLR[a.conviction] || '#64748b', width: 18 }}>{a.score}</span>
-              <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8', width: 72 }}>{a.company}</span>
-              <span style={{ fontSize: 9, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{a.nextAction}</span>
+            <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: CONV_CLR[a.conviction] || '#64748b', width: 22 }}>{a.score}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8', width: 90 }}>{a.company}</span>
+              <span style={{ fontSize: 12, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{a.nextAction}</span>
             </Link>
           ))}
         </div>

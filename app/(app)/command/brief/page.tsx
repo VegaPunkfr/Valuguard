@@ -8,7 +8,7 @@ import { loadAccounts, getAttackNow, getScanNeeded, getKillCandidates, getOutrea
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
 const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 8, padding: '16px 20px' };
-const lbl: React.CSSProperties = { ...mono, fontSize: 8, fontWeight: 600, letterSpacing: '0.16em', color: '#475569', marginBottom: 10, textTransform: 'uppercase' as const };
+const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '0.16em', color: '#475569', marginBottom: 10, textTransform: 'uppercase' as const };
 
 export default function BriefPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -27,13 +27,13 @@ export default function BriefPage() {
 
   return (
     <div style={mono}>
-      <div style={{ fontSize: 16, fontWeight: 700, color: '#e4e9f4', marginBottom: 2 }}>Decision Brief</div>
-      <div style={{ fontSize: 10, color: '#475569', marginBottom: 20 }}>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, color: '#e4e9f4', marginBottom: 2 }}>Decision Brief</div>
+      <div style={{ fontSize: 13, color: '#475569', marginBottom: 20 }}>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
 
       {/* Executive summary */}
       <div style={{ ...box, borderLeft: '3px solid #60a5fa', marginBottom: 16 }}>
         <div style={{ ...lbl, color: '#60a5fa' }}>EXECUTIVE SUMMARY</div>
-        <div style={{ fontSize: 12, color: '#e4e9f4', lineHeight: 1.7 }}>
+        <div style={{ fontSize: 15, color: '#e4e9f4', lineHeight: 1.7 }}>
           <p style={{ margin: '0 0 8px' }}>
             Pipeline: <strong>{active.length}</strong> comptes actifs.
             <strong style={{ color: '#34d399' }}> {attackNow.length}</strong> prêts à attaquer.
@@ -62,29 +62,29 @@ export default function BriefPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {attackNow.slice(0, 2).map(a => (
               <div key={a.id} style={{ padding: '10px 12px', borderRadius: 6, background: 'rgba(52,211,153,0.04)', border: '1px solid rgba(52,211,153,0.10)' }}>
-                <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '0.12em', color: '#34d399', marginBottom: 3 }}>ATTACK NOW</div>
+                <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', color: '#34d399', marginBottom: 3 }}>ATTACK NOW</div>
                 <Link href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#e4e9f4' }}>{a.company} <span style={{ fontSize: 9, color: '#64748b' }}>({a.financeLead.name})</span></div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4' }}>{a.company} <span style={{ fontSize: 13, color: '#64748b' }}>({a.financeLead.name})</span></div>
                 </Link>
-                <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 3, lineHeight: 1.5 }}>{a.whyNow}</div>
+                <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 3, lineHeight: 1.5 }}>{a.whyNow}</div>
               </div>
             ))}
             {active.filter(a => a.attackability === 'soon').slice(0, 2).map(a => (
               <div key={a.id} style={{ padding: '10px 12px', borderRadius: 6, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.10)' }}>
-                <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '0.12em', color: '#60a5fa', marginBottom: 3 }}>SCAN FIRST, THEN DECIDE</div>
+                <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', color: '#60a5fa', marginBottom: 3 }}>SCAN FIRST, THEN DECIDE</div>
                 <Link href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#e4e9f4' }}>{a.company}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4' }}>{a.company}</div>
                 </Link>
-                <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 3, lineHeight: 1.5 }}>{a.whyNow}</div>
+                <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 3, lineHeight: 1.5 }}>{a.whyNow}</div>
               </div>
             ))}
             {killCandidates.length > 0 && killCandidates.slice(0, 1).map(a => (
               <div key={a.id} style={{ padding: '10px 12px', borderRadius: 6, background: 'rgba(248,113,113,0.04)', border: '1px solid rgba(248,113,113,0.10)' }}>
-                <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: '0.12em', color: '#f87171', marginBottom: 3 }}>CONSIDER DROPPING</div>
+                <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', color: '#f87171', marginBottom: 3 }}>CONSIDER DROPPING</div>
                 <Link href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>{a.company}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#94a3b8' }}>{a.company}</div>
                 </Link>
-                <div style={{ fontSize: 9, color: '#64748b', marginTop: 3, lineHeight: 1.5 }}>
+                <div style={{ fontSize: 13, color: '#64748b', marginTop: 3, lineHeight: 1.5 }}>
                   {a.weaknesses.length > 0 ? a.weaknesses[0] : 'Conviction too low to justify time investment.'}
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function BriefPage() {
               { risk: 'All contacts are CFOs — no alternative entry points if unresponsive', sev: 'med' },
               { risk: `${killCandidates.length} weak account(s) consuming pipeline attention`, sev: killCandidates.length > 0 ? 'med' : 'low' },
             ].map((r, i) => (
-              <div key={i} style={{ fontSize: 9, color: '#94a3b8', lineHeight: 1.5, padding: '6px 10px', borderRadius: 4, marginBottom: 4, borderLeft: `2px solid ${r.sev === 'high' ? '#f87171' : r.sev === 'med' ? '#fbbf24' : '#475569'}`, background: r.sev === 'high' ? 'rgba(248,113,113,0.04)' : r.sev === 'med' ? 'rgba(251,191,36,0.04)' : 'rgba(71,85,105,0.04)' }}>
+              <div key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, padding: '6px 10px', borderRadius: 4, marginBottom: 4, borderLeft: `2px solid ${r.sev === 'high' ? '#f87171' : r.sev === 'med' ? '#fbbf24' : '#475569'}`, background: r.sev === 'high' ? 'rgba(248,113,113,0.04)' : r.sev === 'med' ? 'rgba(251,191,36,0.04)' : 'rgba(71,85,105,0.04)' }}>
                 {r.risk}
               </div>
             ))}
@@ -117,7 +117,7 @@ export default function BriefPage() {
               'Tech layoffs: 45,000+ early 2026 — zombie licenses industry-wide',
               'Avg enterprise SaaS: $55.7M/yr (flat app count, rising costs)',
             ].map((d, i) => (
-              <div key={i} style={{ fontSize: 9, color: '#94a3b8', lineHeight: 1.5, paddingLeft: 10, borderLeft: '1px solid rgba(96,165,250,0.12)', marginBottom: 4 }}>{d}</div>
+              <div key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, paddingLeft: 10, borderLeft: '1px solid rgba(96,165,250,0.12)', marginBottom: 4 }}>{d}</div>
             ))}
           </div>
         </div>
@@ -135,8 +135,8 @@ export default function BriefPage() {
             { day: 'FRI', tasks: ['Email #5: Circula', 'Check email opens', 'Prep follow-ups J+5'] },
           ].map(d => (
             <div key={d.day} style={{ padding: '10px 12px', borderRadius: 6, background: 'rgba(14,18,33,0.4)', border: '1px solid rgba(36,48,78,0.10)' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#60a5fa', marginBottom: 6, letterSpacing: '0.1em' }}>{d.day}</div>
-              {d.tasks.map((t, i) => <div key={i} style={{ fontSize: 9, color: '#94a3b8', lineHeight: 1.5, marginBottom: 2 }}>{t}</div>)}
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa', marginBottom: 6, letterSpacing: '0.1em' }}>{d.day}</div>
+              {d.tasks.map((t, i) => <div key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 2 }}>{t}</div>)}
             </div>
           ))}
         </div>

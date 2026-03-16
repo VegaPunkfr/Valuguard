@@ -11,7 +11,6 @@ const NAV: { href: string; label: string }[] = [
   { href: '/command/outreach', label: 'OUTREACH' },
   { href: '/command/brief',    label: 'BRIEF' },
 ];
-// OUTREACH tab now contains: Hot Queue / Review Queue / All Accounts
 
 export default function CommandLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -32,19 +31,17 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
         borderBottom: '1px solid rgba(36,48,78,0.30)',
         background: 'rgba(6,9,18,0.97)', backdropFilter: 'blur(16px)',
       }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 20px', display: 'flex', alignItems: 'center', height: 48 }}>
-          {/* Brand */}
-          <Link href="/" style={{ textDecoration: 'none', color: '#3a4560', fontSize: 10, letterSpacing: '0.08em', marginRight: 20 }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: 56 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: '#3a4560', fontSize: 12, letterSpacing: '0.08em', marginRight: 24 }}>
             ← SITE
           </Link>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', color: '#e4e9f4', marginRight: 6 }}>
+          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '0.10em', color: '#e4e9f4', marginRight: 8 }}>
             GHOST TAX
           </span>
-          <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.18em', color: '#3b82f6', marginRight: 32 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', color: '#3b82f6', marginRight: 36 }}>
             COMMAND
           </span>
 
-          {/* Navigation */}
           <nav style={{ display: 'flex', gap: 0, flex: 1 }}>
             {NAV.map(item => {
               const active = isActive(item.href);
@@ -54,10 +51,10 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
                   href={item.href}
                   style={{
                     textDecoration: 'none',
-                    fontSize: 10,
+                    fontSize: 13,
                     fontWeight: active ? 600 : 400,
-                    letterSpacing: '0.12em',
-                    padding: '15px 14px 13px',
+                    letterSpacing: '0.10em',
+                    padding: '17px 18px 15px',
                     color: active ? '#e4e9f4' : '#55637d',
                     borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
                     background: active ? 'rgba(59,130,246,0.06)' : 'transparent',
@@ -70,14 +67,13 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          {/* Date */}
-          <span style={{ fontSize: 9, color: '#3a4560', letterSpacing: '0.06em' }}>
+          <span style={{ fontSize: 12, color: '#3a4560', letterSpacing: '0.06em' }}>
             {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
           </span>
         </div>
       </header>
 
-      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 20px 80px' }}>
+      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 24px 80px' }}>
         {children}
       </main>
     </div>

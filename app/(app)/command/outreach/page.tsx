@@ -23,11 +23,11 @@ import {
 // ── Style Tokens ────────────────────────────────────────────
 
 const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
-const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 8, padding: '14px 18px' };
-const lbl: React.CSSProperties = { ...mono, fontSize: 8, fontWeight: 600, letterSpacing: '0.16em', color: '#475569', textTransform: 'uppercase' as const };
+const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 10, padding: '18px 22px' };
+const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', color: '#475569', textTransform: 'uppercase' as const };
 const pill = (color: string, bg: string): React.CSSProperties => ({
-  ...mono, fontSize: 7, fontWeight: 700, letterSpacing: '0.08em', padding: '2px 7px',
-  borderRadius: 3, color, background: bg, display: 'inline-block',
+  ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', padding: '3px 9px',
+  borderRadius: 4, color, background: bg, display: 'inline-block',
 });
 
 const CH_CLR: Record<string, string> = { linkedin: '#60a5fa', email: '#34d399', hold: '#f59e0b' };
@@ -218,13 +218,13 @@ function OutreachConsole() {
   return (
     <div style={mono}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 16, fontWeight: 700, color: '#e4e9f4', margin: 0 }}>Outreach Command</h1>
-        <span style={{ fontSize: 9, color: '#3b82f6', fontWeight: 600, letterSpacing: '0.12em' }}>SEMI-AUTO</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 6 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e4e9f4', margin: 0 }}>Outreach Command</h1>
+        <span style={{ fontSize: 12, color: '#3b82f6', fontWeight: 600, letterSpacing: '0.12em' }}>SEMI-AUTO</span>
       </div>
 
       {/* Queue Stats Bar */}
-      <div style={{ display: 'flex', gap: 20, marginBottom: 16, fontSize: 9, color: '#64748b' }}>
+      <div style={{ display: 'flex', gap: 24, marginBottom: 20, fontSize: 13, color: '#64748b' }}>
         <span><b style={{ color: '#ef4444' }}>{queue.stats.hotCount}</b> hot</span>
         <span><b style={{ color: '#f59e0b' }}>{queue.stats.warmCount}</b> warm</span>
         <span><b style={{ color: '#3b82f6' }}>{queue.stats.holdCount}</b> hold</span>
@@ -234,7 +234,7 @@ function OutreachConsole() {
       </div>
 
       {/* Discipline */}
-      <div style={{ fontSize: 8, color: '#fbbf24', lineHeight: 1.6, background: 'rgba(251,191,36,0.03)', borderRadius: 6, padding: '8px 12px', border: '1px solid rgba(251,191,36,0.08)', marginBottom: 16 }}>
+      <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.6, background: 'rgba(251,191,36,0.03)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(251,191,36,0.08)', marginBottom: 20 }}>
         Research → Channel → Angle → Draft → Critique → Rewrite → Review → Send. Never send without human review. Quality over volume.
       </div>
 
@@ -249,13 +249,13 @@ function OutreachConsole() {
             key={t.id}
             onClick={() => setTab(t.id)}
             style={{
-              ...mono, fontSize: 9, fontWeight: tab === t.id ? 700 : 400,
-              letterSpacing: '0.12em', padding: '10px 16px', border: 'none', cursor: 'pointer',
+              ...mono, fontSize: 13, fontWeight: tab === t.id ? 700 : 400,
+              letterSpacing: '0.10em', padding: '12px 20px', border: 'none', cursor: 'pointer',
               color: tab === t.id ? '#e4e9f4' : '#55637d', background: 'transparent',
               borderBottom: tab === t.id ? `2px solid ${t.color}` : '2px solid transparent',
             }}
           >
-            {t.label} <span style={{ color: t.color, marginLeft: 4 }}>{t.count}</span>
+            {t.label} <span style={{ color: t.color, marginLeft: 6 }}>{t.count}</span>
           </button>
         ))}
       </div>
@@ -322,8 +322,8 @@ function HotQueueTab({ accounts, queue, expandedId, expandedMsg, copiedId, onTog
   if (accounts.length === 0) {
     return (
       <div style={{ ...box, textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>No accounts in hot queue</div>
-        <div style={{ fontSize: 9, color: '#475569' }}>All accounts below heat threshold (60/100) or in cooldown.</div>
+        <div style={{ fontSize: 15, color: '#64748b', marginBottom: 6 }}>No accounts in hot queue</div>
+        <div style={{ fontSize: 13, color: '#475569' }}>All accounts below heat threshold (60/100) or in cooldown.</div>
       </div>
     );
   }
@@ -368,8 +368,8 @@ function ReviewQueueTab({ accounts, expandedId, expandedMsg, copiedId, onToggle,
   if (accounts.length === 0) {
     return (
       <div style={{ ...box, textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 11, color: '#64748b' }}>No messages pending review</div>
-        <div style={{ fontSize: 9, color: '#475569' }}>Generate messages from the Hot Queue tab first.</div>
+        <div style={{ fontSize: 15, color: '#64748b' }}>No messages pending review</div>
+        <div style={{ fontSize: 13, color: '#475569' }}>Generate messages from the Hot Queue tab first.</div>
       </div>
     );
   }
@@ -420,14 +420,14 @@ function AllAccountsTab({ accounts, expandedId, onToggle, onGenerate }: {
               <div key={c.account.id} style={{ ...box, marginBottom: 6, padding: '10px 14px' }}>
                 <div onClick={() => onToggle(c.account.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <HeatBadge score={c.heat.total} />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#e4e9f4', flex: 1 }}>{c.account.company}</span>
-                  <span style={{ fontSize: 8, color: '#64748b' }}>{c.account.financeLead.name}</span>
-                  <span style={{ fontSize: 8, color: '#475569' }}>{c.account.country}</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4', flex: 1 }}>{c.account.company}</span>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>{c.account.financeLead.name}</span>
+                  <span style={{ fontSize: 12, color: '#475569' }}>{c.account.country}</span>
                   <span style={pill(CH_CLR[c.channel.primary] || '#64748b', `${CH_CLR[c.channel.primary] || '#64748b'}18`)}>
                     {c.channel.primary.toUpperCase()}
                   </span>
                   <ReadinessBadge status={c.readiness.status} />
-                  <span style={{ fontSize: 8, color: '#475569' }}>EV €{c.expectedValue.toLocaleString()}</span>
+                  <span style={{ fontSize: 12, color: '#475569' }}>EV €{c.expectedValue.toLocaleString()}</span>
                 </div>
                 {expandedId === c.account.id && (
                   <div style={{ marginTop: 10 }}>
@@ -471,20 +471,20 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
     <div style={{ ...box, marginBottom: 8 }}>
       {/* Collapsed Header */}
       <div onClick={onToggle} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-        {rank && <span style={{ fontSize: 9, fontWeight: 700, color: '#3a4560', width: 20, textAlign: 'right' }}>#{rank}</span>}
+        {rank && <span style={{ fontSize: 13, fontWeight: 700, color: '#3a4560', width: 28, textAlign: 'right' }}>#{rank}</span>}
         <HeatBadge score={c.heat.total} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#e4e9f4' }}>{c.account.company}</span>
-          <span style={{ fontSize: 9, color: '#64748b', marginLeft: 8 }}>{c.account.financeLead.name}</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4' }}>{c.account.company}</span>
+          <span style={{ fontSize: 13, color: '#64748b', marginLeft: 8 }}>{c.account.financeLead.name}</span>
         </div>
-        <span style={{ fontSize: 8, color: '#475569' }}>{c.account.country}</span>
+        <span style={{ fontSize: 12, color: '#475569' }}>{c.account.country}</span>
         <span style={pill(CH_CLR[c.channel.primary] || '#64748b', `${CH_CLR[c.channel.primary] || '#64748b'}18`)}>
           {c.channel.primary.toUpperCase()}
         </span>
-        <span style={{ fontSize: 8, color: '#475569' }}>{c.angle.primary.label.split(' ').slice(0, 3).join(' ')}</span>
+        <span style={{ fontSize: 12, color: '#475569' }}>{c.angle.primary.label.split(' ').slice(0, 3).join(' ')}</span>
         <ReadinessBadge status={c.readiness.status} />
-        <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 600 }}>P:{c.probability}%</span>
-        <span style={{ fontSize: 8, color: '#34d399', fontWeight: 600 }}>EV:€{c.expectedValue.toLocaleString()}</span>
+        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>P:{c.probability}%</span>
+        <span style={{ fontSize: 12, color: '#34d399', fontWeight: 600 }}>EV:€{c.expectedValue.toLocaleString()}</span>
         {c.duplicateRisk && <span style={pill('#f87171', 'rgba(248,113,113,0.12)')}>DUP RISK</span>}
         <span style={{ fontSize: 11, color: '#3a4560' }}>{expanded ? '▾' : '▸'}</span>
       </div>
@@ -568,8 +568,8 @@ function IntelGrid({ c }: { c: ComputedAccount }) {
 function MetricCell({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ padding: '8px 10px', borderRadius: 6, background: 'rgba(14,18,33,0.5)', border: '1px solid rgba(36,48,78,0.12)' }}>
-      <div style={{ ...lbl, fontSize: 7, marginBottom: 3 }}>{label}</div>
-      <div style={{ ...mono, fontSize: 12, fontWeight: 700, color }}>{value}</div>
+      <div style={{ ...lbl, fontSize: 11, marginBottom: 3 }}>{label}</div>
+      <div style={{ ...mono, fontSize: 16, fontWeight: 700, color }}>{value}</div>
     </div>
   );
 }
@@ -579,18 +579,18 @@ function MetricCell({ label, value, color }: { label: string; value: string; col
 function ChannelPanel({ c }: { c: ComputedAccount }) {
   return (
     <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(59,130,246,0.03)', border: '1px solid rgba(59,130,246,0.08)', marginBottom: 10 }}>
-      <div style={{ ...lbl, color: '#3b82f6', marginBottom: 6, fontSize: 7 }}>CHANNEL RECOMMENDATION</div>
+      <div style={{ ...lbl, color: '#3b82f6', marginBottom: 6, fontSize: 11 }}>CHANNEL RECOMMENDATION</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div>
-          <div style={{ fontSize: 9, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Primary:</b> {c.channel.primary.toUpperCase()}</div>
+          <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Primary:</b> {c.channel.primary.toUpperCase()}</div>
           {c.channel.secondary && (
-            <div style={{ fontSize: 9, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Secondary:</b> {c.channel.secondary.toUpperCase()}</div>
+            <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Secondary:</b> {c.channel.secondary.toUpperCase()}</div>
           )}
-          <div style={{ fontSize: 9, color: '#94a3b8' }}><b style={{ color: '#e4e9f4' }}>Sequence:</b> {c.channel.sequence.replace(/_/g, ' ')}</div>
+          <div style={{ fontSize: 13, color: '#94a3b8' }}><b style={{ color: '#e4e9f4' }}>Sequence:</b> {c.channel.sequence.replace(/_/g, ' ')}</div>
         </div>
         <div>
-          <div style={{ fontSize: 8, color: '#64748b', lineHeight: 1.6 }}><b style={{ color: '#60a5fa' }}>Why:</b> {c.channel.whyPrimary}</div>
-          <div style={{ fontSize: 8, color: '#64748b', lineHeight: 1.6, marginTop: 4 }}><b style={{ color: '#475569' }}>Why not other:</b> {c.channel.whyNotOthers}</div>
+          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6 }}><b style={{ color: '#60a5fa' }}>Why:</b> {c.channel.whyPrimary}</div>
+          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginTop: 4 }}><b style={{ color: '#475569' }}>Why not other:</b> {c.channel.whyNotOthers}</div>
         </div>
       </div>
     </div>
@@ -604,15 +604,15 @@ function AnglePanel({ c }: { c: ComputedAccount }) {
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
       {/* Primary Angle */}
       <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.08)' }}>
-        <div style={{ ...lbl, color: '#34d399', marginBottom: 4, fontSize: 7 }}>PRIMARY ANGLE</div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#e4e9f4', marginBottom: 4 }}>{c.angle.primary.label}</div>
-        <div style={{ fontSize: 8, color: '#94a3b8', lineHeight: 1.5, marginBottom: 3 }}>
+        <div style={{ ...lbl, color: '#34d399', marginBottom: 4, fontSize: 11 }}>PRIMARY ANGLE</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', marginBottom: 6 }}>{c.angle.primary.label}</div>
+        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
           <b style={{ color: '#fbbf24' }}>CFO tension:</b> {c.angle.primary.cfoTension}
         </div>
-        <div style={{ fontSize: 8, color: '#94a3b8', lineHeight: 1.5, marginBottom: 3 }}>
+        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
           <b style={{ color: '#60a5fa' }}>Financial reading:</b> {c.angle.primary.financialReading}
         </div>
-        <div style={{ fontSize: 8, color: '#f87171', lineHeight: 1.5 }}>
+        <div style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>
           <b>Avoid:</b> {c.angle.primary.avoid}
         </div>
       </div>
@@ -621,18 +621,18 @@ function AnglePanel({ c }: { c: ComputedAccount }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {c.angle.secondary && (
           <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(96,165,250,0.03)', border: '1px solid rgba(96,165,250,0.08)' }}>
-            <div style={{ ...lbl, color: '#60a5fa', marginBottom: 3, fontSize: 7 }}>SECONDARY ANGLE</div>
-            <div style={{ fontSize: 9, fontWeight: 500, color: '#e4e9f4' }}>{c.angle.secondary.label}</div>
-            <div style={{ fontSize: 8, color: '#64748b', marginTop: 2 }}>{c.angle.secondary.cfoTension.slice(0, 100)}...</div>
+            <div style={{ ...lbl, color: '#60a5fa', marginBottom: 3, fontSize: 11 }}>SECONDARY ANGLE</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#e4e9f4' }}>{c.angle.secondary.label}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{c.angle.secondary.cfoTension.slice(0, 100)}...</div>
           </div>
         )}
         <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(14,18,33,0.4)', border: '1px solid rgba(36,48,78,0.08)' }}>
-          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 7 }}>WHY NOT OTHER ANGLES</div>
-          <div style={{ fontSize: 8, color: '#64748b', lineHeight: 1.5 }}>{c.angle.whyNotOthers}</div>
+          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 11 }}>WHY NOT OTHER ANGLES</div>
+          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{c.angle.whyNotOthers}</div>
         </div>
         <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(14,18,33,0.4)', border: '1px solid rgba(36,48,78,0.08)' }}>
-          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 7 }}>WHY NOW</div>
-          <div style={{ fontSize: 8, color: '#94a3b8', lineHeight: 1.5 }}>{c.account.whyNow}</div>
+          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 11 }}>WHY NOW</div>
+          <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>{c.account.whyNow}</div>
         </div>
       </div>
     </div>
@@ -646,20 +646,20 @@ function ReadinessPanel({ c }: { c: ComputedAccount }) {
   return (
     <div style={{ padding: '10px 14px', borderRadius: 6, background: `${meta.color}08`, border: `1px solid ${meta.color}15`, marginBottom: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <div style={{ ...lbl, color: meta.color, fontSize: 7, margin: 0 }}>OUTREACH READINESS</div>
+        <div style={{ ...lbl, color: meta.color, fontSize: 11, margin: 0 }}>OUTREACH READINESS</div>
         <ReadinessBadge status={c.readiness.status} />
       </div>
       {c.readiness.blockers.length > 0 && (
         <div style={{ marginBottom: 4 }}>
           {c.readiness.blockers.map((b, i) => (
-            <div key={i} style={{ fontSize: 8, color: '#f87171', lineHeight: 1.5 }}>— {b}</div>
+            <div key={i} style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>— {b}</div>
           ))}
         </div>
       )}
       {c.readiness.reasons.length > 0 && (
         <div>
           {c.readiness.reasons.map((r, i) => (
-            <div key={i} style={{ fontSize: 8, color: '#94a3b8', lineHeight: 1.5 }}>+ {r}</div>
+            <div key={i} style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>+ {r}</div>
           ))}
         </div>
       )}
@@ -679,7 +679,7 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
 }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ ...lbl, color: '#a78bfa', marginBottom: 6, fontSize: 7 }}>MESSAGES ({c.messages.length})</div>
+      <div style={{ ...lbl, color: '#a78bfa', marginBottom: 6, fontSize: 11 }}>MESSAGES ({c.messages.length})</div>
       {c.messages.map(msg => {
         const msgKey = `${c.account.id}-${msg.id}`;
         const isOpen = expandedMsg === msgKey;
@@ -693,16 +693,16 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
               display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', cursor: 'pointer',
               background: `${gradeColor}06`,
             }}>
-              <span style={{ ...mono, fontSize: 7, fontWeight: 700, color: CH_CLR[msg.channel] || '#64748b', width: 90 }}>
+              <span style={{ ...mono, fontSize: 11, fontWeight: 700, color: CH_CLR[msg.channel] || '#64748b', width: 90 }}>
                 {MSG_TYPE_LABELS[msg.type] || msg.type}
               </span>
-              <span style={{ fontSize: 8, color: '#64748b', flex: 1 }}>{msg.body.split('\n')[0].slice(0, 60)}...</span>
-              <span style={{ fontSize: 7, color: '#475569' }}>{msg.wordCount}w</span>
+              <span style={{ fontSize: 12, color: '#64748b', flex: 1 }}>{msg.body.split('\n')[0].slice(0, 60)}...</span>
+              <span style={{ fontSize: 11, color: '#475569' }}>{msg.wordCount}w</span>
               {msg.critique && (
                 <span style={pill(gradeColor, `${gradeColor}15`)}>{grade.toUpperCase()}</span>
               )}
               {msg.status === 'sent' && <span style={pill('#34d399', 'rgba(52,211,153,0.12)')}>SENT</span>}
-              {msg.rewriteSummary && <span style={{ fontSize: 7, color: '#a78bfa' }}>REWRITTEN</span>}
+              {msg.rewriteSummary && <span style={{ fontSize: 11, color: '#a78bfa' }}>REWRITTEN</span>}
             </div>
 
             {/* Expanded Message */}
@@ -714,22 +714,22 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       {msg.critique.issues.length > 0 && (
                         <div style={{ padding: '8px 10px', borderRadius: 4, background: 'rgba(248,113,113,0.03)', border: '1px solid rgba(248,113,113,0.06)' }}>
-                          <div style={{ ...lbl, color: '#f87171', marginBottom: 3, fontSize: 7 }}>ISSUES</div>
+                          <div style={{ ...lbl, color: '#f87171', marginBottom: 3, fontSize: 11 }}>ISSUES</div>
                           {msg.critique.issues.map((issue, j) => (
-                            <div key={j} style={{ fontSize: 8, color: '#f87171', lineHeight: 1.5 }}>— {issue}</div>
+                            <div key={j} style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>— {issue}</div>
                           ))}
                         </div>
                       )}
                       {msg.critique.strengths.length > 0 && (
                         <div style={{ padding: '8px 10px', borderRadius: 4, background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.06)' }}>
-                          <div style={{ ...lbl, color: '#34d399', marginBottom: 3, fontSize: 7 }}>STRENGTHS</div>
+                          <div style={{ ...lbl, color: '#34d399', marginBottom: 3, fontSize: 11 }}>STRENGTHS</div>
                           {msg.critique.strengths.map((s, j) => (
-                            <div key={j} style={{ fontSize: 8, color: '#34d399', lineHeight: 1.5 }}>+ {s}</div>
+                            <div key={j} style={{ fontSize: 12, color: '#34d399', lineHeight: 1.6 }}>+ {s}</div>
                           ))}
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: 8, color: '#94a3b8', marginTop: 6 }}>
+                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>
                       <b style={{ color: gradeColor }}>Score: {msg.critique.score}/12</b> — {msg.critique.summary}
                     </div>
                   </div>
@@ -737,17 +737,17 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
 
                 {/* Rewrite note */}
                 {msg.rewriteSummary && (
-                  <div style={{ fontSize: 8, color: '#a78bfa', marginBottom: 8, padding: '4px 8px', borderRadius: 3, background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.08)' }}>
+                  <div style={{ fontSize: 12, color: '#a78bfa', marginBottom: 8, padding: '4px 8px', borderRadius: 3, background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.08)' }}>
                     {msg.rewriteSummary}
                   </div>
                 )}
 
                 {/* Subject */}
-                {msg.subject && <div style={{ fontSize: 9, color: '#e4e9f4', marginBottom: 6 }}><b>Subject:</b> {msg.subject}</div>}
+                {msg.subject && <div style={{ fontSize: 13, color: '#e4e9f4', marginBottom: 6 }}><b>Subject:</b> {msg.subject}</div>}
 
                 {/* Body */}
                 <pre style={{
-                  ...mono, fontSize: 9, color: '#94a3b8', lineHeight: 1.6, whiteSpace: 'pre-wrap',
+                  ...mono, fontSize: 13, color: '#94a3b8', lineHeight: 1.6, whiteSpace: 'pre-wrap',
                   margin: 0, padding: 12, background: '#060912', borderRadius: 4, border: '1px solid rgba(36,48,78,0.12)',
                 }}>{msg.body}</pre>
 
@@ -790,8 +790,8 @@ function HeatBadge({ score }: { score: number }) {
   const color = score >= 60 ? '#ef4444' : score >= 35 ? '#f59e0b' : '#64748b';
   return (
     <span style={{
-      ...mono, fontSize: 10, fontWeight: 700, color, width: 30, textAlign: 'center',
-      padding: '2px 0', borderRadius: 3, background: `${color}12`,
+      ...mono, fontSize: 14, fontWeight: 700, color, width: 38, textAlign: 'center',
+      padding: '3px 0', borderRadius: 4, background: `${color}12`,
     }}>
       {score}
     </span>
@@ -805,7 +805,7 @@ function ReadinessBadge({ status }: { status: ReadinessStatus }) {
 
 function actionBtn(color: string): React.CSSProperties {
   return {
-    ...mono, fontSize: 8, fontWeight: 600, padding: '4px 10px', borderRadius: 3,
+    ...mono, fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 4,
     background: `${color}0a`, color, border: `1px solid ${color}20`, cursor: 'pointer',
     display: 'inline-block', textAlign: 'center',
   };

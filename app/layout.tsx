@@ -3,7 +3,6 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
-import Navbar from "@/components/ui/navbar";
 import CrispChat from "@/components/ui/crisp-chat";
 import ErrorBoundary from "@/components/ui/error-boundary";
 
@@ -189,7 +188,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
-        style={{ background: "#FFFFFF" }}
+        style={{ background: "#060912" }}
       >
         <JsonLdScripts />
         {/* PostHog analytics — deferred, non-blocking */}
@@ -204,7 +203,6 @@ export default function RootLayout({
         )}
         <I18nProvider>
           <ErrorBoundary>
-            <Navbar />
             {children}
           </ErrorBoundary>
         </I18nProvider>
