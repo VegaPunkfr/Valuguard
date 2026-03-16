@@ -18,26 +18,33 @@ const EXPECTED_SECRET = 'ghost-command-2026';
 function CommandLayoutInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [authed, setAuthed] = useState(false);
+  // 'loading' = initial state (matches server render), 'authed' | 'denied'
+  const [authState, setAuthState] = useState<'loading' | 'authed' | 'denied'>('loading');
   const [signalCount, setSignalCount] = useState(0);
 
-  // Auth gate: check URL key or localStorage
+  // Auth gate: check URL key or localStorage (client-only)
   useEffect(() => {
     const urlKey = searchParams.get('key');
     const storedKey = localStorage.getItem(AUTH_KEY);
     if (urlKey === EXPECTED_SECRET) {
       localStorage.setItem(AUTH_KEY, EXPECTED_SECRET);
-      setAuthed(true);
-      // Clean key from URL
+      setAuthState('authed');
       const url = new URL(window.location.href);
       url.searchParams.delete('key');
       window.history.replaceState({}, '', url.toString());
     } else if (storedKey === EXPECTED_SECRET) {
-      setAuthed(true);
+      setAuthState('authed');
+    } else {
+      setAuthState('denied');
     }
   }, [searchParams]);
 
-  if (!authed) {
+  // Loading state — matches server render (no hydration mismatch)
+  if (authState === 'loading') {
+    return <div style={{ minHeight: '100vh', background: '#060912' }} />;
+  }
+
+  if (authState === 'denied') {
     return (
       <div style={{ minHeight: '100vh', background: '#060912', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ fontFamily: 'monospace', color: '#f87171', fontSize: 14, textAlign: 'center' }}>
