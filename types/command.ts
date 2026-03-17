@@ -210,6 +210,12 @@ export interface Account {
   // Revenue estimate (EUR, rough)
   revenueEstimate: number;
 
+  // Enrichment pipeline state
+  enrichmentStatus?: EnrichmentStatus;
+  qualityScore?: number;     // 0-100 from quality gate
+  thesisStrength?: number;   // 0-85 from thesis engine
+  proofLevel?: number;       // 0-85 from proof engine
+
   // Meta
   createdAt: string;
   updatedAt: string;
@@ -329,6 +335,29 @@ export interface GmailDraftState {
   reviewedAt?: string;
   sentAt?: string;
 }
+
+// ── Enrichment Pipeline ─────────────────────────────────────
+
+export type EnrichmentStatus =
+  | 'pending'
+  | 'signals_collected'
+  | 'thesis_built'
+  | 'proofs_selected'
+  | 'quality_checked'
+  | 'messages_generated'
+  | 'ready_for_review'
+  | 'blocked';
+
+export const ENRICHMENT_META: Record<EnrichmentStatus, { label: string; color: string; order: number }> = {
+  pending:            { label: 'PENDING',          color: '#64748b', order: 1 },
+  signals_collected:  { label: 'SIGNALS',          color: '#22d3ee', order: 2 },
+  thesis_built:       { label: 'THESIS',           color: '#60a5fa', order: 3 },
+  proofs_selected:    { label: 'PROOFS',           color: '#a78bfa', order: 4 },
+  quality_checked:    { label: 'QUALITY GATE',     color: '#fbbf24', order: 5 },
+  messages_generated: { label: 'MESSAGES',         color: '#2dd4bf', order: 6 },
+  ready_for_review:   { label: 'READY FOR REVIEW', color: '#34d399', order: 7 },
+  blocked:            { label: 'BLOCKED',          color: '#f87171', order: 8 },
+};
 
 // ── Hot Queue Engine ────────────────────────────────────────
 

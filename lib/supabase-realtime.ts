@@ -47,6 +47,10 @@ export interface SarahProspect {
   headcount: number | null;
   thesis: string | null;
   domain: string | null;
+  enrichment_status: string | null;
+  quality_score: number | null;
+  thesis_strength: number | null;
+  proof_level: number | null;
   created_at: string;
 }
 
@@ -188,6 +192,11 @@ export function prospectToAccount(p: SarahProspect) {
     executionLog: [],
     nextAction: p.tier === 'hot' ? 'Review and send outreach' : 'Enrich: find CFO, resolve email, build thesis.',
     revenueEstimate: p.valeur_estimee || 490,
+    // Enrichment pipeline state
+    enrichmentStatus: p.enrichment_status || 'pending',
+    qualityScore: p.quality_score || undefined,
+    thesisStrength: p.thesis_strength || undefined,
+    proofLevel: p.proof_level || undefined,
     // Extra: Sarah-specific fields
     sarahId: p.id,
     sarahTier: p.tier || 'raw',
