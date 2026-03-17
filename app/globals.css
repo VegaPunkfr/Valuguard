@@ -22,41 +22,41 @@
 /* ── 1. DESIGN TOKENS ───────────────────────────── */
 
 :root {
-  /* ── Depth layers (enterprise light) */
-  --gt-bg:        #FFFFFF;
-  --gt-surface:   #F8FAFC;
-  --gt-card:      #F8FAFC;
-  --gt-elevated:  #F1F5F9;
-  --gt-raised:    #E2E8F0;
+  /* ── Depth layers (Signal Terminal — dark institutional) */
+  --gt-bg:        #08090d;
+  --gt-surface:   #0e1017;
+  --gt-card:      #12141d;
+  --gt-elevated:  #181b26;
+  --gt-raised:    #1e2233;
 
-  /* ── Borders (solid, enterprise) */
-  --gt-border:    #E2E8F0;
-  --gt-border-s:  #CBD5E1;
-  --gt-border-ss: #94A3B8;
+  /* ── Borders (subtle on dark) */
+  --gt-border:    rgba(255,255,255,0.06);
+  --gt-border-s:  rgba(255,255,255,0.10);
+  --gt-border-ss: rgba(255,255,255,0.15);
 
-  /* ── Text (dark on light, WCAG AA+) */
-  --gt-text-1:    #0F172A;
-  --gt-text-2:    #475569;
-  --gt-text-3:    #64748B;
-  --gt-text-4:    #94A3B8;
+  /* ── Text (light on dark) */
+  --gt-text-1:    #e8eaed;
+  --gt-text-2:    #8b8f98;
+  --gt-text-3:    #565a63;
+  --gt-text-4:    #3a3f4a;
 
-  /* ── Brand */
-  --gt-accent:    #0F172A;
-  --gt-accent-hi: #1E293B;
-  --gt-accent-bg: rgba(15,23,42,0.04);
-  --gt-accent-bd: rgba(15,23,42,0.12);
+  /* ── Brand — Signal Blue */
+  --gt-accent:    #4d8cff;
+  --gt-accent-hi: #6da3ff;
+  --gt-accent-bg: rgba(77,140,255,0.06);
+  --gt-accent-bd: rgba(77,140,255,0.12);
 
-  /* ── Signals */
-  --gt-green:     #059669;
-  --gt-green-bg:  rgba(5,150,105,0.06);
-  --gt-green-bd:  rgba(5,150,105,0.18);
-  --gt-red:       #DC2626;
-  --gt-red-bg:    rgba(220,38,38,0.06);
-  --gt-red-bd:    rgba(220,38,38,0.18);
-  --gt-amber:     #D97706;
-  --gt-amber-bg:  rgba(217,119,6,0.06);
-  --gt-amber-bd:  rgba(217,119,6,0.18);
-  --gt-cyan:      #0891B2;
+  /* ── Signals (matched to ghost-tax.com) */
+  --gt-green:     #00d47b;
+  --gt-green-bg:  rgba(0,212,123,0.08);
+  --gt-green-bd:  rgba(0,212,123,0.18);
+  --gt-red:       #ff4d4d;
+  --gt-red-bg:    rgba(255,77,77,0.08);
+  --gt-red-bd:    rgba(255,77,77,0.18);
+  --gt-amber:     #ffb020;
+  --gt-amber-bg:  rgba(255,176,32,0.08);
+  --gt-amber-bd:  rgba(255,176,32,0.18);
+  --gt-cyan:      #22d3ee;
 
   /* ── Typography */
   --gt-font-sans: var(--vg-font-sans, 'Inter', system-ui, -apple-system, sans-serif);
