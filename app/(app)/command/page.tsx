@@ -71,14 +71,32 @@ export default function CommandOverview() {
   const [signalLoading, setSignalLoading] = useState(false);
   const [processedIds, setProcessedIds] = useState<Set<number>>(new Set());
 
-  // Load accounts
+  // Load accounts from localStorage + sync with Sarah's Supabase
   useEffect(() => {
     try {
-      import('@/lib/command/store').then(mod => {
+      import('@/lib/command/store').then(async (mod) => {
         try {
-          const accounts = mod.loadAccounts();
-          setData({ accounts: accounts as typeof data extends null ? never : NonNullable<typeof data>['accounts'] });
+          const localAccounts = mod.loadAccounts();
+          setData({ accounts: localAccounts as typeof data extends null ? never : NonNullable<typeof data>['accounts'] });
           setStoreRef({ saveAccounts: mod.saveAccounts });
+
+          // Sync with Sarah's real prospects from Supabase
+          try {
+            const res = await fetch('/api/command/sync');
+            if (res.ok) {
+              const sync = await res.json();
+              if (sync.accounts && sync.accounts.length > 0) {
+                // Merge: keep local accounts, add new Sarah prospects (no duplicates by domain)
+                const localDomains = new Set(localAccounts.map((a: any) => a.domain));
+                const newAccounts = sync.accounts.filter((a: any) => !localDomains.has(a.domain));
+                if (newAccounts.length > 0) {
+                  const merged = [...localAccounts, ...newAccounts];
+                  setData({ accounts: merged as any });
+                  mod.saveAccounts(merged);
+                }
+              }
+            }
+          } catch { /* sync failure is non-fatal */ }
         } catch (e) {
           setError(`loadAccounts failed: ${e instanceof Error ? e.message : String(e)}`);
         }
