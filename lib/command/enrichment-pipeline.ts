@@ -107,9 +107,9 @@ export function runEnrichmentPipeline(
     nextSteps.push(...qualityGate.hardBlocks.map(b => `BLOCKER: ${b}`));
     nextSteps.push(...qualityGate.warnings.map(w => `Warning: ${w}`));
   } else {
-    // Generate messages
+    // Generate messages — fed by thesis + proofs
     const channel = preferredChannel || 'email';
-    messages = processMessages(account, angle, channel);
+    messages = processMessages(account, angle, channel, thesis, proofs);
 
     if (qualityGate.verdict === 'pass') {
       status = 'ready_for_review';
