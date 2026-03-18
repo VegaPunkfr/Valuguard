@@ -155,6 +155,83 @@ function buildWhyNow(ctx: MessageContext): string {
   return angle.primary.cfoTension;
 }
 
+// ── Locale Detection ────────────────────────────────────────
+// RULE: Always localize by prospect country. DE→German formal. FR→French. EN default.
+// RULE: "Ghost Tax" is a BRAND NAME — NEVER translate it.
+
+type MessageLocale = 'en' | 'de' | 'fr';
+
+function detectLocale(country: string): MessageLocale {
+  const c = country?.toUpperCase();
+  if (c === 'DE' || c === 'AT' || c === 'CH') return 'de';
+  if (c === 'FR' || c === 'BE') return 'fr';
+  return 'en';
+}
+
+// Localized strings — Ghost Tax is NEVER translated
+const L = {
+  en: {
+    iRun: 'I run financial exposure scans for',
+    wouldDiag: 'Would a quick diagnostic be useful?',
+    companies: 'companies',
+    noCall: 'No call needed. I can deliver a structured diagnostic in 48h. If the numbers are meaningful, we talk. If not, you\'ve lost nothing.',
+    specialize: 'I specialize in detecting this kind of hidden financial exposure in SaaS, cloud, and software spend.',
+    followUp: 'quick follow-up on the exposure scan.',
+    forCompany: 'For a',
+    personCompany: '-person company, that typically means',
+    happy: 'Happy to share what a scan surfaces. No commitment.',
+    followingUp: 'following up.',
+    inCompanies: 'In companies at',
+    stage: '\'s stage, this typically represents',
+    scan48: 'A 48h scan would tell you if',
+    inRange: 'is in that range.',
+    wouldScan: 'Would a 48h exposure scan be useful?',
+    annualSw: 'of annual software costs',
+    annualSpend: 'of annual software spend',
+    iRunPhase: 'I run financial exposure scans for companies in your exact phase. 48h, no call needed. Would it be useful?',
+  },
+  de: {
+    iRun: 'Ich führe Finanzexpositionsanalysen durch für',
+    wouldDiag: 'Wäre eine kurze Diagnostik nützlich?',
+    companies: 'Unternehmen',
+    noCall: 'Kein Anruf nötig. Ich liefere eine strukturierte Diagnostik in 48h. Wenn die Zahlen relevant sind, sprechen wir. Wenn nicht, haben Sie nichts verloren.',
+    specialize: 'Ich bin spezialisiert auf die Erkennung versteckter Finanzexposition in SaaS-, Cloud- und Softwareausgaben.',
+    followUp: 'kurzes Follow-up zur Expositionsanalyse.',
+    forCompany: 'Für ein',
+    personCompany: '-Personen-Unternehmen bedeutet das typischerweise',
+    happy: 'Gerne teile ich, was eine Analyse aufdeckt. Keine Verpflichtung.',
+    followingUp: 'kurzes Follow-up.',
+    inCompanies: 'Bei Unternehmen in der Phase von',
+    stage: ' entspricht das typischerweise',
+    scan48: 'Eine 48h-Analyse würde zeigen, ob',
+    inRange: 'in diesem Bereich liegt.',
+    wouldScan: 'Wäre eine 48h-Expositionsanalyse nützlich?',
+    annualSw: 'der jährlichen Softwarekosten',
+    annualSpend: 'der jährlichen Softwareausgaben',
+    iRunPhase: 'Ich führe Finanzexpositionsanalysen für Unternehmen in Ihrer exakten Phase durch. 48h, kein Anruf nötig. Wäre das nützlich?',
+  },
+  fr: {
+    iRun: 'Je réalise des analyses d\'exposition financière pour les',
+    wouldDiag: 'Un diagnostic rapide serait-il utile ?',
+    companies: 'entreprises',
+    noCall: 'Pas d\'appel nécessaire. Je peux livrer un diagnostic structuré en 48h. Si les chiffres sont significatifs, nous en parlons. Sinon, vous n\'avez rien perdu.',
+    specialize: 'Je suis spécialisée dans la détection d\'exposition financière cachée dans les dépenses SaaS, cloud et logiciels.',
+    followUp: 'suivi rapide concernant l\'analyse d\'exposition.',
+    forCompany: 'Pour une entreprise de',
+    personCompany: ' personnes, cela représente typiquement',
+    happy: 'Je serais ravie de partager ce qu\'une analyse révèle. Sans engagement.',
+    followingUp: 'suivi rapide.',
+    inCompanies: 'Dans les entreprises au stade de',
+    stage: ', cela représente typiquement',
+    scan48: 'Une analyse de 48h montrerait si',
+    inRange: 'se situe dans cette fourchette.',
+    wouldScan: 'Une analyse d\'exposition en 48h serait-elle utile ?',
+    annualSw: 'des coûts logiciels annuels',
+    annualSpend: 'des dépenses logicielles annuelles',
+    iRunPhase: 'Je réalise des analyses d\'exposition financière pour les entreprises dans votre phase exacte. 48h, pas d\'appel nécessaire. Cela serait-il utile ?',
+  },
+};
+
 // ── Core Message Body Builder ───────────────────────────────
 
 function buildMessageBody(ctx: MessageContext, type: MessageType): string {
@@ -163,15 +240,16 @@ function buildMessageBody(ctx: MessageContext, type: MessageType): string {
   const obs = buildObservation(ctx);
   const reading = buildFinancialReading(ctx);
   const proof = buildProofLine(ctx);
-  const whyNow = buildWhyNow(ctx);
+  const locale = detectLocale(account.country);
+  const t = L[locale];
 
   switch (type) {
     case 'linkedin_note': {
-      // Max 300 chars — thesis-backed opener
       const hook = ctx.thesis?.l4?.cfoPain
         ? ctx.thesis.l4.cfoPain.split('.')[0]
         : obs.split('.')[0];
-      const note = `${firstName} — ${hook}. I run financial exposure scans for ${account.industry.toLowerCase().includes('fintech') ? 'fintech' : 'B2B tech'} companies. Would a quick diagnostic be useful?`;
+      const industry = account.industry.toLowerCase().includes('fintech') ? 'fintech' : 'B2B tech';
+      const note = `${firstName} — ${hook}. ${t.iRun} ${industry} ${t.companies}. ${t.wouldDiag}`;
       return note.length > 290 ? note.slice(0, 287) + '...' : note;
     }
 
@@ -179,7 +257,7 @@ function buildMessageBody(ctx: MessageContext, type: MessageType): string {
       const parts = [`${firstName},`, '', obs];
       if (proof) parts.push('', proof);
       parts.push('', reading.split('.').slice(0, 2).join('.') + '.');
-      parts.push('', 'I run financial exposure scans for companies in your exact phase. 48h, no call needed. Would it be useful?');
+      parts.push('', t.iRunPhase);
       parts.push('', '— Hélène');
       return parts.join('\n');
     }
@@ -191,29 +269,18 @@ function buildMessageBody(ctx: MessageContext, type: MessageType): string {
 
       const exposure = account.scan
         ? `${Math.round(account.scan.exposureLow / 1000)}k-${Math.round(account.scan.exposureHigh / 1000)}k ${account.scan.currency}`
-        : '12-20% of annual software costs';
+        : `12-20% ${t.annualSw}`;
 
-      return `${firstName} — quick follow-up on the exposure scan.\n\n${followupReading}. For a ${account.employeeRange}-person company, that typically means ${exposure}.\n\nHappy to share what a scan surfaces. No commitment.\n\n— Hélène`;
+      return `${firstName} — ${t.followUp}\n\n${followupReading}. ${t.forCompany} ${account.employeeRange}${t.personCompany} ${exposure}.\n\n${t.happy}\n\n— Hélène`;
     }
 
     case 'email_main': {
       const parts = [`${firstName},`, '', obs];
-
-      // Proof paragraph (thesis-backed evidence)
-      if (proof) {
-        parts.push('', proof);
-      }
-
-      // Financial reading from thesis or fallback
+      if (proof) parts.push('', proof);
       parts.push('', reading);
-
-      // Offer
-      parts.push('', 'I specialize in detecting this kind of hidden financial exposure in SaaS, cloud, and software spend.');
-
-      // No call CTA
-      parts.push('', 'No call needed. I can deliver a structured diagnostic in 48h. If the numbers are meaningful, we talk. If not, you\'ve lost nothing.');
-
-      // Signature
+      parts.push('', t.specialize);
+      parts.push('', t.noCall);
+      // Signature — Ghost Tax is NEVER translated
       parts.push('', 'Hélène', 'Ghost Tax — ghost-tax.com');
       return parts.join('\n');
     }
@@ -225,17 +292,16 @@ function buildMessageBody(ctx: MessageContext, type: MessageType): string {
 
       const exposure = account.scan
         ? `${Math.round(account.scan.exposureLow / 1000)}k-${Math.round(account.scan.exposureHigh / 1000)}k ${account.scan.currency}/year`
-        : '12-20% of annual software spend';
+        : `12-20% ${t.annualSpend}`;
 
-      return `${firstName} — following up.\n\n${followupReading}. In companies at ${account.company}'s stage, this typically represents ${exposure}.\n\nA 48h scan would tell you if ${account.company} is in that range.\n\n— Hélène`;
+      return `${firstName} — ${t.followingUp}\n\n${followupReading}. ${t.inCompanies} ${account.company}${t.stage} ${exposure}.\n\n${t.scan48} ${account.company} ${t.inRange}\n\n— Hélène`;
     }
 
     case 'ultra_short': {
-      // Thesis-backed one-liner
       const hook = ctx.thesis?.l4?.cfoPain
         ? ctx.thesis.l4.cfoPain.split('.')[0].replace(account.company, '').replace(/^\s*/, '').trim()
         : obs.split('.')[0].replace(account.company, '').replace(/^\s*is\s*/i, '').trim();
-      return `${firstName} — ${hook}. Would a 48h exposure scan be useful? ghost-tax.com`;
+      return `${firstName} — ${hook}. ${t.wouldScan} ghost-tax.com`;
     }
 
     default:
