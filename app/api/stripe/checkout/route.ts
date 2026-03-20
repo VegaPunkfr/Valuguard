@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
           product_data: {
             name: productName,
             description: productDesc,
+            images: [`${SITE_URL}/api/og`],
             metadata: { ...railConfig.metadata, tier },
           },
         },
@@ -183,6 +184,7 @@ export async function POST(request: NextRequest) {
           product_data: {
             name: productName,
             description: productDesc,
+            images: [`${SITE_URL}/api/og`],
             metadata: stabilize.metadata,
           },
         },
@@ -217,6 +219,28 @@ export async function POST(request: NextRequest) {
         subscription_data: { metadata: sessionMetadata },
       }),
       locale: locale === "fr" ? "fr" : locale === "de" ? "de" : "en",
+      custom_text: {
+        submit: {
+          message: locale === "fr"
+            ? "Livraison sous 48h · Garantie zéro-exposition = remboursement intégral"
+            : locale === "de"
+              ? "Lieferung in 48h · Zero-Exposure-Garantie = volle Rückerstattung"
+              : "Delivery within 48h · Zero-exposure guarantee = full refund",
+        },
+        after_submit: {
+          message: locale === "fr"
+            ? "Vous recevrez votre Decision Pack par email sous 48h."
+            : locale === "de"
+              ? "Sie erhalten Ihr Decision Pack innerhalb von 48h per E-Mail."
+              : "You will receive your Decision Pack by email within 48h.",
+        },
+      },
+      payment_intent_data: checkoutMode === "payment" ? {
+        description: `Ghost Tax — ${rail === "A" ? "Financial Exposure Detection" : "Stabilization Protocol 30/60/90"}`,
+        statement_descriptor_suffix: "GHOST TAX",
+      } : undefined,
+      phone_number_collection: { enabled: true },
+      tax_id_collection: { enabled: true, required: "if_supported" },
     });
 
     return NextResponse.json({ url: session.url });
