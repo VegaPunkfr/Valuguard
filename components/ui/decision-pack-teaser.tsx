@@ -117,15 +117,14 @@ export function DecisionPackTeaser({
     trackEvent("decision_pack_unlock_clicked", { domain, locale });
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain, email, rail: "A", locale }),
+      const params = new URLSearchParams({
+        rail: "A",
+        locale,
+        ...(domain && { domain }),
+        ...(email && { email }),
       });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      window.location.href = `/checkout?${params.toString()}`;
     } catch {
-      // Fallback: redirect to /intel for re-attempt
       window.location.href = "/intel?retry=1";
     } finally {
       setLoading(false);

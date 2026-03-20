@@ -398,7 +398,7 @@ function accumulatedLeak(ghostTaxAnnual: number, scanDate: string, overrideDays?
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
 
 function buildCheckoutUrl(domain: string, email: string): string {
-  return `${SITE_URL}/api/stripe/checkout?domain=${encodeURIComponent(domain)}&email=${encodeURIComponent(email)}&ref=drip`;
+  return `${SITE_URL}/checkout?rail=A&domain=${encodeURIComponent(domain)}&email=${encodeURIComponent(email)}&ref=drip`;
 }
 
 function buildUnsubscribeUrl(email: string): string {

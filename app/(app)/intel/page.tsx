@@ -206,22 +206,14 @@ export default function IntelPage() {
     setCheckoutLoading(true);
     trackCheckoutStarted({ domain });
     try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locale,
-          domain,
-          email: email.trim() || undefined,
-          companyName: phases.context?.name || undefined,
-          headcount: phases.context?.headcount || (headcount ? parseInt(headcount, 10) : undefined),
-          monthlySpendEur: phases.context?.monthlySpendEur || (monthlySpend ? parseInt(monthlySpend, 10) : undefined),
-          industry: phases.context?.industry || industry || undefined,
-        }),
+      const params = new URLSearchParams({
+        rail: "A",
+        locale,
+        ...(domain && { domain }),
+        ...(email.trim() && { email: email.trim() }),
+        ...(phases.context?.name && { company: phases.context.name }),
       });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else setError("Unable to initiate checkout. Please try again.");
+      window.location.href = `/checkout?${params.toString()}`;
     } catch {
       setError("Network error during checkout.");
     } finally {

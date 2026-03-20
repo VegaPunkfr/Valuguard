@@ -1,19 +1,12 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
-import { CheckCircle, ArrowRight, Shield, Zap, BarChart3, FileText, Play, X } from "lucide-react";
+import { CheckCircle, ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { c, f, sp, ts } from "@/lib/tokens";
+import { cWarm as c, fWarm as f, sp, ts } from "@/lib/tokens";
 import Section from "@/components/ui/section";
 
 const LeakCounter = lazy(() => import("@/components/ui/leak-counter").then(m => ({ default: m.LeakCounter })));
-
-/* ─── Helper: format bento numbers ──────────────────── */
-function formatBentoNum(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
-  if (n >= 1_000) return Math.round(n).toLocaleString("fr-FR");
-  return String(Math.round(n));
-}
 
 /* ─── Hook: count-up animation ──────────────────────── */
 function useCountUp(target: number, duration: number, active: boolean): number {
@@ -26,7 +19,6 @@ function useCountUp(target: number, duration: number, active: boolean): number {
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.round(eased * target));
       if (progress < 1) {
@@ -49,21 +41,17 @@ export default function LandingPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState(false);
 
-  // Video modal state
-  const [videoOpen, setVideoOpen] = useState(false);
+  // Stats visibility for count-up
+  const [statsVisible, setStatsVisible] = useState(false);
+  const statsRef = useRef<HTMLDivElement | null>(null);
 
-  // Bento visibility for count-up trigger
-  const [bentoVisible, setBentoVisible] = useState(false);
-  const bentoRef = useRef<HTMLDivElement | null>(null);
-
-  // IntersectionObserver for bento count-up
   useEffect(() => {
-    const node = bentoRef.current;
+    const node = statsRef.current;
     if (!node) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setBentoVisible(true);
+          setStatsVisible(true);
           observer.disconnect();
         }
       },
@@ -73,23 +61,9 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Escape key closes video modal
-  useEffect(() => {
-    if (!videoOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setVideoOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [videoOpen]);
-
   // Count-up values
-  const valLow = useCountUp(210340, 1800, bentoVisible);
-  const valHigh = useCountUp(278900, 2100, bentoVisible);
-  const valOrphan = useCountUp(47, 1200, bentoVisible);
-  const valOverlaps = useCountUp(12, 800, bentoVisible);
-  const valSavings = useCountUp(142000, 1600, bentoVisible);
-  const valConfidence = useCountUp(62, 1500, bentoVisible);
+  const valAudits = useCountUp(200, 1200, statsVisible);
+  const valRecoverable = useCountUp(142, 1600, statsVisible);
 
   const navigateToIntel = useCallback(() => {
     const domain = heroInput.trim();
@@ -101,14 +75,8 @@ export default function LandingPage() {
     setCheckoutLoading(true);
     setCheckoutError(false);
     try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ locale }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else { setCheckoutLoading(false); setCheckoutError(true); }
+      const params = new URLSearchParams({ rail: "A", locale });
+      window.location.href = `/checkout?${params.toString()}`;
     } catch {
       setCheckoutLoading(false);
       setCheckoutError(true);
@@ -116,558 +84,434 @@ export default function LandingPage() {
   }, [checkoutLoading, locale]);
 
   return (
-    <div style={{ minHeight: "100vh", background: c.bg, color: c.text1 }}>
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "0 24px" }}>
+    <div style={{ minHeight: "100vh", color: c.text1 }}>
 
-        {/* ═══════════ HERO — Algorithmic Layout ═══════════ */}
-        <section style={{ position: "relative", paddingTop: sp[7], paddingBottom: sp[7], overflow: "hidden" }}>
+      {/* ═══════════ T6 — HERO (centered, single column) ═══════════ */}
+      <section style={{ padding: "80px 0 60px", textAlign: "center" }}>
+        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
 
-          {/* Layer 0: Radial noise */}
+          {/* Badge */}
           <div style={{
-            position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-            background: [
-              "radial-gradient(ellipse 80% 50% at 70% -20%, rgba(15,23,42,0.03) 0%, transparent 60%)",
-              "radial-gradient(ellipse 40% 60% at 10% 80%, rgba(5,150,105,0.02) 0%, transparent 50%)",
-            ].join(", "),
-          }} />
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+            letterSpacing: "0.08em", textTransform: "uppercase" as const,
+            color: c.green, background: c.greenBg,
+            border: `1px solid ${c.greenBd}`,
+            padding: "5px 14px", borderRadius: 100,
+            marginBottom: 28,
+          }}>
+            {t("landing.hero.badge") || "Decision Intelligence Platform"}
+          </div>
 
-          {/* Layer 1: Grain texture overlay */}
-          <div style={{
-            position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", opacity: 0.05,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-            backgroundRepeat: "repeat",
-          }} />
+          {/* H1 */}
+          <h1 style={{
+            fontSize: "clamp(2.4rem, 5vw, 3.6rem)",
+            fontWeight: 800, lineHeight: 1.08,
+            letterSpacing: "-0.035em",
+            marginBottom: 20,
+            maxWidth: 700, marginLeft: "auto", marginRight: "auto",
+          }}>
+            {t("landing.hero.t1")}{" "}
+            <span style={{ color: c.accent }}>Ghost Tax.</span>
+          </h1>
 
-          {/* Layer 2: Asymmetric grid */}
-          <div style={{
-            position: "relative", zIndex: 2,
-            display: "grid",
-            gridTemplateColumns: "1fr 0.85fr",
-            gap: sp[6],
-            alignItems: "start",
-          }}
-          className="gt-hero-grid"
-          >
+          {/* Subtitle */}
+          <p style={{
+            fontSize: 18, color: c.text2, maxWidth: 560,
+            margin: "0 auto 36px", lineHeight: 1.7,
+          }}>
+            {t("landing.hero.sub")}
+          </p>
 
-            {/* ── LEFT: Proposition ────────────────── */}
-            <div style={{ paddingTop: sp[5] }}>
-              <div className="gt-badge gt-badge--blue" style={{ marginBottom: sp[4] }}>
-                {t("landing.hero.badge") || "Decision Intelligence Platform"}
+          {/* Input + CTA */}
+          <div className="gt-hero-input-row" style={{
+            display: "flex", gap: 8, maxWidth: 480, margin: "0 auto 16px",
+          }}>
+            <input
+              type="text"
+              value={heroInput}
+              onChange={(e) => setHeroInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
+              placeholder="yourcompany.com"
+              spellCheck={false}
+              style={{
+                flex: 1, padding: "14px 18px", fontFamily: f.mono, fontSize: 14,
+                background: "#FFFFFF", border: `1.5px solid ${c.borderS}`,
+                borderRadius: 10, color: c.text1, outline: "none",
+                transition: "border-color 200ms, box-shadow 200ms",
+              }}
+            />
+            <button
+              type="button"
+              onClick={navigateToIntel}
+              style={{
+                padding: "14px 30px", fontSize: 14, fontWeight: 700,
+                background: c.accent, color: "white", border: "none",
+                borderRadius: 10, cursor: "pointer", whiteSpace: "nowrap" as const,
+                transition: "all 200ms",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = c.accentHi;
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(232,91,0,0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = c.accent;
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              {t("landing.hero.cta")}
+            </button>
+          </div>
+
+          <p style={{ fontSize: 12, color: c.text4, textAlign: "center" }}>
+            {t("landing.hero.nologin")}
+          </p>
+        </div>
+      </section>
+
+      {/* ═══════════ T7 — LOGO BAR ═══════════ */}
+      <section style={{
+        padding: "50px 0",
+        borderTop: `1px solid ${c.border}`,
+        borderBottom: `1px solid ${c.border}`,
+        textAlign: "center",
+      }}>
+        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
+          <p style={{
+            fontFamily: f.mono, fontSize: 10, color: c.text4,
+            letterSpacing: "0.12em", textTransform: "uppercase" as const,
+            marginBottom: 24,
+          }}>
+            {t("landing.logos.label")}
+          </p>
+          <div className="gt-logos-row" style={{
+            display: "flex", justifyContent: "center", alignItems: "center",
+            gap: 48, flexWrap: "wrap" as const, opacity: 0.4,
+          }}>
+            {["Mirakl", "ContentSquare", "PayFit", "Alan", "Spendesk", "Swile", "BackMarket"].map((name) => (
+              <span key={name} style={{
+                fontSize: 16, fontWeight: 700, color: c.text3,
+                letterSpacing: "0.02em",
+              }}>
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
+
+        {/* ═══════════ VIDEO SECTION ═══════════ */}
+        <Section style={{ paddingTop: 48, paddingBottom: 48 }}>
+          <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              color: c.text4, marginBottom: 16,
+            }}>
+              {t("landing.video.subtitle")}
+            </p>
+            <div style={{
+              position: "relative", borderRadius: 16, overflow: "hidden",
+              border: `1px solid ${c.border}`,
+              boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
+            }}>
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                poster="/site-screenshot.png"
+                style={{ width: "100%", display: "block" }}
+              >
+                <source src="/demo-video.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <p style={{
+              fontSize: 14, color: c.text3, marginTop: 16, lineHeight: 1.5,
+            }}>
+              {t("landing.video.title")}
+            </p>
+          </div>
+        </Section>
+
+        {/* ═══════════ T8 — STATS (4 simple cards) ═══════════ */}
+        <Section style={{ paddingTop: 64, paddingBottom: 48 }}>
+          <div ref={statsRef} className="gt-stats-grid" style={{
+            display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20,
+          }}>
+            {[
+              { value: `${valAudits}+`, label: t("landing.stats.analysesDesc"), color: c.text1 },
+              { value: t("landing.stats.delivery"), label: t("landing.stats.deliveryDesc"), color: c.green },
+              { value: "100%", label: t("landing.stats.exposureDesc"), color: c.red },
+              { value: `${valRecoverable}k`, label: "EUR avg. recoverable", color: c.amber },
+            ].map((stat) => (
+              <div key={stat.label} style={{
+                background: "#FFFFFF", border: `1px solid ${c.border}`,
+                borderRadius: 14, padding: 28, textAlign: "center",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                transition: "transform 200ms, box-shadow 200ms",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
+              }}
+              >
+                <p style={{
+                  fontFamily: f.mono, fontSize: 32, fontWeight: 700,
+                  marginBottom: 6, color: stat.color,
+                  fontVariantNumeric: "tabular-nums",
+                }}>{stat.value}</p>
+                <p style={{ fontSize: 13, color: c.text3 }}>{stat.label}</p>
               </div>
+            ))}
+          </div>
+        </Section>
 
-              <h1 style={{
-                fontSize: `clamp(${ts.lg}, 5.5vw, ${ts.xl})`,
-                fontWeight: 800,
-                lineHeight: 1.04,
-                letterSpacing: "-0.04em",
-                marginBottom: sp[4],
-              }}>
-                <span style={{
-                  background: "linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #059669 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>{t("landing.hero.t1")}</span>
-                <br />
-                <span style={{
-                  background: "linear-gradient(to right, #059669, #0284C7)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>{t("landing.hero.t2")}</span>
-              </h1>
+        {/* ═══════════ T9 — BEFORE/AFTER COMPARISON ═══════════ */}
+        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
+          <p style={{
+            fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+            letterSpacing: "0.12em", textTransform: "uppercase" as const,
+            color: c.accent, marginBottom: 14,
+          }}>
+            {t("landing.compare.label")}
+          </p>
+          <h2 style={{
+            fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 800,
+            letterSpacing: "-0.03em", lineHeight: 1.12, marginBottom: 48,
+            maxWidth: 520,
+          }}>
+            {t("landing.compare.title")}
+          </h2>
 
-              <p style={{
-                fontSize: ts.base,
-                color: c.text2,
-                maxWidth: 480,
-                lineHeight: 1.65,
-                marginBottom: sp[4],
+          <div className="gt-comp-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            {/* Before card */}
+            <div style={{
+              background: "#FFFFFF", borderRadius: 18, padding: 36,
+              border: `1px solid ${c.border}`, borderTop: `3px solid ${c.red}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <span style={{
+                fontFamily: f.mono, fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.1em", textTransform: "uppercase" as const,
+                padding: "3px 10px", borderRadius: 100,
+                display: "inline-block", marginBottom: 20,
+                background: c.redBg, color: c.red,
               }}>
-                {t("landing.hero.sub")}
+                {t("landing.compare.before.tag")}
+              </span>
+              <p style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 700, color: c.red, marginBottom: 6 }}>
+                {t("landing.compare.before.amount")}
               </p>
-
-              {/* Institutional trust bar */}
-              <div className="gt-hero-trust-bar" style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: "6px 16px",
-                marginBottom: sp[5],
-                maxWidth: 520,
-              }}>
-                {[
-                  t("hero.trust.audits"),
-                  t("hero.trust.delivery"),
-                  t("hero.trust.soc2"),
-                  t("hero.trust.gdpr"),
-                  t("hero.trust.zeroAccess"),
-                ].map((label) => (
-                  <span key={label} style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 5,
-                    fontSize: "10.5px",
-                    fontFamily: f.mono,
-                    color: c.text3,
-                    letterSpacing: "0.04em",
-                    lineHeight: 1,
-                    padding: "3px 0",
-                  }}>
-                    <CheckCircle size={11} color={c.green} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                    {label}
-                  </span>
-                ))}
-              </div>
-
-              {/* Domain input */}
-              <div style={{ display: "flex", gap: sp[2], maxWidth: 480, marginBottom: sp[3] }}>
-                <input
-                  type="text"
-                  value={heroInput}
-                  onChange={(e) => setHeroInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
-                  placeholder="acme.com"
-                  className="gt-input gt-input-mono"
-                  style={{
-                    flex: 1, padding: `${sp[3]} ${sp[4]}`,
-                    fontSize: ts.base,
-                    border: "1px solid #CBD5E1",
-                    background: "#FFFFFF",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={navigateToIntel}
-                  className="gt-btn gt-btn-primary"
-                  style={{ padding: `${sp[3]} ${sp[5]}`, fontSize: "0.875rem", fontWeight: 700, whiteSpace: "nowrap" }}
-                >
-                  {t("landing.hero.cta")}
-                </button>
-              </div>
-
-              <p style={{
-                fontSize: ts.xs, color: c.text4, fontFamily: f.mono,
-                letterSpacing: "0.06em",
-              }}>
-                {t("landing.hero.nologin")}
+              <p style={{ fontSize: 13, color: c.text3, marginBottom: 24 }}>
+                {t("landing.compare.before.unit")}
               </p>
-
-              {/* Trust row — conversion stats */}
-              <div className="gt-trust-bar" style={{
-                display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
-                gap: sp[3], marginTop: sp[4], maxWidth: 480,
-              }}>
+              <ul style={{ listStyle: "none", fontSize: 14, color: c.text2, lineHeight: 2.2, padding: 0 }}>
                 {[
-                  { val: t("landing.stats.analyses"), label: t("landing.stats.analysesDesc"), color: c.accent },
-                  { val: t("landing.stats.delivery"), label: t("landing.stats.deliveryDesc"), color: c.green },
-                  { val: t("landing.stats.exposure"), label: t("landing.stats.exposureDesc"), color: c.red },
-                  { val: t("landing.stats.action"), label: t("landing.stats.actionDesc"), color: c.amber },
-                ].map((s) => (
-                  <div key={s.label} style={{
-                    padding: "12px 0",
-                    borderTop: `2px solid ${s.color}20`,
-                  }}>
-                    <p style={{
-                      fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
-                      color: s.color, letterSpacing: "-0.02em", lineHeight: 1,
-                      fontVariantNumeric: "tabular-nums",
-                    }}>{s.val}</p>
-                    <p style={{ fontSize: ts.xs, color: c.text4, marginTop: sp[1], lineHeight: 1.3 }}>{s.label}</p>
-                  </div>
+                  { n: "47", text: t("landing.compare.before.l1") },
+                  { n: "12", text: t("landing.compare.before.l2") },
+                  { n: "3", text: t("landing.compare.before.l3") },
+                  { n: "0", text: t("landing.compare.before.l4") },
+                  { n: "0%", text: t("landing.compare.before.l5") },
+                ].map((item) => (
+                  <li key={item.text}>{item.text.replace("{n}", item.n)}</li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* ── RIGHT: Live Dashboard Bento ──────── */}
-            <div
-              ref={bentoRef}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gridTemplateRows: "auto auto auto",
-                gap: sp[2],
-                paddingTop: sp[4],
-              }}
-              className="gt-bento"
-            >
-              {/* Bento: Total Exposure (span 2) */}
-              <div style={{
-                gridColumn: "1 / -1",
-                background: "#FFFFFF",
-                backdropFilter: "none",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: sp[4],
+            {/* After card */}
+            <div style={{
+              background: "#FFFFFF", borderRadius: 18, padding: 36,
+              border: `1px solid ${c.border}`, borderTop: `3px solid ${c.green}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <span style={{
+                fontFamily: f.mono, fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.1em", textTransform: "uppercase" as const,
+                padding: "3px 10px", borderRadius: 100,
+                display: "inline-block", marginBottom: 20,
+                background: c.greenBg, color: c.green,
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: sp[3] }}>
-                  <p style={{ fontSize: ts.xs, fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    {t("landing.bento.totalExposure")}
+                {t("landing.compare.after.tag")}
+              </span>
+              <p style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 700, color: c.green, marginBottom: 6 }}>
+                {t("landing.compare.after.amount")}
+              </p>
+              <p style={{ fontSize: 13, color: c.text3, marginBottom: 24 }}>
+                {t("landing.compare.after.unit")}
+              </p>
+              <ul style={{ listStyle: "none", fontSize: 14, color: c.text2, lineHeight: 2.2, padding: 0 }}>
+                {[
+                  { n: "47", text: t("landing.compare.after.l1") },
+                  { n: "8", text: t("landing.compare.after.l2") },
+                  { n: "3", text: t("landing.compare.after.l3") },
+                  { n: "10", text: t("landing.compare.after.l4") },
+                  { n: "1", text: t("landing.compare.after.l5") },
+                ].map((item) => (
+                  <li key={item.text}>{item.text.replace("{n}", item.n)}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Section>
+
+        {/* ═══════════ T10 — TESTIMONIALS ═══════════ */}
+        <section style={{
+          padding: "80px 0",
+          marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28,
+          background: "#FFFFFF",
+          borderTop: `1px solid ${c.border}`,
+          borderBottom: `1px solid ${c.border}`,
+        }}>
+          <div style={{ maxWidth: 1140, margin: "0 auto" }}>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase" as const,
+              color: c.accent, marginBottom: 14,
+            }}>
+              {t("landing.social.label")}
+            </p>
+            <h2 style={{
+              fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 800,
+              letterSpacing: "-0.03em", lineHeight: 1.12, marginBottom: 48,
+              maxWidth: 520,
+            }}>
+              {t("landing.social.title")}
+            </h2>
+
+            <div className="gt-test-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+              {[
+                {
+                  quote: t("landing.social.q1"),
+                  name: t("landing.social.a1"),
+                  role: t("landing.social.ctx1"),
+                  initials: "MK",
+                  stars: 4,
+                },
+                {
+                  quote: t("landing.social.q2"),
+                  name: t("landing.social.a2"),
+                  role: t("landing.social.ctx2"),
+                  initials: "SL",
+                  stars: 4,
+                },
+                {
+                  quote: t("landing.social.q3"),
+                  name: t("landing.social.a3"),
+                  role: t("landing.social.ctx3"),
+                  initials: "JR",
+                  stars: 5,
+                },
+              ].map((item) => (
+                <div key={item.initials} style={{
+                  background: c.bg, border: `1px solid ${c.border}`,
+                  borderRadius: 16, padding: 28,
+                }}>
+                  {/* Stars */}
+                  <p style={{ fontSize: 14, letterSpacing: 2, marginBottom: 16 }}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <span key={i} style={{ color: i < item.stars ? c.amber : c.border }}>&#9733;</span>
+                    ))}
                   </p>
-                  <span style={{
-                    fontSize: "9px", fontFamily: f.mono, padding: "2px 8px",
-                    borderRadius: 999, background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.20)",
-                    color: "#60a5fa", fontWeight: 700, letterSpacing: "0.06em",
-                  }}>DEMO</span>
-                </div>
-                <p style={{
-                  fontFamily: f.mono, fontSize: ts.lg, fontWeight: 800,
-                  color: c.red, letterSpacing: "-0.02em",
-                  fontVariantNumeric: "tabular-nums",
-                }}>
-                  {formatBentoNum(valLow)} — {formatBentoNum(valHigh)} <span style={{ fontSize: ts.base, color: c.text3 }}>{t("landing.bento.perYear")}</span>
-                </p>
-                <p style={{ fontSize: 11, color: c.text3, marginTop: 6, fontFamily: f.mono, fontStyle: "italic" }}>
-                  *Exemple illustratif — votre analyse utilise votre domaine réel
-                </p>
-                <div style={{
-                  marginTop: sp[3], height: 4, borderRadius: 2,
-                  background: "#F1F5F9", overflow: "hidden",
-                }}>
+                  <p style={{ fontSize: 15, color: c.text2, lineHeight: 1.7, marginBottom: 20 }}>
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
                   <div style={{
-                    width: "73%", height: "100%", borderRadius: 2,
-                    background: "linear-gradient(to right, hsl(0,82%,66%), hsl(35,86%,56%))",
-                  }} />
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: sp[1] }}>
-                  <span style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, fontVariantNumeric: "tabular-nums" }}>0</span>
-                  <span style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, fontVariantNumeric: "tabular-nums" }}>{t("landing.bento.itSpendPct")}</span>
-                </div>
-              </div>
-
-              {/* Bento: Orphan Licenses */}
-              <div style={{
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: sp[4],
-              }}>
-                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
-                  {t("landing.bento.orphanLicenses")}
-                </p>
-                <p style={{
-                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
-                  color: c.amber, fontVariantNumeric: "tabular-nums",
-                }}>{formatBentoNum(valOrphan)}</p>
-                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
-                  ~38 400 {t("landing.bento.perYear")}
-                </p>
-              </div>
-
-              {/* Bento: Overlaps */}
-              <div style={{
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: sp[4],
-              }}>
-                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
-                  {t("landing.bento.overlaps")}
-                </p>
-                <p style={{
-                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
-                  color: c.red, fontVariantNumeric: "tabular-nums",
-                }}>{formatBentoNum(valOverlaps)}</p>
-                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
-                  {t("landing.bento.categories")}
-                </p>
-              </div>
-
-              {/* Bento: Projected Savings */}
-              <div style={{
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: sp[4],
-              }}>
-                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
-                  {t("landing.bento.projectedSavings")}
-                </p>
-                <p style={{
-                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
-                  color: c.green, fontVariantNumeric: "tabular-nums",
-                }}>+{valSavings >= 1000 ? Math.round(valSavings / 1000) + "k" : formatBentoNum(valSavings)}</p>
-                <p style={{ fontSize: ts.xs, color: c.text3, marginTop: sp[1], fontFamily: f.mono, fontVariantNumeric: "tabular-nums" }}>
-                  {t("landing.bento.recoverable")}
-                </p>
-              </div>
-
-              {/* Bento: Confidence */}
-              <div style={{
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: sp[4],
-              }}>
-                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
-                  {t("landing.bento.confidenceScore")}
-                </p>
-                <p style={{
-                  fontFamily: f.mono, fontSize: ts.md, fontWeight: 800,
-                  color: c.accent, fontVariantNumeric: "tabular-nums",
-                }}>{formatBentoNum(valConfidence)}<span style={{ fontSize: ts.sm, color: c.text3, fontWeight: 400 }}>/100</span></p>
-                <p style={{ fontSize: ts.xs, color: c.text4, marginTop: sp[1], fontFamily: f.mono }}>
-                  {t("landing.bento.gradeModerate")}
-                </p>
-              </div>
-
-              {/* Bento: Signal bar (span 2) */}
-              <div style={{
-                gridColumn: "1 / -1",
-                background: "#FFFFFF",
-                border: "1px solid #E2E8F0",
-                borderRadius: 14, padding: `${sp[3]} ${sp[4]}`,
-              }}>
-                <p style={{ fontSize: "9px", fontFamily: f.mono, color: c.text4, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: sp[2] }}>
-                  {t("landing.bento.signalsDetected")}
-                </p>
-                <div style={{ display: "flex", gap: sp[2], flexWrap: "wrap" }}>
-                  {[
-                    { label: t("landing.bento.tag1"), severity: c.red },
-                    { label: t("landing.bento.tag2"), severity: c.amber },
-                    { label: t("landing.bento.tag3"), severity: c.red },
-                    { label: t("landing.bento.tag4"), severity: c.amber },
-                    { label: t("landing.bento.tag5"), severity: c.green },
-                  ].map((sig) => (
-                    <span key={sig.label} style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      fontSize: "10px", fontFamily: f.mono, color: c.text2,
-                      padding: "3px 10px", borderRadius: 6,
-                      background: "#F8FAFC",
-                      border: "1px solid #E2E8F0",
+                    display: "flex", alignItems: "center", gap: 10,
+                    borderTop: `1px solid ${c.border}`, paddingTop: 16,
+                  }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: "50%",
+                      background: c.surface, display: "flex",
+                      alignItems: "center", justifyContent: "center",
+                      fontFamily: f.mono, fontSize: 12, fontWeight: 700, color: c.text3,
                     }}>
-                      <span style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: sig.severity, flexShrink: 0,
-                      }} />
-                      {sig.label}
-                    </span>
-                  ))}
+                      {item.initials}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: c.text1 }}>{item.name}</p>
+                      <p style={{ fontSize: 11, color: c.text4 }}>{item.role}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* SAMPLE DATA badge */}
-              <div style={{
-                gridColumn: "1 / -1",
-                fontSize: 9, fontFamily: f.mono, color: c.text4,
-                letterSpacing: ".1em", textTransform: "uppercase",
-                textAlign: "center", marginTop: 8, padding: "2px 0",
-              }}>
-                SAMPLE DATA
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ═══════════ VIDEO / DEMO PLACEHOLDER ═══════════ */}
-        <Section style={{ paddingTop: 48, paddingBottom: 48 }}>
-          {/* Video trigger thumbnail */}
-          <div
-            onClick={() => setVideoOpen(true)}
-            className="gt-video-placeholder"
-            style={{
-              display: "block",
-              maxWidth: 800,
-              margin: "0 auto",
-              position: "relative",
-              aspectRatio: "16 / 9",
-              borderRadius: 16,
-              overflow: "hidden",
-              background: "#F8FAFC",
-              border: "1px solid #E2E8F0",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-              cursor: "pointer",
-            }}
-          >
-            {/* Subtle bg tint */}
-            <div style={{
-              position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-            }} />
-
-            {/* Grid texture overlay */}
-            <div style={{
-              position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", opacity: 0.15,
-              backgroundImage: "linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }} />
-
-            {/* Content */}
-            <div style={{
-              position: "relative", zIndex: 2,
-              display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              height: "100%", gap: 16,
+        {/* ═══════════ T11 — HOW IT WORKS (3 steps) ═══════════ */}
+        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
+          <div style={{
+            background: "#FFFFFF", border: `1px solid ${c.border}`,
+            borderRadius: 18, padding: "56px 48px", maxWidth: 960, margin: "0 auto",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase" as const,
+              color: c.accent, marginBottom: 14,
             }}>
-              {/* Play button */}
-              <div style={{
-                width: 72, height: 72, borderRadius: "50%",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "rgba(15,23,42,0.06)",
-                border: "1px solid #E2E8F0",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                transition: "all 0.2s ease",
-              }}>
-                <Play size={28} color={c.accent} fill={c.accent} style={{ marginLeft: 3 }} />
-              </div>
+              {t("landing.how.label")}
+            </p>
+            <h2 style={{ marginBottom: 32 }}>{t("landing.how.title")}</h2>
 
-              <p style={{
-                fontSize: ts.base, fontWeight: 700, color: c.text1,
-                textAlign: "center", maxWidth: 480, lineHeight: 1.4,
-              }}>
-                {t("landing.video.title")}
-              </p>
-
-              <p style={{
-                fontSize: ts.xs, fontFamily: f.mono, color: c.text4,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-              }}>
-                {t("landing.video.subtitle")}
-              </p>
-            </div>
-          </div>
-
-          {/* Video modal overlay */}
-          {videoOpen && (
-            <div
-              onClick={() => setVideoOpen(false)}
-              style={{
-                position: "fixed", inset: 0, zIndex: 1000,
-                background: "rgba(0,0,0,0.50)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: "24px",
-              }}
-            >
-              {/* Inner container — stop propagation so click inside doesn't close */}
-              <div
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: 900,
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  background: "#FFFFFF",
-                  border: "1px solid #E2E8F0",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-                  backdropFilter: "none",
-                }}
-              >
-                {/* Close button */}
-                <button
-                  onClick={() => setVideoOpen(false)}
-                  style={{
-                    position: "absolute", top: 12, right: 12, zIndex: 10,
-                    width: 36, height: 36, borderRadius: "50%",
-                    background: "rgba(0,0,0,0.05)",
-                    border: "1px solid #E2E8F0",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", color: c.text1,
-                    transition: "background 0.15s ease",
-                  }}
-                  aria-label="Fermer la vidéo"
-                >
-                  <X size={18} />
-                </button>
-
-                {/* 16:9 iframe wrapper */}
-                <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
-                  {/* TODO: Replace with real product demo URL before launch */}
-                  <iframe
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-                    title="Ghost Tax — Demo"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{
-                      position: "absolute", top: 0, left: 0,
-                      width: "100%", height: "100%",
-                      border: "none",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </Section>
-
-        {/* ═══════════ VALUE STRIP (4 items, breathing room) ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div className="gt-strip-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
-            {[
-              { icon: <BarChart3 size={20} />, label: t("landing.strip.detect"), desc: t("landing.strip.detect.d") },
-              { icon: <Zap size={20} />, label: t("landing.strip.explain"), desc: t("landing.strip.explain.d") },
-              { icon: <FileText size={20} />, label: t("landing.strip.simulate"), desc: t("landing.strip.simulate.d") },
-              { icon: <Shield size={20} />, label: t("landing.strip.arm"), desc: t("landing.strip.arm.d") },
-            ].map((item) => (
-              <div key={item.label} className="gt-card gt-card-interactive" style={{ padding: "28px 20px", textAlign: "center" }}>
-                <div style={{ color: c.accent, marginBottom: 14, display: "flex", justifyContent: "center" }}>{item.icon}</div>
-                <p style={{ fontSize: 13, fontFamily: f.mono, fontWeight: 700, color: c.text1, letterSpacing: ".06em", marginBottom: 10, textTransform: "uppercase" }}>
-                  {item.label}
-                </p>
-                <p style={{ fontSize: 15, color: c.text2, lineHeight: 1.6 }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        {/* ═══════════ PROBLEM ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div className="gt-panel" style={{ padding: "56px 48px", maxWidth: 960, margin: "0 auto" }}>
-            <p className="gt-section-label" style={{ color: c.red }}>{t("problem.label")}</p>
-            <h2 style={{ marginBottom: 32 }}>
-              {t("problem.title1")}
-              <br />
-              <span style={{ color: c.red }}>{t("problem.title2")}</span>
-            </h2>
-
-            <div className="gt-problem-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <div className="gt-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
               {[
-                { amt: t("problem.amt1"), desc: t("problem.desc1"), color: c.red },
-                { amt: t("problem.amt2"), desc: t("problem.desc2"), color: c.amber },
-                { amt: t("problem.amt3"), desc: t("problem.desc3"), color: c.red },
+                { num: "01", title: t("landing.how.s1"), desc: t("landing.how.s1d") },
+                { num: "02", title: t("landing.how.s2"), desc: t("landing.how.s2d") },
+                { num: "03", title: t("landing.how.s3"), desc: t("landing.how.s3d") },
               ].map((item) => (
-                <div key={item.amt} className="gt-metric" style={{ padding: "28px 22px", textAlign: "left" }}>
-                  <p style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: item.color, letterSpacing: "-0.02em", marginBottom: 10 }}>
-                    {item.amt}
-                  </p>
-                  <p style={{ fontSize: 15, color: c.text2, lineHeight: 1.6 }}>{item.desc}</p>
+                <div key={item.num} style={{
+                  background: c.bg, border: `1px solid ${c.border}`,
+                  borderRadius: 14, padding: "28px 22px", position: "relative",
+                }}>
+                  <span style={{
+                    fontFamily: f.mono, fontSize: 36, fontWeight: 800,
+                    color: "rgba(26,26,26,0.05)", position: "absolute", top: 10, right: 14,
+                  }}>
+                    {item.num}
+                  </span>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{item.title}</p>
+                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6 }}>{item.desc}</p>
                 </div>
               ))}
             </div>
 
-            <p style={{ fontSize: 12, color: c.text3, fontFamily: f.mono, marginTop: 20, textAlign: "center", lineHeight: 1.5 }}>
-              {t("problem.source")}
-            </p>
-          </div>
-        </Section>
-
-        {/* ═══════════ SOCIAL PROOF (moved up, before pricing) ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div style={{ textAlign: "center", marginBottom: 32, maxWidth: 960, margin: "0 auto 32px" }}>
-            <p className="gt-section-label">{t("landing.social.label")}</p>
-            <h2 style={{ marginBottom: 12 }}>{t("landing.social.title")}</h2>
-            <p style={{ fontSize: 15, fontFamily: f.mono, color: c.green, fontWeight: 600, marginTop: 8 }}>
-              {t("landing.social.count")}
-            </p>
-          </div>
-
-          <div className="gt-social-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, maxWidth: 960, margin: "0 auto" }}>
-            {[
-              { q: t("landing.social.q1"), a: t("landing.social.a1"), ctx: t("landing.social.ctx1") },
-              { q: t("landing.social.q2"), a: t("landing.social.a2"), ctx: t("landing.social.ctx2") },
-              { q: t("landing.social.q3"), a: t("landing.social.a3"), ctx: t("landing.social.ctx3") },
-            ].map((item) => (
-              <div key={item.a} className="gt-panel" style={{ padding: "32px 28px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <p style={{ fontSize: 15, color: c.text1, lineHeight: 1.65, fontStyle: "italic", marginBottom: 20 }}>
-                  &ldquo;{item.q}&rdquo;
-                </p>
-                <div>
-                  <p style={{ fontSize: 12, fontFamily: f.mono, color: c.text2, letterSpacing: ".04em", marginBottom: 4 }}>{item.a}</p>
-                  <p style={{ fontSize: 11, fontFamily: f.mono, color: c.text4 }}>{item.ctx}</p>
-                </div>
-              </div>
-            ))}
+            {/* Confidence note (merged from step 4) */}
+            <div style={{
+              marginTop: 24, padding: "18px 22px", borderRadius: 10,
+              background: c.amberBg, border: `1px solid ${c.amberBd}`,
+            }}>
+              <p style={{ fontSize: 13, color: c.amber, fontWeight: 600, marginBottom: 6 }}>{t("landing.how.conf.title")}</p>
+              <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.6 }}>
+                {t("landing.how.s4d")} {t("landing.how.conf.desc")}
+              </p>
+            </div>
           </div>
         </Section>
 
         {/* ═══════════ WHAT YOU RECEIVE ═══════════ */}
         <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div className="gt-panel" style={{ padding: "56px 48px", maxWidth: 960, margin: "0 auto" }}>
-            <p className="gt-section-label">{t("landing.output.label")}</p>
+          <div style={{
+            background: "#FFFFFF", border: `1px solid ${c.border}`,
+            borderRadius: 18, padding: "56px 48px", maxWidth: 960, margin: "0 auto",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase" as const,
+              color: c.accent, marginBottom: 14,
+            }}>
+              {t("landing.output.label")}
+            </p>
             <h2 style={{ marginBottom: 12 }}>{t("landing.output.title")}</h2>
             <p style={{ fontSize: 17, color: c.text2, marginBottom: 36, maxWidth: 600, lineHeight: 1.6 }}>
               {t("landing.output.sub")}
@@ -682,8 +526,24 @@ export default function LandingPage() {
                 { num: "05", title: t("landing.output.05"), desc: t("landing.output.05d") },
                 { num: "06", title: t("landing.output.06"), desc: t("landing.output.06d") },
               ].map((item) => (
-                <div key={item.num} className="gt-card gt-card-interactive" style={{ padding: "22px", position: "relative" }}>
-                  <span style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 800, color: "rgba(15,23,42,0.05)", position: "absolute", top: 10, right: 14 }}>
+                <div key={item.num} style={{
+                  background: c.bg, border: `1px solid ${c.border}`,
+                  borderRadius: 14, padding: 22, position: "relative",
+                  transition: "transform 200ms, box-shadow 200ms",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+                >
+                  <span style={{
+                    fontFamily: f.mono, fontSize: 28, fontWeight: 800,
+                    color: "rgba(26,26,26,0.05)", position: "absolute", top: 10, right: 14,
+                  }}>
                     {item.num}
                   </span>
                   <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 6 }}>{item.title}</p>
@@ -693,64 +553,41 @@ export default function LandingPage() {
             </div>
 
             <div style={{ textAlign: "center", marginTop: 32 }}>
-              <a href="/intel" className="gt-btn gt-btn-primary" style={{ padding: "14px 32px" }}>
+              <a href="/intel" style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "14px 32px", fontSize: 14, fontWeight: 700,
+                background: c.accent, color: "white", border: "none",
+                borderRadius: 10, textDecoration: "none",
+                transition: "all 200ms",
+              }}>
                 {t("landing.output.cta")} <ArrowRight size={16} />
               </a>
             </div>
           </div>
         </Section>
 
-        {/* ═══════════ HOW IT WORKS ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div className="gt-panel" style={{ padding: "56px 48px", maxWidth: 960, margin: "0 auto" }}>
-            <p className="gt-section-label">{t("landing.how.label")}</p>
-            <h2 style={{ marginBottom: 32 }}>{t("landing.how.title")}</h2>
-
-            <div className="gt-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-              {[
-                { num: "01", title: t("landing.how.s1"), desc: t("landing.how.s1d") },
-                { num: "02", title: t("landing.how.s2"), desc: t("landing.how.s2d") },
-                { num: "03", title: t("landing.how.s3"), desc: t("landing.how.s3d") },
-              ].map((item) => (
-                <div key={item.num} className="gt-card" style={{ padding: "28px 22px", position: "relative" }}>
-                  <span style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 800, color: "rgba(15,23,42,0.05)", position: "absolute", top: 10, right: 14 }}>
-                    {item.num}
-                  </span>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{item.title}</p>
-                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6 }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Step 4: Decision surface — highlighted */}
-            <div className="gt-card" style={{ padding: "28px 22px", position: "relative", marginTop: 14, borderColor: c.accentBd }}>
-              <span style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 800, color: "rgba(15,23,42,0.05)", position: "absolute", top: 10, right: 14 }}>
-                04
-              </span>
-              <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{t("landing.how.s4")}</p>
-              <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6 }}>{t("landing.how.s4d")}</p>
-            </div>
-
-            {/* Confidence note */}
-            <div style={{ marginTop: 24, padding: "18px 22px", borderRadius: 10, background: c.amberBg, border: "1px solid " + c.amberBd }}>
-              <p style={{ fontSize: 13, color: c.amber, fontWeight: 600, marginBottom: 6 }}>{t("landing.how.conf.title")}</p>
-              <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.6 }}>{t("landing.how.conf.desc")}</p>
-            </div>
-          </div>
-        </Section>
-
         {/* ═══════════ DECISION TIERS ═══════════ */}
         <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div className="gt-panel" style={{ padding: "56px 48px", maxWidth: 960, margin: "0 auto" }}>
-            <p className="gt-section-label">{t("landing.tiers.label")}</p>
+          <div style={{
+            background: "#FFFFFF", border: `1px solid ${c.border}`,
+            borderRadius: 18, padding: "56px 48px", maxWidth: 960, margin: "0 auto",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase" as const,
+              color: c.accent, marginBottom: 14,
+            }}>
+              {t("landing.tiers.label")}
+            </p>
             <h2 style={{ marginBottom: 32 }}>{t("landing.tiers.title")}</h2>
 
             <div className="gt-tiers-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
               {[
                 {
-                  badge: t("landing.tiers.l1.badge"), badgeColor: c.accentHi,
+                  badge: t("landing.tiers.l1.badge"), badgeColor: c.accent,
                   name: t("landing.tiers.l1.name"), desc: t("landing.tiers.l1.desc"),
-                  cta: t("landing.tiers.l1.cta"), href: "/intel", ctaColor: c.accentHi,
+                  cta: t("landing.tiers.l1.cta"), href: "/intel", ctaColor: c.accent,
                   borderColor: c.accentBd,
                 },
                 {
@@ -766,13 +603,33 @@ export default function LandingPage() {
                   borderColor: c.borderS,
                 },
               ].map((tier) => (
-                <div key={tier.name} className="gt-card gt-card-interactive" style={{ padding: "28px 22px", borderColor: tier.borderColor }}>
-                  <p style={{ fontSize: 10, fontFamily: f.mono, fontWeight: 700, color: tier.badgeColor, letterSpacing: ".08em", marginBottom: 12, textTransform: "uppercase" }}>
+                <div key={tier.name} style={{
+                  background: c.bg, border: `1px solid ${tier.borderColor}`,
+                  borderRadius: 14, padding: "28px 22px",
+                  transition: "transform 200ms, box-shadow 200ms",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+                >
+                  <p style={{
+                    fontSize: 10, fontFamily: f.mono, fontWeight: 700,
+                    color: tier.badgeColor, letterSpacing: ".08em",
+                    marginBottom: 12, textTransform: "uppercase" as const,
+                  }}>
                     {tier.badge}
                   </p>
                   <p style={{ fontSize: 18, fontWeight: 700, color: c.text1, marginBottom: 10 }}>{tier.name}</p>
                   <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6, marginBottom: 16 }}>{tier.desc}</p>
-                  <a href={tier.href} style={{ fontSize: 13, fontFamily: f.mono, color: tier.ctaColor, textDecoration: "none", fontWeight: 600 }}>
+                  <a href={tier.href} style={{
+                    fontSize: 13, fontFamily: f.mono, color: tier.ctaColor,
+                    textDecoration: "none", fontWeight: 600,
+                  }}>
                     {tier.cta} &rarr;
                   </a>
                 </div>
@@ -781,29 +638,39 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════════ PRICING — Focused Rail A ═══════════ */}
+        {/* ═══════════ PRICING — Rail A ═══════════ */}
         <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
           <div id="pricing" style={{ textAlign: "center", marginBottom: 32 }}>
-            <p className="gt-section-label">{t("price.label")}</p>
+            <p style={{
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase" as const,
+              color: c.accent, marginBottom: 14,
+            }}>
+              {t("price.label")}
+            </p>
             <h2 style={{ marginBottom: 10 }}>{t("price.title")}</h2>
             <p style={{ fontSize: 17, color: c.text2, maxWidth: 520, margin: "0 auto", lineHeight: 1.6 }}>
               {t("price.sub")}
             </p>
           </div>
 
-          {/* Single Rail A card — focused */}
           <div style={{ maxWidth: 480, margin: "0 auto" }}>
-            <div
-              className="gt-panel"
-              style={{
-                padding: "40px 36px",
-                borderColor: c.greenBd,
-                position: "relative",
-                textAlign: "center",
-              }}
-            >
-              <div className="gt-badge gt-badge--green"
-                style={{ position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>
+            <div style={{
+              background: "#FFFFFF", border: `1px solid ${c.greenBd}`,
+              borderRadius: 18, padding: "40px 36px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              position: "relative", textAlign: "center",
+            }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontFamily: f.mono, fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.06em", textTransform: "uppercase" as const,
+                color: c.green, background: c.greenBg,
+                border: `1px solid ${c.greenBd}`,
+                padding: "4px 10px", borderRadius: 9999,
+                position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
+                whiteSpace: "nowrap" as const,
+              }}>
                 {t("price.diag.badge")}
               </div>
 
@@ -813,7 +680,6 @@ export default function LandingPage() {
                 <span style={{
                   fontFamily: f.mono, fontSize: 48, fontWeight: 800, color: c.green,
                   letterSpacing: "-0.03em", lineHeight: 1,
-                  textShadow: "none",
                 }}>
                   {t("price.diag.price")}
                 </span>
@@ -831,17 +697,23 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              <div style={{ padding: "10px 14px", borderRadius: 8, background: c.greenBg, border: "1px solid " + c.greenBd, marginBottom: 18 }}>
+              <div style={{
+                padding: "10px 14px", borderRadius: 8,
+                background: c.greenBg, border: `1px solid ${c.greenBd}`,
+                marginBottom: 18,
+              }}>
                 <p style={{ fontSize: 12, fontFamily: f.mono, color: c.green, letterSpacing: ".04em" }}>{t("price.diag.roi")}</p>
               </div>
 
               <button
                 type="button" onClick={handleRailACheckout} disabled={checkoutLoading}
-                className="gt-btn gt-btn-green"
                 style={{
                   width: "100%", padding: "16px 28px", fontSize: 15, fontWeight: 700,
+                  background: c.green, color: "#FFFFFF", border: "none",
+                  borderRadius: 10, cursor: "pointer",
                   opacity: checkoutLoading ? 0.7 : 1,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  transition: "all 200ms",
                 }}
               >
                 {checkoutLoading ? t("landing.pricing.cta.loading") : t("landing.pricing.cta")}
@@ -869,8 +741,12 @@ export default function LandingPage() {
               { label: t("landing.security.us"), desc: t("landing.security.us.d") },
               { label: t("landing.security.purge"), desc: t("landing.security.purge.d") },
             ].map((item) => (
-              <div key={item.label} className="gt-card" style={{ padding: "22px 18px", textAlign: "center" }}>
-                <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, color: c.accent, letterSpacing: ".06em", marginBottom: 8 }}>{item.label}</p>
+              <div key={item.label} style={{
+                background: "#FFFFFF", border: `1px solid ${c.border}`,
+                borderRadius: 14, padding: "22px 18px", textAlign: "center",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              }}>
+                <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, color: c.text1, letterSpacing: ".06em", marginBottom: 8 }}>{item.label}</p>
                 <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.5 }}>{item.desc}</p>
               </div>
             ))}
@@ -882,47 +758,62 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════════ LEAK COUNTER (Growth Hack #9) ═══════════ */}
+        {/* ═══════════ LEAK COUNTER ═══════════ */}
         <Section style={{ paddingTop: 48, paddingBottom: 48 }}>
-          <Suspense fallback={<div style={{ height: 120, background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0" }} />}>
+          <Suspense fallback={<div style={{ height: 120, background: "#FFFFFF", borderRadius: 12, border: `1px solid ${c.border}` }} />}>
             <LeakCounter locale={locale} />
           </Suspense>
         </Section>
 
-        {/* ═══════════ FINAL CTA — Full-width dark, impossible to ignore ═══════════ */}
-        <Section style={{ paddingTop: 48, paddingBottom: sp[7] }}>
+        {/* ═══════════ T12 — FINAL CTA (warm) ═══════════ */}
+        <Section style={{ paddingTop: 48, paddingBottom: 104 }}>
           <div style={{
-            padding: "72px 48px",
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: 18,
-            background: "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)",
-            border: "1px solid #E2E8F0",
+            padding: "80px 48px", textAlign: "center",
+            borderRadius: 18, background: c.bg,
+            border: `1px solid ${c.border}`,
           }}>
-            {/* Removed ambient glow for light theme */}
-
-            <p style={{ fontSize: 12, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".14em", color: c.red, marginBottom: 18, textTransform: "uppercase", position: "relative" }}>
-              {t("landing.cta.urgency")}
-            </p>
-            <h2 style={{ fontSize: "clamp(24px, 3.5vw, 42px)", fontWeight: 800, marginBottom: 16, position: "relative" }}>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight: 800,
+              letterSpacing: "-0.03em", marginBottom: 16,
+            }}>
               {t("landing.cta.title")}
             </h2>
-            <p style={{ fontSize: 17, color: c.text2, maxWidth: 520, margin: "0 auto 36px", lineHeight: 1.6, position: "relative" }}>
+            <p style={{
+              fontSize: 16, color: c.text2, maxWidth: 440,
+              margin: "0 auto 32px", lineHeight: 1.7,
+            }}>
               {t("landing.cta.sub")}
             </p>
 
-            <div style={{ display: "flex", justifyContent: "center", position: "relative" }}>
-              <a href="/intel" className="gt-btn gt-btn-primary" style={{
-                padding: "18px 40px", fontSize: 15, fontWeight: 700,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              }}>
-                {t("landing.cta.primary")} <ArrowRight size={18} />
-              </a>
-            </div>
+            <button
+              type="button"
+              onClick={navigateToIntel}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "16px 36px", fontSize: 15, fontWeight: 700,
+                background: c.accent, color: "white", border: "none",
+                borderRadius: 12, cursor: "pointer", transition: "all 200ms",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = c.accentHi;
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 28px rgba(232,91,0,0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = c.accent;
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              {t("landing.cta.primary")} <ArrowRight size={18} />
+            </button>
+
+            <p style={{ marginTop: 14, fontSize: 13, color: c.text4 }}>
+              {t("price.diag.price")} {t("price.period.onetime")}
+            </p>
 
             {/* Trust badges */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 32, marginTop: 28, flexWrap: "wrap", position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 32, marginTop: 28, flexWrap: "wrap" }}>
               {[
                 t("landing.cta.badge.stripe"),
                 t("landing.cta.badge.soc2"),
@@ -931,9 +822,9 @@ export default function LandingPage() {
               ].map((name) => (
                 <span key={name} style={{
                   fontSize: 10, fontFamily: f.mono, color: c.text4,
-                  letterSpacing: ".08em", textTransform: "uppercase",
+                  letterSpacing: ".08em", textTransform: "uppercase" as const,
                   padding: "4px 10px", borderRadius: 4,
-                  border: "1px solid #E2E8F0",
+                  border: `1px solid ${c.border}`,
                 }}>
                   {name}
                 </span>
@@ -981,26 +872,25 @@ export default function LandingPage() {
         ]) }}
       />
 
-      {/* Responsive */}
+      {/* T13 — Responsive */}
       <style>{`
         @media (max-width: 768px) {
-          .gt-hero-grid { grid-template-columns: 1fr !important; }
-          .gt-bento { grid-template-columns: 1fr 1fr !important; }
-          .gt-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .gt-output-grid { grid-template-columns: 1fr !important; }
+          .gt-hero-input-row { flex-direction: column !important; }
+          .gt-logos-row { gap: 24px !important; }
+          .gt-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .gt-comp-grid { grid-template-columns: 1fr !important; }
+          .gt-test-grid { grid-template-columns: 1fr !important; }
           .gt-how-grid { grid-template-columns: 1fr !important; }
+          .gt-output-grid { grid-template-columns: 1fr !important; }
           .gt-tiers-grid { grid-template-columns: 1fr !important; }
-          .gt-pricing-grid { grid-template-columns: 1fr !important; }
           .gt-security-grid { grid-template-columns: 1fr 1fr !important; }
-          .gt-problem-grid { grid-template-columns: 1fr !important; }
-          .gt-social-grid { grid-template-columns: 1fr !important; }
-          .gt-trust-bar { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
-          .gt-video-placeholder { max-width: 100% !important; }
         }
         @media (max-width: 480px) {
-          .gt-strip-grid { grid-template-columns: 1fr !important; }
-          .gt-how-grid { grid-template-columns: 1fr !important; }
+          .gt-stats-grid { grid-template-columns: 1fr 1fr !important; }
           .gt-security-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation: none !important; transition: none !important; }
         }
       `}</style>
     </div>
