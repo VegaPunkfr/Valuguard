@@ -211,6 +211,7 @@ export async function POST(request: NextRequest) {
       success_url: successUrl,
       cancel_url: `${SITE_URL}/cancel`,
       customer_email: email,
+      allow_promotion_codes: true,
       metadata: sessionMetadata,
       ...(checkoutMode === "subscription" && {
         subscription_data: { metadata: sessionMetadata },
