@@ -25,12 +25,12 @@ export function getHeadcountTier(headcount: number | undefined): HeadcountTier {
 export type PricingLocale = "en" | "fr" | "de";
 
 export function getCurrency(locale: PricingLocale): "usd" | "eur" {
-  // US market = USD, everything else = EUR
-  return locale === "en" ? "usd" : "eur";
+  // All pricing in EUR — single currency until multi-currency decision
+  return "eur";
 }
 
 export function getCurrencySymbol(locale: PricingLocale): string {
-  return locale === "en" ? "$" : "€";
+  return "€";
 }
 
 // ── Rail A: Flat pricing (launch strategy — impulse buy) ──
