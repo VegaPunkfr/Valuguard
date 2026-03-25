@@ -40,8 +40,8 @@ const P = {
   blueHi: "#60a5fa",
   green: "#34d399",
   greenGlow: "rgba(52,211,153,0.12)",
-  amber: "#f59e0b",
-  amberGlow: "rgba(245,158,11,0.12)",
+  amber: "#3b82f6",
+  amberGlow: "rgba(59,130,246,0.12)",
   cyan: "#22d3ee",
 } as const;
 

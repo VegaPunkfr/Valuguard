@@ -23,7 +23,7 @@ export const STATUS_META: Record<AccountStatus, {
   order: number;
 }> = {
   new:             { label: 'NEW',            color: '#60a5fa', bg: 'rgba(96,165,250,0.10)', border: 'rgba(96,165,250,0.20)', order: 1 },
-  reviewing:       { label: 'REVIEWING',      color: '#fbbf24', bg: 'rgba(251,191,36,0.10)', border: 'rgba(251,191,36,0.20)', order: 2 },
+  reviewing:       { label: 'REVIEWING',      color: '#60a5fa', bg: 'rgba(96,165,250,0.10)', border: 'rgba(96,165,250,0.20)', order: 2 },
   scan_queued:     { label: 'SCAN QUEUED',    color: '#22d3ee', bg: 'rgba(34,211,238,0.10)', border: 'rgba(34,211,238,0.20)', order: 3 },
   scanned:         { label: 'SCANNED',        color: '#2dd4bf', bg: 'rgba(45,212,191,0.10)', border: 'rgba(45,212,191,0.20)', order: 4 },
   qualified:       { label: 'QUALIFIED',      color: '#34d399', bg: 'rgba(52,211,153,0.10)', border: 'rgba(52,211,153,0.20)', order: 5 },
@@ -44,14 +44,14 @@ export type Tier = 1 | 2 | 3;
 export const ATTACK_META: Record<Attackability, { label: string; color: string; bg: string }> = {
   now:     { label: 'ATTACK NOW',  color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
   soon:    { label: 'SCAN FIRST',  color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-  later:   { label: 'HOLD',        color: '#fbbf24', bg: 'rgba(251,191,36,0.10)' },
+  later:   { label: 'HOLD',        color: '#60a5fa', bg: 'rgba(96,165,250,0.10)' },
   blocked: { label: 'BLOCKED',     color: '#f87171', bg: 'rgba(248,113,113,0.10)' },
 };
 
 export const CONVICTION_META: Record<Conviction, { label: string; color: string; score: number }> = {
   very_high: { label: 'VERY HIGH', color: '#34d399', score: 4 },
   high:      { label: 'HIGH',      color: '#60a5fa', score: 3 },
-  moderate:  { label: 'MODERATE',   color: '#fbbf24', score: 2 },
+  moderate:  { label: 'MODERATE',   color: '#60a5fa', score: 2 },
   low:       { label: 'LOW',       color: '#64748b', score: 1 },
 };
 
@@ -89,7 +89,7 @@ export interface DomainEmailIntel {
 export const EMAIL_STATUS_META: Record<EmailStatus, { label: string; color: string; gmailAllowed: boolean }> = {
   verified:    { label: 'VERIFIED',    color: '#34d399', gmailAllowed: true },
   likely_valid:{ label: 'LIKELY',      color: '#60a5fa', gmailAllowed: true },
-  catch_all:   { label: 'CATCH-ALL',   color: '#f59e0b', gmailAllowed: false },
+  catch_all:   { label: 'CATCH-ALL',   color: '#3b82f6', gmailAllowed: false },
   guessed:     { label: 'UNVERIFIED',  color: '#64748b', gmailAllowed: false },
   missing:     { label: 'NO EMAIL',    color: '#3a4560', gmailAllowed: false },
   invalid:     { label: 'INVALID',     color: '#f87171', gmailAllowed: false },
@@ -142,7 +142,7 @@ export const TIMELINE_META: Record<TimelineEventType, { label: string; color: st
   account_created:    { label: 'Account created',    color: '#94a3b8' },
   scan_started:       { label: 'Scan started',       color: '#22d3ee' },
   scan_completed:     { label: 'Scan completed',     color: '#2dd4bf' },
-  hypothesis_updated: { label: 'Hypothesis updated', color: '#fbbf24' },
+  hypothesis_updated: { label: 'Hypothesis updated', color: '#60a5fa' },
   message_prepared:   { label: 'Message prepared',   color: '#a78bfa' },
   message_sent:       { label: 'Message sent',       color: '#34d399' },
   response_received:  { label: 'Response received',  color: '#34d399' },
@@ -305,9 +305,9 @@ export interface OutreachReadiness {
 export const READINESS_META: Record<ReadinessStatus, { label: string; color: string; bg: string }> = {
   ready_to_send:    { label: 'READY TO SEND',    color: '#34d399', bg: 'rgba(52,211,153,0.10)' },
   ready_to_draft:   { label: 'READY TO DRAFT',   color: '#60a5fa', bg: 'rgba(96,165,250,0.10)' },
-  draft_needs_review: { label: 'NEEDS REVIEW',   color: '#fbbf24', bg: 'rgba(251,191,36,0.10)' },
+  draft_needs_review: { label: 'NEEDS REVIEW',   color: '#60a5fa', bg: 'rgba(96,165,250,0.10)' },
   not_ready:        { label: 'NOT READY',         color: '#64748b', bg: 'rgba(100,116,139,0.10)' },
-  hold:             { label: 'HOLD',              color: '#f59e0b', bg: 'rgba(245,158,11,0.10)' },
+  hold:             { label: 'HOLD',              color: '#3b82f6', bg: 'rgba(59,130,246,0.10)' },
   do_not_send:      { label: 'DO NOT SEND',       color: '#f87171', bg: 'rgba(248,113,113,0.10)' },
 };
 
@@ -353,7 +353,7 @@ export const ENRICHMENT_META: Record<EnrichmentStatus, { label: string; color: s
   signals_collected:  { label: 'SIGNALS',          color: '#22d3ee', order: 2 },
   thesis_built:       { label: 'THESIS',           color: '#60a5fa', order: 3 },
   proofs_selected:    { label: 'PROOFS',           color: '#a78bfa', order: 4 },
-  quality_checked:    { label: 'QUALITY GATE',     color: '#fbbf24', order: 5 },
+  quality_checked:    { label: 'QUALITY GATE',     color: '#60a5fa', order: 5 },
   messages_generated: { label: 'MESSAGES',         color: '#2dd4bf', order: 6 },
   ready_for_review:   { label: 'READY FOR REVIEW', color: '#34d399', order: 7 },
   blocked:            { label: 'BLOCKED',          color: '#f87171', order: 8 },
@@ -380,7 +380,7 @@ export type QueueTier = 'hot' | 'warm' | 'cold' | 'hold' | 'killed';
 
 export const QUEUE_TIER_META: Record<QueueTier, { label: string; color: string; bg: string }> = {
   hot:    { label: 'HOT',    color: '#ef4444', bg: 'rgba(239,68,68,0.10)' },
-  warm:   { label: 'WARM',   color: '#f59e0b', bg: 'rgba(245,158,11,0.10)' },
+  warm:   { label: 'WARM',   color: '#3b82f6', bg: 'rgba(59,130,246,0.10)' },
   cold:   { label: 'COLD',   color: '#64748b', bg: 'rgba(100,116,139,0.10)' },
   hold:   { label: 'HOLD',   color: '#3b82f6', bg: 'rgba(59,130,246,0.10)' },
   killed: { label: 'KILLED', color: '#475569', bg: 'rgba(71,85,105,0.08)' },

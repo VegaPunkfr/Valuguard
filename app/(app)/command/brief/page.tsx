@@ -102,7 +102,7 @@ export default function BriefPage() {
               { risk: 'All contacts are CFOs — no alternative entry points if unresponsive', sev: 'med' },
               { risk: `${killCandidates.length} weak account(s) consuming pipeline attention`, sev: killCandidates.length > 0 ? 'med' : 'low' },
             ].map((r, i) => (
-              <div key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, padding: '6px 10px', borderRadius: 4, marginBottom: 4, borderLeft: `2px solid ${r.sev === 'high' ? '#f87171' : r.sev === 'med' ? '#fbbf24' : '#475569'}`, background: r.sev === 'high' ? 'rgba(248,113,113,0.04)' : r.sev === 'med' ? 'rgba(251,191,36,0.04)' : 'rgba(71,85,105,0.04)' }}>
+              <div key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, padding: '6px 10px', borderRadius: 4, marginBottom: 4, borderLeft: `2px solid ${r.sev === 'high' ? '#f87171' : r.sev === 'med' ? '#60a5fa' : '#475569'}`, background: r.sev === 'high' ? 'rgba(248,113,113,0.04)' : r.sev === 'med' ? 'rgba(96,165,250,0.04)' : 'rgba(71,85,105,0.04)' }}>
                 {r.risk}
               </div>
             ))}

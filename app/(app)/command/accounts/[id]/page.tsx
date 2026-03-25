@@ -13,7 +13,7 @@ const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)'
 const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 8, padding: '16px 20px' };
 const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '0.16em', color: '#475569', marginBottom: 8, textTransform: 'uppercase' as const };
 
-const SF_META: Record<string, { l: string; c: string }> = { ideal: { l: 'IDEAL', c: '#34d399' }, good: { l: 'GOOD', c: '#60a5fa' }, stretch: { l: 'STRETCH', c: '#fbbf24' }, hard: { l: 'HARD', c: '#f87171' } };
+const SF_META: Record<string, { l: string; c: string }> = { ideal: { l: 'IDEAL', c: '#34d399' }, good: { l: 'GOOD', c: '#60a5fa' }, stretch: { l: 'STRETCH', c: '#60a5fa' }, hard: { l: 'HARD', c: '#f87171' } };
 const DP_META: Record<string, { l: string; c: string }> = { high: { l: 'HIGH', c: '#34d399' }, medium: { l: 'MED', c: '#60a5fa' }, low: { l: 'LOW', c: '#64748b' } };
 function fmt(n: number) { return n >= 1000 ? `€${Math.round(n / 1000)}k` : `€${n}`; }
 
@@ -74,7 +74,7 @@ export default function AccountDetailPage() {
   // Safety & Queue calculations
   const heat = calcHeat(a);
   const tierLabel = heat >= 60 ? 'HOT' : heat >= 35 ? 'WARM' : 'COLD';
-  const tierColor = heat >= 60 ? '#f87171' : heat >= 35 ? '#f59e0b' : '#64748b';
+  const tierColor = heat >= 60 ? '#f87171' : heat >= 35 ? '#3b82f6' : '#64748b';
 
   const isLocked = a.outreach.some(o => o.status === 'sent') && a.status === 'contacted';
   const hasSentOutreach = a.outreach.some(o => o.status === 'sent');
@@ -103,16 +103,16 @@ export default function AccountDetailPage() {
   // Determine panel border color based on safety
   const hasWarnings = isCooling || isWaiting;
   const hasBlocked = isLocked;
-  const panelBorder = hasBlocked ? '#f87171' : hasWarnings ? '#f59e0b' : '#34d399';
+  const panelBorder = hasBlocked ? '#f87171' : hasWarnings ? '#3b82f6' : '#34d399';
 
   // Safety check items
   const safetyChecks: { label: string; value: string; color: string }[] = [
     { label: 'LOCK STATUS', value: isLocked ? 'LOCKED' : 'UNLOCKED', color: isLocked ? '#f87171' : '#34d399' },
-    { label: 'COOLDOWN', value: isCooling ? 'COOLING' : 'CLEAR', color: isCooling ? '#f59e0b' : '#34d399' },
+    { label: 'COOLDOWN', value: isCooling ? 'COOLING' : 'CLEAR', color: isCooling ? '#3b82f6' : '#34d399' },
     { label: 'DUPLICATE RISK', value: 'CLEAR', color: '#34d399' },
-    { label: 'WAITING RESPONSE', value: isWaiting ? 'YES' : 'NO', color: isWaiting ? '#f59e0b' : '#64748b' },
+    { label: 'WAITING RESPONSE', value: isWaiting ? 'YES' : 'NO', color: isWaiting ? '#3b82f6' : '#64748b' },
     { label: 'LAST CONTACTED', value: lastContactedStr, color: lastSentAt ? '#e4e9f4' : '#64748b' },
-    { label: 'NEXT ELIGIBLE', value: nextEligible, color: nextEligible === 'Now' ? '#34d399' : '#f59e0b' },
+    { label: 'NEXT ELIGIBLE', value: nextEligible, color: nextEligible === 'Now' ? '#34d399' : '#3b82f6' },
   ];
 
   return (
@@ -140,7 +140,7 @@ export default function AccountDetailPage() {
         {[
           { l: 'ATTACK', v: atk.label, c: atk.color },
           { l: 'CONVICTION', v: conv.label, c: conv.color },
-          { l: 'PROBABILITY', v: `${prob}%`, c: prob >= 40 ? '#34d399' : prob >= 25 ? '#60a5fa' : '#fbbf24' },
+          { l: 'PROBABILITY', v: `${prob}%`, c: prob >= 40 ? '#34d399' : prob >= 25 ? '#60a5fa' : '#60a5fa' },
           { l: 'REVENUE', v: fmt(a.revenueEstimate), c: '#e4e9f4' },
           { l: 'EXPECTED VALUE', v: fmt(ev), c: ev >= 5000 ? '#34d399' : ev >= 2000 ? '#60a5fa' : '#64748b' },
           { l: 'SOLO FIT', v: sf.l, c: sf.c },
@@ -253,7 +253,7 @@ export default function AccountDetailPage() {
                             persist(updated);
                           }
                         } catch { /* silent */ }
-                      }} style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 4, background: 'rgba(251,191,36,0.08)', color: '#f59e0b', border: '1px solid rgba(251,191,36,0.15)', cursor: 'pointer' }}>
+                      }} style={{ ...mono, fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 4, background: 'rgba(96,165,250,0.08)', color: '#3b82f6', border: '1px solid rgba(96,165,250,0.15)', cursor: 'pointer' }}>
                         VERIFY MX
                       </button>
                     )}
@@ -273,7 +273,7 @@ export default function AccountDetailPage() {
             <div style={lbl}>SIGNALS ({a.signals.length})</div>
             {a.signals.map((s, i) => (
               <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 7 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: s.strength >= 4 ? '#34d399' : '#fbbf24', minWidth: 22, padding: '3px 6px', borderRadius: 2, background: s.strength >= 4 ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)', textAlign: 'center' as const }}>{s.strength}/5</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: s.strength >= 4 ? '#34d399' : '#60a5fa', minWidth: 22, padding: '3px 6px', borderRadius: 2, background: s.strength >= 4 ? 'rgba(52,211,153,0.08)' : 'rgba(96,165,250,0.08)', textAlign: 'center' as const }}>{s.strength}/5</span>
                 <div><div style={{ fontSize: 13, color: '#e4e9f4' }}>{s.detail}</div><div style={{ fontSize: 11, color: '#3a4560', marginTop: 1 }}>{s.type.toUpperCase()} · {s.source}{s.date ? ` · ${s.date}` : ''}</div></div>
               </div>
             ))}
@@ -281,7 +281,7 @@ export default function AccountDetailPage() {
 
           {/* Enrichment Pipeline Status */}
           {enrichment && (
-            <div style={{ ...box, borderLeft: `3px solid ${enrichment.qualityGate.verdict === 'pass' ? '#34d399' : enrichment.qualityGate.verdict === 'review' ? '#f59e0b' : '#f87171'}` }}>
+            <div style={{ ...box, borderLeft: `3px solid ${enrichment.qualityGate.verdict === 'pass' ? '#34d399' : enrichment.qualityGate.verdict === 'review' ? '#3b82f6' : '#f87171'}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <div style={lbl}>ENRICHMENT PIPELINE</div>
                 <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 4, color: ENRICHMENT_META[enrichment.status]?.color || '#64748b', background: `${ENRICHMENT_META[enrichment.status]?.color || '#64748b'}15`, border: `1px solid ${ENRICHMENT_META[enrichment.status]?.color || '#64748b'}25` }}>
@@ -302,23 +302,23 @@ export default function AccountDetailPage() {
               {/* Quality Gate Score */}
               <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 12, padding: '10px 14px', borderRadius: 6, background: 'rgba(6,9,18,0.5)', border: '1px solid rgba(36,48,78,0.12)' }}>
                 <div style={{ textAlign: 'center' as const }}>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.qualityGate.totalScore >= 70 ? '#34d399' : enrichment.qualityGate.totalScore >= 55 ? '#f59e0b' : '#f87171' }}>{enrichment.qualityGate.totalScore}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.qualityGate.totalScore >= 70 ? '#34d399' : enrichment.qualityGate.totalScore >= 55 ? '#3b82f6' : '#f87171' }}>{enrichment.qualityGate.totalScore}</div>
                   <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em' }}>QUALITY /100</div>
                 </div>
                 <div style={{ textAlign: 'center' as const }}>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.thesis.l4.strengthScore >= 50 ? '#60a5fa' : '#f59e0b' }}>{enrichment.thesis.l4.strengthScore}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.thesis.l4.strengthScore >= 50 ? '#60a5fa' : '#3b82f6' }}>{enrichment.thesis.l4.strengthScore}</div>
                   <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em' }}>THESIS /85</div>
                 </div>
                 <div style={{ textAlign: 'center' as const }}>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.proofs.overallProofLevel >= 50 ? '#a78bfa' : '#f59e0b' }}>{enrichment.proofs.overallProofLevel}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.proofs.overallProofLevel >= 50 ? '#a78bfa' : '#3b82f6' }}>{enrichment.proofs.overallProofLevel}</div>
                   <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em' }}>PROOFS /85</div>
                 </div>
                 <div style={{ textAlign: 'center' as const }}>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.angle.confidence >= 50 ? '#22d3ee' : '#f59e0b' }}>{enrichment.angle.confidence}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: enrichment.angle.confidence >= 50 ? '#22d3ee' : '#3b82f6' }}>{enrichment.angle.confidence}</div>
                   <div style={{ fontSize: 11, color: '#475569', letterSpacing: '0.1em' }}>ANGLE /85</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'right' as const }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: enrichment.qualityGate.verdict === 'pass' ? '#34d399' : enrichment.qualityGate.verdict === 'review' ? '#f59e0b' : '#f87171' }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: enrichment.qualityGate.verdict === 'pass' ? '#34d399' : enrichment.qualityGate.verdict === 'review' ? '#3b82f6' : '#f87171' }}>
                     {enrichment.qualityGate.verdict === 'pass' ? 'GATE PASSED' : enrichment.qualityGate.verdict === 'review' ? 'NEEDS REVIEW' : 'BLOCKED'}
                   </div>
                   <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>{enrichment.qualityGate.criteria.filter(c => c.passed).length}/10 criteria met</div>
@@ -338,7 +338,7 @@ export default function AccountDetailPage() {
               {enrichment.qualityGate.warnings.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
                   {enrichment.qualityGate.warnings.map((w, i) => (
-                    <div key={i} style={{ fontSize: 12, color: '#f59e0b', padding: '4px 8px', marginBottom: 3, borderRadius: 3, background: 'rgba(245,158,11,0.06)' }}>WARNING: {w}</div>
+                    <div key={i} style={{ fontSize: 12, color: '#3b82f6', padding: '4px 8px', marginBottom: 3, borderRadius: 3, background: 'rgba(59,130,246,0.06)' }}>WARNING: {w}</div>
                   ))}
                 </div>
               )}
@@ -360,7 +360,7 @@ export default function AccountDetailPage() {
             <div style={box}>
               <div style={lbl}>COMMERCIAL THESIS (L4)</div>
               <div style={{ fontSize: 14, color: '#e4e9f4', lineHeight: 1.6, marginBottom: 10 }}>{enrichment.thesis.l4.thesis}</div>
-              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#fbbf24' }}>CFO Pain:</strong> {enrichment.thesis.l4.cfoPain}</div>
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#60a5fa' }}>CFO Pain:</strong> {enrichment.thesis.l4.cfoPain}</div>
               <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#60a5fa' }}>Financial Reading:</strong> {enrichment.thesis.l4.financialReading}</div>
               <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#22d3ee' }}>Why Now:</strong> {enrichment.thesis.l4.whyNow}</div>
               <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}><strong style={{ color: '#a78bfa' }}>Proof Hook:</strong> {enrichment.thesis.l4.proofHook}</div>
@@ -376,8 +376,8 @@ export default function AccountDetailPage() {
                 )}
                 {enrichment.thesis.l2.inferred.length > 0 && (
                   <div style={{ marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', letterSpacing: '0.08em' }}>INFERRED</span>
-                    {enrichment.thesis.l2.inferred.map((o, i) => <div key={i} style={{ fontSize: 12, color: '#94a3b8', marginTop: 2, paddingLeft: 8, borderLeft: '2px solid rgba(245,158,11,0.3)' }}>{o}</div>)}
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#3b82f6', letterSpacing: '0.08em' }}>INFERRED</span>
+                    {enrichment.thesis.l2.inferred.map((o, i) => <div key={i} style={{ fontSize: 12, color: '#94a3b8', marginTop: 2, paddingLeft: 8, borderLeft: '2px solid rgba(59,130,246,0.3)' }}>{o}</div>)}
                   </div>
                 )}
                 {enrichment.thesis.l2.estimated.length > 0 && (
@@ -395,14 +395,14 @@ export default function AccountDetailPage() {
             <div style={box}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={lbl}>SELECTED PROOFS ({enrichment.proofs.selected.length})</div>
-                <span style={{ fontSize: 11, color: enrichment.proofs.hasSufficientProof ? '#34d399' : '#f59e0b' }}>
+                <span style={{ fontSize: 11, color: enrichment.proofs.hasSufficientProof ? '#34d399' : '#3b82f6' }}>
                   {enrichment.proofs.hasSufficientProof ? 'SUFFICIENT' : 'INSUFFICIENT'}
                 </span>
               </div>
               {enrichment.proofs.selected.map((p, i) => (
-                <div key={p.id} style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 6, background: 'rgba(6,9,18,0.5)', border: `1px solid ${p.evidenceClass === 'observed' ? 'rgba(52,211,153,0.15)' : p.evidenceClass === 'inferred' ? 'rgba(245,158,11,0.15)' : 'rgba(100,116,139,0.15)'}` }}>
+                <div key={p.id} style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 6, background: 'rgba(6,9,18,0.5)', border: `1px solid ${p.evidenceClass === 'observed' ? 'rgba(52,211,153,0.15)' : p.evidenceClass === 'inferred' ? 'rgba(59,130,246,0.15)' : 'rgba(100,116,139,0.15)'}` }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: p.evidenceClass === 'observed' ? '#34d399' : p.evidenceClass === 'inferred' ? '#f59e0b' : '#64748b', padding: '2px 6px', borderRadius: 3, background: `${p.evidenceClass === 'observed' ? '#34d399' : p.evidenceClass === 'inferred' ? '#f59e0b' : '#64748b'}15`, whiteSpace: 'nowrap' as const }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: p.evidenceClass === 'observed' ? '#34d399' : p.evidenceClass === 'inferred' ? '#3b82f6' : '#64748b', padding: '2px 6px', borderRadius: 3, background: `${p.evidenceClass === 'observed' ? '#34d399' : p.evidenceClass === 'inferred' ? '#3b82f6' : '#64748b'}15`, whiteSpace: 'nowrap' as const }}>
                       {p.evidenceClass.toUpperCase()}
                     </span>
                     <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', padding: '2px 6px', borderRadius: 3, background: 'rgba(36,48,78,0.2)' }}>{p.specificity}</span>
@@ -420,9 +420,9 @@ export default function AccountDetailPage() {
             <div style={box}>
               <div style={lbl}>QUALITY GATE — 10 CRITERIA</div>
               {enrichment.qualityGate.criteria.map((c, i) => (
-                <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, padding: '5px 8px', borderRadius: 4, background: c.passed ? 'rgba(52,211,153,0.04)' : c.isHardBlock ? 'rgba(248,113,113,0.04)' : 'rgba(245,158,11,0.04)' }}>
+                <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, padding: '5px 8px', borderRadius: 4, background: c.passed ? 'rgba(52,211,153,0.04)' : c.isHardBlock ? 'rgba(248,113,113,0.04)' : 'rgba(59,130,246,0.04)' }}>
                   <span style={{ fontSize: 13, width: 18, textAlign: 'center' as const }}>{c.passed ? '✓' : c.isHardBlock ? '✕' : '⚠'}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: c.passed ? '#34d399' : c.isHardBlock ? '#f87171' : '#f59e0b', minWidth: 30 }}>{c.score}/{c.weight}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: c.passed ? '#34d399' : c.isHardBlock ? '#f87171' : '#3b82f6', minWidth: 30 }}>{c.score}/{c.weight}</span>
                   <span style={{ fontSize: 12, color: '#94a3b8', flex: 1 }}>{c.name}</span>
                   <span style={{ fontSize: 11, color: '#475569', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{c.detail}</span>
                 </div>
@@ -435,7 +435,7 @@ export default function AccountDetailPage() {
             <div style={box}>
               <div style={lbl}>HYPOTHESIS</div>
               <div style={{ fontSize: 14, color: '#e4e9f4', lineHeight: 1.5, marginBottom: 8 }}>{a.hypothesis.summary}</div>
-              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#fbbf24' }}>Why it matters:</strong> {a.hypothesis.whyItMatters}</div>
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5, marginBottom: 8 }}><strong style={{ color: '#60a5fa' }}>Why it matters:</strong> {a.hypothesis.whyItMatters}</div>
               <div style={{ ...lbl, marginTop: 10 }}>HIDDEN EXPOSURE</div>
               <ul style={{ margin: 0, paddingLeft: 12 }}>{a.hypothesis.hiddenExposure.map((e, i) => <li key={i} style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>{e}</li>)}</ul>
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(36,48,78,0.12)' }}><strong>Proof needed:</strong> {a.hypothesis.proofNeeded}</div>
@@ -496,9 +496,9 @@ export default function AccountDetailPage() {
               <div>
                 <div style={{ display: 'flex', gap: 14, marginBottom: 6 }}>
                   <div><div style={{ fontSize: 11, color: '#475569' }}>VENDORS</div><div style={{ fontSize: 13, fontWeight: 700, color: '#e4e9f4' }}>{a.scan.vendorCount}</div></div>
-                  <div><div style={{ fontSize: 11, color: '#475569' }}>EXPOSURE</div><div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>{Math.round(a.scan.exposureLow / 1000)}k-{Math.round(a.scan.exposureHigh / 1000)}k {a.scan.currency}</div></div>
+                  <div><div style={{ fontSize: 11, color: '#475569' }}>EXPOSURE</div><div style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa' }}>{Math.round(a.scan.exposureLow / 1000)}k-{Math.round(a.scan.exposureHigh / 1000)}k {a.scan.currency}</div></div>
                 </div>
-                <div style={{ fontSize: 13, color: a.scan.strengthensHypothesis ? '#34d399' : '#fbbf24' }}>{a.scan.strengthensHypothesis ? '✓ Hypothesis confirmed' : '⚠ Review needed'}</div>
+                <div style={{ fontSize: 13, color: a.scan.strengthensHypothesis ? '#34d399' : '#60a5fa' }}>{a.scan.strengthensHypothesis ? '✓ Hypothesis confirmed' : '⚠ Review needed'}</div>
               </div>
             )}
           </div>
@@ -509,7 +509,7 @@ export default function AccountDetailPage() {
               <Link key={i} href={`/command/outreach?account=${a.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', borderRadius: 3, background: 'rgba(14,18,33,0.3)', border: '1px solid rgba(36,48,78,0.06)', marginBottom: 3 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', width: 60, textTransform: 'uppercase' as const }}>{o.channel}</span>
                 <span style={{ fontSize: 12, color: '#64748b', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{o.hook}</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: o.status === 'draft' ? '#fbbf24' : '#34d399' }}>{o.status.toUpperCase()}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: o.status === 'draft' ? '#60a5fa' : '#34d399' }}>{o.status.toUpperCase()}</span>
               </Link>
             ))}
           </div>
@@ -518,7 +518,7 @@ export default function AccountDetailPage() {
           {(() => {
             const platformSignals = a.signals.filter(s => s.source === 'ghost-tax' || s.source === 'stripe');
             if (platformSignals.length === 0) return null;
-            const SIG_CLR: Record<string, string> = { payment: '#34d399', scan: '#22d3ee', intent: '#f59e0b' };
+            const SIG_CLR: Record<string, string> = { payment: '#34d399', scan: '#22d3ee', intent: '#3b82f6' };
             return (
               <div style={{ ...box, borderLeft: '3px solid #22d3ee' }}>
                 <div style={{ ...lbl, color: '#22d3ee' }}>PLATFORM SIGNALS ({platformSignals.length})</div>

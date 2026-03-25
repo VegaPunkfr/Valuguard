@@ -187,7 +187,7 @@ export default function OGImage() {
           {[
             { label: "CFO Memo", color: "#3b82f6" },
             { label: "CIO Memo", color: "#22d3ee" },
-            { label: "Procurement Brief", color: "#f59e0b" },
+            { label: "Procurement Brief", color: "#3b82f6" },
             { label: "Board Slide", color: "#34d399" },
           ].map((item) => (
             <div

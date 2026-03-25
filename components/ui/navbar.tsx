@@ -43,6 +43,7 @@ export default function Navbar() {
           position: "sticky",
           top: 0,
           zIndex: 100,
+          minHeight: 56,
           padding: scrolled ? "10px 0" : "14px 0",
           background: scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.60)",
           backdropFilter: "blur(20px) saturate(1.2)",
@@ -54,14 +55,7 @@ export default function Navbar() {
         <div className="gt-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo */}
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: c.accentBg, border: "1px solid " + c.accentBd,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 13, fontWeight: 800, fontFamily: f.mono, color: c.accent,
-            }}>
-              GT
-            </div>
+            <img src="/favicon.svg" alt="Ghost Tax" width={30} height={30} style={{ borderRadius: 8 }} />
             <span style={{ fontSize: 15, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".04em", color: c.accent }}>
               Ghost Tax
             </span>

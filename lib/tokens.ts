@@ -70,9 +70,9 @@ export const c = {
   red:      "#DC2626",
   redBg:    "rgba(220,38,38,0.06)",
   redBd:    "rgba(220,38,38,0.18)",
-  amber:    "#D97706",
-  amberBg:  "rgba(217,119,6,0.06)",
-  amberBd:  "rgba(217,119,6,0.18)",
+  amber:    "#3b82f6",
+  amberBg:  "rgba(59,130,246,0.06)",
+  amberBd:  "rgba(59,130,246,0.18)",
   cyan:     "#0891B2",
   linkedin: "#0A66C2",
 } as const;
@@ -117,6 +117,64 @@ export const revealTransition = (delay = 0) => ({
   ease: [0.16, 1, 0.3, 1] as const,
   delay: delay / 1000,
 });
+
+/* ── Colors — Warm Light (Zylo-inspired, marketing) ── */
+export const cWarm = {
+  bg:       "#FAF9F7",
+  surface:  "#F3F1ED",
+  card:     "#FFFFFF",
+  elevated: "#F3F1ED",
+  raised:   "#E8E5DF",
+
+  border:   "#E8E5DF",
+  borderS:  "#D4D0C8",
+  borderSS: "#B8B4AC",
+
+  text1: "#1A1A1A",
+  text2: "#4A4A4A",
+  text3: "#7A7A7A",
+  text4: "#A8A8A8",
+
+  accent:   "#E85B00",
+  accentHi: "#D04F00",
+  accentBg: "rgba(232,91,0,0.06)",
+  accentBd: "rgba(232,91,0,0.15)",
+
+  green:    "#059669",
+  greenBg:  "rgba(5,150,105,0.08)",
+  greenBd:  "rgba(5,150,105,0.18)",
+  red:      "#DC2626",
+  redBg:    "rgba(220,38,38,0.06)",
+  redBd:    "rgba(220,38,38,0.18)",
+  amber:    "#3b82f6",
+  amberBg:  "rgba(59,130,246,0.06)",
+  amberBd:  "rgba(59,130,246,0.18)",
+  cyan:     "#0891B2",
+  linkedin: "#0A66C2",
+} as const;
+
+/* ── Fonts — Warm ──────────────────────────────── */
+export const fWarm = {
+  mono: "var(--gt-font-ibm-plex, 'IBM Plex Mono', ui-monospace, monospace)",
+  sans: "var(--gt-font-dm-sans, 'DM Sans', system-ui, sans-serif)",
+} as const;
+
+/* ── Panel style — Warm ────────────────────────── */
+export const panelWarm: React.CSSProperties = {
+  background: "#FFFFFF",
+  border: "1px solid " + cWarm.border,
+  borderRadius: 18,
+  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+};
+
+/* ── Card style — Warm ─────────────────────────── */
+export const cardWarm: React.CSSProperties = {
+  background: "#FFFFFF",
+  border: "1px solid " + cWarm.border,
+  borderRadius: 14,
+  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  transition: "transform 200ms, box-shadow 200ms",
+};
 
 /* ── Backward-compat aliases ────────────────────── */
 export const colors = c;

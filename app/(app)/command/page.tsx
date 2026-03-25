@@ -32,9 +32,9 @@ const EVT_CLR: Record<string, string> = {
   lead_captured: '#60a5fa',
   scan_completed: '#22d3ee',
   payment_completed: '#34d399',
-  checkout_abandoned: '#f59e0b',
+  checkout_abandoned: '#3b82f6',
   contact_form_submitted: '#a78bfa',
-  high_intent_detected: '#f59e0b',
+  high_intent_detected: '#3b82f6',
   return_visit: '#64748b',
   memo_copied: '#ef4444',
 };
@@ -81,22 +81,24 @@ export default function CommandOverview() {
           setData({ accounts: localAccounts as typeof data extends null ? never : NonNullable<typeof data>['accounts'] });
           setStoreRef({ saveAccounts: mod.saveAccounts });
 
-          // 2. Fetch Sarah's real prospects from Supabase
+          // 2. Fetch Sarah's real prospects via server-side sync API
+          // Uses service_role key (bypasses RLS) — anon key is blocked by RLS
           try {
-            const { fetchProspects, prospectToAccount } = await import('@/lib/supabase-realtime');
-            const prospects = await fetchProspects();
-            if (prospects.length > 0) {
-              const sarahAccounts = prospects.map(prospectToAccount);
-              // Merge: curated first, then Sarah (no domain duplicates)
-              const localDomains = new Set(localAccounts.map((a: any) => a.domain));
-              const newAccounts = sarahAccounts.filter((a: any) => !localDomains.has(a.domain));
-              if (newAccounts.length > 0) {
-                const merged = [...localAccounts, ...newAccounts] as any[];
-                setData({ accounts: merged });
-                mod.saveAccounts(merged as any);
+            const commandKey = document.cookie.match(/gt-command-key=([^;]+)/)?.[1] || '';
+            const syncRes = await fetch(`/api/command/sync${commandKey ? '?key=' + commandKey : ''}`, { cache: 'no-store' });
+            if (syncRes.ok) {
+              const { accounts: sarahAccounts } = await syncRes.json();
+              if (sarahAccounts && sarahAccounts.length > 0) {
+                const localDomains = new Set(localAccounts.map((a: any) => a.domain));
+                const newAccounts = sarahAccounts.filter((a: any) => !localDomains.has(a.domain));
+                if (newAccounts.length > 0) {
+                  const merged = [...localAccounts, ...newAccounts] as any[];
+                  setData({ accounts: merged });
+                  mod.saveAccounts(merged as any);
+                }
               }
             }
-          } catch { /* Supabase fetch failure is non-fatal — seed data still works */ }
+          } catch { /* Sync failure is non-fatal — seed data still works */ }
         } catch (e) {
           setError(`loadAccounts failed: ${e instanceof Error ? e.message : String(e)}`);
         }
@@ -262,16 +264,16 @@ export default function CommandOverview() {
   const coolingCount = accounts.filter(a => a.status === 'contacted').length;
   const awaitingCount = active.filter(a => !a.scan && a.attackability !== 'now').length;
 
-  const HEAT_CLR = (score: number) => score >= 60 ? '#ef4444' : score >= 35 ? '#f59e0b' : '#64748b';
-  const HEAT_BG = (score: number) => score >= 60 ? 'rgba(239,68,68,0.12)' : score >= 35 ? 'rgba(245,158,11,0.12)' : 'rgba(100,116,139,0.08)';
+  const HEAT_CLR = (score: number) => score >= 60 ? '#ef4444' : score >= 35 ? '#3b82f6' : '#64748b';
+  const HEAT_BG = (score: number) => score >= 60 ? 'rgba(239,68,68,0.12)' : score >= 35 ? 'rgba(59,130,246,0.12)' : 'rgba(100,116,139,0.08)';
 
   const totalPipeline = active.reduce((s, a) => s + a.revenueEstimate, 0);
   const weightedPipeline = active.reduce((s, a) => s + calcEV(a), 0);
   const topEV = [...active].sort((a, b) => calcEV(b) - calcEV(a)).slice(0, 3);
 
-  const CONV_CLR: Record<string, string> = { very_high: '#34d399', high: '#60a5fa', moderate: '#fbbf24', low: '#64748b' };
+  const CONV_CLR: Record<string, string> = { very_high: '#34d399', high: '#60a5fa', moderate: '#60a5fa', low: '#64748b' };
   const ATK_LBL: Record<string, string> = { now: 'ATTACK NOW', soon: 'SCAN FIRST', later: 'HOLD', blocked: 'BLOCKED' };
-  const ATK_CLR: Record<string, string> = { now: '#34d399', soon: '#60a5fa', later: '#fbbf24', blocked: '#f87171' };
+  const ATK_CLR: Record<string, string> = { now: '#34d399', soon: '#60a5fa', later: '#60a5fa', blocked: '#f87171' };
 
   return (
     <div style={mono}>
@@ -393,7 +395,7 @@ export default function CommandOverview() {
         {/* Stats bar */}
         <div style={{ display: 'flex', gap: 16, marginBottom: 16, fontSize: 13, flexWrap: 'wrap' as const }}>
           <span><span style={{ fontWeight: 700, color: '#ef4444' }}>{hotCount}</span> <span style={{ color: '#64748b' }}>hot</span></span>
-          <span><span style={{ fontWeight: 700, color: '#f59e0b' }}>{warmCount}</span> <span style={{ color: '#64748b' }}>warm</span></span>
+          <span><span style={{ fontWeight: 700, color: '#3b82f6' }}>{warmCount}</span> <span style={{ color: '#64748b' }}>warm</span></span>
           <span><span style={{ fontWeight: 700, color: '#64748b' }}>{holdCount}</span> <span style={{ color: '#64748b' }}>hold</span></span>
           <span style={{ color: '#3a4560' }}>|</span>
           <span><span style={{ fontWeight: 700, color: '#475569' }}>{slotsFree}</span> <span style={{ color: '#64748b' }}>slots free</span></span>

@@ -90,6 +90,11 @@ export default function LandingPage() {
       <section style={{ padding: "80px 0 60px", textAlign: "center" }}>
         <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
 
+          {/* Logo */}
+          <div style={{ marginBottom: 32 }}>
+            <img src="/logo.svg" alt="Ghost Tax — Decision Intelligence" width={320} height={74} style={{ maxWidth: "100%", height: "auto" }} />
+          </div>
+
           {/* Badge */}
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
@@ -224,8 +229,9 @@ export default function LandingPage() {
                 loop
                 muted
                 playsInline
+                preload="none"
                 poster="/site-screenshot.png"
-                style={{ width: "100%", display: "block" }}
+                style={{ width: "100%", display: "block", aspectRatio: "16/9" }}
               >
                 <source src="/demo-video.mp4" type="video/mp4" />
               </video>
@@ -835,42 +841,7 @@ export default function LandingPage() {
 
       </div>
 
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([
-          {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "Ghost Tax SAS",
-            url: "https://ghost-tax.com",
-            logo: "https://ghost-tax.com/favicon.svg",
-            description: "Decision Intelligence platform that detects hidden financial exposure in SaaS, AI, and Cloud spending.",
-            foundingDate: "2025",
-            contactPoint: {
-              "@type": "ContactPoint",
-              email: "audits@ghost-tax.com",
-              contactType: "sales",
-            },
-            sameAs: [],
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            name: "Ghost Tax",
-            url: "https://ghost-tax.com",
-            applicationCategory: "BusinessApplication",
-            operatingSystem: "Web",
-            description: "Detect hidden financial exposure in your SaaS, AI, and Cloud spending. Get a full Decision Pack with exposure analysis, negotiation playbooks, and corrective protocols.",
-            offers: {
-              "@type": "Offer",
-              price: "490",
-              priceCurrency: "EUR",
-              availability: "https://schema.org/InStock",
-            },
-          },
-        ]) }}
-      />
+      {/* JSON-LD handled by root layout @graph — no duplicate here */}
 
       {/* T13 — Responsive */}
       <style>{`

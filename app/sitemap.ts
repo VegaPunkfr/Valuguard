@@ -3,56 +3,53 @@ import { getAllVerticalSlugs } from "@/lib/verticals";
 
 const BASE = "https://ghost-tax.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date().toISOString();
+// Use meaningful dates — Google ignores lastmod when all URLs share the same timestamp
+const LAUNCH_DATE = "2026-03-24";
+const CONTENT_UPDATE = "2026-03-20";
 
+export default function sitemap(): MetadataRoute.Sitemap {
   const verticalPages: MetadataRoute.Sitemap = getAllVerticalSlugs().map((slug) => ({
     url: `${BASE}/ghost-tax/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.75,
+    lastModified: CONTENT_UPDATE,
   }));
 
   return [
     // Core public surfaces
-    { url: BASE, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
-    { url: `${BASE}/platform`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE}/intel`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: BASE, lastModified: LAUNCH_DATE },
+    { url: `${BASE}/platform`, lastModified: LAUNCH_DATE },
+    { url: `${BASE}/pricing`, lastModified: LAUNCH_DATE },
+    { url: `${BASE}/intel`, lastModified: LAUNCH_DATE },
 
     // Trust & credibility
-    { url: `${BASE}/methodology`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/security-vault`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/faq`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE}/methodology`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/security-vault`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/about`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/faq`, lastModified: CONTENT_UPDATE },
 
     // Tools
-    { url: `${BASE}/ghost-tax`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
-    { url: `${BASE}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/ghost-tax`, lastModified: LAUNCH_DATE },
+    { url: `${BASE}/contact`, lastModified: CONTENT_UPDATE },
 
     // Intelligence index
-    { url: `${BASE}/intel-benchmarks`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/intel-benchmarks/saas-ai-cost-exposure`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
-    { url: `${BASE}/intel-benchmarks/shadow-ai-governance`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
-    { url: `${BASE}/intel-benchmarks/cfo-technology-spend-guide`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
+    { url: `${BASE}/intel-benchmarks`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/intel-benchmarks/saas-ai-cost-exposure`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/intel-benchmarks/shadow-ai-governance`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/intel-benchmarks/cfo-technology-spend-guide`, lastModified: CONTENT_UPDATE },
 
     // Tools & additional pages
-    { url: `${BASE}/procurement`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/estimator`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE}/sample-report`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/peer-gap`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/roi-report`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/case-studies`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    // /competitor-scan is an (app) route behind auth — excluded from public sitemap
-    { url: `${BASE}/integrations`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/procurement`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/estimator`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/sample-report`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/peer-gap`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/roi-report`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/case-studies`, lastModified: CONTENT_UPDATE },
+    { url: `${BASE}/integrations`, lastModified: CONTENT_UPDATE },
 
     // Legal
-    { url: `${BASE}/legal/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/legal/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE}/legal/privacy`, lastModified: "2026-03-01" },
+    { url: `${BASE}/legal/terms`, lastModified: "2026-03-01" },
 
     // Ghost Tax vertical landing pages (industry + country SEO)
     ...verticalPages,
-
-    // Post-conversion pages excluded (noindex, private user flow)
   ];
 }

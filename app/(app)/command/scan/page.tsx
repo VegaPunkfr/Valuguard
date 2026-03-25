@@ -80,9 +80,9 @@ export default function ScanPage() {
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', marginBottom: 6 }}>{a.company}</div>
                 <div style={{ display: 'flex', gap: 12, marginBottom: 6 }}>
                   <div><div style={{ fontSize: 11, color: '#475569' }}>VENDORS</div><div style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa' }}>{a.scan?.vendorCount}</div></div>
-                  <div><div style={{ fontSize: 11, color: '#475569' }}>EXPOSURE</div><div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>{Math.round((a.scan?.exposureLow ?? 0) / 1000)}k-{Math.round((a.scan?.exposureHigh ?? 0) / 1000)}k</div></div>
+                  <div><div style={{ fontSize: 11, color: '#475569' }}>EXPOSURE</div><div style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa' }}>{Math.round((a.scan?.exposureLow ?? 0) / 1000)}k-{Math.round((a.scan?.exposureHigh ?? 0) / 1000)}k</div></div>
                 </div>
-                <div style={{ fontSize: 13, color: a.scan?.strengthensHypothesis ? '#34d399' : '#fbbf24' }}>
+                <div style={{ fontSize: 13, color: a.scan?.strengthensHypothesis ? '#34d399' : '#60a5fa' }}>
                   {a.scan?.strengthensHypothesis ? '✓ Hypothesis confirmed — promote' : '⚠ Hypothesis weak — review or drop'}
                 </div>
               </Link>

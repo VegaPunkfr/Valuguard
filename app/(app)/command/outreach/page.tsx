@@ -30,8 +30,8 @@ const pill = (color: string, bg: string): React.CSSProperties => ({
   borderRadius: 4, color, background: bg, display: 'inline-block',
 });
 
-const CH_CLR: Record<string, string> = { linkedin: '#60a5fa', email: '#34d399', hold: '#f59e0b' };
-const GRADE_CLR: Record<string, string> = { strong: '#34d399', acceptable: '#60a5fa', weak: '#fbbf24', rewrite: '#f87171' };
+const CH_CLR: Record<string, string> = { linkedin: '#60a5fa', email: '#34d399', hold: '#3b82f6' };
+const GRADE_CLR: Record<string, string> = { strong: '#34d399', acceptable: '#60a5fa', weak: '#60a5fa', rewrite: '#f87171' };
 const MSG_TYPE_LABELS: Record<MessageType, string> = {
   linkedin_note: 'LI NOTE', linkedin_message: 'LI MESSAGE', linkedin_followup: 'LI FOLLOW-UP',
   email_main: 'EMAIL', email_followup: 'EMAIL FOLLOW-UP', ultra_short: 'ULTRA-SHORT',
@@ -226,7 +226,7 @@ function OutreachConsole() {
       {/* Queue Stats Bar */}
       <div style={{ display: 'flex', gap: 24, marginBottom: 20, fontSize: 13, color: '#64748b' }}>
         <span><b style={{ color: '#ef4444' }}>{queue.stats.hotCount}</b> hot</span>
-        <span><b style={{ color: '#f59e0b' }}>{queue.stats.warmCount}</b> warm</span>
+        <span><b style={{ color: '#3b82f6' }}>{queue.stats.warmCount}</b> warm</span>
         <span><b style={{ color: '#3b82f6' }}>{queue.stats.holdCount}</b> hold</span>
         <span>{queue.stats.slotsAvailable} slots free</span>
         <span>{queue.stats.inCooldown} cooling</span>
@@ -234,7 +234,7 @@ function OutreachConsole() {
       </div>
 
       {/* Discipline */}
-      <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.6, background: 'rgba(251,191,36,0.03)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(251,191,36,0.08)', marginBottom: 20 }}>
+      <div style={{ fontSize: 12, color: '#60a5fa', lineHeight: 1.6, background: 'rgba(96,165,250,0.03)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(96,165,250,0.08)', marginBottom: 20 }}>
         Research → Channel → Angle → Draft → Critique → Rewrite → Review → Send. Never send without human review. Quality over volume.
       </div>
 
@@ -242,7 +242,7 @@ function OutreachConsole() {
       <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid rgba(36,48,78,0.20)' }}>
         {([
           { id: 'hot' as TabId, label: 'HOT QUEUE', count: tabCounts.hot, color: '#ef4444' },
-          { id: 'review' as TabId, label: 'REVIEW QUEUE', count: tabCounts.review, color: '#fbbf24' },
+          { id: 'review' as TabId, label: 'REVIEW QUEUE', count: tabCounts.review, color: '#60a5fa' },
           { id: 'all' as TabId, label: 'ALL ACCOUNTS', count: tabCounts.all, color: '#64748b' },
         ]).map(t => (
           <button
@@ -376,7 +376,7 @@ function ReviewQueueTab({ accounts, expandedId, expandedMsg, copiedId, onToggle,
 
   return (
     <div>
-      <div style={{ ...lbl, color: '#fbbf24', marginBottom: 10 }}>
+      <div style={{ ...lbl, color: '#60a5fa', marginBottom: 10 }}>
         MESSAGES READY FOR REVIEW ({accounts.length})
       </div>
       {accounts.map(c => (
@@ -538,7 +538,7 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
             <Link href={`/command/accounts/${c.account.id}`} style={{ ...actionBtn('#64748b'), textDecoration: 'none' }}>
               VIEW ACCOUNT
             </Link>
-            {onMarkWaiting && <button onClick={onMarkWaiting} style={actionBtn('#f59e0b')}>MARK WAITING</button>}
+            {onMarkWaiting && <button onClick={onMarkWaiting} style={actionBtn('#3b82f6')}>MARK WAITING</button>}
             {onMarkNoResponse && <button onClick={onMarkNoResponse} style={actionBtn('#94a3b8')}>NO RESPONSE</button>}
             {onHold && <button onClick={onHold} style={actionBtn('#f87171')}>HOLD</button>}
           </div>
@@ -553,14 +553,14 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
 function IntelGrid({ c }: { c: ComputedAccount }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>
-      <MetricCell label="HEAT" value={`${c.heat.total}/100`} color={c.heat.total >= 60 ? '#ef4444' : c.heat.total >= 35 ? '#f59e0b' : '#64748b'} />
+      <MetricCell label="HEAT" value={`${c.heat.total}/100`} color={c.heat.total >= 60 ? '#ef4444' : c.heat.total >= 35 ? '#3b82f6' : '#64748b'} />
       <MetricCell label="PROBABILITY" value={`${c.probability}%`} color="#60a5fa" />
       <MetricCell label="EXPECTED VALUE" value={`€${c.expectedValue.toLocaleString()}`} color="#34d399" />
       <MetricCell label="REVENUE EST." value={`€${c.account.revenueEstimate.toLocaleString()}`} color="#94a3b8" />
       <MetricCell label="CHANNEL" value={c.channel.primary.toUpperCase()} color={CH_CLR[c.channel.primary] || '#64748b'} />
       <MetricCell label="CHANNEL CONF." value={`${c.channel.confidence}%`} color="#475569" />
       <MetricCell label="ANGLE CONF." value={`${c.angle.confidence}%`} color="#475569" />
-      <MetricCell label="SOLOFIT" value={c.account.solofit.toUpperCase()} color={c.account.solofit === 'ideal' ? '#34d399' : c.account.solofit === 'good' ? '#60a5fa' : '#fbbf24'} />
+      <MetricCell label="SOLOFIT" value={c.account.solofit.toUpperCase()} color={c.account.solofit === 'ideal' ? '#34d399' : c.account.solofit === 'good' ? '#60a5fa' : '#60a5fa'} />
     </div>
   );
 }
@@ -607,7 +607,7 @@ function AnglePanel({ c }: { c: ComputedAccount }) {
         <div style={{ ...lbl, color: '#34d399', marginBottom: 4, fontSize: 11 }}>PRIMARY ANGLE</div>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', marginBottom: 6 }}>{c.angle.primary.label}</div>
         <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
-          <b style={{ color: '#fbbf24' }}>CFO tension:</b> {c.angle.primary.cfoTension}
+          <b style={{ color: '#60a5fa' }}>CFO tension:</b> {c.angle.primary.cfoTension}
         </div>
         <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
           <b style={{ color: '#60a5fa' }}>Financial reading:</b> {c.angle.primary.financialReading}
@@ -787,7 +787,7 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
 // ── Small Components ────────────────────────────────────────
 
 function HeatBadge({ score }: { score: number }) {
-  const color = score >= 60 ? '#ef4444' : score >= 35 ? '#f59e0b' : '#64748b';
+  const color = score >= 60 ? '#ef4444' : score >= 35 ? '#3b82f6' : '#64748b';
   return (
     <span style={{
       ...mono, fontSize: 14, fontWeight: 700, color, width: 38, textAlign: 'center',

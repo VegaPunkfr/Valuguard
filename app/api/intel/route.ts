@@ -34,6 +34,12 @@ import {
   type PipelineResult,
 } from "@/lib/plugins";
 import { scheduleDripSequence } from "@/lib/drip-sequence";
+import {
+  routeProspect,
+  buildRejectResponse,
+  buildPreviewOutput,
+  buildPremiumOutput,
+} from "@/lib/severity-router";
 
 // Vercel serverless: analysis pipeline takes 10-30s (Exa + OpenAI + vectors)
 export const maxDuration = 60;
@@ -172,8 +178,37 @@ export async function POST(request: NextRequest) {
       try {
         const result = await runDecisionIntelligence(input);
 
-        // Stream in doctrine order: exposure → window → cause → correction
-        // Evidence arrives before conclusions. Snapshot is last (earned summary).
+        // ── FINANCIAL THESIS KERNEL ─────────────────────────
+        const routing = routeProspect(result);
+        send("routing", "complete", { tier: routing.tier, reason: routing.reason });
+
+        if (routing.tier === "reject" || !routing.thesis) {
+          send("reject", "complete", buildRejectResponse());
+          send("complete", "complete", { tier: "reject", reason: routing.reason });
+          controller.close();
+          return;
+        }
+
+        const thesis = routing.thesis;
+
+        // ── LAYER 1: Flash Verdict (one-line institutional verdict) ──
+        send("flashVerdict", "complete", thesis.flash_verdict);
+
+        // ── LAYER 2: Control Note (45-second readable memo) ──
+        send("controlNote", "complete", thesis.control_note);
+
+        // ── Discomfort: why inaction is unsafe ──
+        send("inactionRisk", "complete", {
+          why_unsafe: thesis.cost_of_inaction.why_inaction_unsafe,
+          monthly_cost: thesis.cost_of_inaction.monthly_eur,
+          quarterly_cost: thesis.cost_of_inaction.quarterly_eur,
+          dominant_frame: thesis.dominant_frame,
+        });
+
+        // ── Offer routing ──
+        send("offer", "complete", thesis.offer);
+
+        // ── ALL phases expected by client (doctrine order) ──
         send("context", "complete", result.companyContext);
         send("exposure", "complete", result.exposure);
         send("lossVelocity", "complete", result.lossVelocity);
@@ -194,6 +229,44 @@ export async function POST(request: NextRequest) {
         send("confidenceModel", "complete", result.confidenceModel);
         send("decisionPack", "complete", result.decisionPack);
         send("executiveSnapshot", "complete", result.executiveSnapshot);
+
+        // ── TIER-SPECIFIC thesis outputs (new, additive) ──
+        if (routing.tier === "premium") {
+          send("premiumThesis", "complete", buildPremiumOutput(thesis));
+          send("resistanceMap", "complete", thesis.internal_resistance_map);
+          send("redacted", "complete", {
+            sections: thesis.proof_boundary.withheld_sections,
+            message: "Full Decision Pack available after purchase — includes vendor negotiation playbooks, correction protocols, and board-ready memos.",
+          });
+        } else {
+          send("previewThesis", "complete", buildPreviewOutput(thesis));
+          send("redacted", "complete", {
+            sections: [
+              ...thesis.proof_boundary.withheld_sections,
+              "Causal analysis",
+              "Detailed classified claims",
+              "Confidence model breakdown",
+              "Correction momentum",
+              "Internal resistance map",
+            ],
+            message: "Detailed diagnostic available after purchase — unlock the full financial exposure analysis.",
+          });
+        }
+
+        // ── CONVERSION LEARNING: log event for future optimization ──
+        if (routing.conversionEvent) {
+          send("conversionEvent", "complete", routing.conversionEvent);
+          // Fire-and-forget to command ingest for ledger storage
+          const commandSecret = process.env.COMMAND_SECRET;
+          if (commandSecret) {
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
+            fetch(`${siteUrl}/api/command/ingest?key=${commandSecret}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: "conversion_event", ...routing.conversionEvent }),
+            }).catch(() => {});
+          }
+        }
 
         // ── Plugin SDK: feed FULL pipeline result to plugins ──────
         // Global SaaS Exposure Score: composite of exposure confidence,

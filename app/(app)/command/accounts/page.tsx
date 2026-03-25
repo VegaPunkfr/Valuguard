@@ -14,7 +14,7 @@ function Pill({ text, color, bg }: { text: string; color: string; bg: string }) 
 }
 function fmt(n: number): string { return n >= 1000 ? `€${Math.round(n / 1000)}k` : `€${n}`; }
 
-const SF_C: Record<string, string> = { ideal: '#34d399', good: '#60a5fa', stretch: '#fbbf24', hard: '#f87171' };
+const SF_C: Record<string, string> = { ideal: '#34d399', good: '#60a5fa', stretch: '#60a5fa', hard: '#f87171' };
 
 const calcHeat = (a: Account) => {
   let heat = 0;
@@ -36,14 +36,14 @@ const calcHeat = (a: Account) => {
   return Math.min(100, heat);
 };
 
-const heatColor = (h: number) => h >= 60 ? '#ef4444' : h >= 35 ? '#f59e0b' : '#64748b';
+const heatColor = (h: number) => h >= 60 ? '#ef4444' : h >= 35 ? '#3b82f6' : '#64748b';
 
 const safetyPill = (a: Account): { text: string; color: string; bg: string } => {
   if (a.status === 'contacted') return { text: 'CONTACTED', color: '#94a3b8', bg: 'rgba(148,163,184,0.10)' };
   if (a.status === 'dropped') return { text: 'DROPPED', color: '#f87171', bg: 'rgba(248,113,113,0.10)' };
   if (a.outreach.some(o => o.status === 'sent')) return { text: 'SENT', color: '#34d399', bg: 'rgba(52,211,153,0.10)' };
   if (a.attackability === 'blocked') return { text: 'BLOCKED', color: '#f87171', bg: 'rgba(248,113,113,0.10)' };
-  if (a.outreach.some(o => o.status === 'draft')) return { text: 'DRAFT', color: '#fbbf24', bg: 'rgba(251,191,36,0.10)' };
+  if (a.outreach.some(o => o.status === 'draft')) return { text: 'DRAFT', color: '#60a5fa', bg: 'rgba(96,165,250,0.10)' };
   return { text: 'CLEAR', color: '#34d399', bg: 'rgba(52,211,153,0.10)' };
 };
 
@@ -161,7 +161,7 @@ export default function AccountsPage() {
                   <td style={{ padding: '8px' }}><div style={{ fontSize: 12, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, maxWidth: 170 }}>{a.mainSignal}</div></td>
                   <td style={{ padding: '8px' }}><Pill text={atk.label} color={atk.color} bg={atk.bg} /></td>
                   <td style={{ padding: '8px', fontSize: 12, fontWeight: 600, color: conv.color }}>{conv.label}</td>
-                  <td style={{ padding: '8px', fontSize: 13, fontWeight: 700, color: prob >= 40 ? '#34d399' : prob >= 25 ? '#60a5fa' : '#fbbf24' }}>{prob}%</td>
+                  <td style={{ padding: '8px', fontSize: 13, fontWeight: 700, color: prob >= 40 ? '#34d399' : prob >= 25 ? '#60a5fa' : '#60a5fa' }}>{prob}%</td>
                   <td style={{ padding: '8px', fontSize: 13, fontWeight: 600, color: '#e4e9f4' }}>{fmt(a.revenueEstimate)}</td>
                   <td style={{ padding: '8px', fontSize: 11, fontWeight: 600, color: SF_C[a.solofit] || '#64748b' }}>{a.solofit.toUpperCase()}</td>
                   <td style={{ padding: '8px' }}><Pill text={st.label} color={st.color} bg={st.bg} /></td>

@@ -176,7 +176,7 @@ export default function OGImage() {
           {/* Phase blocks */}
           {[
             { label: "EXPOSURE", color: "#ef4444" },
-            { label: "PROOF", color: "#f59e0b" },
+            { label: "PROOF", color: "#3b82f6" },
             { label: "BENCHMARK", color: "#22d3ee" },
             { label: "SCENARIOS", color: "#34d399" },
             { label: "DECISION PACK", color: "#3b82f6" },

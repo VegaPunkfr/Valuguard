@@ -218,7 +218,7 @@ const c = {
   text3: "#55637d",
   blue: "#3b82f6",
   green: "#34d399",
-  amber: "#f59e0b",
+  amber: "#3b82f6",
   red: "#ef4444",
   border: "#1e2a42",
   white: "#ffffff",

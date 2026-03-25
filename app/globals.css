@@ -53,9 +53,9 @@
   --gt-red:       #ff4d4d;
   --gt-red-bg:    rgba(255,77,77,0.08);
   --gt-red-bd:    rgba(255,77,77,0.18);
-  --gt-amber:     #ffb020;
-  --gt-amber-bg:  rgba(255,176,32,0.08);
-  --gt-amber-bd:  rgba(255,176,32,0.18);
+  --gt-amber:     #3b82f6;
+  --gt-amber-bg:  rgba(59,130,246,0.08);
+  --gt-amber-bd:  rgba(59,130,246,0.18);
   --gt-cyan:      #22d3ee;
 
   /* ── Typography */
@@ -110,7 +110,57 @@
   --gt-z-modal:     100;
   --gt-z-toast:     110;
 
-  /* ── Backward compat (old token names → new) */
+  /* ── Warm Light Theme (Zylo-inspired, marketing pages only) ── */
+[data-theme="warm"] {
+  --gt-bg:        #FAF9F7;
+  --gt-surface:   #F3F1ED;
+  --gt-card:      #FFFFFF;
+  --gt-elevated:  #F3F1ED;
+  --gt-raised:    #E8E5DF;
+
+  --gt-border:    #E8E5DF;
+  --gt-border-s:  #D4D0C8;
+  --gt-border-ss: #B8B4AC;
+
+  --gt-text-1:    #1A1A1A;
+  --gt-text-2:    #4A4A4A;
+  --gt-text-3:    #7A7A7A;
+  --gt-text-4:    #A8A8A8;
+
+  --gt-accent:    #E85B00;
+  --gt-accent-hi: #D04F00;
+  --gt-accent-bg: rgba(232,91,0,0.06);
+  --gt-accent-bd: rgba(232,91,0,0.15);
+
+  --gt-green:     #059669;
+  --gt-green-bg:  rgba(5,150,105,0.08);
+  --gt-green-bd:  rgba(5,150,105,0.18);
+  --gt-red:       #DC2626;
+  --gt-red-bg:    rgba(220,38,38,0.06);
+  --gt-red-bd:    rgba(220,38,38,0.18);
+  --gt-amber:     #3b82f6;
+  --gt-amber-bg:  rgba(59,130,246,0.06);
+  --gt-amber-bd:  rgba(59,130,246,0.18);
+  --gt-cyan:      #0891B2;
+
+  --gt-font-sans: var(--gt-font-dm-sans, 'DM Sans', system-ui, sans-serif);
+  --gt-font-mono: var(--gt-font-ibm-plex, 'IBM Plex Mono', ui-monospace, monospace);
+
+  --gt-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --gt-shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --gt-shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --gt-shadow-xl: 0 12px 36px rgba(0,0,0,0.10);
+}
+
+[data-theme="warm"] .gt-card { background: #FFFFFF; }
+[data-theme="warm"] .gt-panel { background: #FFFFFF; }
+[data-theme="warm"] .gt-input { background: #FFFFFF; }
+[data-theme="warm"] .gt-btn-primary { background: var(--gt-accent); }
+[data-theme="warm"] .gt-btn-primary:hover { background: var(--gt-accent-hi); box-shadow: 0 6px 20px rgba(232,91,0,0.25); }
+[data-theme="warm"] .gt-section-label { color: var(--gt-accent); }
+[data-theme="warm"] ::selection { background: rgba(232,91,0,0.12); }
+
+/* ── Backward compat (old token names → new) */
   --t-bg: var(--gt-bg);
   --t-surface: var(--gt-surface);
   --t-panel: var(--gt-card);

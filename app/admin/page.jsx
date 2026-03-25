@@ -7,12 +7,12 @@ import { useState, useEffect, useMemo } from "react";
     Target markets: US + Germany.
     100% USD display for revenue. Bloomberg terminal density. */
 
-const V="#060912",A="#3b82f6",AH="#60a5fa",T1="#e0e6f2",T2="#8d9bb5",T3="#55637d",RD="#ef4444",OR="#f59e0b",GR="#22c55e",TL="#34d399",BD="rgba(36,48,78,0.32)",MO="ui-monospace,'Cascadia Code','Fira Code',monospace",SA="system-ui,-apple-system,sans-serif";
+const V="#060912",A="#3b82f6",AH="#60a5fa",T1="#e0e6f2",T2="#8d9bb5",T3="#55637d",RD="#ef4444",OR="#3b82f6",GR="#22c55e",TL="#34d399",BD="rgba(36,48,78,0.32)",MO="ui-monospace,'Cascadia Code','Fira Code',monospace",SA="system-ui,-apple-system,sans-serif";
 const gl={background:"rgba(11,14,24,0.72)",backdropFilter:"blur(18px) saturate(1.15)",WebkitBackdropFilter:"blur(18px) saturate(1.15)",border:"1px solid "+BD,borderRadius:12,boxShadow:"0 4px 32px rgba(0,0,0,0.28)"};
 function fmt(n,s){if(!n&&n!==0)return"—";if(s&&n>=1e6)return"€"+(n/1e6).toFixed(1)+"M";if(s&&n>=1e4)return"€"+Math.round(n/1e3)+"k";return"€"+Math.round(n).toLocaleString("en-US");}
 
 const STATUS_COL={pending:OR,processing:AH,delivered:TL,followup_scheduled:GR,monitoring_active:A,monitoring_cancelled:T3,monitoring_paused:RD,failed:RD};
-const STATUS_BG={pending:"rgba(245,158,11,0.06)",processing:"rgba(96,165,250,0.06)",delivered:"rgba(52,211,153,0.06)",followup_scheduled:"rgba(34,197,94,0.06)",monitoring_active:"rgba(59,130,246,0.08)",failed:"rgba(239,68,68,0.06)"};
+const STATUS_BG={pending:"rgba(59,130,246,0.06)",processing:"rgba(96,165,250,0.06)",delivered:"rgba(52,211,153,0.06)",followup_scheduled:"rgba(34,197,94,0.06)",monitoring_active:"rgba(59,130,246,0.08)",failed:"rgba(239,68,68,0.06)"};
 
 // Mini Radar (48x48)
 function MiniRadar({metrics}){
