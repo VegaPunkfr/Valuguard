@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Tax — Style Zylo (Warm Light)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAF9F7;
+  --white: #FFFFFF;
+  --surface: #F3F1ED;
+  --border: #E8E5DF;
+  --border-s: #D4D0C8;
+  --text1: #1A1A1A;
+  --text2: #4A4A4A;
+  --text3: #7A7A7A;
+  --text4: #A8A8A8;
+  --cta: #E85B00;
+  --cta-hover: #D04F00;
+  --green: #059669;
+  --green-bg: rgba(5,150,105,0.08);
+  --red: #DC2626;
+  --red-bg: rgba(220,38,38,0.06);
+  --amber: #D97706;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text1); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+.container { max-width: 1140px; margin: 0 auto; padding: 0 28px; }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,249,247,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1140px; margin: 0 auto; padding: 0 28px; }
+.nav-brand { font-weight: 800; font-size: 18px; color: var(--text1); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--cta); }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 14px; color: var(--text2); text-decoration: none; font-weight: 500; transition: color 200ms; }
+.nav-links a:hover { color: var(--text1); }
+.nav-cta {
+  font-size: 13px; font-weight: 700; padding: 9px 22px;
+  background: var(--cta); color: white; border: none; border-radius: 8px;
+  cursor: pointer; transition: all 200ms; letter-spacing: 0.02em;
+}
+.nav-cta:hover { background: var(--cta-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,91,0,0.25); }
+
+/* ── Hero ── */
+.hero { padding: 80px 0 60px; text-align: center; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--green); background: var(--green-bg);
+  border: 1px solid rgba(5,150,105,0.15);
+  padding: 5px 14px; border-radius: 100px;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 800; line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 20px;
+  max-width: 700px; margin-left: auto; margin-right: auto;
+}
+.hero h1 .accent { color: var(--cta); }
+
+.hero-sub {
+  font-size: 18px; color: var(--text2); max-width: 560px;
+  margin: 0 auto 36px; line-height: 1.7;
+}
+
+.hero-input-row {
+  display: flex; gap: 8px; max-width: 480px; margin: 0 auto 16px;
+}
+.hero-input {
+  flex: 1; padding: 14px 18px; font-family: var(--mono); font-size: 14px;
+  background: var(--white); border: 1.5px solid var(--border-s);
+  border-radius: 10px; color: var(--text1); outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.hero-input:focus { border-color: var(--cta); box-shadow: 0 0 0 3px rgba(232,91,0,0.1); }
+.hero-input::placeholder { color: var(--text4); }
+.hero-btn {
+  padding: 14px 30px; font-size: 14px; font-weight: 700;
+  background: var(--cta); color: white; border: none;
+  border-radius: 10px; cursor: pointer; white-space: nowrap;
+  transition: all 200ms;
+}
+.hero-btn:hover { background: var(--cta-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,91,0,0.25); }
+
+.hero-hint { font-size: 12px; color: var(--text4); text-align: center; }
+
+/* ── Logos ── */
+.logos { padding: 50px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; }
+.logos-label { font-family: var(--mono); font-size: 10px; color: var(--text4); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
+.logos-row { display: flex; justify-content: center; align-items: center; gap: 48px; flex-wrap: wrap; opacity: 0.4; }
+.logos-row span { font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--text3); letter-spacing: 0.02em; }
+
+/* ── Stats ── */
+.stats { padding: 64px 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.stat-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: transform 200ms, box-shadow 200ms;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.stat-value { font-family: var(--mono); font-size: 32px; font-weight: 700; margin-bottom: 6px; }
+.stat-label { font-size: 13px; color: var(--text3); }
+
+/* ── Before/After ── */
+.comparison { padding: 80px 0; }
+.section-tag {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cta); margin-bottom: 14px;
+}
+.section-heading {
+  font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 48px;
+  max-width: 520px;
+}
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.comp-card {
+  background: var(--white); border-radius: 18px;
+  padding: 36px; border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.comp-card--red { border-top: 3px solid var(--red); }
+.comp-card--green { border-top: 3px solid var(--green); }
+.comp-tag {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 100px;
+  display: inline-block; margin-bottom: 20px;
+}
+.comp-tag--red { background: var(--red-bg); color: var(--red); }
+.comp-tag--green { background: var(--green-bg); color: var(--green); }
+.comp-amount { font-family: var(--mono); font-size: 36px; font-weight: 700; margin-bottom: 6px; }
+.comp-unit { font-size: 13px; color: var(--text3); margin-bottom: 24px; }
+.comp-list { list-style: none; font-size: 14px; color: var(--text2); line-height: 2.2; }
+.comp-list span { font-weight: 600; color: var(--text1); }
+
+/* ── Testimonials ── */
+.testimonials { padding: 80px 0; background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.test-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px;
+}
+.test-stars { color: var(--amber); font-size: 14px; letter-spacing: 2px; margin-bottom: 16px; }
+.test-quote { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+.test-quote strong { color: var(--text1); }
+.test-meta { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px; }
+.test-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text3);
+}
+.test-name { font-size: 13px; font-weight: 600; color: var(--text1); }
+.test-role { font-size: 11px; color: var(--text4); }
+
+/* ── Final CTA ── */
+.final { padding: 80px 0; text-align: center; }
+.final h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; }
+.final p { font-size: 16px; color: var(--text2); max-width: 440px; margin: 0 auto 32px; line-height: 1.7; }
+.final-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 36px; font-size: 15px; font-weight: 700;
+  background: var(--cta); color: white; border: none;
+  border-radius: 12px; cursor: pointer; transition: all 200ms;
+}
+.final-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,91,0,0.25); }
+.final-sub { margin-top: 14px; font-size: 13px; color: var(--text4); }
+
+footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--text4); }
+
+/* ── Reveal ── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .comp-grid, .test-grid { grid-template-columns: 1fr; }
+  .hero-input-row { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Ghost<span>Tax</span></div>
+    <div class="nav-links">
+      <a href="#">Platform</a>
+      <a href="#">Pricing</a>
+      <a href="#">Methodology</a>
+      <a href="#">About</a>
+    </div>
+    <button class="nav-cta">Free Scan</button>
+  </div>
+</nav>
+
+<div class="container">
+  <section class="hero">
+    <div class="hero-badge">Decision Intelligence Platform</div>
+    <h1>Your IT spend has a <span class="accent">Ghost Tax.</span></h1>
+    <p class="hero-sub">We detect hidden financial exposure in your SaaS, Cloud & AI spending. Institutional-grade evidence delivered in 48 hours — not 6 months.</p>
+    <div class="hero-input-row">
+      <input type="text" class="hero-input" placeholder="yourcompany.com" spellcheck="false">
+      <button class="hero-btn">Detect Exposure</button>
+    </div>
+    <p class="hero-hint">Free scan. No login. No credit card. 90 seconds.</p>
+  </section>
+</div>
+
+<section class="logos">
+  <div class="container">
+    <div class="logos-label">Trusted by finance teams across Europe</div>
+    <div class="logos-row">
+      <span>Mirakl</span><span>ContentSquare</span><span>PayFit</span><span>Alan</span><span>Spendesk</span><span>Swile</span><span>BackMarket</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <section class="stats reveal">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--text1);">200+</div>
+        <div class="stat-label">Audits completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--green);">48h</div>
+        <div class="stat-label">Average delivery</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--red);">100%</div>
+        <div class="stat-label">Found exposure</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--amber);">142k</div>
+        <div class="stat-label">EUR avg. recoverable</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="comparison reveal">
+    <div class="section-tag">Exposure Shock</div>
+    <h2 class="section-heading">The gap between what you think you spend and what you actually lose.</h2>
+    <div class="comp-grid">
+      <div class="comp-card comp-card--red">
+        <div class="comp-tag comp-tag--red">Before Ghost Tax</div>
+        <div class="comp-amount" style="color: var(--red);">247k — 341k</div>
+        <div class="comp-unit">EUR / year hidden exposure</div>
+        <ul class="comp-list">
+          <li><span>47</span> orphan licenses undetected</li>
+          <li><span>12</span> tool overlaps across departments</li>
+          <li><span>3</span> auto-renewals within 60 days</li>
+          <li><span>0</span> vendor negotiations in 18 months</li>
+          <li><span>0%</span> visibility on AI spend growth</li>
+        </ul>
+      </div>
+      <div class="comp-card comp-card--green">
+        <div class="comp-tag comp-tag--green">After Ghost Tax</div>
+        <div class="comp-amount" style="color: var(--green);">+142k</div>
+        <div class="comp-unit">EUR / year recoverable</div>
+        <ul class="comp-list">
+          <li><span>47</span> licenses flagged for termination</li>
+          <li><span>8</span> consolidation paths identified</li>
+          <li><span>3</span> renewal playbooks delivered</li>
+          <li><span>10</span> vendor negotiation scripts</li>
+          <li><span>1</span> board-ready Decision Pack</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="testimonials reveal">
+  <div class="container">
+    <div class="section-tag">What CFOs say</div>
+    <h2 class="section-heading">The report sells itself inside the organization.</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="test-quote">"Ghost Tax found <strong>280k EUR in exposure</strong> we had zero visibility on. The board slide was ready before our next meeting."</p>
+        <div class="test-meta">
+          <div class="test-avatar">MK</div>
+          <div><div class="test-name">M. Kleiner</div><div class="test-role">CFO, Series B SaaS — Munich</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="test-quote">"<strong>48 hours.</strong> Our Big 4 audit took 5 months and found less. The negotiation playbooks alone paid for it <strong>10x over.</strong>"</p>
+        <div class="test-meta">
+          <div class="test-avatar">SL</div>
+          <div><div class="test-name">S. Laurent</div><div class="test-role">VP Finance, Mid-market — Paris</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="test-quote">"I forwarded the Decision Pack to our CIO. <strong>Three vendor renegotiations started the same week.</strong> Now part of our quarterly review."</p>
+        <div class="test-meta">
+          <div class="test-avatar">JR</div>
+          <div><div class="test-name">J. Richter</div><div class="test-role">IT Director, Manufacturing — Zurich</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <section class="final reveal">
+    <h2>Stop leaking. <span style="color: var(--green);">Start recovering.</span></h2>
+    <p>Free scan in 90 seconds. Zero data access. If we find nothing, you owe nothing.</p>
+    <button class="final-btn">Detect Your Ghost Tax &rarr;</button>
+    <p class="final-sub">490 EUR for the full Decision Pack</p>
+  </section>
+</div>
+
+<footer><div class="container">Ghost Tax &copy; 2026 — Decision Intelligence for IT Spending — GDPR Compliant</div></footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

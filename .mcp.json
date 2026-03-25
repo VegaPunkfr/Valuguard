@@ -2,6 +2,13 @@
   "mcpServers": {
     "Sentry": {
       "url": "https://mcp.sentry.dev/mcp/ghost-taxe/javascript-nextjs"
+    },
+    "linkedin": {
+      "command": "uvx",
+      "args": ["linkedin-scraper-mcp"]
+    },
+    "linkedin-composio": {
+      "url": "https://mcp.composio.dev/linkedin/ak__fMpQy6Nhsx5XvZSmbFn"
     }
   }
 }

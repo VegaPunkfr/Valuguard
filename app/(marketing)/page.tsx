@@ -86,95 +86,100 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", color: c.text1 }}>
 
-      {/* ═══════════ T6 — HERO (centered, single column) ═══════════ */}
-      <section style={{ padding: "80px 0 60px", textAlign: "center" }}>
-        <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
+      {/* ═══════════ HERO — Logo left, content right ═══════════ */}
+      <section style={{ padding: "80px 0 60px" }}>
+        <div className="gt-hero-layout" style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px", display: "grid", gridTemplateColumns: "380px 1fr", gap: 56, alignItems: "center" }}>
 
-          {/* Logo */}
-          <div style={{ marginBottom: 32 }}>
-            <img src="/logo.svg" alt="Ghost Tax — Decision Intelligence" width={320} height={74} style={{ maxWidth: "100%", height: "auto" }} />
+          {/* LEFT — Large prominent logo */}
+          <div className="gt-hero-logo">
+            <img src="/logo.svg" alt="Ghost Tax — Decision Intelligence" width={380} height={88} style={{ width: "100%", height: "auto", display: "block" }} />
           </div>
 
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            fontFamily: f.mono, fontSize: 11, fontWeight: 600,
-            letterSpacing: "0.08em", textTransform: "uppercase" as const,
-            color: c.green, background: c.greenBg,
-            border: `1px solid ${c.greenBd}`,
-            padding: "5px 14px", borderRadius: 100,
-            marginBottom: 28,
-          }}>
-            {t("landing.hero.badge") || "Decision Intelligence Platform"}
+          {/* RIGHT — Content */}
+          <div>
+            {/* Badge */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.08em", textTransform: "uppercase" as const,
+              color: c.green, background: c.greenBg,
+              border: `1px solid ${c.greenBd}`,
+              padding: "5px 14px", borderRadius: 100,
+              marginBottom: 20,
+            }}>
+              {t("landing.hero.badge") || "Decision Intelligence Platform"}
+            </div>
+
+            {/* H1 */}
+            <h1 style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontWeight: 800, lineHeight: 1.1,
+              letterSpacing: "-0.035em",
+              marginBottom: 18,
+            }}>
+              {t("landing.hero.t1")}{" "}
+              <span style={{ color: c.accent }}>Ghost Tax.</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{
+              fontSize: 17, color: c.text2, maxWidth: 520,
+              marginBottom: 28, lineHeight: 1.7,
+            }}>
+              {t("landing.hero.sub")}
+            </p>
+
+            {/* Input + CTA */}
+            <div className="gt-hero-input-row" style={{
+              display: "flex", gap: 8, maxWidth: 460,
+            }}>
+              <input
+                type="text"
+                value={heroInput}
+                onChange={(e) => setHeroInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
+                placeholder="yourcompany.com"
+                spellCheck={false}
+                style={{
+                  flex: 1, padding: "14px 18px", fontFamily: f.mono, fontSize: 14,
+                  background: "#FFFFFF", border: `1.5px solid ${c.borderS}`,
+                  borderRadius: 10, color: c.text1, outline: "none",
+                  transition: "border-color 200ms, box-shadow 200ms",
+                }}
+              />
+              <button
+                type="button"
+                onClick={navigateToIntel}
+                style={{
+                  padding: "14px 30px", fontSize: 14, fontWeight: 700,
+                  background: c.accent, color: "white", border: "none",
+                  borderRadius: 10, cursor: "pointer", whiteSpace: "nowrap" as const,
+                  transition: "all 200ms",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = c.accentHi;
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,130,246,0.25)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = c.accent;
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                {t("landing.hero.cta")}
+              </button>
+            </div>
+
+            <p style={{ fontSize: 12, color: c.text4, marginTop: 10 }}>
+              {t("landing.hero.nologin")}
+            </p>
           </div>
-
-          {/* H1 */}
-          <h1 style={{
-            fontSize: "clamp(2.4rem, 5vw, 3.6rem)",
-            fontWeight: 800, lineHeight: 1.08,
-            letterSpacing: "-0.035em",
-            marginBottom: 20,
-            maxWidth: 700, marginLeft: "auto", marginRight: "auto",
-          }}>
-            {t("landing.hero.t1")}{" "}
-            <span style={{ color: c.accent }}>Ghost Tax.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p style={{
-            fontSize: 18, color: c.text2, maxWidth: 560,
-            margin: "0 auto 36px", lineHeight: 1.7,
-          }}>
-            {t("landing.hero.sub")}
-          </p>
-
-          {/* Input + CTA */}
-          <div className="gt-hero-input-row" style={{
-            display: "flex", gap: 8, maxWidth: 480, margin: "0 auto 16px",
-          }}>
-            <input
-              type="text"
-              value={heroInput}
-              onChange={(e) => setHeroInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
-              placeholder="yourcompany.com"
-              spellCheck={false}
-              style={{
-                flex: 1, padding: "14px 18px", fontFamily: f.mono, fontSize: 14,
-                background: "#FFFFFF", border: `1.5px solid ${c.borderS}`,
-                borderRadius: 10, color: c.text1, outline: "none",
-                transition: "border-color 200ms, box-shadow 200ms",
-              }}
-            />
-            <button
-              type="button"
-              onClick={navigateToIntel}
-              style={{
-                padding: "14px 30px", fontSize: 14, fontWeight: 700,
-                background: c.accent, color: "white", border: "none",
-                borderRadius: 10, cursor: "pointer", whiteSpace: "nowrap" as const,
-                transition: "all 200ms",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = c.accentHi;
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(232,91,0,0.25)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = c.accent;
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              {t("landing.hero.cta")}
-            </button>
-          </div>
-
-          <p style={{ fontSize: 12, color: c.text4, textAlign: "center" }}>
-            {t("landing.hero.nologin")}
-          </p>
         </div>
       </section>
+
+      {/* Mobile responsive — stack hero on small screens */}
+      <style>{`.gt-hero-layout { grid-template-columns: 380px 1fr !important; } @media (max-width: 768px) { .gt-hero-layout { grid-template-columns: 1fr !important; text-align: center; } .gt-hero-logo { display: flex; justify-content: center; } }`}</style>
 
       {/* ═══════════ T7 — LOGO BAR ═══════════ */}
       <section style={{
@@ -803,7 +808,7 @@ export default function LandingPage() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = c.accentHi;
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 28px rgba(232,91,0,0.25)";
+                e.currentTarget.style.boxShadow = "0 8px 28px rgba(59,130,246,0.25)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = c.accent;

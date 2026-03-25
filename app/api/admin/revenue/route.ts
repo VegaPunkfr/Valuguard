@@ -71,9 +71,9 @@ export async function GET(req: NextRequest) {
       }
     }
   } catch (err) {
-    console.error("[Revenue Intel] Error:", err);
+    console.error("[Revenue Intel] Error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
+      { error: "Revenue data unavailable. Please retry." },
       { status: 500 }
     );
   }

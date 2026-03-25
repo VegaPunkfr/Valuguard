@@ -629,12 +629,12 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
 
   // CTA color by step
   const ctaColor =
-    step === 1 ? "#3b82f6" : step === 2 ? "#D97706" : "#DC2626";
+    step === 1 ? "#3b82f6" : step === 2 ? "#3b82f6" : "#DC2626";
   const borderAccent =
     step === 1
       ? "rgba(59,130,246,0.15)"
       : step === 2
-        ? "rgba(217,119,6,0.15)"
+        ? "rgba(59,130,246,0.15)"
         : "rgba(220,38,38,0.15)";
 
   // Build body text
@@ -786,8 +786,8 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
 
   ${step === 2 ? `
   <!-- Cost-of-Delay Projection (Step 2 only) -->
-  <div style="background:#F8FAFC;border:1px solid rgba(217,119,6,0.20);border-radius:12px;padding:28px;margin-bottom:28px">
-    <p style="font-size:10px;color:#D97706;letter-spacing:0.15em;margin:0 0 6px 0;text-transform:uppercase;font-weight:600">
+  <div style="background:#F8FAFC;border:1px solid rgba(59,130,246,0.20);border-radius:12px;padding:28px;margin-bottom:28px">
+    <p style="font-size:10px;color:#3b82f6;letter-spacing:0.15em;margin:0 0 6px 0;text-transform:uppercase;font-weight:600">
       ${delayLabels.header}
     </p>
     <p style="font-size:13px;color:#475569;margin:0 0 20px 0;line-height:1.5">
@@ -801,7 +801,7 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
           <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perDay}</p>
         </td>
         <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0;text-align:right">
-          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#D97706;margin:0">${formattedDailyLeak}</p>
+          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#3b82f6;margin:0">${formattedDailyLeak}</p>
         </td>
       </tr>
       <tr>
@@ -809,7 +809,7 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
           <p style="font-size:11px;color:#64748B;margin:0;text-transform:uppercase;letter-spacing:0.08em">${delayLabels.perWeek}</p>
         </td>
         <td style="padding:12px 16px;border-bottom:1px solid #E2E8F0;text-align:right">
-          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#D97706;margin:0">${weeklyLeak}</p>
+          <p style="font-size:18px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:700;color:#3b82f6;margin:0">${weeklyLeak}</p>
         </td>
       </tr>
       <tr>
@@ -836,11 +836,11 @@ function buildRecoveryEmail(params: RecoveryEmailParams): {
   </div>
 
   <!-- Accumulated loss callout -->
-  <div style="background:#F1F5F9;border:2px solid rgba(217,119,6,0.30);border-radius:12px;padding:24px;text-align:center;margin-bottom:28px">
-    <p style="font-size:10px;color:#D97706;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase;font-weight:600">
+  <div style="background:#F1F5F9;border:2px solid rgba(59,130,246,0.30);border-radius:12px;padding:24px;text-align:center;margin-bottom:28px">
+    <p style="font-size:10px;color:#3b82f6;letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase;font-weight:600">
       ${locale === "fr" ? "PERTE ACCUMUL\u00c9E DEPUIS VOTRE CHECKOUT" : locale === "de" ? "AUFGELAUFENER VERLUST SEIT CHECKOUT" : "ACCUMULATED LOSS SINCE YOUR CHECKOUT"}
     </p>
-    <p style="font-size:36px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:900;color:#D97706;margin:0;letter-spacing:-0.02em">
+    <p style="font-size:36px;font-family:'SF Mono',SFMono-Regular,Consolas,monospace;font-weight:900;color:#3b82f6;margin:0;letter-spacing:-0.02em">
       ${totalLost}
     </p>
     <p style="font-size:12px;color:#64748B;margin:8px 0 0 0">

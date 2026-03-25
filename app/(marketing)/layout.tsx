@@ -7,7 +7,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ background: "#FFFFFF", color: "#0F172A", minHeight: "100vh" }}>
+    <div data-theme="warm" style={{ background: "#FAF9F7", color: "#1A1A1A", minHeight: "100vh" }}>
       <Navbar />
       {children}
       <Footer />

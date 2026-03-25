@@ -38,6 +38,17 @@ function sanitizeDomain(raw: string): string {
 // ── POST handler ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // Auth: internal-only endpoint — require CRON_SECRET or INTERNAL_API_KEY
+  const secret = process.env.CRON_SECRET || process.env.INTERNAL_API_KEY;
+  if (!secret) {
+    return NextResponse.json({ error: "Not configured" }, { status: 503 });
+  }
+  const authHeader = req.headers.get("authorization")?.replace("Bearer ", "");
+  const apiKey = req.headers.get("x-api-key");
+  if (authHeader !== secret && apiKey !== secret) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
 

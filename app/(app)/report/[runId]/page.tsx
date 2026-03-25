@@ -160,7 +160,7 @@ function confidenceGrade(score: number, locale: Locale = "en"): string {
 
 function confidenceColor(score: number): string {
   if (score >= 60) return "#059669";
-  if (score >= 35) return "#D97706";
+  if (score >= 35) return "#3b82f6";
   return "#DC2626";
 }
 
@@ -365,7 +365,7 @@ export default async function ReportPage({
                             v.riskLevel === "critical"
                               ? "#DC2626"
                               : v.riskLevel === "high"
-                                ? "#D97706"
+                                ? "#3b82f6"
                                 : "#059669",
                           marginLeft: 8,
                           textTransform: "uppercase" as const,
@@ -604,7 +604,7 @@ export default async function ReportPage({
               href={`/pricing?ref=report&rail=B_SETUP&domain=${encodeURIComponent((audit as any).domain)}`}
               style={{
                 background: "transparent",
-                color: "#D97706",
+                color: "#3b82f6",
                 padding: "12px 28px",
                 borderRadius: 8,
                 fontSize: 14,

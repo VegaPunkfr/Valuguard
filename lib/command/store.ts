@@ -22,7 +22,6 @@ export function loadAccounts(): Account[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as Account[];
-      // Validate structure: must have timeline and revenueEstimate (v3 fields)
       if (parsed.length > 0 && Array.isArray(parsed[0].timeline) && typeof parsed[0].revenueEstimate === 'number') {
         return parsed;
       }
@@ -31,6 +30,64 @@ export function loadAccounts(): Account[] {
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ACCOUNTS));
   return SEED_ACCOUNTS;
+}
+
+/**
+ * Sync with Sarah's Supabase data via /api/command/sync.
+ * Merges remote accounts into local store without overwriting local edits.
+ * Returns the merged account list (also persisted to localStorage).
+ */
+export async function syncWithSarah(): Promise<{ accounts: Account[]; added: number; updated: number }> {
+  const local = loadAccounts();
+  let added = 0;
+  let updated = 0;
+
+  try {
+    const key = typeof window !== 'undefined'
+      ? document.cookie.match(/gt-command-key=([^;]+)/)?.[1] || ''
+      : '';
+    const res = await fetch(`/api/command/sync${key ? `?key=${key}` : ''}`, { cache: 'no-store' });
+    if (!res.ok) return { accounts: local, added: 0, updated: 0 };
+
+    const { accounts: remote } = await res.json() as { accounts: Account[] };
+    if (!remote || remote.length === 0) return { accounts: local, added: 0, updated: 0 };
+
+    const localByDomain = new Map(local.map(a => [a.domain, a]));
+    const merged = [...local];
+
+    for (const remoteAccount of remote) {
+      const existing = localByDomain.get(remoteAccount.domain);
+      if (!existing) {
+        // New account from Sarah — add it
+        merged.push(remoteAccount);
+        added++;
+      } else {
+        // Existing account — merge signals (don't overwrite local edits)
+        const existingSignalKeys = new Set(existing.signals.map(s => `${s.type}:${s.detail}`));
+        const newSignals = remoteAccount.signals.filter(s => !existingSignalKeys.has(`${s.type}:${s.detail}`));
+        if (newSignals.length > 0) {
+          const idx = merged.findIndex(a => a.id === existing.id);
+          if (idx >= 0) {
+            merged[idx] = {
+              ...existing,
+              signals: [...existing.signals, ...newSignals],
+              updatedAt: new Date().toISOString(),
+              // Update financeLead email if Sarah found one and we don't have it
+              ...(remoteAccount.financeLead?.email && !existing.financeLead?.email
+                ? { financeLead: { ...existing.financeLead, email: remoteAccount.financeLead.email } }
+                : {}),
+            };
+            updated++;
+          }
+        }
+      }
+    }
+
+    saveAccounts(merged);
+    return { accounts: merged, added, updated };
+  } catch {
+    return { accounts: local, added: 0, updated: 0 };
+  }
 }
 
 export function saveAccounts(accounts: Account[]): void {

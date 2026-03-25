@@ -41,9 +41,9 @@ const C = {
   red:      "#DC2626",
   redBg:    "rgba(220,38,38,0.06)",
   redBd:    "rgba(220,38,38,0.18)",
-  amber:    "#D97706",
-  amberBg:  "rgba(217,119,6,0.06)",
-  amberBd:  "rgba(217,119,6,0.18)",
+  amber:    "#3b82f6",
+  amberBg:  "rgba(59,130,246,0.06)",
+  amberBd:  "rgba(59,130,246,0.18)",
   cyan:     "#0891B2",
 };
 

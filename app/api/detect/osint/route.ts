@@ -67,9 +67,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(report);
   } catch (err) {
-    console.error("[osint-interceptor] Error:", err);
+    console.error("[osint-interceptor] Error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal error" },
+      { error: "OSINT scan failed. Please retry." },
       { status: 500 },
     );
   }

@@ -145,7 +145,6 @@ export async function POST(request: NextRequest) {
     console.error(`[Connector Activate] Upsert failed for ${connectorId}:`, error.message);
     return NextResponse.json({
       error: "Failed to save credentials",
-      detail: error.message,
     }, { status: 500 });
   }
 

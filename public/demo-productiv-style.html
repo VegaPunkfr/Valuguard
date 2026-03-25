@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Tax — Style Productiv (Clean Minimal)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FFFFFF;
+  --cream: #FAFAF8;
+  --surface: #F5F5F0;
+  --border: #E8E6E1;
+  --border-s: #D5D2CC;
+  --text1: #111111;
+  --text2: #444444;
+  --text3: #777777;
+  --text4: #AAAAAA;
+  --orange: #F45D01;
+  --orange-bg: rgba(244,93,1,0.06);
+  --orange-bd: rgba(244,93,1,0.18);
+  --green: #0D9668;
+  --green-bg: rgba(13,150,104,0.06);
+  --red: #E02424;
+  --red-bg: rgba(224,36,36,0.05);
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text1); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+.container { max-width: 1060px; margin: 0 auto; padding: 0 28px; }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; max-width: 1060px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+.nav-brand { font-weight: 800; font-size: 17px; }
+.nav-brand span { color: var(--orange); }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: 14px; color: var(--text3); text-decoration: none; font-weight: 500; transition: color 150ms; }
+.nav-links a:hover { color: var(--text1); }
+.nav-cta {
+  font-size: 13px; font-weight: 700; padding: 8px 20px;
+  background: var(--orange); color: white; border: none; border-radius: 8px;
+  cursor: pointer; transition: all 200ms;
+}
+.nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── Hero — max whitespace, centered, big type ── */
+.hero {
+  padding: 100px 0 40px;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: clamp(2.8rem, 6vw, 4rem);
+  font-weight: 800; line-height: 1.04;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px;
+}
+.hero h1 .orange { color: var(--orange); }
+
+.hero-sub {
+  font-size: 18px; color: var(--text2); line-height: 1.75;
+  margin-bottom: 40px; max-width: 520px; margin-left: auto; margin-right: auto;
+}
+
+.hero-cta-group { display: flex; justify-content: center; gap: 12px; margin-bottom: 14px; }
+.btn-primary {
+  padding: 15px 36px; font-size: 15px; font-weight: 700;
+  background: var(--orange); color: white; border: none; border-radius: 10px;
+  cursor: pointer; transition: all 200ms;
+}
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(244,93,1,0.22); }
+.btn-secondary {
+  padding: 15px 36px; font-size: 15px; font-weight: 600;
+  background: var(--bg); color: var(--text1); border: 1.5px solid var(--border-s);
+  border-radius: 10px; cursor: pointer; transition: all 200ms;
+}
+.btn-secondary:hover { border-color: var(--text4); background: var(--cream); }
+
+.hero-hint { font-size: 12px; color: var(--text4); }
+
+/* ── Logos ── */
+.logos {
+  padding: 48px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  text-align: center; background: var(--cream);
+}
+.logos-label { font-family: var(--mono); font-size: 10px; color: var(--text4); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+.logos-row { display: flex; justify-content: center; gap: 44px; flex-wrap: wrap; opacity: 0.35; }
+.logos-row span { font-size: 15px; font-weight: 700; color: var(--text2); }
+
+/* ── Comparison Table (like Productiv) ── */
+.comparison { padding: 80px 0; }
+.section-tag { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 12px; text-align: center; }
+.section-heading { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 48px; text-align: center; max-width: 520px; margin-left: auto; margin-right: auto; }
+
+.comp-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.comp-table th, .comp-table td {
+  padding: 16px 20px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.comp-table th {
+  background: var(--cream); font-weight: 700;
+  font-size: 12px; color: var(--text3);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.comp-table th:first-child { width: 200px; }
+.comp-table td:first-child { font-weight: 600; color: var(--text1); }
+.comp-table tr:last-child td { border-bottom: none; }
+
+.comp-table .gt-col { background: var(--orange-bg); font-weight: 700; color: var(--orange); }
+.comp-table th.gt-col { background: var(--orange); color: white; font-weight: 700; letter-spacing: 0.06em; }
+
+.check { color: var(--green); font-weight: 700; }
+.cross { color: var(--text4); }
+.partial { color: var(--text3); font-style: italic; font-size: 12px; }
+
+/* ── How it works ── */
+.how { padding: 80px 0; background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.how-step {
+  text-align: center; padding: 32px 24px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.how-num {
+  font-family: var(--mono); font-size: 32px; font-weight: 700;
+  color: var(--orange); margin-bottom: 16px;
+}
+.how-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.how-desc { font-size: 13px; color: var(--text3); line-height: 1.65; }
+
+/* ── Testimonials ── */
+.testimonials { padding: 80px 0; }
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.test-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.test-highlight {
+  font-family: var(--mono); font-size: 24px; font-weight: 700;
+  color: var(--green); margin-bottom: 14px;
+}
+.test-quote { font-size: 14px; color: var(--text2); line-height: 1.75; margin-bottom: 20px; }
+.test-quote strong { color: var(--text1); }
+.test-meta { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px; }
+.test-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text3); }
+.test-name { font-size: 13px; font-weight: 600; }
+.test-role { font-size: 11px; color: var(--text4); }
+
+/* ── Final ── */
+.final { padding: 80px 0; text-align: center; }
+.final h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 14px; }
+.final p { font-size: 16px; color: var(--text2); max-width: 440px; margin: 0 auto 32px; line-height: 1.7; }
+.final-sub { margin-top: 14px; font-size: 13px; color: var(--text4); }
+
+footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--text4); }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .how-grid, .test-grid { grid-template-columns: 1fr; }
+  .comp-table { font-size: 12px; }
+  .hero-cta-group { flex-direction: column; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Ghost<span>Tax</span></div>
+    <div class="nav-links"><a href="#">Platform</a><a href="#">Pricing</a><a href="#">Methodology</a></div>
+    <button class="nav-cta">Free Scan</button>
+  </div>
+</nav>
+
+<div class="container">
+  <section class="hero">
+    <h1>Find the <span class="orange">Ghost Tax</span> in your IT spend.</h1>
+    <p class="hero-sub">Hidden financial exposure lives in every SaaS stack. We detect it, prove it, and give you the playbook to fix it. In 48 hours.</p>
+    <div class="hero-cta-group">
+      <button class="btn-primary">Scan Your Stack Free</button>
+      <button class="btn-secondary">See methodology</button>
+    </div>
+    <p class="hero-hint">No login. No credit card. Results in 90 seconds.</p>
+  </section>
+</div>
+
+<section class="logos">
+  <div class="logos-label">Trusted by finance teams across Europe</div>
+  <div class="logos-row">
+    <span>Mirakl</span><span>ContentSquare</span><span>PayFit</span><span>Alan</span><span>Spendesk</span><span>Swile</span><span>BackMarket</span>
+  </div>
+</section>
+
+<div class="container">
+  <section class="comparison reveal">
+    <div class="section-tag">Why Ghost Tax</div>
+    <h2 class="section-heading">What takes others months, we deliver in 48 hours.</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="gt-col">GHOST TAX</th>
+          <th>Big 4 Audit</th>
+          <th>SaaS Mgmt Tool</th>
+          <th>DIY / Internal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Time to insight</td>
+          <td class="gt-col">48 hours</td>
+          <td>3-6 months</td>
+          <td>2-4 weeks setup</td>
+          <td>Ongoing</td>
+        </tr>
+        <tr>
+          <td>Cost</td>
+          <td class="gt-col">490 EUR</td>
+          <td>50k — 200k EUR</td>
+          <td>2k — 8k/mo</td>
+          <td>Internal FTE cost</td>
+        </tr>
+        <tr>
+          <td>Data access needed</td>
+          <td class="gt-col"><span class="check">None</span></td>
+          <td>Full access</td>
+          <td>SSO + API keys</td>
+          <td>Full access</td>
+        </tr>
+        <tr>
+          <td>Negotiation playbooks</td>
+          <td class="gt-col"><span class="check">Included</span></td>
+          <td><span class="cross">Not included</span></td>
+          <td><span class="partial">Some vendors</span></td>
+          <td><span class="cross">No</span></td>
+        </tr>
+        <tr>
+          <td>Board-ready output</td>
+          <td class="gt-col"><span class="check">Decision Pack</span></td>
+          <td><span class="check">Report</span></td>
+          <td><span class="cross">Dashboard only</span></td>
+          <td><span class="cross">No</span></td>
+        </tr>
+        <tr>
+          <td>Compliance coverage</td>
+          <td class="gt-col"><span class="check">GDPR, DORA, AI Act</span></td>
+          <td><span class="check">Full</span></td>
+          <td><span class="partial">Limited</span></td>
+          <td><span class="cross">No</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<section class="how reveal">
+  <div class="container">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-heading">Three steps. 48 hours. Zero friction.</h2>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-title">Scan</div>
+        <div class="how-desc">Enter your domain. Our engine detects your SaaS footprint, overlaps, and exposure signals — without accessing your systems.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-title">Analyze</div>
+        <div class="how-desc">21-phase intelligence pipeline produces evidence-grade findings. Market memory compares your spend to peers.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-title">Deliver</div>
+        <div class="how-desc">Decision Pack: CFO memo, CIO brief, board slide, negotiation playbooks. Ready to circulate and act on.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <section class="testimonials reveal">
+    <div class="section-tag">Results</div>
+    <h2 class="section-heading">The report pays for itself before lunch.</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-highlight">280k EUR found</div>
+        <p class="test-quote">"We thought our SaaS spend was under control. Ghost Tax found <strong>280k EUR in exposure</strong> we had zero visibility on."</p>
+        <div class="test-meta">
+          <div class="test-avatar">MK</div>
+          <div><div class="test-name">M. Kleiner</div><div class="test-role">CFO, Series B SaaS — Munich</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-highlight">10&times; ROI</div>
+        <p class="test-quote">"<strong>48 hours.</strong> Our Big 4 audit took 5 months and found less. The negotiation playbooks alone paid for the analysis."</p>
+        <div class="test-meta">
+          <div class="test-avatar">SL</div>
+          <div><div class="test-name">S. Laurent</div><div class="test-role">VP Finance — Paris</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-highlight">3 deals / week 1</div>
+        <p class="test-quote">"Forwarded the Decision Pack to our CIO. <strong>Three vendor renegotiations started the same week.</strong>"</p>
+        <div class="test-meta">
+          <div class="test-avatar">JR</div>
+          <div><div class="test-name">J. Richter</div><div class="test-role">IT Director — Zurich</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final reveal">
+    <h2>Stop leaking. <span style="color: var(--green);">Start recovering.</span></h2>
+    <p>Free scan in 90 seconds. Zero data access. If we find nothing, you owe nothing.</p>
+    <button class="btn-primary" style="font-size: 15px; padding: 16px 40px;">Detect Your Ghost Tax &rarr;</button>
+    <p class="final-sub">490 EUR for the full Decision Pack</p>
+  </section>
+</div>
+
+<footer><div class="container">Ghost Tax &copy; 2026 — Decision Intelligence for IT Spending — GDPR Compliant</div></footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

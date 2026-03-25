@@ -71,9 +71,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(report);
   } catch (err) {
-    console.error("[orphan-detection] Error:", err);
+    console.error("[orphan-detection] Error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal error" },
+      { error: "Orphan detection failed. Please retry." },
       { status: 500 },
     );
   }

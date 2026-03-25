@@ -1,0 +1,59 @@
+/**
+ * GHOST TAX — Create HUNT100 Product Hunt promo code in Stripe
+ *
+ * Run once: npx tsx scripts/create-hunt100-coupon.ts
+ *
+ * Creates:
+ * - 40% off coupon (capped at 100 redemptions)
+ * - Promotion code "HUNT100" linked to that coupon
+ * - Expires April 3, 2026
+ */
+
+import Stripe from "stripe";
+import * as dotenv from "dotenv";
+import { resolve } from "path";
+
+dotenv.config({ path: resolve(__dirname, "../.env.local") });
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2026-02-25.clover",
+});
+
+async function createHunt100() {
+  // 1. Create the coupon
+  const coupon = await stripe.coupons.create({
+    percent_off: 40,
+    duration: "once",
+    max_redemptions: 100,
+    redeem_by: Math.floor(new Date("2026-04-03T23:59:59Z").getTime() / 1000),
+    name: "Product Hunt Launch — 40% off",
+    metadata: {
+      campaign: "product_hunt_launch",
+      created_by: "ghost-tax-cli",
+    },
+  });
+
+  console.log(`✓ Coupon created: ${coupon.id}`);
+
+  // 2. Create the promotion code
+  const promoCode = await stripe.promotionCodes.create({
+    coupon: coupon.id,
+    code: "HUNT100",
+    max_redemptions: 100,
+    expires_at: Math.floor(new Date("2026-04-03T23:59:59Z").getTime() / 1000),
+    metadata: {
+      campaign: "product_hunt_launch",
+    },
+  });
+
+  console.log(`✓ Promo code created: ${promoCode.code}`);
+  console.log(`  - 40% off, first 100 users`);
+  console.log(`  - Expires: April 3, 2026`);
+  console.log(`  - Coupon ID: ${coupon.id}`);
+  console.log(`  - Promo ID: ${promoCode.id}`);
+}
+
+createHunt100().catch((err) => {
+  console.error("Failed to create promo code:", err.message);
+  process.exit(1);
+});

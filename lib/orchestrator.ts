@@ -1359,14 +1359,14 @@ function buildEmailHtml(params: {
     data.tier === "CRITICAL" || data.tier === "URGENT"
       ? "#DC2626"
       : data.tier === "READY"
-        ? "#D97706"
+        ? "#3b82f6"
         : "#3b82f6";
 
   const ctaColor =
     data.tier === "CRITICAL" || data.tier === "URGENT"
       ? "#DC2626"
       : data.tier === "READY"
-        ? "#D97706"
+        ? "#3b82f6"
         : "#3b82f6";
 
   // Conviction indicator (subtle social proof)

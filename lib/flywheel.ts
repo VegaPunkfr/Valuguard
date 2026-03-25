@@ -1123,7 +1123,7 @@ function buildRecoveryEmail(ar: Record<string, unknown>, locale: Locale, isUS: b
   </div>
 
   <div style="background:#F8FAFC;border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 16px 0">PAYMENT RECOVERY</p>
+    <p style="font-size:9px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 16px 0">PAYMENT RECOVERY</p>
 
     <p style="font-size:16px;font-weight:700;color:#0F172A;line-height:1.4;margin:0 0 16px 0">
       ${company}
@@ -1180,7 +1180,7 @@ function buildScanResultEmail(s: Record<string, unknown>, locale: Locale, isUS: 
     <div style="display:flex;gap:12px;margin-bottom:20px">
       <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
         <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.entropy}</p>
-        <p style="font-size:16px;font-weight:700;color:${entropy > 60 ? '#DC2626' : '#D97706'};margin:0;font-family:'Courier New',monospace">${entropy}/100</p>
+        <p style="font-size:16px;font-weight:700;color:${entropy > 60 ? '#DC2626' : '#3b82f6'};margin:0;font-family:'Courier New',monospace">${entropy}/100</p>
       </div>
       <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
         <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.peerRank}</p>
@@ -1188,7 +1188,7 @@ function buildScanResultEmail(s: Record<string, unknown>, locale: Locale, isUS: 
       </div>
       <div style="flex:1;background:#F1F5F9;border-radius:6px;padding:12px;text-align:center">
         <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 4px 0">${t.dailyLeak}</p>
-        <p style="font-size:16px;font-weight:700;color:#D97706;margin:0;font-family:'Courier New',monospace">${fmtDaily}</p>
+        <p style="font-size:16px;font-weight:700;color:#3b82f6;margin:0;font-family:'Courier New',monospace">${fmtDaily}</p>
       </div>
     </div>
 
@@ -1231,7 +1231,7 @@ function buildMarketSignalEmail(s: Record<string, unknown>, signal: MarketSignal
   </div>
 
   <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:28px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 12px 0">${t.marketSignal}</p>
+    <p style="font-size:9px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 12px 0">${t.marketSignal}</p>
 
     <p style="font-size:18px;font-weight:700;color:#0F172A;line-height:1.3;margin:0 0 16px 0">
       ${signal.headlines[locale]}
@@ -1241,8 +1241,8 @@ function buildMarketSignalEmail(s: Record<string, unknown>, signal: MarketSignal
       ${signal.body[locale]}
     </p>
 
-    <div style="background:#F1F5F9;border-left:3px solid #D97706;border-radius:0 6px 6px 0;padding:14px 16px;margin-bottom:20px">
-      <p style="font-size:9px;letter-spacing:0.12em;color:#D97706;text-transform:uppercase;margin:0 0 6px 0">${t.impactOn} ${company.toUpperCase()}</p>
+    <div style="background:#F1F5F9;border-left:3px solid #3b82f6;border-radius:0 6px 6px 0;padding:14px 16px;margin-bottom:20px">
+      <p style="font-size:9px;letter-spacing:0.12em;color:#3b82f6;text-transform:uppercase;margin:0 0 6px 0">${t.impactOn} ${company.toUpperCase()}</p>
       <p style="font-size:12px;color:#0F172A;line-height:1.5;margin:0">
         ${signal.impact[locale]} ${fmtLow}-${fmtHigh}/${perYear}.
       </p>
@@ -1349,7 +1349,7 @@ function buildMonitoringEmail(
     <table style="width:100%;border-collapse:collapse;font-family:'Courier New',monospace;margin-bottom:16px">
       <tr><td style="font-size:9px;color:#64748B;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.previous}</td><td style="font-size:13px;color:#475569;font-weight:700;text-align:right">${fmt(drift.previousLow)}-${fmt(drift.previousHigh)}</td></tr>
       <tr><td style="font-size:9px;color:#64748B;padding:6px 0;text-transform:uppercase;letter-spacing:0.1em">${t.current}</td><td style="font-size:13px;color:#DC2626;font-weight:700;text-align:right">${fmt(drift.currentLow)}-${fmt(drift.currentHigh)}</td></tr>
-      <tr style="border-top:1px solid #E2E8F0"><td style="font-size:9px;color:#64748B;padding:8px 0 4px;text-transform:uppercase;letter-spacing:0.1em">${t.drift}</td><td style="font-size:13px;color:#D97706;font-weight:700;text-align:right">+${fmt(drift.deltaLow)}-${fmt(drift.deltaHigh)} (+${drift.driftPct}%)</td></tr>
+      <tr style="border-top:1px solid #E2E8F0"><td style="font-size:9px;color:#64748B;padding:8px 0 4px;text-transform:uppercase;letter-spacing:0.1em">${t.drift}</td><td style="font-size:13px;color:#3b82f6;font-weight:700;text-align:right">+${fmt(drift.deltaLow)}-${fmt(drift.deltaHigh)} (+${drift.driftPct}%)</td></tr>
     </table>
 
     <div style="text-align:center">

@@ -86,10 +86,9 @@ export async function POST(request: NextRequest) {
       warnings: payload.warnings,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("[Audit Run] Error:", message);
+    console.error("[Audit Run] Error:", err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: message },
+      { error: "Audit failed. Please retry." },
       { status: 500 },
     );
   }

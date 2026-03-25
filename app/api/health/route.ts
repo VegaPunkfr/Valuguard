@@ -50,32 +50,22 @@ export async function GET() {
     });
   }
 
-  // ── Stripe Check ───────────────────────────────────
+  // ── Service Checks (no key names leaked) ─────────
   checks.push({
-    name: "stripe",
+    name: "payments",
     status: process.env.STRIPE_SECRET_KEY ? "ok" : "down",
-    ...(!process.env.STRIPE_SECRET_KEY && { error: "STRIPE_SECRET_KEY not set" }),
   });
-
-  // ── Resend Check ───────────────────────────────────
   checks.push({
-    name: "resend",
+    name: "email",
     status: process.env.RESEND_API_KEY ? "ok" : "down",
-    ...(!process.env.RESEND_API_KEY && { error: "RESEND_API_KEY not set" }),
   });
-
-  // ── Exa Check ──────────────────────────────────────
   checks.push({
-    name: "exa",
+    name: "enrichment",
     status: process.env.EXA_API_KEY ? "ok" : "degraded",
-    ...(!process.env.EXA_API_KEY && { error: "EXA_API_KEY not set (enrichment disabled)" }),
   });
-
-  // ── OpenAI Check ───────────────────────────────────
   checks.push({
-    name: "openai",
+    name: "embeddings",
     status: process.env.OPENAI_API_KEY ? "ok" : "degraded",
-    ...(!process.env.OPENAI_API_KEY && { error: "OPENAI_API_KEY not set (embeddings disabled)" }),
   });
 
   // ── Overall Status ─────────────────────────────────

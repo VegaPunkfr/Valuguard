@@ -4,8 +4,9 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import en from "@/messages/en.json";
 import fr from "@/messages/fr.json";
 import de from "@/messages/de.json";
+import nl from "@/messages/nl.json";
 
-export type Locale = "en" | "fr" | "de";
+export type Locale = "en" | "fr" | "de" | "nl";
 
 const STORAGE_KEY = "vg-locale";
 const DEFAULT_LOCALE: Locale = "en";
@@ -26,7 +27,7 @@ const I18nContext = createContext<I18nCtx>({
 });
 
 // ── Dictionaries ────────────────────────────────────
-const dict: Record<Locale, Record<string, string>> = { en, fr, de };
+const dict: Record<Locale, Record<string, string>> = { en, fr, de, nl };
 
 // ── Currency formatting ─────────────────────────────
 function buildCurrencyFormatter(locale: Locale) {
@@ -36,10 +37,11 @@ function buildCurrencyFormatter(locale: Locale) {
       if (compact && amount >= 1e4) return `$${Math.round(amount / 1e3)}k`;
       return "$" + Math.round(amount).toLocaleString("en-US");
     }
-    // FR and DE use Euro
+    // FR, DE and NL use Euro
     if (compact && amount >= 1e6) return `${(amount / 1e6).toFixed(1)}M €`;
     if (compact && amount >= 1e4) return `${Math.round(amount / 1e3)}k €`;
-    return Math.round(amount).toLocaleString(locale === "fr" ? "fr-FR" : "de-DE") + " €";
+    const localeMap: Record<string, string> = { fr: "fr-FR", de: "de-DE", nl: "nl-NL" };
+    return Math.round(amount).toLocaleString(localeMap[locale] || "de-DE") + " €";
   };
 }
 
@@ -97,4 +99,5 @@ export const LOCALES: { code: Locale; label: string }[] = [
   { code: "en", label: "EN" },
   { code: "fr", label: "FR" },
   { code: "de", label: "DE" },
+  { code: "nl", label: "NL" },
 ];

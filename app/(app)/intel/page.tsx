@@ -47,7 +47,7 @@ const C = {
   text3:   "#64748B",
   text4:   "#94A3B8",
   green:   "#059669",
-  amber:   "#D97706",
+  amber:   "#3b82f6",
   red:     "#DC2626",
   blue:    "#0F172A",
   blueHi:  "#1E293B",
@@ -381,21 +381,26 @@ export default function IntelPage() {
             </span>
           </div>
 
+          {/* Email capture — visible by default for lead generation */}
+          <div style={{ marginTop: 18 }}>
+            <div style={{ marginBottom: 12 }}>
+              <FieldLabel>{t("intel.field.emailCta") || "Where should we send your detailed results?"}</FieldLabel>
+              <input
+                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="cfo@acme.com" disabled={running}
+                className="gt-input"
+                style={{ width: "100%" }}
+              />
+            </div>
+          </div>
+
           {/* Collapsible optional fields */}
-          <details style={{ marginTop: 18 }}>
+          <details style={{ marginTop: 10 }}>
             <summary style={{ fontSize: 12, fontFamily: SA, color: C.text2, cursor: "pointer", userSelect: "none", listStyle: "none", display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 10, color: C.text4, transition: "transform 150ms" }}>&#9654;</span>
               {t("intel.form.improve")}
             </summary>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
-              <div>
-                <FieldLabel>{t("intel.field.email")}</FieldLabel>
-                <input
-                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="cfo@acme.com" disabled={running}
-                  className="gt-input"
-                />
-              </div>
               <div>
                 <FieldLabel>{t("intel.field.headcount")}</FieldLabel>
                 <input type="number" value={headcount} onChange={(e) => setHeadcount(e.target.value)} placeholder="120" disabled={running} className="gt-input" />
@@ -506,7 +511,7 @@ export default function IntelPage() {
                     {phases.executiveSnapshot.recommendedActionPath}
                   </p>
                 </div>
-                <div style={{ padding: "16px 14px", borderRadius: 12, background: "rgba(245,158,11,0.04)", border: `1px solid rgba(245,158,11,0.12)`, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ padding: "16px 14px", borderRadius: 12, background: "rgba(59,130,246,0.04)", border: `1px solid rgba(59,130,246,0.12)`, textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                   <p style={{ fontSize: 9, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 8 }}>{t("intel.metric.pressure")}</p>
                   <p className="vg-countup vg-delay-5" style={{ fontFamily: MO, fontSize: 20, fontWeight: 800, color: signalColor(100 - phases.executiveSnapshot.pressureScore), lineHeight: 1 }}>
                     {phases.executiveSnapshot.pressureScore}/100
@@ -635,14 +640,14 @@ export default function IntelPage() {
                   </p>
                   <p style={{ fontSize: 8, color: C.red, marginTop: 4, fontFamily: MO }}>{t("intel.costOfDelay.eurDayLost")}</p>
                 </div>
-                <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(245,158,11,0.03)", border: "1px solid rgba(245,158,11,0.10)", textAlign: "center" }}>
+                <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)", textAlign: "center" }}>
                   <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.everyMonth")}</p>
                   <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.amber, lineHeight: 1 }}>
                     {fmt(phases.costOfDelay.monthlyCostOfDelay[0])}&ndash;{fmt(phases.costOfDelay.monthlyCostOfDelay[1])}
                   </p>
                   <p style={{ fontSize: 8, color: C.text4, marginTop: 4, fontFamily: MO }}>{t("intel.costOfDelay.eurMoLost")}</p>
                 </div>
-                <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(245,158,11,0.03)", border: "1px solid rgba(245,158,11,0.10)", textAlign: "center" }}>
+                <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)", textAlign: "center" }}>
                   <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.ninetyDayProjection")}</p>
                   <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.amber, lineHeight: 1 }}>
                     {fmt(phases.costOfDelay.projectedDelayLoss90[0])}&ndash;{fmt(phases.costOfDelay.projectedDelayLoss90[1])}
@@ -913,7 +918,7 @@ export default function IntelPage() {
                 <div style={{ marginBottom: 12 }}>
                   <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.drift.categoryCostDrift")}</p>
                   {phases.driftMonitor.categoryDrifts.slice(0, 3).map((cd: any, i: number) => (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 50px 1fr", gap: 6, padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(245,158,11,0.02)", border: "1px solid rgba(245,158,11,0.08)", marginBottom: 3, alignItems: "center" }}>
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 50px 1fr", gap: 6, padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 3, alignItems: "center" }}>
                       <div>
                         <p style={{ fontSize: 11, fontWeight: 600, color: C.text1 }}>{cd.category}</p>
                         <p style={{ fontSize: 9, color: C.text4 }}>{cd.dominantCause}</p>
@@ -1686,7 +1691,7 @@ export default function IntelPage() {
                     </div>
                   )}
 
-                  <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(245,158,11,0.03)", border: "1px solid rgba(245,158,11,0.10)" }}>
+                  <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)" }}>
                     <p style={{ fontSize: 8, fontFamily: MO, color: C.amber, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.keyUncertainties")}</p>
                     {phases.decisionPack.consensusView.keyUncertainties.map((u: string, i: number) => (
                       <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.5, marginBottom: 3, paddingLeft: 8, borderLeft: `2px solid ${C.amber}30` }}>{u}</p>
@@ -1925,7 +1930,7 @@ function SimMetric({ label, value, color }: { label: string; value: string; colo
 
 function ConfBadge({ quality }: { quality: "strong" | "moderate" | "weak" }) {
   const { t } = useI18n();
-  const c = quality === "strong" ? "#059669" : quality === "moderate" ? "#D97706" : "#DC2626";
+  const c = quality === "strong" ? "#059669" : quality === "moderate" ? "#3b82f6" : "#DC2626";
   return (
     <span className="vg-badge" style={{ background: c + "10", border: `1px solid ${c}25`, color: c }}>
       {quality.toUpperCase()} {t("intel.benchmark.strongBenchmark")}
@@ -2142,7 +2147,7 @@ function ScanProgressIndicator({
 
 function SignalTier({ tier, color, signals }: { tier: string; color: string; signals: any[] }) {
   const { t } = useI18n();
-  const sevColors: Record<string, string> = { critical: "#DC2626", high: "#D97706", medium: "#d4a72c", low: "#059669" };
+  const sevColors: Record<string, string> = { critical: "#DC2626", high: "#3b82f6", medium: "#d4a72c", low: "#059669" };
   return (
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -2161,7 +2166,7 @@ function SignalTier({ tier, color, signals }: { tier: string; color: string; sig
                 <p style={{ fontSize: 12, fontWeight: 600, color: "#0F172A", marginBottom: 2 }}>{s.label}</p>
                 <p style={{ fontSize: 11, color: "#475569", lineHeight: 1.4 }}>{s.description}</p>
                 {s.impactEurRange && (
-                  <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#D97706", marginTop: 3 }}>
+                  <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#3b82f6", marginTop: 3 }}>
                     {fmt(s.impactEurRange[0])}&ndash;{fmt(s.impactEurRange[1])} &euro;/yr
                   </p>
                 )}

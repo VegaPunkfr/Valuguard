@@ -135,10 +135,10 @@ export const cWarm = {
   text3: "#7A7A7A",
   text4: "#A8A8A8",
 
-  accent:   "#E85B00",
-  accentHi: "#D04F00",
-  accentBg: "rgba(232,91,0,0.06)",
-  accentBd: "rgba(232,91,0,0.15)",
+  accent:   "#3b82f6",
+  accentHi: "#2563eb",
+  accentBg: "rgba(59,130,246,0.06)",
+  accentBd: "rgba(59,130,246,0.15)",
 
   green:    "#059669",
   greenBg:  "rgba(5,150,105,0.08)",

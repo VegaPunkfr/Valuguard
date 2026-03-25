@@ -260,10 +260,10 @@ export default function ContactPage() {
                 textAlign: "center",
               }}>
                 <p style={{ fontSize: 10, fontFamily: f.mono, color: c.text3, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>
-                  {t("contact.phone")}
+                  {t("contact.bookCall") || "Book a Call"}
                 </p>
-                <a href="tel:+33XXXXXXXXX" style={{ fontSize: 16, fontWeight: 700, color: c.text1, textDecoration: "none", fontFamily: f.mono }}>
-                  +33 X XX XX XX XX
+                <a href="https://cal.com/ghost-tax" target="_blank" rel="noopener noreferrer" style={{ fontSize: 16, fontWeight: 700, color: c.text1, textDecoration: "none", fontFamily: f.mono }}>
+                  Schedule 15 min
                 </a>
               </div>
               <div style={{

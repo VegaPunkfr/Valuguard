@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Tax — Style Vertice (Premium Hybrid)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #F8FAFC;
+  --elevated: #F1F5F9;
+  --border: #E2E8F0;
+  --border-s: #CBD5E1;
+  --text1: #0F172A;
+  --text2: #475569;
+  --text3: #64748B;
+  --text4: #94A3B8;
+  --purple: #7C3AED;
+  --purple-bg: rgba(124,58,237,0.06);
+  --purple-bd: rgba(124,58,237,0.18);
+  --green: #059669;
+  --green-bg: rgba(5,150,105,0.06);
+  --green-bd: rgba(5,150,105,0.15);
+  --red: #DC2626;
+  --red-bg: rgba(220,38,38,0.06);
+  --amber: #D97706;
+  --hero-bg: #0B1120;
+  --hero-text: #E8ECF4;
+  --hero-text2: #8D9BB5;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text1); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+/* ── Hero (Dark section like Vertice) ── */
+.hero-section {
+  background: var(--hero-bg);
+  color: var(--hero-text);
+  position: relative; overflow: hidden;
+}
+.hero-section::before {
+  content: '';
+  position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 0; position: relative; z-index: 2;
+}
+.hero-nav-brand { font-weight: 800; font-size: 17px; color: var(--hero-text); letter-spacing: -0.01em; }
+.hero-nav-brand span { color: var(--purple); }
+.hero-nav-links { display: flex; gap: 28px; }
+.hero-nav-links a { font-size: 13px; color: var(--hero-text2); text-decoration: none; font-weight: 500; transition: color 200ms; }
+.hero-nav-links a:hover { color: var(--hero-text); }
+.hero-nav-cta {
+  font-size: 12px; font-weight: 700; padding: 9px 22px;
+  background: var(--purple); color: white; border: none; border-radius: 8px;
+  cursor: pointer; transition: all 200ms;
+}
+.hero-nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.hero-content {
+  text-align: center; padding: 80px 0 48px;
+  position: relative; z-index: 2;
+}
+
+.hero-badges {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.hero-badge-item {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px;
+  border: 1px solid rgba(124,58,237,0.3);
+  color: rgba(124,58,237,0.8); background: rgba(124,58,237,0.06);
+}
+
+.hero-content h1 {
+  font-size: clamp(2.6rem, 5.5vw, 3.8rem);
+  font-weight: 800; line-height: 1.06; letter-spacing: -0.04em;
+  margin-bottom: 20px; max-width: 650px; margin-left: auto; margin-right: auto;
+}
+
+.hero-content p {
+  font-size: 17px; color: var(--hero-text2); max-width: 520px;
+  margin: 0 auto 36px; line-height: 1.7;
+}
+
+.hero-cta-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; }
+.hero-cta-primary {
+  padding: 14px 32px; font-size: 14px; font-weight: 700;
+  background: var(--purple); color: white; border: none;
+  border-radius: 10px; cursor: pointer; transition: all 200ms;
+}
+.hero-cta-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,58,237,0.3); }
+.hero-cta-secondary {
+  padding: 14px 32px; font-size: 14px; font-weight: 600;
+  background: transparent; color: var(--hero-text);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+  cursor: pointer; transition: all 200ms;
+}
+.hero-cta-secondary:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.04); }
+.hero-hint { font-size: 12px; color: rgba(141,155,181,0.6); text-align: center; }
+
+/* ── Stats strip (light) ── */
+.stats-strip { padding: 48px 0; background: var(--surface); border-bottom: 1px solid var(--border); }
+.stats-inner {
+  display: flex; justify-content: center; gap: 64px; flex-wrap: wrap;
+}
+.strip-stat { text-align: center; }
+.strip-stat-value { font-family: var(--mono); font-size: 36px; font-weight: 700; letter-spacing: -0.02em; }
+.strip-stat-label { font-size: 13px; color: var(--text3); margin-top: 4px; }
+
+/* ── Logo Marquee ── */
+.logos { padding: 40px 0; border-bottom: 1px solid var(--border); overflow: hidden; }
+.logos-label { text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text4); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
+.marquee { display: flex; gap: 56px; animation: scroll 20s linear infinite; width: max-content; }
+.marquee span { font-size: 15px; font-weight: 600; color: var(--text4); white-space: nowrap; }
+@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ── Feature Cards ── */
+.features { padding: 80px 0; }
+.section-tag { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); margin-bottom: 12px; }
+.section-heading { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 48px; max-width: 500px; }
+
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feat-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: transform 200ms, box-shadow 200ms;
+}
+.feat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.08); }
+.feat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; font-size: 18px;
+}
+.feat-icon--red { background: var(--red-bg); color: var(--red); }
+.feat-icon--green { background: var(--green-bg); color: var(--green); }
+.feat-icon--purple { background: var(--purple-bg); color: var(--purple); }
+.feat-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.feat-desc { font-size: 13px; color: var(--text3); line-height: 1.65; }
+
+/* ── Testimonials ── */
+.testimonials { padding: 80px 0; background: var(--surface); border-top: 1px solid var(--border); }
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.test-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px;
+}
+.test-metric {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.test-quote { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+.test-meta { display: flex; align-items: center; gap: 10px; padding-top: 16px; border-top: 1px solid var(--border); }
+.test-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--elevated); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text3); }
+.test-name { font-size: 13px; font-weight: 600; }
+.test-role { font-size: 11px; color: var(--text4); }
+
+/* ── CTA ── */
+.final { padding: 80px 0; text-align: center; }
+.final-box {
+  background: var(--hero-bg); border-radius: 24px;
+  padding: 64px 40px; color: var(--hero-text);
+  position: relative; overflow: hidden;
+}
+.final-box::before {
+  content: '';
+  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+  width: 500px; height: 400px;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.1) 0%, transparent 60%);
+}
+.final-box h2 { font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 14px; position: relative; }
+.final-box p { font-size: 16px; color: var(--hero-text2); max-width: 420px; margin: 0 auto 28px; line-height: 1.7; position: relative; }
+.final-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 36px; font-size: 14px; font-weight: 700;
+  background: var(--purple); color: white; border: none;
+  border-radius: 12px; cursor: pointer; transition: all 200ms; position: relative;
+}
+.final-btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,58,237,0.3); }
+.final-sub { margin-top: 12px; font-size: 12px; color: rgba(141,155,181,0.5); position: relative; }
+
+footer { padding: 32px 0; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--text4); }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  .hero-nav-links { display: none; }
+  .stats-inner { gap: 32px; }
+  .feat-grid, .test-grid { grid-template-columns: 1fr; }
+  .hero-cta-row { flex-direction: column; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .marquee { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO (dark like Vertice) ═══ -->
+<section class="hero-section">
+  <div class="container">
+    <nav class="hero-nav">
+      <div class="hero-nav-brand">Ghost<span>Tax</span></div>
+      <div class="hero-nav-links">
+        <a href="#">Platform</a><a href="#">Pricing</a><a href="#">Methodology</a>
+      </div>
+      <button class="hero-nav-cta">Book a Demo</button>
+    </nav>
+
+    <div class="hero-content">
+      <div class="hero-badges">
+        <span class="hero-badge-item">Decision Intelligence</span>
+        <span class="hero-badge-item">Savings Guaranteed</span>
+      </div>
+      <h1>Detect your<br>Ghost Tax.</h1>
+      <p>The AI-powered platform that finds hidden financial exposure in your SaaS, Cloud & AI spending. 48h delivery. Institutional-grade evidence.</p>
+      <div class="hero-cta-row">
+        <button class="hero-cta-primary">Free Scan — 90 seconds</button>
+        <button class="hero-cta-secondary">See methodology</button>
+      </div>
+      <p class="hero-hint">No login. No credit card. No data access required.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS (light) ═══ -->
+<section class="stats-strip">
+  <div class="stats-inner">
+    <div class="strip-stat">
+      <div class="strip-stat-value" style="color: var(--text1);">200+</div>
+      <div class="strip-stat-label">Audits completed</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-stat-value" style="color: var(--green);">20%</div>
+      <div class="strip-stat-label">Average savings found</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-stat-value" style="color: var(--purple);">7&times;</div>
+      <div class="strip-stat-label">Average ROI</div>
+    </div>
+    <div class="strip-stat">
+      <div class="strip-stat-value" style="color: var(--amber);">48h</div>
+      <div class="strip-stat-label">Delivery time</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LOGOS ═══ -->
+<section class="logos">
+  <div class="logos-label">Trusted by finance teams across Europe</div>
+  <div class="marquee">
+    <span>Mirakl</span><span>ContentSquare</span><span>PayFit</span><span>Alan</span><span>Spendesk</span><span>Swile</span><span>BackMarket</span><span>Malt</span><span>Revolut</span><span>Klarna</span>
+    <span>Mirakl</span><span>ContentSquare</span><span>PayFit</span><span>Alan</span><span>Spendesk</span><span>Swile</span><span>BackMarket</span><span>Malt</span><span>Revolut</span><span>Klarna</span>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<div class="container">
+  <section class="features reveal">
+    <div class="section-tag">What we detect</div>
+    <h2 class="section-heading">Complete exposure map. Delivered as a Decision Pack.</h2>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--red">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="feat-title">Orphan Licenses</div>
+        <div class="feat-desc">Seats nobody uses. Subscriptions nobody owns. Typically 15-30% of your SaaS budget.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--red">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+        </div>
+        <div class="feat-title">Tool Overlaps</div>
+        <div class="feat-desc">Multiple tools doing the same job across departments. We map every overlap and its cost.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--red">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+        </div>
+        <div class="feat-title">Auto-Renewals</div>
+        <div class="feat-desc">Contracts silently renewing at inflated rates. We flag every one within 60-90 days.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="feat-title">Negotiation Playbooks</div>
+        <div class="feat-desc">Vendor-specific scripts with timing, leverage points, and expected discount ranges.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+        </div>
+        <div class="feat-title">Decision Pack</div>
+        <div class="feat-desc">CFO memo, CIO brief, board slide, procurement plan. Ready to circulate internally.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon feat-icon--purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+        </div>
+        <div class="feat-title">Compliance Risks</div>
+        <div class="feat-desc">GDPR, DORA, EU AI Act exposure. Costed in EUR with remediation paths.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="testimonials reveal">
+  <div class="container">
+    <div class="section-tag">Results</div>
+    <h2 class="section-heading">Real savings. Real CFOs. Real numbers.</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-metric" style="color: var(--green);">280k EUR</div>
+        <p class="test-quote">"Ghost Tax found exposure we had zero visibility on. The board slide was ready before our next meeting."</p>
+        <div class="test-meta">
+          <div class="test-avatar">MK</div>
+          <div><div class="test-name">M. Kleiner</div><div class="test-role">CFO, Series B SaaS — Munich</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-metric" style="color: var(--green);">10&times; ROI</div>
+        <p class="test-quote">"48 hours. Our Big 4 audit took 5 months and found less. The negotiation playbooks alone paid for it."</p>
+        <div class="test-meta">
+          <div class="test-avatar">SL</div>
+          <div><div class="test-name">S. Laurent</div><div class="test-role">VP Finance — Paris</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-metric" style="color: var(--green);">3 renegotiations</div>
+        <p class="test-quote">"Forwarded the Decision Pack. Three vendor renegotiations started the same week. Now part of our quarterly."</p>
+        <div class="test-meta">
+          <div class="test-avatar">JR</div>
+          <div><div class="test-name">J. Richter</div><div class="test-role">IT Director — Zurich</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<div class="container">
+  <section class="final reveal">
+    <div class="final-box">
+      <h2>Stop leaking. <span style="color: rgba(124,58,237,0.8);">Start recovering.</span></h2>
+      <p>Free scan in 90 seconds. Zero data access. If we find nothing, you owe nothing.</p>
+      <button class="final-btn">Detect Your Ghost Tax &rarr;</button>
+      <p class="final-sub">490 EUR for the full Decision Pack — Savings Guaranteed.</p>
+    </div>
+  </section>
+</div>
+
+<footer><div class="container">Ghost Tax &copy; 2026 — Decision Intelligence for IT Spending — GDPR Compliant</div></footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

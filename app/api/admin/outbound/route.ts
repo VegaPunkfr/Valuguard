@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
     .limit(limit);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Admin Outbound] DB error:", error.message);
+    return NextResponse.json({ error: "Failed to fetch prospects" }, { status: 500 });
   }
 
   return NextResponse.json({ prospects: data || [], count: data?.length || 0 });
@@ -123,7 +124,8 @@ export async function POST(req: NextRequest) {
     .eq("domain", domain);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Admin Outbound] Update error:", error.message);
+    return NextResponse.json({ error: "Failed to update prospect" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, domain, status: newStatus });

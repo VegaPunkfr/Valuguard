@@ -187,13 +187,13 @@ export function getDripHtml(touch: number, lead: DripLead): string {
       <p style="font-family:'Courier New',monospace;font-size:30px;font-weight:800;color:#DC2626;margin:0">${fmtEur(exposureLow)}–${fmtEur(exposureHigh)} €</p>
       <p style="font-size:11px;color:#64748B;margin:8px 0 0 0">${domain}</p>
     </div>` : `
-    <div style="background:#F8FAFC;border:1px solid rgba(217,119,6,0.20);border-radius:10px;padding:20px;margin:0 0 20px 0">
+    <div style="background:#F8FAFC;border:1px solid rgba(59,130,246,0.20);border-radius:10px;padding:20px;margin:0 0 20px 0">
       <p style="font-size:13px;color:#475569;line-height:1.7;margin:0">
         ${l === 'fr'
-          ? `Votre scan a révélé des <strong style="color:#D97706">signaux d'exposition financière</strong> sur ${domain}. L'analyse complète quantifie l'exposition par fournisseur, identifie les causes dominantes, et génère les protocoles de correction.`
+          ? `Votre scan a révélé des <strong style="color:#3b82f6">signaux d'exposition financière</strong> sur ${domain}. L'analyse complète quantifie l'exposition par fournisseur, identifie les causes dominantes, et génère les protocoles de correction.`
           : l === 'de'
-          ? `Ihr Scan hat <strong style="color:#D97706">finanzielle Expositionssignale</strong> für ${domain} aufgedeckt. Die vollständige Analyse quantifiziert die Exposition nach Anbieter, identifiziert Hauptursachen und generiert Korrekturprotokolle.`
-          : `Your scan revealed <strong style="color:#D97706">financial exposure signals</strong> on ${domain}. The full analysis quantifies exposure by vendor, identifies root causes, and generates corrective protocols.`}
+          ? `Ihr Scan hat <strong style="color:#3b82f6">finanzielle Expositionssignale</strong> für ${domain} aufgedeckt. Die vollständige Analyse quantifiziert die Exposition nach Anbieter, identifiziert Hauptursachen und generiert Korrekturprotokolle.`
+          : `Your scan revealed <strong style="color:#3b82f6">financial exposure signals</strong> on ${domain}. The full analysis quantifies exposure by vendor, identifies root causes, and generates corrective protocols.`}
       </p>
     </div>`
 
@@ -322,11 +322,11 @@ export function getDripHtml(touch: number, lead: DripLead): string {
       <table style="width:100%;border-collapse:collapse">
         <tr><td style="padding:9px 8px;border-bottom:1px solid #E2E8F0;color:#475569;font-size:12px">${atScanLabel}</td><td style="padding:9px 8px;border-bottom:1px solid #E2E8F0;color:#475569;font-family:'Courier New',monospace;text-align:right;font-size:12px">${fmtEur(exposureLow)}–${fmtEur(exposureHigh)} €</td></tr>
         <tr><td style="padding:9px 8px;border-bottom:1px solid #E2E8F0;color:#475569;font-size:12px">${leakLabel}</td><td style="padding:9px 8px;border-bottom:1px solid #E2E8F0;color:#DC2626;font-family:'Courier New',monospace;font-weight:700;text-align:right;font-size:12px">${fmtEur(leakSinceScan)} €</td></tr>
-        <tr><td style="padding:9px 8px;color:#475569;font-size:12px">${projLabel}</td><td style="padding:9px 8px;color:#D97706;font-family:'Courier New',monospace;font-weight:700;text-align:right;font-size:12px">${fmtEur(projectedLow)}–${fmtEur(projectedHigh)} €</td></tr>
+        <tr><td style="padding:9px 8px;color:#475569;font-size:12px">${projLabel}</td><td style="padding:9px 8px;color:#3b82f6;font-family:'Courier New',monospace;font-weight:700;text-align:right;font-size:12px">${fmtEur(projectedLow)}–${fmtEur(projectedHigh)} €</td></tr>
       </table>
     </div>
     <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">${body}</p>
-    ${ctaButton(ctaLabel, checkoutUrl, '#D97706')}
+    ${ctaButton(ctaLabel, checkoutUrl, '#3b82f6')}
     ${paymentNote(l)}`
 
     return emailShell(content, unsubUrl, l)

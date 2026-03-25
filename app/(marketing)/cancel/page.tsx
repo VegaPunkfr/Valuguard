@@ -121,8 +121,8 @@ export default function CancelPage() {
           {/* ── Peer Pressure ── */}
           <div
             style={{
-              background: "rgba(245,158,11,0.06)",
-              border: `1px solid rgba(245,158,11,0.18)`,
+              background: "rgba(59,130,246,0.06)",
+              border: `1px solid rgba(59,130,246,0.18)`,
               borderRadius: 10,
               padding: "16px 20px",
               marginBottom: 24,
@@ -160,7 +160,7 @@ export default function CancelPage() {
           </div>
 
           {/* Cost of delay */}
-          <div style={{ background: "rgba(245,158,11,0.06)", border: `1px solid rgba(245,158,11,0.18)`, borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "center" }}>
+          <div style={{ background: "rgba(59,130,246,0.06)", border: `1px solid rgba(59,130,246,0.18)`, borderRadius: 10, padding: "16px 20px", marginBottom: 24, textAlign: "center" }}>
             <p style={{ ...sectionLabel, fontSize: 10, color: c.amber, marginBottom: 8 }}>
               {t("cancel.costOfDelay.title")}
             </p>

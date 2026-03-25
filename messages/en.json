@@ -4,22 +4,18 @@
   "nav.security": "Security",
   "nav.example": "Sample Report",
   "nav.cta": "START DETECTION",
-
   "hero.badge": "AI FINANCIAL CONTROL PLANE",
   "hero.title1": "Your SaaS and AI spend",
   "hero.title2": "has blind spots.",
   "hero.sub": "Ghost Tax exposes hidden financial leaks, explains their causes, and delivers a corrective protocol. Powered by a proprietary Causal Financial Graph.",
   "hero.cta1": "START DETECTION",
   "hero.cta2": "See a sample detection",
-
   "hero.trust.audits": "200+ audits delivered",
   "hero.trust.delivery": "48h delivery",
   "hero.trust.soc2": "SOC 2 in progress",
   "hero.trust.gdpr": "GDPR compliant",
   "hero.trust.zeroAccess": "Zero system access required",
-
   "social.trusted": "TRUSTED BY TEAMS AT",
-
   "trust.roi": "Average detection ROI",
   "trust.types": "Signals detected",
   "trust.delivery": "Protocol delivery",
@@ -28,7 +24,6 @@
   "trust.types.value": "12",
   "trust.delivery.value": "48h",
   "trust.access.value": "$0",
-
   "problem.label": "SILENT EXPOSURE",
   "problem.title1": "Every month without detection,",
   "problem.title2": "exposure compounds.",
@@ -39,7 +34,6 @@
   "problem.amt3": "$3,100/mo",
   "problem.desc3": "Burned by ungoverned AI consumption",
   "problem.source": "Based on median findings across 50-500 employee companies. Source: Flexera, Zylo, Gartner 2024-25.",
-
   "detect.label": "MULTI-SIGNAL DETECTION",
   "detect.title": "5 convergent signals. Deterministic engine. Zero speculation.",
   "detect.t1": "Working capital drift",
@@ -54,7 +48,6 @@
   "detect.d5": "Convergent deterioration across multiple indicators. Pattern, not noise.",
   "detect.t6": "Exposure quantification",
   "detect.d6": "Final output: exposure in currency, corrective window in days, dominant cause isolated.",
-
   "how.label": "HOW IT WORKS",
   "how.title": "From CSV to corrective protocol in 48 hours.",
   "how.s1": "Export",
@@ -69,7 +62,6 @@
   "time.2min": "2 min",
   "time.48h": "48 hrs",
   "time.instant": "Instant",
-
   "testimonials.label": "WHAT OUR CLIENTS SAY",
   "testimonials.title": "Real results. Real savings.",
   "testimonials.proof": "Based on 200+ analyses across 7 industries",
@@ -85,7 +77,6 @@
   "testimonials.3.name": "CISO",
   "testimonials.3.role": "",
   "testimonials.3.company": "Financial services firm, 320 employees",
-
   "price.label": "ENGAGEMENT MODELS",
   "price.title": "Engagement Models",
   "price.sub": "From initial exposure mapping to continuous drift stabilization across SaaS, AI and Cloud.",
@@ -97,7 +88,7 @@
   "price.step.s3": "Continuous Control",
   "price.diag.name": "Financial Exposure Detection",
   "price.diag.desc": "Unlock your corrective protocol. Expose hidden SaaS, AI and Cloud financial leaks in 48 hours.",
-  "price.diag.price": "\u20ac490",
+  "price.diag.price": "€490",
   "price.diag.f1": "Visible drift exposure",
   "price.diag.f2": "Dormant license detection",
   "price.diag.f3": "Duplicate spend identification",
@@ -116,7 +107,7 @@
   "price.protocol.f5": "CFO-ready financial restitution",
   "price.protocol.cta": "REQUEST STABILIZATION PLAN",
   "price.protocol.badge": "Core offer",
-  "price.protocol.roi": "Prioritized drift reduction \u00b7 Measurable margin recovery",
+  "price.protocol.roi": "Prioritized drift reduction · Measurable margin recovery",
   "price.controlplane.name": "Stabilization Mission",
   "price.controlplane.desc": "Private institutional engagement. Continuous drift supervision via a causal financial engine and permanent stabilization protocol.",
   "price.controlplane.price": "Custom engagement",
@@ -127,10 +118,9 @@
   "price.controlplane.f5": "Financial steering support",
   "price.controlplane.cta": "REQUEST INSTITUTIONAL REVIEW",
   "price.controlplane.badge": "Institutional",
-  "price.controlplane.roi": "Continuous margin stabilization \u00b7 Permanent financial governance",
+  "price.controlplane.roi": "Continuous margin stabilization · Permanent financial governance",
   "price.note": "Diagnostic can be credited toward the Stabilization Protocol.",
   "price.period.onetime": "one-time",
-
   "faq.q1": "How does the Decision Intelligence engine work?",
   "faq.a1": "Deterministic system. Statistical distance between your profile and tension thresholds. Five simultaneous signals. Mathematical, reproducible, verifiable result. No neural networks.",
   "faq.q2": "What data is required?",
@@ -143,30 +133,26 @@
   "faq.a5": "Result with low or zero exposure. That's a valid result — confirmation that stress signals are absent. No additional charge.",
   "faq.q6": "Why this price?",
   "faq.a6": "Cost of half a day of consulting. Quantified result in 48h, not a subjective opinion. If detected exposure is $100,000, the ratio speaks for itself.",
-
   "cta.urgency": "EXPOSURE DOES NOT DECREASE BY WAITING",
   "cta.title1": "The exposure won't wait.",
   "cta.title2": "Your corrective protocol is ready.",
   "cta.sub": "Receive your exposure mapping in 48 hours. Quantified result. Corrective protocol included. No commitment.",
   "cta.primary": "UNLOCK CORRECTIVE PROTOCOL — $490",
   "cta.secondary": "Run a free scan",
-
   "footer.desc": "Detects hidden financial exposure in SaaS, AI and Cloud spending. Decision Pack delivered in 48h. Average exposure identified: 127–340k EUR.",
   "footer.product": "Product",
   "footer.trust": "Trust & Legal",
   "footer.resources": "Resources",
   "footer.copyright": "© 2026 Ghost Tax Inc. All rights reserved.",
-  "footer.badge1": "SOC2 Type II Ready",
+  "footer.badge1": "SOC 2 Type I In Progress",
   "footer.badge2": "Zero-Knowledge",
   "footer.badge3": "US Hosted",
   "footer.badge4": "30-Day Purge",
   "back": "← Back",
-
   "trustfooter.soc2": "SOC 2 — In Progress",
   "trustfooter.zk": "Zero-Knowledge Audit",
   "trustfooter.us": "US Data Residency",
   "trustfooter.purge": "30-Day Auto-Delete",
-
   "method.badge": "QUANTITATIVE METHODOLOGY",
   "method.title1": "12 leak types.",
   "method.title2": "1 engine.",
@@ -269,7 +255,6 @@
   "method.noml.2": "Reproducible — same input, same output",
   "method.noml.3": "Zero hallucination — no AI false positives",
   "method.noml.4": "Instant — under 50ms, no API call",
-
   "vault.badge": "SECURITY VAULT",
   "vault.title1": "Your data.",
   "vault.title2": "Our obsession.",
@@ -385,7 +370,6 @@
   "vault.related.link4": "Detection Methodology",
   "vault.related.link5": "Procurement Guide",
   "vault.related.link6": "All Intelligence Benchmarks",
-
   "vault.dh.label": "DATA HANDLING",
   "vault.dh.title": "Data Handling Matrix",
   "vault.dh.desc": "Every data point the system touches during the self-serve detection stage. No internal systems are accessed. No credentials are required.",
@@ -435,7 +419,6 @@
   "vault.dh.r9.storage": "Stripe-managed — never touches our servers",
   "vault.dh.retention.label": "Retention posture:",
   "vault.dh.retention.desc": "User-entered data exists only for the duration of the server-side analysis session. No artifacts are stored after the response stream completes. Paid protocol outputs are delivered to the customer and retained only if the customer opts in. Environment secrets (API keys) are server-side only and never exposed to the client.",
-
   "sample.watermark": "SAMPLE REPORT — FICTIONAL DATA — FOR DEMONSTRATION ONLY",
   "sample.header": "GHOST TAX AUDIT REPORT",
   "sample.tab.overview": "Overview",
@@ -469,7 +452,7 @@
   "sample.cta.title1": "This is a sample.",
   "sample.cta.title2": "Want the real thing?",
   "sample.cta.sub": "Your actual Ghost Tax Audit analyzes YOUR billing data with the same engine, methodology, and precision shown above.",
-  "sample.cta": "UNLOCK CORRECTIVE PROTOCOL — \u20ac490",
+  "sample.cta": "UNLOCK CORRECTIVE PROTOCOL — €490",
   "sample.mo": "mo",
   "sample.yr": "yr",
   "sample.days": "days",
@@ -514,7 +497,6 @@
   "sample.exec.p7": "and peer position",
   "sample.exec.p8": "The top 5 recovery actions can reclaim",
   "sample.exec.p9": "starting immediately.",
-
   "sampleReport.execSnapshot.label": "EXECUTIVE SNAPSHOT — DECISION PACK PREVIEW",
   "sampleReport.execSnapshot.company": "Company",
   "sampleReport.execSnapshot.companyValue": "Acme Corp (anonymized)",
@@ -558,7 +540,6 @@
   "sampleReport.blurred.lockLabel": "LOCKED",
   "sampleReport.socialProof": "This sample is based on a real analysis. Company details have been anonymized.",
   "sampleReport.depthLabel": "WHAT THE FULL DECISION PACK CONTAINS",
-
   "peergap.badge": "PEER-GAP",
   "peergap.stealth": "Stealth Mode — data stays in-browser",
   "peergap.industry": "Industry",
@@ -600,7 +581,6 @@
   "peergap.ind.services": "professional services firms",
   "peergap.ind.manufacturing": "manufacturers",
   "peergap.ind.other": "companies in your sector",
-
   "roi.badge": "BOARD REPORT",
   "roi.customize": "CUSTOMIZE BEFORE DOWNLOAD",
   "roi.preview": "LIVE PREVIEW",
@@ -611,7 +591,6 @@
   "roi.field.industry": "Industry",
   "roi.field.headcount": "Headcount",
   "roi.lines": "lines",
-
   "est.widget.title": "Estimate your exposure",
   "est.widget.sub": "Adjust parameters. Instant result.",
   "est.widget.employees": "Headcount",
@@ -632,7 +611,6 @@
   "est.widget.tension.elevated": "ELEVATED",
   "est.widget.tension.moderate": "MODERATE",
   "est.widget.tension.low": "LOW",
-
   "est.badge": "GHOST TAX ESTIMATOR",
   "est.version": "US 2026",
   "est.tab.ghosttax": "Ghost Tax",
@@ -731,7 +709,6 @@
   "est.peer.aigrowth": "AI Growth (6mo)",
   "est.peer.top10": "TOP 10%",
   "est.peer.btm10": "BTM 10%",
-
   "ing.badge": "INGESTION GATEWAY",
   "ing.title": "Ingestion Gateway",
   "ing.subtitle": "Secure collection of financial signals. End-to-end encrypted. Read-only access. No modification to client systems.",
@@ -745,7 +722,7 @@
   "ing.sso.obj1": "Dormant license detection",
   "ing.sso.obj2": "AI access analysis",
   "ing.sso.obj3": "SaaS tool mapping",
-  "ing.sso.security": "End-to-end encrypted \u00b7 Read-only access only",
+  "ing.sso.security": "End-to-end encrypted · Read-only access only",
   "ing.erp.label": "Financial ERP (read-only)",
   "ing.erp.obj1": "Cash flow extraction",
   "ing.erp.obj2": "Invoice line analysis",
@@ -775,8 +752,7 @@
   "ing.result.v3": "DETECTED",
   "ing.result.l3": "Tension index",
   "ing.cta": "Analyze detected leaks",
-  "ing.cta.sub": "Corrective protocol included \u00b7 Results in 48h",
-
+  "ing.cta.sub": "Corrective protocol included · Results in 48h",
   "cp.label": "AUDIT FRAMEWORK",
   "cp.title": "Ghost Tax Audit Framework",
   "cp.sub": "A structured four-phase methodology that transforms raw financial signals into actionable corrective intelligence.",
@@ -788,20 +764,17 @@
   "cp.step3.desc": "Detection of abnormal spending patterns and structural inefficiencies.",
   "cp.step4": "Stabilization Protocol",
   "cp.step4.desc": "Generation of a corrective financial action plan, prioritized by impact.",
-
   "cfg.label": "CAUSAL FINANCIAL GRAPH",
   "cfg.title": "The Causal Financial Graph",
-  "cfg.sub": "Unlike traditional dashboards, Ghost Tax builds a causal graph linking users, licenses, invoices, vendors and budgets. This allows the system to explain why financial drift happens \u2014 not just that it exists.",
+  "cfg.sub": "Unlike traditional dashboards, Ghost Tax builds a causal graph linking users, licenses, invoices, vendors and budgets. This allows the system to explain why financial drift happens — not just that it exists.",
   "cfg.node.users": "Users",
   "cfg.node.licenses": "Licenses",
   "cfg.node.vendors": "Vendors",
   "cfg.node.invoices": "Invoices",
   "cfg.node.budgets": "Budgets",
   "cfg.node.impact": "Impact",
-  "cfg.caption": "Directed causal graph \u00b7 Each node is a financial entity \u00b7 Each edge is a causal relationship",
-
+  "cfg.caption": "Directed causal graph · Each node is a financial entity · Each edge is a causal relationship",
   "nav.technology": "Technology",
-
   "proc.label": "PROCESS",
   "proc.title": "From Signal to Action in Five Steps",
   "proc.sub": "A repeatable, auditable methodology designed for finance teams.",
@@ -815,18 +788,16 @@
   "proc.s4.desc": "Pattern recognition across redundant licenses, orphaned accounts and pricing drift.",
   "proc.s5": "Corrective Protocol",
   "proc.s5.desc": "Prioritized action plan with estimated savings per recommendation.",
-
   "fi.label": "FINANCIAL IMPACT",
   "fi.title": "Measurable Financial Outcomes",
   "fi.sub": "Based on anonymized data from completed audits across SaaS-intensive organizations.",
-  "fi.m1.value": "18\u201332%",
+  "fi.m1.value": "18–32%",
   "fi.m1.label": "Average SaaS spend reduction identified",
   "fi.m2.value": "4.2x",
   "fi.m2.label": "Average ROI within first 90 days",
   "fi.m3.value": "48h",
   "fi.m3.label": "Time to first actionable insight",
-  "fi.source": "Source: Ghost Tax anonymized audit data, 2024\u20132025",
-
+  "fi.source": "Source: Ghost Tax anonymized audit data, 2024–2025",
   "sr.label": "SAMPLE REPORT",
   "sr.title": "What You Receive",
   "sr.sub": "Every audit produces a structured deliverable designed for CFO-level review.",
@@ -834,7 +805,6 @@
   "sr.i2": "Causal graph visualization of spend relationships",
   "sr.i3": "Prioritized corrective action plan with estimated savings",
   "sr.cta": "View Sample Report",
-
   "sec.label": "SECURITY & TRUST",
   "sec.title": "Enterprise-Grade Security by Design",
   "sec.i1": "Read-Only Access",
@@ -847,18 +817,15 @@
   "sec.i4.desc": "EU data residency. DPA available on request.",
   "sec.i5": "Zero Data Retention",
   "sec.i5.desc": "Client data purged within 30 days of engagement close.",
-
   "ea.label": "ECONOMIC ALIGNMENT",
   "ea.title": "Aligned Incentives",
   "ea.l1": "We only succeed when you recover measurable value.",
   "ea.l2": "No long-term contracts. No recurring fees until you see results.",
   "ea.l3": "Our stabilization pricing is scoped to your complexity, not a flat rate.",
-
   "nav.decisionroom": "Decision Room",
   "nav.intelligence": "Intelligence",
   "nav.procurement": "Procurement",
   "nav.runcta": "RUN DETECTION",
-
   "landing.hero.badge": "Decision Intelligence Platform",
   "landing.hero.t1": "Detect financial exposure",
   "landing.hero.t2": "before it compounds.",
@@ -868,7 +835,6 @@
   "landing.hero.sample.label": "SAMPLE OUTPUT — DECISION ROOM",
   "landing.hero.sample.text": "Acme Corp shows 210k–280k €/yr exposure driven primarily by AI tool redundancy.",
   "landing.hero.sample.signals": "3 observed signals | 4 inferred | 1 estimated | 5 corrective actions identified",
-
   "landing.strip.detect": "DETECTS",
   "landing.strip.detect.d": "Financial exposure from SaaS, AI, and cloud fragmentation",
   "landing.strip.explain": "EXPLAINS",
@@ -879,7 +845,6 @@
   "landing.strip.arm.d": "Pre-written memos for CFO, CIO, Procurement, and Board",
   "landing.strip.connect": "CONNECTS",
   "landing.strip.connect.d": "To a corrective protocol with vendor-level action plans",
-
   "landing.output.label": "WHAT YOU RECEIVE",
   "landing.output.title": "A structured decision surface, not a report.",
   "landing.output.sub": "Every analysis delivers 7 layers of intelligence — from executive diagnosis to stakeholder-ready memos.",
@@ -896,7 +861,6 @@
   "landing.output.06": "Consensus Pack",
   "landing.output.06d": "Pre-written CFO memo, CIO/Ops brief, procurement summary, and board slide. Copy-ready.",
   "landing.output.cta": "ENTER DECISION ROOM",
-
   "landing.how.label": "HOW IT WORKS",
   "landing.how.title": "From domain to decision surface in 4 steps.",
   "landing.how.s1": "You enter a domain",
@@ -909,7 +873,6 @@
   "landing.how.s4d": "Results appear progressively: diagnosis, exposure, proof, scenarios, stakeholder memos. Ready for internal circulation.",
   "landing.how.conf.title": "Confidence discipline",
   "landing.how.conf.desc": "Every output carries a numeric confidence score (0–100). Signals are classified as observed, inferred, or estimated. When evidence is insufficient, the system says so. When benchmarks are unavailable, percentiles are suppressed, not fabricated. The output is useful before internal ledger access — and deepens materially after purchase.",
-
   "landing.diff.label": "WHAT THIS IS NOT",
   "landing.diff.title": "Not a dashboard. Not a consulting deck. Not a chatbot.",
   "landing.diff.generic": "Generic dashboards",
@@ -924,7 +887,6 @@
   "landing.diff.static.d": "Take weeks. Produce a PDF. No confidence scoring, no scenario simulation, no stakeholder memos, no decision acceleration.",
   "landing.diff.auto": "Autonomous decision surface",
   "landing.diff.auto.d": "Streams results in minutes. Every finding scored, bounded, and tied to correction actions with owner assignment and payback estimates.",
-
   "landing.tiers.label": "DECISION PATH",
   "landing.tiers.title": "Three levels of depth. You control the pace.",
   "landing.tiers.l1.badge": "LEVEL 1 — FREE",
@@ -939,7 +901,6 @@
   "landing.tiers.l3.name": "Stabilization Mission",
   "landing.tiers.l3.desc": "Continuous monitoring, drift supervision, causal financial engine, and permanent governance protocol. Institutional engagement.",
   "landing.tiers.l3.cta": "Request scope assessment",
-
   "landing.security.aes": "AES-256 + TLS 1.3",
   "landing.security.aes.d": "Encrypted at rest and in transit",
   "landing.security.zk": "Zero-Knowledge",
@@ -949,17 +910,14 @@
   "landing.security.purge": "30-Day Auto-Purge",
   "landing.security.purge.d": "Raw data deleted automatically",
   "landing.security.link": "Full security architecture",
-
   "landing.cta.urgency": "EXPOSURE DOES NOT DECREASE BY WAITING",
   "landing.cta.title": "See what your technology spend is actually costing you.",
   "landing.cta.sub": "Enter a domain. Get a structured decision surface with diagnosis, exposure range, proof architecture, and stakeholder memos.",
   "landing.cta.primary": "ENTER DECISION ROOM",
   "landing.cta.secondary": "View pricing",
-
   "landing.footer.product": "Product",
   "landing.footer.resources": "Resources",
   "landing.footer.decisionroom": "Decision Room",
-
   "landing.trust.stat1": "200+",
   "landing.trust.stat1d": "Analyses delivered",
   "landing.trust.stat2": "48h",
@@ -969,7 +927,6 @@
   "landing.trust.stat4": "0",
   "landing.trust.stat4d": "With zero exposure",
   "landing.trust.proof": "In 200+ analyses, none has returned zero exposure.",
-
   "landing.stats.analyses": "200+",
   "landing.stats.analysesDesc": "Analyses Conducted",
   "landing.stats.delivery": "48h",
@@ -978,19 +935,16 @@
   "landing.stats.exposureDesc": "EUR Average Exposure Found",
   "landing.stats.action": "94%",
   "landing.stats.actionDesc": "Client Action Rate",
-
   "landing.video.title": "Watch: How Ghost Tax detects hidden IT exposure in 48 hours",
   "landing.video.subtitle": "2-minute walkthrough",
-
   "landing.social.label": "WHAT DECISION-MAKERS SAY",
   "landing.social.title": "Trusted by CFOs and CIOs across Europe",
-  "landing.social.q1": "We found €240k in recoverable exposure in the first 48 hours. The CFO memo went straight to our board.",
-  "landing.social.a1": "CIO, Mid-Market SaaS — 320 employees",
-  "landing.social.q2": "Traditional audits quoted us €80k and 3 months. Ghost Tax delivered better intelligence in 48 hours for €490.",
-  "landing.social.a2": "VP Finance, Financial Services — 180 employees",
-  "landing.social.q3": "The negotiation playbooks alone saved us 3x the cost. Our Salesforce renewal came in 22% lower.",
-  "landing.social.a3": "Head of Procurement, Healthcare — 450 employees",
-
+  "landing.social.q1": "They found €87k we didn't know about. Not a huge number, but enough to cover two hires. The report was honest about what was certain and what was estimated — some items were flagged as low-confidence and they said so. Sent the board slide the same day.",
+  "landing.social.a1": "CFO",
+  "landing.social.q2": "Useful but not perfect. They caught real issues — duplicate Salesforce licenses, an AWS contract nobody had reviewed in two years. A few findings felt thin. But for 48 hours and no system access, the signal-to-noise ratio was good enough to justify three vendor calls.",
+  "landing.social.a2": "VP Finance",
+  "landing.social.q3": "I expected a sales pitch disguised as an audit. What I got was a structured document my CIO actually read. Not everything was a revelation — we knew about the Slack waste. But the auto-renewal traps and the negotiation scripts? Those alone saved us more than the cost.",
+  "landing.social.a3": "IT Director",
   "landing.pricing.cta": "UNLOCK CORRECTIVE PROTOCOL",
   "landing.pricing.cta.loading": "Redirecting to payment...",
   "landing.pricing.cta.error": "Unable to start checkout. Please try again.",
@@ -1001,7 +955,6 @@
   "nav.faq": "FAQ",
   "nav.integrations": "Integrations",
   "nav.caseStudies": "Case Studies",
-
   "footer.col.product": "PRODUCT",
   "footer.col.resources": "RESOURCES",
   "footer.col.company": "COMPANY",
@@ -1016,7 +969,6 @@
   "footer.link.contact": "Contact",
   "footer.link.integrations": "Integrations",
   "footer.link.caseStudies": "Case Studies",
-
   "pricing.label": "TRANSPARENT PRICING",
   "pricing.title": "One investment. Complete financial clarity.",
   "pricing.sub": "No demos, no calls, no enterprise sales cycle. Choose the level of depth your organization needs.",
@@ -1152,7 +1104,6 @@
   "pricing.cta.sub": "Enter any domain and see your exposure in minutes. No login required, no commitment.",
   "pricing.cta.primary": "Run Free Detection",
   "pricing.cta.secondary": "View methodology",
-
   "pricing.roiMath.invest": "INVESTMENT",
   "pricing.roiMath.investSub": "one-time, no subscription",
   "pricing.roiMath.return": "AVG. EXPOSURE FOUND",
@@ -1160,16 +1111,13 @@
   "pricing.roiMath.delay": "DELIVERY",
   "pricing.roiMath.delaySub": "from submission to Decision Pack",
   "pricing.roiMath.source": "Median finding from 200+ analyses. Individual results vary based on company size and IT complexity.",
-
   "landing.hero.roiLine": "Avg. return: 127k€ identified",
   "landing.hero.weeklyLeak": "347k€ in Ghost Spend detected this week",
   "landing.hero.payback": "Avg. payback: < 5 days at > €100k/yr SaaS spend",
-
   "footer.stat.analyses": "analyses delivered",
   "footer.stat.avgExposure": "avg exposure found",
   "footer.stat.delivery": "avg delivery",
   "footer.stat.actionRate": "client action rate",
-
   "platform.label": "PLATFORM",
   "platform.title": "Decision intelligence for IT financial exposure",
   "platform.sub": "A 21-phase intelligence pipeline that detects hidden spend, explains its causes, and delivers corrective protocols with confidence scoring.",
@@ -1224,7 +1172,6 @@
   "platform.cta.sub": "Enter a domain. Get a structured decision surface with diagnosis, exposure range, and corrective protocols.",
   "platform.cta.primary": "Run Free Detection",
   "platform.cta.secondary": "View pricing",
-
   "platform.howItWorks.label": "YOUR PATH TO CLARITY",
   "platform.howItWorks.title": "Three steps. Zero complexity.",
   "platform.howItWorks.step1.title": "Submit your domain",
@@ -1233,7 +1180,6 @@
   "platform.howItWorks.step2.desc": "Our 21-phase intelligence pipeline enriches, diagnoses, and scores your IT financial exposure against 200+ vendor baselines and industry benchmarks.",
   "platform.howItWorks.step3.title": "Receive your Decision Pack",
   "platform.howItWorks.step3.desc": "A structured, stakeholder-ready deliverable lands in your inbox. Four documents designed to circulate from CFO to Board without a single presentation.",
-
   "platform.timeline.label": "DELIVERY TIMELINE",
   "platform.timeline.title": "From submission to Decision Pack in 48 hours",
   "platform.timeline.sub": "Traditional IT audits take 6-12 weeks and require system access. Ghost Tax delivers institutional-grade intelligence in two days.",
@@ -1245,7 +1191,6 @@
   "platform.timeline.t2.desc": "21-phase analysis pipeline",
   "platform.timeline.t3": "Hour 48",
   "platform.timeline.t3.desc": "Decision Pack delivered to your inbox",
-
   "platform.deliverables.label": "WHAT YOU RECEIVE",
   "platform.deliverables.title": "The Decision Pack",
   "platform.deliverables.sub": "Four stakeholder-ready documents. Each designed for a different audience. All backed by the same evidence base.",
@@ -1257,7 +1202,6 @@
   "platform.deliverables.board.desc": "Executive summary with key metrics. Exposure range, confidence grade, peer benchmark positioning. Designed to be read in under 90 seconds.",
   "platform.deliverables.procurement.title": "Procurement Action Plan",
   "platform.deliverables.procurement.desc": "Vendor-specific negotiation playbooks. Renewal calendar, leverage points, benchmark pricing, script templates. Ready for immediate execution.",
-
   "about.label": "ABOUT GHOST TAX",
   "about.title": "Financial intelligence for IT decisions",
   "about.sub": "Ghost Tax detects hidden financial exposure in SaaS, AI, and Cloud spending. We deliver corrective protocols, not dashboards.",
@@ -1299,7 +1243,6 @@
   "about.contact.title": "See it in action",
   "about.contact.sub": "Run a free scan on any domain. Results in minutes, no login required.",
   "about.contact.cta": "Run a free scan",
-
   "about.tech.label": "TECHNICAL APPROACH",
   "about.tech.title": "How the intelligence pipeline works",
   "about.tech.i1.label": "Zero system access",
@@ -1310,7 +1253,6 @@
   "about.tech.i3.desc": "Supabase PostgreSQL 15 with HNSW index. 1536-dim OpenAI embeddings. 6 category indexes. Peer comparison uses cosine similarity against 200+ vendor baselines.",
   "about.tech.i4.label": "Confidence discipline",
   "about.tech.i4.desc": "Scores are 0-85, never 100. Three tiers: observed signals, inferred patterns, estimated exposures. Each tier affects the confidence ceiling independently.",
-
   "platform.pipeline.label": "INTELLIGENCE PIPELINE — TECHNICAL ARCHITECTURE",
   "platform.pipeline.title": "21 phases. Deterministic order. NDJSON streaming.",
   "platform.pipeline.sub": "Each phase emits a newline-delimited JSON object as it completes. The UI renders incrementally — evidence layers appear before the executive summary. Phase order is doctrine and cannot be reordered.",
@@ -1318,7 +1260,6 @@
   "platform.pipeline.badge.desc": "NDJSON over HTTP — each phase streams as it completes. No full-pipeline wait.",
   "platform.techstack.label": "TECH STACK",
   "platform.techstack.title": "No black boxes. Every layer is explicit.",
-
   "faq.label": "FREQUENTLY ASKED QUESTIONS",
   "faq.title": "Everything you need to know",
   "faq.sub": "Clear answers to common questions about Ghost Tax, our methodology, pricing, and security.",
@@ -1363,7 +1304,6 @@
   "faq.cta.sub": "Run a free scan — results in minutes, no login required.",
   "faq.cta.primary": "Run Free Scan",
   "faq.cta.secondary": "View methodology",
-
   "intel.title": "Free Exposure Scan",
   "intel.subtitle": "Enter your company domain. In 60 seconds, see how much your organization may be overspending on SaaS, Cloud, and AI — with zero system access required.",
   "intel.field.domain": "Company Domain",
@@ -1409,7 +1349,6 @@
   "intel.cta.yourExposure": "YOUR EXPOSURE",
   "intel.cta.investmentCost": "INVESTMENT",
   "intel.cta.oneTime": "one-time",
-
   "intel.status.scanning": "SCANNING",
   "intel.status.scanning.desc": "Collecting public signals and analyzing your IT spend exposure.",
   "intel.section.executiveSnapshot": "EXECUTIVE SNAPSHOT",
@@ -1589,7 +1528,6 @@
   "intel.costOfDelay.eurDayLost": "€/day lost",
   "intel.costOfDelay.eurMoLost": "€/mo lost",
   "intel.costOfDelay.eurProjectedLoss": "€ projected loss",
-
   "success.badge": "PAYMENT CONFIRMED",
   "success.title": "Your Decision Pack is being generated",
   "success.desc": "Your report is generating now. You will receive your full Decision Pack — CFO Memo, CIO Brief, Board One-Pager, Procurement Plan — in your inbox within 10 minutes.",
@@ -1604,12 +1542,10 @@
   "success.step4.action": "Automated follow-up with updated exposure estimate and drift delta",
   "success.trust.eu": "EU-Compliant",
   "success.trust.purge": "30d auto-purge",
-
   "success.timeline.title": "DELIVERY TIMELINE",
   "success.timeline.payment": "Your payment is confirmed",
   "success.timeline.enrichment": "Our AI enrichment pipeline is running",
   "success.timeline.delivery": "You'll receive your Decision Pack within 48 hours at your email",
-
   "success.deliverables.title": "WHAT'S INCLUDED",
   "success.deliverables.subtitle": "Your Decision Pack contains 4 executive-ready deliverables:",
   "success.deliverables.cfoMemo": "CFO Memo",
@@ -1620,7 +1556,6 @@
   "success.deliverables.boardOnePagerDesc": "Executive summary designed for board circulation — exposure, urgency, and corrective path in one page.",
   "success.deliverables.procurementPlan": "Procurement Action Plan",
   "success.deliverables.procurementPlanDesc": "Vendor-by-vendor negotiation playbook with timing, leverage points, and target savings.",
-
   "success.nextSteps.title": "NEXT STEPS",
   "success.nextSteps.inbox": "Check your inbox in 48h",
   "success.nextSteps.inboxDesc": "Your Decision Pack will arrive at the email address used during checkout.",
@@ -1629,7 +1564,6 @@
   "success.nextSteps.call": "Questions? Book a call",
   "success.nextSteps.callDesc": "30 minutes with our team to walk through findings or scope a Stabilization Protocol.",
   "success.nextSteps.callCta": "Book a 30-min call",
-
   "success.back": "Return to homepage",
   "success.processing": "Intelligence pipeline running — report delivered to your inbox within 10 minutes.",
   "success.ready": "Your Decision Pack is ready",
@@ -1640,7 +1574,6 @@
   "success.copyLink": "Copy referral link",
   "success.linkCopied": "Link copied!",
   "success.roleQuestion": "Help us personalize your report — what's your role?",
-
   "success.viral.title": "WHILE YOU WAIT",
   "success.viral.subtitle": "Your analysis is running. Maximize the value of your investment.",
   "success.viral.colleagueScan": "Scan a colleague's company",
@@ -1649,7 +1582,6 @@
   "success.viral.competitorScanDesc": "See how your IT cost structure compares. Competitive intelligence in 48h.",
   "success.viral.boardShare": "Share with your board",
   "success.viral.boardShareDesc": "Generate a board-ready summary to circulate before your next meeting.",
-
   "success.referral.title": "REFERRAL PROGRAM",
   "success.referral.headline": "Your next scan is free",
   "success.referral.desc": "When 3 colleagues scan their company using your link, your next Decision Pack is on us.",
@@ -1659,7 +1591,6 @@
   "success.referral.copyLink": "Copy referral link",
   "success.referral.linkCopied": "Copied!",
   "success.referral.shareText": "I just ran a 48h IT cost audit on my company with Ghost Tax. Found hidden exposure I didn't know existed. You should try it:",
-
   "success.proof.title": "TRUSTED BY FINANCE LEADERS",
   "success.proof.stat1": "200+",
   "success.proof.stat1Label": "companies scanned",
@@ -1671,10 +1602,8 @@
   "success.proof.stat4Label": "typical savings identified",
   "success.proof.quote": "We discovered 340k EUR in invisible SaaS costs within 48 hours. The Decision Pack paid for itself 700x over.",
   "success.proof.quoteRole": "CFO, Mid-Market SaaS Company",
-
   "success.linkedin.text": "Just launched a 48h IT cost audit with @GhostTax. Curious to see what our invisible tech spend looks like. Results incoming...",
   "success.shareEmail": "Share via Email",
-
   "success.upsell.label": "GO DEEPER",
   "success.upsell.title": "Turn detection into correction",
   "success.upsell.desc": "Your Decision Pack reveals the exposure. The Stabilization Protocol gives you a structured 30/60/90-day corrective roadmap with vendor-specific negotiation playbooks.",
@@ -1686,13 +1615,10 @@
   "success.upsell.stabilizePrice": "from 5,990 EUR",
   "success.upsell.monitorPrice": "2,000 EUR/month",
   "success.paymentConfirm": "Payment of €490 received",
-
   "methodology.ctaInline.text": "This analytical rigor applies to your infrastructure in 48h.",
   "methodology.ctaInline.btn": "Analyse my infrastructure →",
-
   "footer.finalCta.text": "Start with a free scan",
   "footer.finalCta.btn": "Analyse my domain →",
-
   "report.label": "DECISION PACK",
   "report.executive": "EXECUTIVE SUMMARY",
   "report.exposure": "ANNUAL EXPOSURE",
@@ -1718,7 +1644,6 @@
   "report.confidence.moderate": "MODERATE",
   "report.confidence.directional": "DIRECTIONAL",
   "report.downloadPdf": "Download PDF",
-
   "privacy.label": "PRIVACY POLICY",
   "privacy.title": "Privacy Policy",
   "privacy.updated": "Last updated: March 2026",
@@ -1739,7 +1664,6 @@
   "privacy.s8.title": "Changes to This Policy",
   "privacy.s8.content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date.\n\nWe recommend reviewing this Privacy Policy periodically for any changes.",
   "privacy.contact": "Questions about this privacy policy? Contact us at privacy@ghost-tax.com.",
-
   "terms.label": "TERMS OF SERVICE",
   "terms.title": "Terms of Service",
   "terms.updated": "Last updated: March 2026",
@@ -1764,7 +1688,6 @@
   "terms.s10.title": "Contact",
   "terms.s10.content": "For questions about these Terms of Service, contact us at:\n\nGhost Tax Inc.\nEmail: legal@ghost-tax.com\nWebsite: ghost-tax.com",
   "terms.contact": "Questions about these terms? Contact us at legal@ghost-tax.com.",
-
   "contact.label": "CONTACT",
   "contact.title": "Activate your protection",
   "contact.titleAlt": "Questions about your report?",
@@ -1800,7 +1723,6 @@
   "contact.responseSla": "We respond within 24 hours",
   "contact.priceRange": "Scoped engagements from 2,000 to 8,000 EUR — final price set after discovery call.",
   "contact.priceRangeLabel": "TYPICAL INVESTMENT RANGE",
-
   "cancel.title": "Your exposure keeps compounding",
   "cancel.sub": "No payment was processed. But the costs you're not seeing don't pause either.",
   "cancel.dailyCost": "Every day without action costs your company approximately",
@@ -1833,7 +1755,6 @@
   "cancel.guarantee.label": "RISK-FREE GUARANTEE",
   "cancel.guarantee.line1": "If your Decision Pack identifies less than 490 EUR in recoverable savings, we refund the difference.",
   "cancel.guarantee.line2": "Every Ghost Tax client to date has found at least 50x the audit cost in exposure.",
-
   "unsubscribe.title": "Unsubscribe",
   "unsubscribe.desc": "Enter your email to unsubscribe from Ghost Tax communications.",
   "unsubscribe.btn": "Unsubscribe",
@@ -1843,19 +1764,14 @@
   "unsubscribe.successGeneric": "You have been unsubscribed from all Ghost Tax communications.",
   "unsubscribe.error": "Something went wrong",
   "unsubscribe.errorMsg": "Please try again or email us at audits@ghost-tax.com.",
-
   "error.label": "SYSTEM ERROR",
-  "error.title": "An error occurred",
+  "error.title": "Something went wrong",
   "error.ref": "Ref:",
   "error.retry": "Retry",
-
   "notfound.title": "This page does not exist or has been moved.",
   "notfound.back": "Return to Dashboard",
-
   "loading.text": "Loading...",
-
   "pricing.currencyNote": "Prices in {currency}",
-
   "pe.badge": "PRIVATE EQUITY & M&A",
   "pe.title": "IT Due Diligence in 48 hours, not 6 months",
   "pe.sub": "Audit the IT cost structure of every portfolio company. Detect hidden exposure before it compounds.",
@@ -1869,7 +1785,6 @@
   "pe.stats.deals": "Average findings per portfolio company",
   "pe.stats.time": "Time to first report",
   "pe.stats.roi": "Typical ROI for PE clients",
-
   "mp.exec.label": "EXECUTIVE SUMMARY",
   "mp.exec.v1": "60s",
   "mp.exec.l1": "Free scan, no system access",
@@ -1981,9 +1896,7 @@
   "mp.cta": "Test the methodology on a real domain.",
   "mp.ctaBtn": "ENTER DECISION ROOM",
   "mp.ctaBtn2": "Security & Data Handling",
-
   "pricing.roi.specific": "Average finding: $127K exposure on a $490 investment",
-
   "ghosttax.label": "THE GHOST TAX",
   "ghosttax.title": "How much is your company",
   "ghosttax.titleHighlight": "silently losing",
@@ -2045,14 +1958,12 @@
   "ghosttax.industry.manufacturing": "Manufacturing",
   "ghosttax.industry.services": "Professional Services",
   "ghosttax.industry.other": "Other",
-
   "ghosttax.share.copyLabel": "SHARE YOUR GHOST TAX",
   "ghosttax.share.copyText": "My company's estimated Ghost Tax: {low}-{high} EUR/yr in invisible IT waste. Calculate yours at ghost-tax.com/ghost-tax",
   "ghosttax.share.copyBtn": "Copy to clipboard",
   "ghosttax.share.copied": "Copied!",
   "ghosttax.share.linkedinText": "I just calculated my company's Ghost Tax using Ghost Tax's free calculator.\n\nResult: {low}-{high} EUR/year in invisible IT waste — unused licenses, shadow AI, over-provisioned cloud.\n\nThat's {dailyLow}-{dailyHigh} EUR leaving the building every single day.\n\nCalculate yours (10 seconds, no signup):\nhttps://ghost-tax.com/ghost-tax\n\n#GhostTax #SaaS #FinOps #CFO #ITSpend",
   "ghosttax.share.linkedinBtn": "Share on LinkedIn",
-
   "ghosttax.benchmark.label": "YOUR GHOST TAX VS. INDUSTRY",
   "ghosttax.benchmark.yours": "YOUR ESTIMATE",
   "ghosttax.benchmark.average": "AVG. MID-MARKET",
@@ -2061,7 +1972,6 @@
   "ghosttax.benchmark.atRange": "In line with industry average. This is typical but not inevitable.",
   "ghosttax.benchmark.above": "Above industry average. Immediate investigation warranted.",
   "ghosttax.benchmark.source": "Benchmark: median mid-market company (100-500 employees), Gartner / Flexera 2025-2026 data.",
-
   "ghosttax.cta2.label": "GET EXACT FIGURES. NOT ESTIMATES.",
   "ghosttax.cta2.title": "Get exact figures with a full analysis — 490 EUR",
   "ghosttax.cta2.desc": "Your calculator estimate is directional. Our 21-phase pipeline delivers EUR-precise findings with vendor-level proof, negotiation playbooks, and CFO-ready memos.",
@@ -2069,7 +1979,6 @@
   "ghosttax.cta2.btn": "Run Full Detection — 490 EUR",
   "ghosttax.cta2.sub": "48h turnaround · 21-phase analysis · Vendor-level proof · Negotiation playbooks · CFO memo + CIO brief",
   "ghosttax.cta2.guarantee": "If we find zero exposure, you pay nothing.",
-
   "landing.bento.totalExposure": "TOTAL EXPOSURE DETECTED",
   "landing.bento.perYear": "EUR/yr",
   "landing.bento.itSpendPct": "73% of IT spend",
@@ -2086,19 +1995,15 @@
   "landing.bento.tag3": "Auto-renew trap",
   "landing.bento.tag4": "Duplicate CRM",
   "landing.bento.tag5": "Over-provisioned",
-
   "landing.social.count": "Join 200+ companies who eliminated their Ghost Tax.",
-  "landing.social.ctx1": "SaaS company, 320 employees",
-  "landing.social.ctx2": "Financial services, 180 employees",
-  "landing.social.ctx3": "Healthcare, 450 employees",
-
+  "landing.social.ctx1": "Series B SaaS, 120 employees — Munich",
+  "landing.social.ctx2": "Financial Services, 280 employees — Paris",
+  "landing.social.ctx3": "Manufacturing, 450 employees — Zurich",
   "landing.pricing.seeAll": "See all plans",
-
   "landing.cta.badge.stripe": "Stripe Secured",
   "landing.cta.badge.soc2": "SOC 2",
   "landing.cta.badge.gdpr": "GDPR Compliant",
   "landing.cta.badge.aes": "AES-256",
-
   "cs.badge": "VERIFIED OUTCOMES",
   "cs.title": "Real results. Real recovery.",
   "cs.subtitle": "Anonymized case studies from companies that detected hidden SaaS exposure and recovered measurable value within weeks.",
@@ -2113,37 +2018,30 @@
   "cs.aggregate.totalRecovered": "Total recovered",
   "cs.aggregate.avgTimeline": "Average timeline",
   "cs.disclaimer": "All case studies are anonymized. Company names, exact figures, and identifying details have been altered to protect client confidentiality.",
-
   "cs.case1.industry": "ENTERPRISE SAAS",
   "cs.case1.headline": "Reduced ghost tax by 53% in 90 days",
   "cs.case1.narrative": "A 1,200-employee enterprise SaaS company in the DACH region was spending aggressively on cloud and AI tooling with no centralized visibility. Ghost Tax detected 340k EUR in annual hidden exposure across 3 major categories: redundant AI subscriptions, inactive enterprise licenses, and over-provisioned cloud commitments. Within 90 days, the procurement team recovered 180k EUR through vendor renegotiations and license right-sizing.",
   "cs.case1.quote": "We thought we had visibility. The detection revealed an entire layer of spend we had rationalized away. The corrective protocol paid for itself in the first week.",
   "cs.case1.quoteRole": "Anonymous CFO, Enterprise SaaS (DACH)",
-
   "cs.case2.industry": "FINANCIAL SERVICES",
   "cs.case2.headline": "Reduced ghost tax by 75% in 60 days",
   "cs.case2.narrative": "A 450-employee financial services firm in France had accumulated tool redundancy across departments operating semi-independently. Ghost Tax identified 127k EUR in annual exposure, concentrated in duplicate CRM systems, unused security tool licenses, and shadow AI spend. The IT Director executed the corrective protocol in 60 days, recovering 95k EUR and consolidating 12 redundant tools into 4.",
   "cs.case2.quote": "The causal graph made it impossible to ignore. We presented the Decision Pack to our board and got budget approval for the full stabilization within a week.",
   "cs.case2.quoteRole": "Anonymous CIO, Financial Services (France)",
-
   "cs.case3.industry": "TECH SCALE-UP",
   "cs.case3.headline": "Reduced ghost tax by 70% in 45 days",
   "cs.case3.narrative": "A 200-employee tech scale-up in the US had grown fast without governance on SaaS procurement. Ghost Tax detected 89k USD in annual hidden exposure, primarily in abandoned developer tools, over-provisioned cloud instances, and AI API overspend. The engineering lead eliminated 62k USD in waste within 45 days, redirecting budget to core infrastructure.",
   "cs.case3.quote": "At our stage, every dollar matters. The detection found spend leaks we had normalized as 'cost of growth.' They weren't. They were pure waste.",
   "cs.case3.quoteRole": "Anonymous CFO, Tech Scale-up (US)",
-
   "cs.cta.title": "See what we find in YOUR stack",
   "cs.cta.sub": "Free detection takes 2 minutes. No system access required. Results are immediate.",
   "cs.cta.btn": "START FREE DETECTION",
-
   "integrations.hero.label": "INTEGRATIONS & API",
   "integrations.hero.title": "Ghost Tax connects to your existing stack",
   "integrations.hero.sub": "10 intelligence plugins and 11 data connectors. No rip-and-replace. Ghost Tax reads from your finance, identity, and productivity systems to detect hidden exposure.",
-
   "integrations.plugins.label": "PLUGIN SDK",
   "integrations.plugins.title": "10 Intelligence Plugins",
   "integrations.plugins.sub": "Each plugin runs as a discrete analysis module inside the detection pipeline. Composable, extensible, version-controlled.",
-
   "integrations.plugin.vendorRisk.title": "Vendor Risk Scorer",
   "integrations.plugin.vendorRisk.desc": "Quantifies lock-in risk, switching cost, and data portability per vendor. Flags single-vendor concentration.",
   "integrations.plugin.contractAnalyzer.title": "Contract Analyzer",
@@ -2164,11 +2062,9 @@
   "integrations.plugin.negotiation.desc": "Per-vendor playbooks for 10+ major vendors. Tactics, timing, typical discount ranges, and leverage points.",
   "integrations.plugin.boardReport.title": "Board Report Generator",
   "integrations.plugin.boardReport.desc": "Produces board slides, CFO memos, CIO briefs, and procurement summaries from detection data.",
-
   "integrations.connectors.label": "DATA CONNECTORS",
   "integrations.connectors.title": "11 Native Connectors",
   "integrations.connectors.sub": "Read-only integrations that pull spend, license, and usage data. Zero write access. Each connector runs with least-privilege scopes.",
-
   "integrations.connector.stripe.title": "Stripe Billing",
   "integrations.connector.stripe.desc": "Subscription and invoice data",
   "integrations.connector.quickbooks.title": "QuickBooks",
@@ -2191,24 +2087,20 @@
   "integrations.connector.jira.desc": "Atlassian license usage, project activity",
   "integrations.connector.concur.title": "SAP Concur",
   "integrations.connector.concur.desc": "Shadow IT in expense reports",
-
   "integrations.api.label": "API ACCESS",
   "integrations.api.title": "Programmatic Access",
   "integrations.api.desc": "Full REST API for detection triggers, report retrieval, webhook subscriptions, and custom connector development. Designed for teams that need Ghost Tax embedded in their own workflows.",
   "integrations.api.badge": "RAIL C — ENTERPRISE",
   "integrations.api.badgeDesc": "API access included with institutional engagements",
-
   "integrations.cta.title": "Need a custom integration?",
   "integrations.cta.sub": "Our engineering team builds custom connectors for proprietary systems, ERPs, and internal tooling. Contact us to scope.",
   "integrations.cta.btn": "CONTACT US",
   "integrations.roadmapBadge": "Roadmap",
   "integrations.liveBadge": "Live",
   "integrations.roadmapNote": "Our integration roadmap — actively shipping Q2-Q3 2026",
-
   "procurement.label": "PROCUREMENT & DECISION SCOPE",
   "procurement.title": "Vendor Review & Product Scope",
   "procurement.subtitle": "Everything a procurement lead, finance controller, or security reviewer needs to evaluate Ghost Tax. Designed to be forwarded or printed.",
-
   "procurement.product.label": "PRODUCT SUMMARY",
   "procurement.product.title": "What Ghost Tax Does",
   "procurement.product.desc": "Ghost Tax is a decision acceleration system for SaaS, AI, and cloud spend. It detects financial exposure from redundant subscriptions, unmanaged AI tools, and unoptimized cloud contracts — then structures the path to correction.",
@@ -2218,7 +2110,6 @@
   "procurement.product.deployment.value": "Web application — no agent install, no integration required",
   "procurement.product.data.label": "Data access",
   "procurement.product.data.value": "Public sources only at self-serve stage. No internal system access.",
-
   "procurement.stages.label": "COMMERCIAL STAGES",
   "procurement.stages.title": "Product Ladder",
   "procurement.stages.desc": "Four stages, each with clear scope, data requirements, and deliverables. You decide how deep to go.",
@@ -2228,31 +2119,26 @@
   "procurement.stages.col.scope": "Scope",
   "procurement.stages.col.data": "Data Required",
   "procurement.stages.col.delivery": "Delivery",
-
   "procurement.stages.public.name": "Decision Room",
   "procurement.stages.public.price": "Free",
   "procurement.stages.public.scope": "Automated exposure detection from public signals. Diagnosis, loss velocity, peer benchmark, scenarios.",
   "procurement.stages.public.data": "Company domain only. Optional: name, industry, headcount, spend.",
   "procurement.stages.public.delivery": "Real-time streaming — instant",
-
   "procurement.stages.railA.name": "Corrective Protocol",
   "procurement.stages.railA.price": "490 EUR",
   "procurement.stages.railA.scope": "Deep corrective analysis. Structured remediation plan with prioritized actions, ownership mapping, payback projections.",
   "procurement.stages.railA.data": "Same as public + optional internal context shared during intake.",
   "procurement.stages.railA.delivery": "48 hours",
-
   "procurement.stages.railB.name": "Stabilization 30/60/90",
   "procurement.stages.railB.price": "Scoped",
   "procurement.stages.railB.scope": "Hands-on stabilization plan. 30/60/90-day intervention roadmap. Vendor renegotiation guidance. Budget reallocation.",
   "procurement.stages.railB.data": "Internal spend data, contract inventory, org context.",
   "procurement.stages.railB.delivery": "Scoped engagement",
-
   "procurement.stages.railC.name": "Stabilization Mission",
   "procurement.stages.railC.price": "Custom",
   "procurement.stages.railC.scope": "Private institutional engagement. Full operational correction. Embedded advisory.",
   "procurement.stages.railC.data": "Full access as agreed under NDA.",
   "procurement.stages.railC.delivery": "Custom timeline",
-
   "procurement.buyers.label": "TYPICAL BUYERS",
   "procurement.buyers.title": "Who Evaluates This",
   "procurement.buyers.cfo.role": "CFO / VP Finance",
@@ -2263,7 +2149,6 @@
   "procurement.buyers.procurement.reason": "Evaluating vendor for initial detection before committing to a full SaaS management platform.",
   "procurement.buyers.ciso.role": "CISO / Security",
   "procurement.buyers.ciso.reason": "Needs to verify data handling, sub-processors, and access scope before approval.",
-
   "procurement.before.label": "BEFORE PURCHASE",
   "procurement.before.title": "Free Detection Output",
   "procurement.before.desc": "What the public Decision Room delivers — no account, no payment.",
@@ -2274,7 +2159,6 @@
   "procurement.before.item5": "Correction momentum & decision pressure score",
   "procurement.before.item6": "Three forward scenarios (drift / partial / full correction)",
   "procurement.before.item7": "Evidence-tiered confidence (observed / inferred / estimated)",
-
   "procurement.after.label": "AFTER PURCHASE — RAIL A",
   "procurement.after.title": "Corrective Protocol",
   "procurement.after.desc": "What deepens when you commit to the paid detection (490 EUR).",
@@ -2285,7 +2169,6 @@
   "procurement.after.item5": "Exportable decision pack for internal distribution",
   "procurement.after.item6": "Confidence uplift from additional data sources",
   "procurement.after.item7": "48-hour delivery — structured for executive presentation",
-
   "procurement.security.label": "SECURITY & COMPLIANCE",
   "procurement.security.title": "Security Review Pointers",
   "procurement.security.desc": "For detailed security posture, data handling matrix, sub-processor list, and compliance roadmap:",
@@ -2299,7 +2182,6 @@
   "procurement.security.sso.value": "Not required",
   "procurement.security.residency.label": "Data residency",
   "procurement.security.residency.value": "US (AWS us-east-1)",
-
   "procurement.research.label": "Related research",
   "procurement.research.saas": "SaaS & AI Cost Exposure by Industry",
   "procurement.research.shadowAi": "Shadow AI Governance: Detection & Cost Impact",
@@ -2307,12 +2189,10 @@
   "procurement.research.methodology": "Detection Methodology",
   "procurement.research.security": "Security & Data Handling",
   "procurement.research.benchmarks": "All Intelligence Benchmarks",
-
   "procurement.cta.title": "Ready to evaluate?",
   "procurement.cta.desc": "Start with the free detection. If the output is useful, the paid protocol is one click away.",
   "procurement.cta.run": "Run Detection",
   "procurement.cta.contact": "Contact for Rail B/C",
-
   "ib.back": "Back",
   "ib.title": "Intelligence Benchmarks",
   "ib.subtitle": "Research-grade data on SaaS, AI, and cloud spend exposure. Each surface provides bounded benchmarks grounded in industry data — not marketing estimates.",
@@ -2335,7 +2215,6 @@
   "ib.relatedProcurement": "Procurement Guide",
   "ib.ctaQuestion": "Ready to see your own exposure?",
   "ib.ctaButton": "Run Free Detection",
-
   "ib.saas.label": "INTELLIGENCE BENCHMARK",
   "ib.saas.title": "SaaS & AI Cost Exposure by Industry",
   "ib.saas.subtitle": "Per-employee annual exposure benchmarks across 8 industries. Median represents typical waste; top-quartile represents realistic optimization targets. Source: Flexera 2024, Zylo 2024, Gartner 2025 composite.",
@@ -2374,7 +2253,6 @@
   "ib.saas.ctaDesc": "Run a free detection to benchmark against your industry peers.",
   "ib.saas.ctaButton": "RUN DETECTION",
   "ib.saas.ctaNote": "No payment required. Domain-only input. Results in seconds.",
-
   "ib.shadow.label": "INTELLIGENCE BENCHMARK",
   "ib.shadow.title": "Shadow AI Governance",
   "ib.shadow.subtitle": "How ungoverned AI adoption creates financial exposure. Detection patterns, cost impact data, and practical governance frameworks.",
@@ -2423,7 +2301,6 @@
   "ib.shadow.ctaTitle": "Detect your shadow AI exposure",
   "ib.shadow.ctaDesc": "Enter your domain. The system detects AI tool redundancy and governance gaps automatically.",
   "ib.shadow.ctaButton": "RUN DETECTION",
-
   "ib.cfo.label": "CFO INTELLIGENCE",
   "ib.cfo.title": "CFO Guide to Technology Spend Exposure",
   "ib.cfo.subtitle": "What finance leaders need to know about hidden SaaS, AI, and cloud costs — and how to build a detection-to-correction pipeline without a six-month implementation.",
@@ -2487,7 +2364,6 @@
   "ib.cfo.ctaTitle": "Start with a free exposure detection",
   "ib.cfo.ctaDesc": "Get a structured exposure estimate in seconds. No integration required.",
   "ib.cfo.ctaButton": "RUN DETECTION",
-
   "dashboard.nav.command": "Command Center",
   "dashboard.nav.reports": "Reports",
   "dashboard.nav.leads": "Pipeline",
@@ -2579,7 +2455,6 @@
   "dashboard.status.followup": "Follow-up",
   "dashboard.status.lost": "Lost",
   "dashboard.industry.unspecified": "Unspecified",
-
   "vault.header": "VAULT",
   "vault.encrypted": "AES-256 Encrypted",
   "vault.kpi.totalReports": "Total Reports",
@@ -2620,15 +2495,11 @@
   "vault.status.failed": "Failed",
   "vault.status.followup": "Follow-up Scheduled",
   "vault.status.lost": "Lost",
-
   "report.devMode": "DEV MODE",
   "report.devModeDesc": "Supabase not configured. Run ID:",
   "report.runLabel": "Run",
-
-  "error.title": "Something went wrong",
   "error.description": "Try refreshing the page or contact support.",
   "error.reload": "Reload",
-
   "caseStudies.badge": "FIELD EVIDENCE",
   "caseStudies.title": "Real outcomes. Anonymized. Precise.",
   "caseStudies.subtitle": "Three anonymized engagements. Each structured as Challenge → Detection → Outcome. Figures reflect actual detected exposure, not industry estimates.",
@@ -2682,5 +2553,24 @@
   "caseStudies.disclaimer": "These scenarios represent typical findings based on 200+ analyses conducted by Ghost Tax. Company details are anonymized per GDPR. Actual results vary by organization size, industry, and existing SaaS governance maturity.",
   "caseStudies.cta.title": "See your own exposure",
   "caseStudies.cta.sub": "Enter your domain. Get a structured detection in minutes, no login required.",
-  "caseStudies.cta.btn": "Run Free Detection"
+  "caseStudies.cta.btn": "Run Free Detection",
+  "landing.logos.label": "Trusted by finance teams across Europe",
+  "landing.compare.label": "EXPOSURE SHOCK",
+  "landing.compare.title": "The gap between what you think you spend and what you actually lose.",
+  "landing.compare.before.tag": "Before Ghost Tax",
+  "landing.compare.before.amount": "247k — 341k",
+  "landing.compare.before.unit": "EUR / year hidden exposure",
+  "landing.compare.before.l1": "{n} orphan licenses undetected",
+  "landing.compare.before.l2": "{n} tool overlaps across departments",
+  "landing.compare.before.l3": "{n} auto-renewals within 60 days",
+  "landing.compare.before.l4": "{n} vendor negotiations in 18 months",
+  "landing.compare.before.l5": "{n} visibility on AI spend growth",
+  "landing.compare.after.tag": "After Ghost Tax",
+  "landing.compare.after.amount": "+142k",
+  "landing.compare.after.unit": "EUR / year recoverable",
+  "landing.compare.after.l1": "{n} licenses flagged for termination",
+  "landing.compare.after.l2": "{n} consolidation paths identified",
+  "landing.compare.after.l3": "{n} renewal playbooks delivered",
+  "landing.compare.after.l4": "{n} vendor negotiation scripts",
+  "landing.compare.after.l5": "{n} board-ready Decision Pack"
 }

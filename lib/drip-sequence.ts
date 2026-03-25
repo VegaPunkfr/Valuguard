@@ -674,9 +674,9 @@ export function getDripEmailHtml(
 
   // Colors by touch
   const accentColor =
-    touch <= 2 ? "#3b82f6" : touch === 3 ? "#3b82f6" : touch === 4 ? "#D97706" : "#DC2626";
+    touch <= 2 ? "#3b82f6" : touch === 3 ? "#3b82f6" : touch === 4 ? "#3b82f6" : "#DC2626";
   const ctaColor =
-    touch <= 3 ? "#3b82f6" : touch === 4 ? "#D97706" : "#DC2626";
+    touch <= 3 ? "#3b82f6" : touch === 4 ? "#3b82f6" : "#DC2626";
 
   const checkoutUrl = buildCheckoutUrl({
     domain: data.domain,
@@ -699,7 +699,7 @@ export function getDripEmailHtml(
       : (locale === "fr" ? "EXPOSITION CUMULÉE DEPUIS LE SCAN" : locale === "de" ? "KUMULIERTE EXPOSITION SEIT DEM SCAN" : "CUMULATIVE EXPOSURE SINCE SCAN");
 
     costBox = `
-    <div style="background:#F8FAFC;border:2px solid ${touch === 2 ? "rgba(59,130,246,0.20)" : "rgba(217,119,6,0.20)"};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
+    <div style="background:#F8FAFC;border:2px solid ${touch === 2 ? "rgba(59,130,246,0.20)" : "rgba(59,130,246,0.20)"};border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
       <p style="font-size:10px;color:${ctaColor};letter-spacing:0.12em;margin:0 0 8px 0;text-transform:uppercase">${boxLabel}</p>
       <p style="font-size:36px;font-family:monospace;font-weight:900;color:${ctaColor};margin:0">${totalLost}</p>
       <p style="font-size:12px;color:#64748B;margin:8px 0 0 0">${daily}/${perDayLabel} × ${data.daysSinceScan} ${dayLabel}</p>
@@ -753,7 +753,7 @@ export function getDripEmailHtml(
         </tr>
         <tr>
           <td style="padding:8px 0">
-            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#D97706">67%</span>
+            <span style="font-size:24px;font-family:monospace;font-weight:900;color:#3b82f6">67%</span>
             <span style="font-size:12px;color:#475569;padding-left:12px">${stat3}</span>
           </td>
         </tr>

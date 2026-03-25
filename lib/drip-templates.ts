@@ -530,11 +530,11 @@ function buildTouch1(data: DripData): DripEmailResult {
     <div style="display:flex;margin:0 0 24px 0">
       <div style="flex:1;background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border-radius:10px;padding:18px;margin-right:8px;text-align:center;border:1px solid #E2E8F0">
         <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t1EntropyLabel[l]}</p>
-        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#D97706;margin:0">${entropyScore}</p>
+        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#3b82f6;margin:0">${entropyScore}</p>
       </div>
       <div style="flex:1;background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border-radius:10px;padding:18px;margin-left:8px;text-align:center;border:1px solid #E2E8F0">
         <p style="font-size:8px;letter-spacing:0.12em;color:#64748B;text-transform:uppercase;margin:0 0 8px 0;font-family:'Courier New',Courier,monospace">${T.t1PercentileLabel[l]}</p>
-        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#D97706;margin:0">P${peerPercentile}</p>
+        <p style="font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:800;color:#3b82f6;margin:0">P${peerPercentile}</p>
       </div>
     </div>
 
@@ -597,7 +597,7 @@ function buildTouch2(data: DripData): DripEmailResult {
 
     ${dataTable(T.t2CostLabel[l], "#DC2626",
       metricRow(T.t2DailyLabel[l], `${fmtEur(Math.round(daily))} \u20ac`, "#DC2626", true) +
-      metricRow(T.t2MonthlyLabel[l], `${fmtEur(monthlyLeak)} \u20ac`, "#D97706", true) +
+      metricRow(T.t2MonthlyLabel[l], `${fmtEur(monthlyLeak)} \u20ac`, "#3b82f6", true) +
       metricRow(T.t2AnnualLabel[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true)
     )}
 
@@ -654,13 +654,13 @@ function buildTouch3(data: DripData): DripEmailResult {
 
   // Percentile bar
   const barFill = Math.min(100, Math.max(5, peerPercentile));
-  const barColor = peerPercentile >= 70 ? "#DC2626" : peerPercentile >= 40 ? "#D97706" : "#059669";
+  const barColor = peerPercentile >= 70 ? "#DC2626" : peerPercentile >= 40 ? "#3b82f6" : "#059669";
 
   const html = emailWrapper(`
     ${dataTable(T.t3BenchmarkLabel[l], "#3b82f6",
       metricRow(T.t3YourExposure[l](companyName), `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true) +
       metricRow(T.t3IndustryAvg[l], `${fmtEur(industryAvg)} \u20ac`, "#475569") +
-      metricRow(T.t3EntropyScore[l], `${entropyScore}/100`, "#D97706", true)
+      metricRow(T.t3EntropyScore[l], `${entropyScore}/100`, "#3b82f6", true)
     )}
 
     <!-- Percentile Bar -->
@@ -732,7 +732,7 @@ function buildTouch4(data: DripData): DripEmailResult {
     ${dataTable(T.t4AccumulatedLabel[l](daysElapsed), "#DC2626",
       metricRow(T.t4AtScan[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac${T.perYear[l]}`, "#475569") +
       metricRow(T.t4SinceScan[l](daysElapsed), `${fmtEur(leaked)} \u20ac`, "#DC2626", true) +
-      metricRow(T.t4ProjectedAnnual[l], `${fmtEurRange(projectedLow, projectedHigh)} \u20ac${T.perYear[l]}`, "#D97706", true) +
+      metricRow(T.t4ProjectedAnnual[l], `${fmtEurRange(projectedLow, projectedHigh)} \u20ac${T.perYear[l]}`, "#3b82f6", true) +
       metricRow(T.t4ReportCost[l], l === "en" ? "$490" : "490\u00a0\u20ac", "#059669", true)
     )}
 

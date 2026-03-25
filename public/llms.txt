@@ -1,0 +1,45 @@
+# Ghost Tax
+> AI Financial Control Plane for SaaS & AI Spend
+
+Ghost Tax detects 12 types of hidden IT spending exposure using deterministic
+analysis and organizational entropy modeling. One-time $490 analysis delivers
+a board-ready Decision Pack in 48 hours. Zero system access required.
+
+## Core Pages
+- [Free Intel Scan](https://ghost-tax.com/intel): Run a free SaaS exposure scan
+- [Platform](https://ghost-tax.com/platform): How Ghost Tax works (21-phase pipeline)
+- [Pricing](https://ghost-tax.com/pricing): $490 one-time, no subscription
+- [Methodology](https://ghost-tax.com/methodology): 12-type detection framework with entropy modeling
+- [FAQ](https://ghost-tax.com/faq): Common questions
+- [Case Studies](https://ghost-tax.com/case-studies): Client results
+
+## Intel Benchmarks
+- [SaaS & AI Cost Exposure](https://ghost-tax.com/intel-benchmarks/saas-ai-cost-exposure)
+- [Shadow AI Governance](https://ghost-tax.com/intel-benchmarks/shadow-ai-governance)
+- [CFO Technology Spend Guide](https://ghost-tax.com/intel-benchmarks/cfo-technology-spend-guide)
+
+## Industries
+- [FinTech](https://ghost-tax.com/ghost-tax/fintech)
+- [SaaS](https://ghost-tax.com/ghost-tax/saas)
+- [Healthcare](https://ghost-tax.com/ghost-tax/healthcare)
+- [Manufacturing](https://ghost-tax.com/ghost-tax/manufacturing)
+- [Financial Services](https://ghost-tax.com/ghost-tax/financial-services)
+- [Professional Services](https://ghost-tax.com/ghost-tax/professional-services)
+
+## Markets
+- [Germany](https://ghost-tax.com/ghost-tax/germany)
+- [United States](https://ghost-tax.com/ghost-tax/united-states)
+- [United Kingdom](https://ghost-tax.com/ghost-tax/united-kingdom)
+- [Netherlands](https://ghost-tax.com/ghost-tax/netherlands)
+- [Switzerland](https://ghost-tax.com/ghost-tax/switzerland)
+- [Nordics](https://ghost-tax.com/ghost-tax/nordics)
+
+## Security & Trust
+- [Security Vault](https://ghost-tax.com/security-vault): Zero-Knowledge protocol, AES-256, SOC 2
+- [About](https://ghost-tax.com/about): Company information
+- [Privacy Policy](https://ghost-tax.com/legal/privacy)
+- [Terms of Service](https://ghost-tax.com/legal/terms)
+
+## Contact
+- Email: audits@ghost-tax.com
+- [Contact Page](https://ghost-tax.com/contact)

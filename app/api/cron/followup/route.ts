@@ -250,11 +250,11 @@ function buildFollowupEmail(
   </div>
 
   <!-- CTA: Rail B Setup -->
-  <div style="background:#F1F5F9;border:1px solid rgba(217,119,6,0.2);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
+  <div style="background:#F1F5F9;border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:16px;text-align:center;margin-bottom:24px">
     <p style="font-size:12px;color:#475569;margin:0 0 10px 0">
       ${copy.setupCta[loc]}
     </p>
-    <a href="${siteUrl}/pricing?ref=followup&domain=${encodeURIComponent(row.domain)}&rail=B_SETUP" style="color:#D97706;font-size:13px;font-weight:600;text-decoration:none">
+    <a href="${siteUrl}/pricing?ref=followup&domain=${encodeURIComponent(row.domain)}&rail=B_SETUP" style="color:#3b82f6;font-size:13px;font-weight:600;text-decoration:none">
       ${copy.setupLink[loc]}
     </a>
   </div>
@@ -392,14 +392,14 @@ function buildRenewalSniperEmail(
 
   const leverageColor: Record<string, string> = {
     strong: "#059669",
-    moderate: "#D97706",
+    moderate: "#3b82f6",
     weak: "#DC2626",
   };
 
   const renewalRows = renewals.map((r) => `
     <tr>
       <td style="padding:8px 12px;font-size:13px;color:#0F172A;font-family:monospace;border-bottom:1px solid #E2E8F0">${r.vendor}</td>
-      <td style="padding:8px 12px;font-size:13px;color:#D97706;font-family:monospace;text-align:center;border-bottom:1px solid #E2E8F0">${r.window}</td>
+      <td style="padding:8px 12px;font-size:13px;color:#3b82f6;font-family:monospace;text-align:center;border-bottom:1px solid #E2E8F0">${r.window}</td>
       <td style="padding:8px 12px;font-size:13px;color:#0F172A;font-family:monospace;text-align:right;border-bottom:1px solid #E2E8F0">${fmtEur(r.annualValue)} EUR</td>
       <td style="padding:8px 12px;font-size:13px;color:${leverageColor[r.leverage] || "#475569"};font-family:monospace;text-align:center;border-bottom:1px solid #E2E8F0">${r.leverage.toUpperCase()}</td>
     </tr>
@@ -418,7 +418,7 @@ function buildRenewalSniperEmail(
 <body style="margin:0;padding:0;background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
 <div style="max-width:600px;margin:0 auto;padding:32px 16px">
 
-  <p style="font-size:10px;letter-spacing:0.2em;color:#D97706;text-transform:uppercase;margin:0 0 16px 0">${copy.badge[loc]}</p>
+  <p style="font-size:10px;letter-spacing:0.2em;color:#3b82f6;text-transform:uppercase;margin:0 0 16px 0">${copy.badge[loc]}</p>
 
   <h1 style="font-size:22px;color:#0F172A;margin:0 0 16px 0;line-height:1.3">
     ${copy.title[loc]}
@@ -466,7 +466,7 @@ function buildRenewalSniperEmail(
     <a href="${siteUrl}/pricing?ref=renewal-sniper&domain=${encodeURIComponent(row.domain)}&rail=B_STABILIZE" style="display:inline-block;background:#059669;color:#FFFFFF;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
       ${copy.ctaBtn[loc]}
     </a>
-    <p style="font-size:11px;color:#D97706;margin:12px 0 0 0;font-weight:600">${copy.deadline[loc]}</p>
+    <p style="font-size:11px;color:#3b82f6;margin:12px 0 0 0;font-weight:600">${copy.deadline[loc]}</p>
   </div>
 
   <!-- Viral CTAs -->

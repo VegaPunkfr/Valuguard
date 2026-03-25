@@ -381,7 +381,7 @@ export function generateViralEmailBlock(report: {
               </tr>
               <tr>
                 <td style="padding:0 0 0 0">
-                  <a href="${boardCTA.url}" style="display:inline-block;background:transparent;color:#D97706;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.01em;border:1px solid rgba(217,119,6,0.4);min-width:200px;text-align:center" target="_blank">
+                  <a href="${boardCTA.url}" style="display:inline-block;background:transparent;color:#3b82f6;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.01em;border:1px solid rgba(59,130,246,0.4);min-width:200px;text-align:center" target="_blank">
                     ${copy.boardButton}
                   </a>
                 </td>

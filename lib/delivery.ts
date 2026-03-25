@@ -508,7 +508,7 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
   const vendorDriftRows = report.vendorPressureMap.vendorDrifts.slice(0, 5).map(vd =>
     `<tr>
       <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600">${vd.vendor}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:${vd.severity === 'critical' ? '#DC2626' : vd.severity === 'high' ? '#D97706' : '#475569'};text-transform:uppercase;font-size:11px">${vd.severity}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:${vd.severity === 'critical' ? '#DC2626' : vd.severity === 'high' ? '#3b82f6' : '#475569'};text-transform:uppercase;font-size:11px">${vd.severity}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #E2E8F0;color:#475569;font-size:12px">${vd.description}</td>
     </tr>`
   ).join("");
@@ -562,7 +562,7 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
         </td>
         <td style="text-align:center;padding:8px">
           <p style="font-size:8px;color:#64748B;margin:0 0 4px 0;letter-spacing:0.08em">CONFIDENCE</p>
-          <p style="font-family:monospace;font-size:14px;font-weight:700;color:#D97706;margin:0">${report.executiveSnapshot.confidenceRange}</p>
+          <p style="font-family:monospace;font-size:14px;font-weight:700;color:#3b82f6;margin:0">${report.executiveSnapshot.confidenceRange}</p>
         </td>
       </tr>
     </table>
@@ -579,11 +579,11 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
         </td>
         <td style="text-align:center;padding:8px">
           <p style="font-size:8px;color:#64748B;margin:0 0 4px 0">${isEn ? "EVERY MONTH" : "PAR MOIS"}</p>
-          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#D97706;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} &euro;</p>
+          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#3b82f6;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.monthly[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.monthly[1])} &euro;</p>
         </td>
         <td style="text-align:center;padding:8px">
           <p style="font-size:8px;color:#64748B;margin:0 0 4px 0">90-DAY</p>
-          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#D97706;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.projected90[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.projected90[1])} &euro;</p>
+          <p style="font-family:monospace;font-size:16px;font-weight:800;color:#3b82f6;margin:0">${fmtEur(report.exposureAnalysis.costOfDelay.projected90[0])}-${fmtEur(report.exposureAnalysis.costOfDelay.projected90[1])} &euro;</p>
         </td>
       </tr>
     </table>
@@ -592,7 +592,7 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
   <!-- Vendor Pressure Map -->
   ${report.vendorPressureMap.vendorDrifts.length > 0 ? `
   <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:16px">
-    <p style="font-size:9px;letter-spacing:0.1em;color:#D97706;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "VENDOR PRESSURE MAP" : "CARTE DE PRESSION FOURNISSEURS"}</p>
+    <p style="font-size:9px;letter-spacing:0.1em;color:#3b82f6;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "VENDOR PRESSURE MAP" : "CARTE DE PRESSION FOURNISSEURS"}</p>
     <table style="width:100%;border-collapse:collapse;font-size:12px">${vendorDriftRows}</table>
     ${report.vendorPressureMap.windowCompression.compressedDays < report.vendorPressureMap.windowCompression.originalDays
       ? `<p style="font-size:11px;color:#DC2626;margin:10px 0 0 0">${isEn ? "Corrective window compressed by" : "Fenetre corrective comprimee de"} ${report.vendorPressureMap.windowCompression.originalDays - report.vendorPressureMap.windowCompression.compressedDays} ${isEn ? "days" : "jours"}</p>`
@@ -641,7 +641,7 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
   <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
     <table style="width:100%;border-collapse:collapse"><tr>
       <td style="vertical-align:top;padding-right:16px">
-        <p style="font-size:9px;letter-spacing:0.15em;color:#D97706;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "RAIL B — STABILIZATION PROTOCOL" : "RAIL B — PROTOCOLE DE STABILISATION"}</p>
+        <p style="font-size:9px;letter-spacing:0.15em;color:#3b82f6;text-transform:uppercase;margin:0 0 10px 0">${isEn ? "RAIL B — STABILIZATION PROTOCOL" : "RAIL B — PROTOCOLE DE STABILISATION"}</p>
         <p style="font-size:15px;color:#0F172A;font-weight:700;margin:0 0 8px 0">${isEn ? "Structured 30/60/90-Day Corrective Plan" : "Plan Correctif Structure 30/60/90 Jours"}</p>
         <p style="font-size:12px;color:#475569;line-height:1.6;margin:0 0 14px 0">${isEn
           ? "Vendor-specific negotiation playbooks, phased execution roadmap, and internal decision packs (CFO memo, board one-pager, procurement brief)."
@@ -651,7 +651,7 @@ function buildReportEmailHtml(report: StructuredReport, locale: string): string 
           <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Timeline" : "Delai"}</td><td style="padding:3px 0;font-size:11px;color:#475569">${isEn ? "Delivered within 5 business days" : "Livre sous 5 jours ouvrables"}</td></tr>
           <tr><td style="padding:3px 10px 3px 0;font-size:11px;color:#64748B">${isEn ? "Investment" : "Investissement"}</td><td style="padding:3px 0;font-size:11px;color:#0F172A;font-weight:700;font-family:monospace">2 500 EUR <span style="color:#64748B;font-weight:400;font-family:-apple-system,sans-serif">(${isEn ? "one-time" : "one-shot"})</span></td></tr>
         </table>
-        <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_SETUP" style="display:inline-block;background:#D97706;color:#fff;padding:10px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.02em">${isEn ? "Request Stabilization Plan" : "Demander le Plan de Stabilisation"}</a>
+        <a href="https://ghost-tax.com/pricing?ref=report&domain=${encodeURIComponent(report.company.domain)}&rail=B_SETUP" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 28px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.02em">${isEn ? "Request Stabilization Plan" : "Demander le Plan de Stabilisation"}</a>
       </td>
     </tr></table>
   </div>

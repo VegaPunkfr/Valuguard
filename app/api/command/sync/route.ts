@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   if (secret && cookieKey !== secret && queryKey !== secret) {
     // Also allow from same origin without key
     const referer = request.headers.get('referer') || '';
-    if (!referer.includes('command.ghost-tax.com') && !referer.includes('localhost')) {
+    if (!referer.includes('command.ghost-tax.com') && !referer.includes('localhost') && !referer.includes('valuguard-cockpit.vercel.app')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
