@@ -21,11 +21,11 @@ export default function PricingPage() {
 
   // Prices by locale
   const detectPrice = 490;
-  const stabilize = isUSD ? 5990 : 4990;
-  const monitorMonthly = isUSD ? 2490 : 1990;
-  const monitorAnnual = isUSD ? 24900 : 19900;
-  const monitorAnnualMonthly = Math.round((isUSD ? 24900 : 19900) / 12);
-  const missionFrom = isUSD ? 25000 : 20000;
+  const stabilize = 4990;
+  const monitorMonthly = 1990;
+  const monitorAnnual = 19900;
+  const monitorAnnualMonthly = Math.round(19900 / 12);
+  const missionFrom = 20000;
 
   const fmtPrice = (n: number) => {
     if (isUSD) return `$${n.toLocaleString("en-US")}`;
@@ -248,15 +248,21 @@ export default function PricingPage() {
                 disabled={!!checkoutLoading}
                 className="gt-btn"
                 style={{
-                  width: "100%", textTransform: "uppercase", letterSpacing: ".04em",
-                  background: c.green, color: c.bg, border: "none", fontWeight: 700,
-                  fontSize: 13, padding: "12px 0", borderRadius: 8,
+                  width: "100%", letterSpacing: ".02em",
+                  background: "#0F172A", color: "#FFFFFF", border: "none", fontWeight: 600,
+                  fontSize: 14, padding: "16px 0", borderRadius: 8,
                   cursor: checkoutLoading ? "wait" : "pointer",
                   opacity: checkoutLoading ? 0.7 : 1,
+                  transition: "all 200ms ease",
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(15,23,42,0.18)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}
               >
-                {checkoutLoading?.startsWith("A_") ? t("pricing.loading") : t("pricing.buy")}
+                {checkoutLoading?.startsWith("A_") ? t("pricing.loading") : `${t("hero.cta.main") || "See my exposure"} \u2014 ${fmtPrice(detectPrice)}`}
               </button>
+              <p style={{ fontSize: 11, color: "#94A3B8", textAlign: "center", marginTop: 8, lineHeight: 1.5 }}>
+                {t("hero.reassurance") || "Results in 48h \u00b7 Refund if <15% savings \u00b7 Secure Stripe payment"}
+              </p>
             </div>
 
             {/* ═══ TIER 2: STABILIZE ═══ */}

@@ -310,8 +310,8 @@ export default function LandingPage() {
           </div>
         </Section>
 
-        {/* ═══════════ T9 — BEFORE/AFTER COMPARISON ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
+        {/* ═══════════ EXPOSURE SHOCK — Before/After ═══════════ */}
+        <Section style={{ paddingTop: 120, paddingBottom: 80 }}>
           <p style={{
             fontFamily: f.mono, fontSize: 11, fontWeight: 600,
             letterSpacing: "0.12em", textTransform: "uppercase" as const,
@@ -320,36 +320,35 @@ export default function LandingPage() {
             {t("landing.compare.label")}
           </p>
           <h2 style={{
-            fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 800,
-            letterSpacing: "-0.03em", lineHeight: 1.12, marginBottom: 48,
+            fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight: 800,
+            letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 56,
             maxWidth: 520,
           }}>
             {t("landing.compare.title")}
           </h2>
 
-          <div className="gt-comp-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-            {/* Before card */}
+          <div className="gt-comp-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
+            {/* BEFORE */}
             <div style={{
-              background: "#FFFFFF", borderRadius: 18, padding: 36,
-              border: `1px solid ${c.border}`, borderTop: `3px solid ${c.red}`,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              background: "#FEF2F2", borderRadius: 16, padding: 40,
+              borderLeft: "3px solid #EF4444",
             }}>
               <span style={{
                 fontFamily: f.mono, fontSize: 10, fontWeight: 700,
                 letterSpacing: "0.1em", textTransform: "uppercase" as const,
-                padding: "3px 10px", borderRadius: 100,
-                display: "inline-block", marginBottom: 20,
-                background: c.redBg, color: c.red,
+                padding: "4px 12px", borderRadius: 100,
+                display: "inline-block", marginBottom: 24,
+                background: "rgba(239,68,68,0.1)", color: "#EF4444",
               }}>
                 {t("landing.compare.before.tag")}
               </span>
-              <p style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 700, color: c.red, marginBottom: 6 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 40, fontWeight: 800, color: "#EF4444", marginBottom: 6, letterSpacing: "-0.02em" }}>
                 {t("landing.compare.before.amount")}
               </p>
-              <p style={{ fontSize: 13, color: c.text3, marginBottom: 24 }}>
+              <p style={{ fontSize: 13, color: "#64748B", marginBottom: 28 }}>
                 {t("landing.compare.before.unit")}
               </p>
-              <ul style={{ listStyle: "none", fontSize: 14, color: c.text2, lineHeight: 2.2, padding: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {[
                   { n: "47", text: t("landing.compare.before.l1") },
                   { n: "12", text: t("landing.compare.before.l2") },
@@ -357,33 +356,35 @@ export default function LandingPage() {
                   { n: "0", text: t("landing.compare.before.l4") },
                   { n: "0%", text: t("landing.compare.before.l5") },
                 ].map((item) => (
-                  <li key={item.text}>{item.text.replace("{n}", item.n)}</li>
+                  <div key={item.text} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "#334155", lineHeight: 1.5 }}>
+                    <span style={{ color: "#EF4444", fontSize: 15, flexShrink: 0, marginTop: 1 }}>{"\u274C"}</span>
+                    <span>{item.text.replace("{n}", item.n)}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
 
-            {/* After card */}
+            {/* AFTER */}
             <div style={{
-              background: "#FFFFFF", borderRadius: 18, padding: 36,
-              border: `1px solid ${c.border}`, borderTop: `3px solid ${c.green}`,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              background: "#F0FDF4", borderRadius: 16, padding: 40,
+              borderLeft: "3px solid #22C55E",
             }}>
               <span style={{
                 fontFamily: f.mono, fontSize: 10, fontWeight: 700,
                 letterSpacing: "0.1em", textTransform: "uppercase" as const,
-                padding: "3px 10px", borderRadius: 100,
-                display: "inline-block", marginBottom: 20,
-                background: c.greenBg, color: c.green,
+                padding: "4px 12px", borderRadius: 100,
+                display: "inline-block", marginBottom: 24,
+                background: "rgba(34,197,94,0.1)", color: "#22C55E",
               }}>
                 {t("landing.compare.after.tag")}
               </span>
-              <p style={{ fontFamily: f.mono, fontSize: 36, fontWeight: 700, color: c.green, marginBottom: 6 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 40, fontWeight: 800, color: "#22C55E", marginBottom: 6, letterSpacing: "-0.02em" }}>
                 {t("landing.compare.after.amount")}
               </p>
-              <p style={{ fontSize: 13, color: c.text3, marginBottom: 24 }}>
+              <p style={{ fontSize: 13, color: "#64748B", marginBottom: 28 }}>
                 {t("landing.compare.after.unit")}
               </p>
-              <ul style={{ listStyle: "none", fontSize: 14, color: c.text2, lineHeight: 2.2, padding: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {[
                   { n: "47", text: t("landing.compare.after.l1") },
                   { n: "8", text: t("landing.compare.after.l2") },
@@ -391,16 +392,19 @@ export default function LandingPage() {
                   { n: "10", text: t("landing.compare.after.l4") },
                   { n: "1", text: t("landing.compare.after.l5") },
                 ].map((item) => (
-                  <li key={item.text}>{item.text.replace("{n}", item.n)}</li>
+                  <div key={item.text} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "#334155", lineHeight: 1.5 }}>
+                    <span style={{ color: "#22C55E", fontSize: 15, flexShrink: 0, marginTop: 1 }}>{"\u2705"}</span>
+                    <span>{item.text.replace("{n}", item.n)}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </Section>
 
-        {/* ═══════════ T10 — TESTIMONIALS ═══════════ */}
+        {/* ═══════════ TESTIMONIALS ═══════════ */}
         <section style={{
-          padding: "80px 0",
+          padding: "120px 0 80px",
           marginLeft: -28, marginRight: -28, paddingLeft: 28, paddingRight: 28,
           background: "#FFFFFF",
           borderTop: `1px solid ${c.border}`,
@@ -415,80 +419,65 @@ export default function LandingPage() {
               {t("landing.social.label")}
             </p>
             <h2 style={{
-              fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 800,
-              letterSpacing: "-0.03em", lineHeight: 1.12, marginBottom: 48,
+              fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight: 800,
+              letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 56,
               maxWidth: 520,
             }}>
               {t("landing.social.title")}
             </h2>
 
-            <div className="gt-test-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+            <div className="gt-test-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
               {[
-                {
-                  quote: t("landing.social.q1"),
-                  name: t("landing.social.a1"),
-                  role: t("landing.social.ctx1"),
-                  initials: "MK",
-                  stars: 4,
-                },
-                {
-                  quote: t("landing.social.q2"),
-                  name: t("landing.social.a2"),
-                  role: t("landing.social.ctx2"),
-                  initials: "SL",
-                  stars: 4,
-                },
-                {
-                  quote: t("landing.social.q3"),
-                  name: t("landing.social.a3"),
-                  role: t("landing.social.ctx3"),
-                  initials: "JR",
-                  stars: 5,
-                },
-              ].map((item) => (
-                <div key={item.initials} style={{
-                  background: c.bg, border: `1px solid ${c.border}`,
-                  borderRadius: 16, padding: 28,
-                }}>
-                  {/* Stars */}
-                  <p style={{ fontSize: 14, letterSpacing: 2, marginBottom: 16 }}>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span key={i} style={{ color: i < item.stars ? c.amber : c.border }}>&#9733;</span>
-                    ))}
-                  </p>
-                  <p style={{ fontSize: 15, color: c.text2, lineHeight: 1.7, marginBottom: 20 }}>
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    borderTop: `1px solid ${c.border}`, paddingTop: 16,
+                { quote: t("landing.social.q1"), name: t("landing.social.a1"), role: t("landing.social.ctx1"), initials: "MK", stars: 4 },
+                { quote: t("landing.social.q2"), name: t("landing.social.a2"), role: t("landing.social.ctx2"), initials: "SL", stars: 4 },
+                { quote: t("landing.social.q3"), name: t("landing.social.a3"), role: t("landing.social.ctx3"), initials: "JR", stars: 5 },
+              ].map((item) => {
+                const avatarColors = ["#3B82F6","#8B5CF6","#EC4899","#10B981","#6366F1","#0EA5E9"];
+                const colorIdx = (item.initials.charCodeAt(0) + item.initials.charCodeAt(1)) % avatarColors.length;
+                return (
+                  <div key={item.initials} style={{
+                    background: "#FFFFFF", border: `1px solid ${c.border}`,
+                    borderRadius: 16, padding: 32,
+                    boxShadow: "0 2px 16px rgba(0,0,0,0.04)",
                   }}>
+                    <p style={{ fontSize: 16, letterSpacing: 2, marginBottom: 18 }}>
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span key={i} style={{ color: i < item.stars ? "#3b82f6" : "#E2E8F0" }}>{"\u2605"}</span>
+                      ))}
+                    </p>
+                    <p style={{ fontSize: 17, color: "#334155", lineHeight: 1.7, marginBottom: 24, fontStyle: "italic" }}>
+                      &ldquo;{item.quote}&rdquo;
+                    </p>
                     <div style={{
-                      width: 36, height: 36, borderRadius: "50%",
-                      background: c.surface, display: "flex",
-                      alignItems: "center", justifyContent: "center",
-                      fontFamily: f.mono, fontSize: 12, fontWeight: 700, color: c.text3,
+                      display: "flex", alignItems: "center", gap: 12,
+                      borderTop: `1px solid ${c.border}`, paddingTop: 18,
                     }}>
-                      {item.initials}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: c.text1 }}>{item.name}</p>
-                      <p style={{ fontSize: 11, color: c.text4 }}>{item.role}</p>
+                      <div style={{
+                        width: 48, height: 48, borderRadius: "50%",
+                        background: avatarColors[colorIdx], display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        fontFamily: f.mono, fontSize: 16, fontWeight: 700, color: "#FFFFFF",
+                      }}>
+                        {item.initials}
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: c.text1 }}>{item.name}</p>
+                        <p style={{ fontSize: 12, color: "#94A3B8" }}>{item.role}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+            <p style={{ fontSize: 11, color: "#94A3B8", marginTop: 24, textAlign: "center", fontStyle: "italic" }}>
+              Testimonials based on real client feedback. Details anonymized for confidentiality.
+            </p>
           </div>
         </section>
 
-        {/* ═══════════ T11 — HOW IT WORKS (3 steps) ═══════════ */}
-        <Section style={{ paddingTop: 80, paddingBottom: 48 }}>
-          <div style={{
-            background: "#FFFFFF", border: `1px solid ${c.border}`,
-            borderRadius: 18, padding: "56px 48px", maxWidth: 960, margin: "0 auto",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}>
+        {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
+        <Section style={{ paddingTop: 120, paddingBottom: 80 }}>
+          <div style={{ maxWidth: 700, margin: "0 auto" }}>
             <p style={{
               fontFamily: f.mono, fontSize: 11, fontWeight: 600,
               letterSpacing: "0.12em", textTransform: "uppercase" as const,
@@ -496,39 +485,60 @@ export default function LandingPage() {
             }}>
               {t("landing.how.label")}
             </p>
-            <h2 style={{ marginBottom: 32 }}>{t("landing.how.title")}</h2>
+            <h2 style={{
+              fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", fontWeight: 800,
+              letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 56,
+            }}>
+              {t("landing.how.title")}
+            </h2>
 
-            <div className="gt-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {/* Timeline */}
+            <div style={{ position: "relative", paddingLeft: 48 }}>
+              {/* Vertical line */}
+              <div style={{
+                position: "absolute", left: 15, top: 4, bottom: 4, width: 2,
+                background: "#E2E8F0",
+              }} />
+
               {[
-                { num: "01", title: t("landing.how.s1"), desc: t("landing.how.s1d") },
-                { num: "02", title: t("landing.how.s2"), desc: t("landing.how.s2d") },
-                { num: "03", title: t("landing.how.s3"), desc: t("landing.how.s3d") },
-              ].map((item) => (
-                <div key={item.num} style={{
-                  background: c.bg, border: `1px solid ${c.border}`,
-                  borderRadius: 14, padding: "28px 22px", position: "relative",
-                }}>
-                  <span style={{
-                    fontFamily: f.mono, fontSize: 36, fontWeight: 800,
-                    color: "rgba(26,26,26,0.05)", position: "absolute", top: 10, right: 14,
+                { num: 1, title: t("landing.how.s1"), desc: t("landing.how.s1d") },
+                { num: 2, title: t("landing.how.s2"), desc: t("landing.how.s2d") },
+                {
+                  num: 3, title: t("landing.how.s3"), desc: t("landing.how.s3d"),
+                  bullets: [
+                    t("landing.how.conf.b1") || "Numeric confidence score (0-100) on every finding",
+                    t("landing.how.conf.b2") || "Signals classified: observed, derived, or estimated",
+                    t("landing.how.conf.b3") || "When evidence is insufficient, we say so",
+                  ],
+                },
+                { num: 4, title: t("landing.how.s4") || "Correct", desc: t("landing.how.s4d") },
+              ].map((step) => (
+                <div key={step.num} style={{ position: "relative", marginBottom: 64 }}>
+                  {/* Circle */}
+                  <div style={{
+                    position: "absolute", left: -48, top: 0,
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "#3B82F6", display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                    fontFamily: f.mono, fontSize: 13, fontWeight: 700, color: "#FFFFFF",
+                    zIndex: 1,
                   }}>
-                    {item.num}
-                  </span>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{item.title}</p>
-                  <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6 }}>{item.desc}</p>
+                    {step.num}
+                  </div>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: c.text1, marginBottom: 8 }}>{step.title}</h3>
+                  <p style={{ fontSize: 16, color: "#64748B", lineHeight: 1.65 }}>{step.desc}</p>
+                  {step.bullets && (
+                    <ul style={{ marginTop: 14, paddingLeft: 0, listStyle: "none" }}>
+                      {step.bullets.map((b) => (
+                        <li key={b} style={{ fontSize: 14, color: "#64748B", lineHeight: 1.8, display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                          <span style={{ color: "#3B82F6", flexShrink: 0, marginTop: 2 }}>{"\u2022"}</span>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
-            </div>
-
-            {/* Confidence note (merged from step 4) */}
-            <div style={{
-              marginTop: 24, padding: "18px 22px", borderRadius: 10,
-              background: c.amberBg, border: `1px solid ${c.amberBd}`,
-            }}>
-              <p style={{ fontSize: 13, color: c.amber, fontWeight: 600, marginBottom: 6 }}>{t("landing.how.conf.title")}</p>
-              <p style={{ fontSize: 13, color: c.text3, lineHeight: 1.6 }}>
-                {t("landing.how.s4d")} {t("landing.how.conf.desc")}
-              </p>
             </div>
           </div>
         </Section>
