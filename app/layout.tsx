@@ -156,9 +156,8 @@ const structuredDataGraph = {
       foundingDate: "2025-01-01",
       address: {
         "@type": "PostalAddress",
-        addressLocality: "Wilmington",
-        addressRegion: "DE",
-        addressCountry: "US",
+        addressLocality: "Paris",
+        addressCountry: "FR",
       },
       contactPoint: {
         "@type": "ContactPoint",
@@ -259,6 +258,7 @@ const structuredDataGraph = {
         { "@type": "Country", name: "United States" },
         { "@type": "Country", name: "United Kingdom" },
         { "@type": "Country", name: "Netherlands" },
+        { "@type": "Country", name: "France" },
       ],
     },
   ],

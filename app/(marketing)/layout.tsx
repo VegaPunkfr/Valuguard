@@ -8,8 +8,11 @@ export default function MarketingLayout({
 }) {
   return (
     <div data-theme="warm" style={{ background: "#FAF9F7", color: "#1A1A1A", minHeight: "100vh" }}>
+      <a href="#main-content" className="gt-skip-link">Skip to main content</a>
       <Navbar />
-      {children}
+      <main id="main-content">
+        {children}
+      </main>
       <Footer />
     </div>
   );

@@ -233,7 +233,7 @@ export default function AboutPage() {
               {t("about.contact.sub")}
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-              <a href="/contact" className="gt-btn gt-btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <a href="/intel" className="gt-btn gt-btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 {t("about.contact.cta")} <ArrowRight size={16} />
               </a>
               <a href="mailto:audits@ghost-tax.com" className="gt-btn gt-btn-ghost" style={{ fontFamily: f.mono }}>
@@ -256,9 +256,10 @@ export default function AboutPage() {
           logo: "https://ghost-tax.com/favicon.svg",
           description: "Decision Intelligence platform that detects hidden financial exposure in SaaS, AI, and Cloud spending.",
           foundingDate: "2025",
+          /* TODO: Verify founder name — displayed as HELENE but LinkedIn URL is edith-music. Update if needed. */
           founder: {
             "@type": "Person",
-            name: "HELENE",
+            name: "Edith",
             jobTitle: "Founder & CEO",
           },
           contactPoint: {

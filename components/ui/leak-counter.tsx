@@ -45,7 +45,7 @@ const COPY = {
 
 export function LeakCounter({
   locale = "en",
-  dailyTotalEur = 100_000, // Conservative: 200 companies × 500 EUR/day avg
+  dailyTotalEur = 161_000, // 200 companies × ~294k EUR/yr avg exposure ÷ 365
   companiesAnalyzed = 200,
 }: LeakCounterProps) {
   const t = COPY[locale as keyof typeof COPY] || COPY.en;
@@ -159,6 +159,23 @@ export function LeakCounter({
       }}>
         ~{perSecond.toFixed(2)} {t.perSecond}
       </div>
+
+      {/* Disclaimer */}
+      <p style={{
+        fontSize: 10,
+        color: "#94A3B8",
+        marginTop: 10,
+        lineHeight: 1.4,
+        maxWidth: 320,
+        marginLeft: "auto",
+        marginRight: "auto",
+      }}>
+        {locale === "fr"
+          ? "Estimation cumulative bas\u00e9e sur l\u2019exposition moyenne d\u00e9tect\u00e9e parmi 200+ analyses"
+          : locale === "de"
+            ? "Kumulative Sch\u00e4tzung basierend auf der durchschnittlichen Exposition aus 200+ Analysen"
+            : "Cumulative estimate based on average exposure detected across 200+ analyses"}
+      </p>
     </div>
   );
 }

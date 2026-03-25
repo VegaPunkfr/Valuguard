@@ -15,6 +15,8 @@ export default function LanguageSelector() {
           <button
             key={l.code}
             onClick={() => setLocale(l.code)}
+            aria-pressed={active}
+            aria-label={`Switch language to ${l.label}`}
             style={{
               padding: "6px 12px",
               fontSize: 12,
