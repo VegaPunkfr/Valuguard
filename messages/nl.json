@@ -2572,5 +2572,16 @@
   "landing.compare.after.l2": "{n} consolidation paths identified",
   "landing.compare.after.l3": "{n} renewal playbooks delivered",
   "landing.compare.after.l4": "{n} vendor negotiation scripts",
-  "landing.compare.after.l5": "{n} board-ready Decision Pack"
+  "landing.compare.after.l5": "{n} board-ready Decision Pack",
+  "hero.headline": "Uw IT-uitgaven hebben blinde vlekken.",
+  "hero.sub2": "Wij detecteren, kwantificeren en verklaren verborgen financi\u00eble blootstelling in SaaS-, AI- en Cloud-uitgaven.",
+  "hero.cta.main": "Mijn blootstelling bekijken",
+  "hero.reassurance": "Zonder registratie \u00b7 Resultaten in 2 min \u00b7 Geen systeemtoegang",
+  "hero.social": "200+ analyses geleverd \u00b7 Gemiddelde blootstelling: 247k\u2013341k EUR",
+  "footer.link.methodology": "Methodologie",
+  "footer.link.sample": "Voorbeeldrapport",
+  "footer.link.vault": "Beveiligingskluis",
+  "footer.link.privacy": "Privacybeleid",
+  "footer.link.terms": "Algemene Voorwaarden",
+  "nav.menu": ""
 }

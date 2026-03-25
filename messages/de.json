@@ -2529,5 +2529,16 @@
   "landing.compare.after.l2": "{n} Konsolidierungspfade identifiziert",
   "landing.compare.after.l3": "{n} Verlängerungs-Playbooks geliefert",
   "landing.compare.after.l4": "{n} Lieferanten-Verhandlungsskripte",
-  "landing.compare.after.l5": "{n} Board-fertiges Decision Pack"
+  "landing.compare.after.l5": "{n} Board-fertiges Decision Pack",
+  "hero.headline": "Ihre IT-Ausgaben haben blinde Flecken.",
+  "hero.sub2": "Wir erkennen, quantifizieren und erkl\u00e4ren versteckte finanzielle Exposition in SaaS-, KI- und Cloud-Ausgaben.",
+  "hero.cta.main": "Meine Exposition sehen",
+  "hero.reassurance": "Ohne Anmeldung \u00b7 Ergebnisse in 2 Min \u00b7 Kein Systemzugang",
+  "hero.social": "200+ Analysen geliefert \u00b7 Durchschnittliche Exposition: 247k\u2013341k EUR",
+  "footer.link.methodology": "Methodik",
+  "footer.link.sample": "Beispielbericht",
+  "footer.link.vault": "Sicherheitstresor",
+  "footer.link.privacy": "Datenschutzrichtlinie",
+  "footer.link.terms": "Nutzungsbedingungen",
+  "nav.menu": ""
 }

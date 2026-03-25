@@ -2572,5 +2572,16 @@
   "landing.compare.after.l2": "{n} consolidation paths identified",
   "landing.compare.after.l3": "{n} renewal playbooks delivered",
   "landing.compare.after.l4": "{n} vendor negotiation scripts",
-  "landing.compare.after.l5": "{n} board-ready Decision Pack"
+  "landing.compare.after.l5": "{n} board-ready Decision Pack",
+  "hero.headline": "Your IT spend has blind spots.",
+  "hero.sub2": "We detect, quantify, and explain hidden financial exposure in SaaS, AI, and Cloud spending.",
+  "hero.cta.main": "See my exposure",
+  "hero.reassurance": "No sign-up required \u00b7 Results in 2 min \u00b7 Zero system access",
+  "hero.social": "200+ analyses delivered \u00b7 Average exposure: 247k\u2013341k EUR",
+  "footer.link.methodology": "Methodology",
+  "footer.link.sample": "Sample Report",
+  "footer.link.vault": "Security Vault",
+  "footer.link.privacy": "Privacy Policy",
+  "footer.link.terms": "Terms of Service",
+  "nav.menu": ""
 }

@@ -2550,5 +2550,16 @@
   "landing.compare.after.l2": "{n} chemins de consolidation identifiés",
   "landing.compare.after.l3": "{n} playbooks de renouvellement livrés",
   "landing.compare.after.l4": "{n} scripts de négociation fournisseur",
-  "landing.compare.after.l5": "{n} Decision Pack prêt pour le board"
+  "landing.compare.after.l5": "{n} Decision Pack prêt pour le board",
+  "hero.headline": "Vos d\u00e9penses IT ont un angle mort.",
+  "hero.sub2": "Nous d\u00e9tectons, quantifions et expliquons l\u2019exposition financi\u00e8re cach\u00e9e dans vos d\u00e9penses SaaS, IA et Cloud.",
+  "hero.cta.main": "Voir mon exposition",
+  "hero.reassurance": "Sans inscription \u00b7 R\u00e9sultats en 2 min \u00b7 Z\u00e9ro acc\u00e8s syst\u00e8me",
+  "hero.social": "200+ analyses livr\u00e9es \u00b7 Exposition moyenne : 247k\u2013341k EUR",
+  "footer.link.methodology": "M\u00e9thodologie",
+  "footer.link.sample": "Rapport Exemple",
+  "footer.link.vault": "Coffre-fort S\u00e9curit\u00e9",
+  "footer.link.privacy": "Politique de Confidentialit\u00e9",
+  "footer.link.terms": "Conditions G\u00e9n\u00e9rales",
+  "nav.menu": ""
 }

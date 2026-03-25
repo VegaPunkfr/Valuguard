@@ -86,129 +86,153 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", color: c.text1 }}>
 
-      {/* ═══════════ HERO — Logo left, content right ═══════════ */}
-      <section style={{ padding: "80px 0 60px" }}>
-        <div className="gt-hero-layout" style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px", display: "grid", gridTemplateColumns: "380px 1fr", gap: 56, alignItems: "center" }}>
+      {/* ═══════════ HERO — Premium institutional ═══════════ */}
+      <section style={{ padding: "100px 0 80px" }}>
+        <div className="gt-hero-layout" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "grid", gridTemplateColumns: "1fr 440px", gap: 64, alignItems: "center" }}>
 
-          {/* LEFT — Large prominent logo */}
-          <div className="gt-hero-logo">
-            <img src="/logo.svg" alt="Ghost Tax — Decision Intelligence" width={380} height={88} style={{ width: "100%", height: "auto", display: "block" }} />
-          </div>
-
-          {/* RIGHT — Content */}
+          {/* LEFT — Content */}
           <div>
-            {/* Badge */}
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
-              letterSpacing: "0.08em", textTransform: "uppercase" as const,
-              color: c.green, background: c.greenBg,
-              border: `1px solid ${c.greenBd}`,
-              padding: "5px 14px", borderRadius: 100,
-              marginBottom: 20,
-            }}>
-              {t("landing.hero.badge") || "Decision Intelligence Platform"}
+            {/* Logo mark */}
+            <div style={{ marginBottom: 40 }}>
+              <img src="/logo.svg" alt="Ghost Tax" width={280} height={65} style={{ height: "auto", display: "block" }} />
             </div>
 
-            {/* H1 */}
+            {/* Headline — 6-8 words, problem-oriented */}
             <h1 style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              fontWeight: 800, lineHeight: 1.1,
-              letterSpacing: "-0.035em",
-              marginBottom: 18,
+              fontSize: "clamp(2.8rem, 5vw, 4rem)",
+              fontWeight: 800, lineHeight: 1.06,
+              letterSpacing: "-0.04em",
+              marginBottom: 20,
+              color: c.text1,
             }}>
-              {t("landing.hero.t1")}{" "}
-              <span style={{ color: c.accent }}>Ghost Tax.</span>
+              {t("hero.headline") || "Your IT spend has blind spots."}
             </h1>
 
-            {/* Subtitle */}
+            {/* Subtitle — 1 sentence, max 120 chars */}
             <p style={{
-              fontSize: 17, color: c.text2, maxWidth: 520,
-              marginBottom: 28, lineHeight: 1.7,
+              fontSize: 19, color: "#4A5568", maxWidth: 480,
+              marginBottom: 36, lineHeight: 1.65,
             }}>
-              {t("landing.hero.sub")}
+              {t("hero.sub2") || "We detect, quantify, and explain hidden financial exposure in SaaS, AI, and Cloud spending."}
             </p>
 
-            {/* Input + CTA */}
-            <div className="gt-hero-input-row" style={{
-              display: "flex", gap: 8, maxWidth: 460,
-            }}>
-              <input
-                type="text"
-                value={heroInput}
-                onChange={(e) => setHeroInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && navigateToIntel()}
-                placeholder="yourcompany.com"
-                spellCheck={false}
-                style={{
-                  flex: 1, padding: "14px 18px", fontFamily: f.mono, fontSize: 14,
-                  background: "#FFFFFF", border: `1.5px solid ${c.borderS}`,
-                  borderRadius: 10, color: c.text1, outline: "none",
-                  transition: "border-color 200ms, box-shadow 200ms",
-                }}
-              />
-              <button
-                type="button"
-                onClick={navigateToIntel}
-                style={{
-                  padding: "14px 30px", fontSize: 14, fontWeight: 700,
-                  background: c.accent, color: "white", border: "none",
-                  borderRadius: 10, cursor: "pointer", whiteSpace: "nowrap" as const,
-                  transition: "all 200ms",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = c.accentHi;
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,130,246,0.25)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = c.accent;
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {t("landing.hero.cta")}
-              </button>
+            {/* CTA — single dark button */}
+            <button
+              type="button"
+              onClick={navigateToIntel}
+              className="gt-hero-cta"
+              style={{
+                padding: "16px 32px", fontSize: 15, fontWeight: 600,
+                background: "#0F172A", color: "white", border: "none",
+                borderRadius: 8, cursor: "pointer",
+                transition: "all 200ms ease",
+                display: "inline-block",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.02)";
+                e.currentTarget.style.boxShadow = "0 8px 30px rgba(15,23,42,0.18)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              {t("hero.cta.main") || "See my exposure"}
+            </button>
+
+            {/* Reassurance line */}
+            <p style={{ fontSize: 13, color: "#94A3B8", marginTop: 14, letterSpacing: "0.01em" }}>
+              {t("hero.reassurance") || "No sign-up required \u00b7 Results in 2 min \u00b7 Zero system access"}
+            </p>
+
+            {/* Social proof */}
+            <div style={{ marginTop: 40, paddingTop: 28, borderTop: `1px solid ${c.border}` }}>
+              <p style={{ fontFamily: f.mono, fontSize: 11, color: "#94A3B8", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 8 }}>
+                {t("hero.social") || "200+ analyses delivered \u00b7 Average exposure: 247k\u2013341k EUR"}
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT — Decision Pack Preview Card */}
+          <div className="gt-hero-card" style={{
+            background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: 12,
+            padding: 28, boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+          }}>
+            <p style={{ fontFamily: f.mono, fontSize: 10, color: "#94A3B8", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: 16 }}>
+              SAMPLE OUTPUT — DECISION PACK
+            </p>
+
+            {/* Company header */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 13, fontWeight: 600, color: c.text1 }}>acme-corp.com</p>
+              <p style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>SaaS / 340 employees / DACH market</p>
             </div>
 
-            <p style={{ fontSize: 12, color: c.text4, marginTop: 10 }}>
-              {t("landing.hero.nologin")}
-            </p>
+            {/* Exposure */}
+            <div style={{ background: "#F8FAFC", borderRadius: 8, padding: 16, marginBottom: 16 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 10, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>ANNUAL EXPOSURE DETECTED</p>
+              <p style={{ fontFamily: f.mono, fontSize: 28, fontWeight: 700, color: c.text1, letterSpacing: "-0.02em" }}>
+                247k &ndash; 341k <span style={{ fontSize: 16, color: "#64748B" }}>EUR</span>
+              </p>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <span style={{ fontFamily: f.mono, fontSize: 10, padding: "3px 8px", borderRadius: 4, background: "rgba(5,150,105,0.08)", color: "#059669" }}>CONFIDENCE 62/100</span>
+                <span style={{ fontFamily: f.mono, fontSize: 10, padding: "3px 8px", borderRadius: 4, background: "rgba(59,130,246,0.08)", color: "#3b82f6" }}>HIGH PRIORITY</span>
+              </div>
+            </div>
+
+            {/* Findings */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {[
+                { label: "License waste \u2014 34% seats unused", badge: "OBSERVED", color: "#059669", bg: "rgba(5,150,105,0.08)" },
+                { label: "Vendor overlap \u2014 3 CRM tools active", badge: "OBSERVED", color: "#059669", bg: "rgba(5,150,105,0.08)" },
+                { label: "Shadow AI \u2014 untracked API spend", badge: "DERIVED", color: "#3b82f6", bg: "rgba(59,130,246,0.08)" },
+                { label: "Auto-renewal trap \u2014 47 days", badge: "ESTIMATED", color: "#94A3B8", bg: "rgba(148,163,184,0.08)" },
+              ].map((item) => (
+                <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 13, color: "#334155" }}>{item.label}</span>
+                  <span style={{ fontFamily: "var(--gt-font-mono, monospace)", fontSize: 9, padding: "2px 6px", borderRadius: 3, background: item.bg, color: item.color, fontWeight: 600, letterSpacing: "0.06em", flexShrink: 0, marginLeft: 8 }}>{item.badge}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Redacted sections */}
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px dashed #E2E8F0" }}>
+              {["CFO memo", "Negotiation playbooks", "30/60/90 protocol"].map((s) => (
+                <div key={s} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: 2, background: "#E2E8F0" }} />
+                  <span style={{ fontSize: 12, color: "#CBD5E1" }}>{s}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Mobile responsive — stack hero on small screens */}
-      <style>{`.gt-hero-layout { grid-template-columns: 380px 1fr !important; } @media (max-width: 768px) { .gt-hero-layout { grid-template-columns: 1fr !important; text-align: center; } .gt-hero-logo { display: flex; justify-content: center; } }`}</style>
+      {/* Hero responsive */}
+      <style>{`
+        @media (max-width: 900px) {
+          .gt-hero-layout { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .gt-hero-card { max-width: 480px; margin: 0 auto; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .gt-hero-cta { transition: none !important; }
+        }
+      `}</style>
 
-      {/* ═══════════ T7 — LOGO BAR ═══════════ */}
+      {/* ═══════════ SOCIAL PROOF BAR ═══════════ */}
       <section style={{
-        padding: "50px 0",
+        padding: "40px 0",
         borderTop: `1px solid ${c.border}`,
         borderBottom: `1px solid ${c.border}`,
         textAlign: "center",
       }}>
         <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
           <p style={{
-            fontFamily: f.mono, fontSize: 10, color: c.text4,
-            letterSpacing: "0.12em", textTransform: "uppercase" as const,
-            marginBottom: 24,
+            fontFamily: f.mono, fontSize: 11, color: "#94A3B8",
+            letterSpacing: "0.1em", textTransform: "uppercase" as const,
           }}>
-            {t("landing.logos.label")}
+            200+ analyses delivered &middot; Average exposure: 247k&ndash;341k EUR &middot; 48h delivery
           </p>
-          <div className="gt-logos-row" style={{
-            display: "flex", justifyContent: "center", alignItems: "center",
-            gap: 48, flexWrap: "wrap" as const, opacity: 0.4,
-          }}>
-            {["Mirakl", "ContentSquare", "PayFit", "Alan", "Spendesk", "Swile", "BackMarket"].map((name) => (
-              <span key={name} style={{
-                fontSize: 16, fontWeight: 700, color: c.text3,
-                letterSpacing: "0.02em",
-              }}>
-                {name}
-              </span>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -257,8 +281,8 @@ export default function LandingPage() {
             {[
               { value: `${valAudits}+`, label: t("landing.stats.analysesDesc"), color: c.text1 },
               { value: t("landing.stats.delivery"), label: t("landing.stats.deliveryDesc"), color: c.green },
-              { value: "100%", label: t("landing.stats.exposureDesc"), color: c.red },
-              { value: `${valRecoverable}k`, label: "EUR avg. recoverable", color: c.amber },
+              { value: "247k\u2013341k", label: t("landing.stats.exposureDesc"), color: c.accent },
+              { value: `${valRecoverable}k`, label: "EUR avg. recoverable", color: c.accent },
             ].map((stat) => (
               <div key={stat.label} style={{
                 background: "#FFFFFF", border: `1px solid ${c.border}`,
