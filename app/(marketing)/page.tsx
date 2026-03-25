@@ -238,40 +238,7 @@ export default function LandingPage() {
 
       <div style={{ maxWidth: 1140, margin: "0 auto", padding: "0 28px" }}>
 
-        {/* ═══════════ VIDEO SECTION ═══════════ */}
-        <Section style={{ paddingTop: 48, paddingBottom: 48 }}>
-          <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-            <p style={{
-              fontFamily: f.mono, fontSize: 11, fontWeight: 600,
-              letterSpacing: "0.08em", textTransform: "uppercase" as const,
-              color: c.text4, marginBottom: 16,
-            }}>
-              {t("landing.video.subtitle")}
-            </p>
-            <div style={{
-              position: "relative", borderRadius: 16, overflow: "hidden",
-              border: `1px solid ${c.border}`,
-              boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
-            }}>
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="none"
-                poster="/site-screenshot.png"
-                style={{ width: "100%", display: "block", aspectRatio: "16/9" }}
-              >
-                <source src="/demo-video.mp4" type="video/mp4" />
-              </video>
-            </div>
-            <p style={{
-              fontSize: 14, color: c.text3, marginTop: 16, lineHeight: 1.5,
-            }}>
-              {t("landing.video.title")}
-            </p>
-          </div>
-        </Section>
+        {/* TODO: Remettre section vidéo quand le contenu sera prêt */}
 
         {/* ═══════════ T8 — STATS (4 simple cards) ═══════════ */}
         <Section style={{ paddingTop: 64, paddingBottom: 48 }}>
@@ -311,7 +278,7 @@ export default function LandingPage() {
         </Section>
 
         {/* ═══════════ EXPOSURE SHOCK — Before/After ═══════════ */}
-        <Section style={{ paddingTop: 120, paddingBottom: 80 }}>
+        <Section style={{ paddingTop: 80, paddingBottom: 80 }}>
           <p style={{
             fontFamily: f.mono, fontSize: 11, fontWeight: 600,
             letterSpacing: "0.12em", textTransform: "uppercase" as const,
@@ -476,7 +443,7 @@ export default function LandingPage() {
         </section>
 
         {/* ═══════════ HOW IT WORKS — Vertical Timeline ═══════════ */}
-        <Section style={{ paddingTop: 120, paddingBottom: 80 }}>
+        <Section style={{ paddingTop: 80, paddingBottom: 80 }}>
           <div style={{ maxWidth: 700, margin: "0 auto" }}>
             <p style={{
               fontFamily: f.mono, fontSize: 11, fontWeight: 600,

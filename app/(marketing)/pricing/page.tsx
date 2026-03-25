@@ -140,7 +140,7 @@ export default function PricingPage() {
               {t("pricing.currencyNote").replace("{currency}", isUSD ? "USD" : "EUR")}
             </span>
             <span style={{ fontSize: 11, fontFamily: f.mono, color: c.green, fontWeight: 700 }}>
-              {isUSD ? "🇺🇸" : "🇩🇪🇦🇹🇨🇭"}
+              {isUSD ? "USD ($)" : "EUR (\u20ac)"}
             </span>
           </div>
         </Section>
