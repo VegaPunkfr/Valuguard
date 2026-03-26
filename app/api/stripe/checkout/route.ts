@@ -24,7 +24,7 @@ import {
   type PricingLocale,
 } from "@/lib/pricing";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").trim();
 
 // ── Rate limiter (5 req/min per IP) ───────────────────
 const RATE_WINDOW_MS = 60 * 1000;
@@ -248,9 +248,8 @@ export async function POST(request: NextRequest) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[Ghost Tax] Stripe checkout error:", message);
 
-    // Return error detail for debugging (temporary)
     return NextResponse.json(
-      { error: "Unable to create checkout session. Please try again.", debug: message },
+      { error: "Unable to create checkout session. Please try again." },
       { status: 500 }
     );
   }
