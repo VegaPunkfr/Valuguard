@@ -9,28 +9,12 @@
   ],
   "crons": [
     {
+      "path": "/api/pulse",
+      "schedule": "0 6 * * 1-5"
+    },
+    {
       "path": "/api/cron/master",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/followup",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/drip",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/osint",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/osint-worker",
-      "schedule": "0 3 * * 0"
-    },
-    {
-      "path": "/api/cron/international-sniper",
-      "schedule": "0 2 * * *"
+      "schedule": "0 6 * * 0,6"
     }
   ]
 }
