@@ -38,12 +38,22 @@ export default function PricingPage() {
     setCheckoutLoading(key);
     setCheckoutError(false);
     try {
-      const params = new URLSearchParams({
-        rail,
-        locale: pLocale,
-        ...(tierHeadcount && { headcount: String(tierHeadcount) }),
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rail,
+          locale: pLocale,
+          ...(tierHeadcount && { headcount: tierHeadcount }),
+        }),
       });
-      window.location.href = `/checkout?${params.toString()}`;
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setCheckoutLoading(null);
+        setCheckoutError(true);
+      }
     } catch {
       setCheckoutLoading(null);
       setCheckoutError(true);

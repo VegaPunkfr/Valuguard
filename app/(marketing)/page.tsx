@@ -75,8 +75,18 @@ export default function LandingPage() {
     setCheckoutLoading(true);
     setCheckoutError(false);
     try {
-      const params = new URLSearchParams({ rail: "A", locale });
-      window.location.href = `/checkout?${params.toString()}`;
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rail: "A", locale }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setCheckoutLoading(false);
+        setCheckoutError(true);
+      }
     } catch {
       setCheckoutLoading(false);
       setCheckoutError(true);

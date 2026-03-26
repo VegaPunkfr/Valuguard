@@ -206,20 +206,32 @@ export default function IntelPage() {
     setCheckoutLoading(true);
     trackCheckoutStarted({ domain });
     try {
-      const params = new URLSearchParams({
-        rail: "A",
-        locale,
-        ...(domain && { domain }),
-        ...(email.trim() && { email: email.trim() }),
-        ...(phases.context?.name && { company: phases.context.name }),
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rail: "A",
+          locale,
+          ...(domain && { domain }),
+          ...(email.trim() && { email: email.trim() }),
+          ...(phases.context?.name && { companyName: phases.context.name }),
+          ...(headcount && { headcount }),
+          ...(monthlySpend && { monthlySpendEur: monthlySpend }),
+          ...(industry && { industry }),
+        }),
       });
-      window.location.href = `/checkout?${params.toString()}`;
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError("Unable to start checkout. Please try again.");
+      }
     } catch {
       setError("Network error during checkout.");
     } finally {
       setCheckoutLoading(false);
     }
-  }, [domain, locale, phases, headcount, monthlySpend, industry]);
+  }, [domain, locale, phases, headcount, monthlySpend, industry, email]);
 
   // ── Decision Simulator ─────────────────────────────
 
