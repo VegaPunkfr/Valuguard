@@ -248,9 +248,9 @@ export async function POST(request: NextRequest) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[Ghost Tax] Stripe checkout error:", message);
 
-    // Return generic error — never leak Stripe internals to client
+    // Return error detail for debugging (temporary)
     return NextResponse.json(
-      { error: "Unable to create checkout session. Please try again." },
+      { error: "Unable to create checkout session. Please try again.", debug: message },
       { status: 500 }
     );
   }
