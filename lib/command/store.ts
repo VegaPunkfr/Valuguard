@@ -3,16 +3,36 @@
  * Data store v3 — Simple, reliable, no dynamic require
  */
 
-import type { Account, AccountStatus, AccountFilters, SortField, SortDir, Conviction, Attackability, TimelineEventType } from '@/types/command';
+import type { Account, AccountStatus, AccountFilters, SortField, SortDir, Conviction, Attackability, TimelineEventType, LeadStatus, OutreachStatusV2, NextActionType } from '@/types/command';
 import { CONVICTION_META, STATUS_META } from '@/types/command';
 import { SEED_ACCOUNTS } from './seed';
 
 const STORAGE_KEY = 'gt-command-v3';
 
+// ── Migration v2 — Cockpit Execution States ─────────────
+
+function migrateAccountV2(account: any): Account {
+  // Add defaults for new fields if missing
+  return {
+    ...account,
+    leadStatus: account.leadStatus || (account.status === 'contacted' ? 'contacted' : account.status === 'dropped' ? 'archived' : 'new'),
+    outreachStatus: account.outreachStatus || (account.outreach?.some((o: any) => o.status === 'sent') ? 'sent' : account.outreach?.length > 0 ? 'message_ready' : 'no_message_generated'),
+    nextActionType: account.nextActionType || 'send_now',
+    followUpCount: account.followUpCount || 0,
+    readyToSend: account.readyToSend ?? false,
+    readyToSendRank: account.readyToSendRank || 0,
+    isSnoozed: account.isSnoozed ?? false,
+    isReactivated: account.isReactivated ?? false,
+    wasContactedBefore: account.wasContactedBefore ?? (account.status === 'contacted'),
+    hiddenFromActiveView: account.hiddenFromActiveView ?? (account.status === 'dropped'),
+    detectedLanguage: account.detectedLanguage || (account.country === 'DE' ? 'de' : account.country === 'NL' ? 'nl' : 'en'),
+  };
+}
+
 // ── Persistence ──────────────────────────────────────────
 
 export function loadAccounts(): Account[] {
-  if (typeof window === 'undefined') return SEED_ACCOUNTS;
+  if (typeof window === 'undefined') return SEED_ACCOUNTS.map(migrateAccountV2);
 
   // Clean old versions
   try { localStorage.removeItem('gt-command-accounts'); } catch {}
@@ -23,13 +43,14 @@ export function loadAccounts(): Account[] {
     if (stored) {
       const parsed = JSON.parse(stored) as Account[];
       if (parsed.length > 0 && Array.isArray(parsed[0].timeline) && typeof parsed[0].revenueEstimate === 'number') {
-        return parsed;
+        return parsed.map(migrateAccountV2);
       }
     }
   } catch { /* corrupted — reset */ }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ACCOUNTS));
-  return SEED_ACCOUNTS;
+  const migrated = SEED_ACCOUNTS.map(migrateAccountV2);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+  return migrated;
 }
 
 /**
@@ -196,3 +217,148 @@ export function getScanNeeded(a: Account[]) { return a.filter(x => !x.scan && x.
 export function getKillCandidates(a: Account[]) { return a.filter(x => x.status !== 'dropped' && (x.conviction === 'low' || x.attackability === 'blocked' || x.weaknesses.length > x.strengths.length)); }
 export function getOutreachReady(a: Account[]) { return a.filter(x => x.outreach.length > 0 && x.outreach.some(o => o.status === 'draft') && x.status !== 'dropped' && (x.attackability === 'now' || x.status === 'outreach_ready' || x.status === 'qualified')).sort((x, y) => y.score - x.score); }
 export function getTopByExpectedValue(a: Account[]) { return a.filter(x => x.status !== 'dropped').sort((x, y) => calcExpectedValue(y) - calcExpectedValue(x)); }
+
+// ── Cockpit v2 — Execution Helpers ──────────────────────
+
+// Snooze a prospect
+export function snoozeAccount(accounts: Account[], id: string, days: number): Account[] {
+  const until = new Date(Date.now() + days * 86400000).toISOString();
+  return updateAccount(accounts, id, {
+    isSnoozed: true,
+    snoozedUntil: until,
+    hiddenFromActiveView: true,
+    nextActionType: 'snooze',
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'snoozed',
+  });
+}
+
+// Unsnooze expired
+export function unsnoozeExpired(accounts: Account[]): Account[] {
+  const now = Date.now();
+  return accounts.map(a => {
+    if (a.isSnoozed && a.snoozedUntil && new Date(a.snoozedUntil).getTime() <= now) {
+      return { ...a, isSnoozed: false, snoozedUntil: undefined, hiddenFromActiveView: false };
+    }
+    return a;
+  });
+}
+
+// Mark as sent
+export function markSent(accounts: Account[], id: string): Account[] {
+  return updateAccount(accounts, id, {
+    outreachStatus: 'sent',
+    leadStatus: 'contacted',
+    sentAt: new Date().toISOString(),
+    wasContactedBefore: true,
+    nextActionType: 'wait_for_reply',
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'sent',
+  });
+}
+
+// Mark as replied
+export function markReplied(accounts: Account[], id: string): Account[] {
+  return updateAccount(accounts, id, {
+    outreachStatus: 'replied',
+    leadStatus: 'replied',
+    replyReceivedAt: new Date().toISOString(),
+    nextActionType: 'send_now',
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'reply_received',
+  });
+}
+
+// Schedule follow-up
+export function scheduleFollowUp(accounts: Account[], id: string, days: number): Account[] {
+  const dueAt = new Date(Date.now() + days * 86400000).toISOString();
+  return updateAccount(accounts, id, {
+    outreachStatus: 'follow_up_due',
+    followUpDueAt: dueAt,
+    followUpCount: (accounts.find(a => a.id === id)?.followUpCount || 0) + 1,
+    nextActionType: days <= 3 ? 'follow_up_in_3_days' : 'follow_up_in_7_days',
+    nextActionAt: dueAt,
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'follow_up_scheduled',
+  });
+}
+
+// Archive
+export function archiveAccount(accounts: Account[], id: string): Account[] {
+  return updateAccount(accounts, id, {
+    leadStatus: 'archived',
+    hiddenFromActiveView: true,
+    nextActionType: 'archive',
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'archived',
+  });
+}
+
+// Reactivate
+export function reactivateAccount(accounts: Account[], id: string): Account[] {
+  return updateAccount(accounts, id, {
+    leadStatus: 'review_needed',
+    hiddenFromActiveView: false,
+    isReactivated: true,
+    isSnoozed: false,
+    nextActionType: 'personalize_message',
+    lastActionAt: new Date().toISOString(),
+    lastActionType: 'reactivated',
+  });
+}
+
+// Get accounts by view
+export function getViewAccounts(accounts: Account[], view: string): Account[] {
+  const now = Date.now();
+  // Unsnooze expired first
+  const live = accounts.map(a => {
+    if (a.isSnoozed && a.snoozedUntil && new Date(a.snoozedUntil).getTime() <= now) {
+      return { ...a, isSnoozed: false, snoozedUntil: undefined, hiddenFromActiveView: false };
+    }
+    return a;
+  });
+
+  switch (view) {
+    case 'focus_now':
+      return live.filter(a => !a.hiddenFromActiveView && !a.isSnoozed && a.readyToSend)
+        .sort((a, b) => (a.readyToSendRank || 0) - (b.readyToSendRank || 0));
+    case 'not_sent':
+      return live.filter(a => !a.hiddenFromActiveView && a.outreachStatus !== 'sent' && a.outreachStatus !== 'replied' && !a.isSnoozed);
+    case 'message_ready':
+      return live.filter(a => a.outreachStatus === 'message_ready' && !a.hiddenFromActiveView);
+    case 'draft_created':
+      return live.filter(a => a.outreachStatus === 'draft_created' && !a.hiddenFromActiveView);
+    case 'sent':
+      return live.filter(a => a.outreachStatus === 'sent');
+    case 'waiting_reply':
+      return live.filter(a => a.outreachStatus === 'sent' && a.nextActionType === 'wait_for_reply');
+    case 'follow_up_due':
+      return live.filter(a => a.outreachStatus === 'follow_up_due' || (a.followUpDueAt && new Date(a.followUpDueAt).getTime() <= now));
+    case 'replied':
+      return live.filter(a => a.outreachStatus === 'replied' || a.leadStatus === 'replied');
+    case 'ignored_archived':
+      return live.filter(a => a.leadStatus === 'ignored' || a.leadStatus === 'archived' || a.hiddenFromActiveView);
+    case 'previously_contacted':
+      return live.filter(a => a.wasContactedBefore);
+    case 'all':
+    default:
+      return live;
+  }
+}
+
+// Compute ready-to-send status for all accounts
+export function computeReadyToSend(accounts: Account[]): Account[] {
+  return accounts.map((a, idx) => {
+    const hasEmail = a.financeLead?.email && a.financeLead?.emailStatus !== 'invalid' && a.financeLead?.emailStatus !== 'missing';
+    const hasMessage = a.outreachStatus === 'message_ready' || a.outreachStatus === 'draft_created' || (a.outreach && a.outreach.length > 0);
+    const notSent = a.outreachStatus !== 'sent' && a.outreachStatus !== 'replied';
+    const notHidden = !a.hiddenFromActiveView && !a.isSnoozed;
+    const ready = !!(hasEmail && hasMessage && notSent && notHidden);
+    return {
+      ...a,
+      readyToSend: ready,
+      nextActionType: ready ? 'send_now' : a.nextActionType,
+    };
+  }).sort((a, b) => (b.readyToSend ? 1 : 0) - (a.readyToSend ? 1 : 0) || b.score - a.score)
+    .map((a, idx) => ({ ...a, readyToSendRank: idx + 1 }));
+}

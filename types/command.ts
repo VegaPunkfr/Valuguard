@@ -216,6 +216,39 @@ export interface Account {
   thesisStrength?: number;   // 0-85 from thesis engine
   proofLevel?: number;       // 0-85 from proof engine
 
+  // === NEW: Cockpit v2 — Execution States ===
+  // (Optional for backward compat — migrateAccountV2 in store.ts fills defaults)
+  leadStatus?: LeadStatus;
+  outreachStatus?: OutreachStatusV2;
+  nextActionType?: NextActionType;
+
+  // Workflow timestamps
+  messageGeneratedAt?: string;
+  draftCreatedAt?: string;
+  sentAt?: string;
+  replyReceivedAt?: string;
+  followUpDueAt?: string;
+  followUpCount?: number;
+  lastActionAt?: string;
+  lastActionType?: string;
+  nextActionAt?: string;
+
+  // Visibility control
+  readyToSend?: boolean;
+  readyToSendRank?: number;
+  isSnoozed?: boolean;
+  snoozedUntil?: string;
+  isReactivated?: boolean;
+  wasContactedBefore?: boolean;
+  hiddenFromActiveView?: boolean;
+
+  // Email workflow
+  openedEmailComposeAt?: string;
+  emailProviderHint?: string; // 'gmail' | 'outlook' | 'mailto'
+
+  // Language
+  detectedLanguage?: string; // 'en' | 'fr' | 'de' | 'nl'
+
   // Meta
   createdAt: string;
   updatedAt: string;
@@ -439,3 +472,51 @@ export interface AccountOutreachState {
   duplicateRisk: boolean;
   waitingResponse: boolean;
 }
+
+// ── Cockpit v2 — Lead & Execution States ────────────────────
+
+// New Lead Status (replaces AccountStatus for lead tracking)
+export type LeadStatus = 'new' | 'review_needed' | 'ready_to_send' | 'contacted' | 'replied' | 'nurturing' | 'ignored' | 'archived' | 'closed';
+
+export const LEAD_STATUS_META: Record<LeadStatus, { label: string; color: string; bg: string; order: number }> = {
+  new:            { label: 'NEW',            color: '#60a5fa', bg: 'rgba(96,165,250,0.10)', order: 1 },
+  review_needed:  { label: 'REVIEW',         color: '#eab308', bg: 'rgba(234,179,8,0.10)', order: 2 },
+  ready_to_send:  { label: 'READY TO SEND',  color: '#34d399', bg: 'rgba(52,211,153,0.10)', order: 3 },
+  contacted:      { label: 'CONTACTED',      color: '#a78bfa', bg: 'rgba(167,139,250,0.10)', order: 4 },
+  replied:        { label: 'REPLIED',        color: '#22c55e', bg: 'rgba(34,197,94,0.10)', order: 5 },
+  nurturing:      { label: 'NURTURING',      color: '#3b82f6', bg: 'rgba(59,130,246,0.10)', order: 6 },
+  ignored:        { label: 'IGNORED',        color: '#64748b', bg: 'rgba(100,116,139,0.08)', order: 7 },
+  archived:       { label: 'ARCHIVED',       color: '#475569', bg: 'rgba(71,85,105,0.06)', order: 8 },
+  closed:         { label: 'CLOSED',         color: '#22c55e', bg: 'rgba(34,197,94,0.06)', order: 9 },
+};
+
+// New Outreach Status
+export type OutreachStatusV2 = 'no_message_generated' | 'message_ready' | 'draft_created' | 'sent' | 'follow_up_due' | 'replied' | 'bounced' | 'not_sent';
+
+export const OUTREACH_STATUS_META: Record<OutreachStatusV2, { label: string; color: string; bg: string; icon: string }> = {
+  no_message_generated: { label: 'NO MESSAGE',   color: '#64748b', bg: 'rgba(100,116,139,0.08)', icon: '○' },
+  message_ready:        { label: 'MSG READY',     color: '#3b82f6', bg: 'rgba(59,130,246,0.10)', icon: '◉' },
+  draft_created:        { label: 'DRAFT',         color: '#a78bfa', bg: 'rgba(167,139,250,0.10)', icon: '✎' },
+  sent:                 { label: 'SENT',          color: '#34d399', bg: 'rgba(52,211,153,0.10)', icon: '✓' },
+  follow_up_due:        { label: 'FOLLOW-UP DUE', color: '#ef4444', bg: 'rgba(239,68,68,0.10)', icon: '!' },
+  replied:              { label: 'REPLIED',       color: '#22c55e', bg: 'rgba(34,197,94,0.12)', icon: '↩' },
+  bounced:              { label: 'BOUNCED',       color: '#f87171', bg: 'rgba(248,113,113,0.10)', icon: '✕' },
+  not_sent:             { label: 'NOT SENT',      color: '#eab308', bg: 'rgba(234,179,8,0.08)', icon: '⊘' },
+};
+
+// New Next Action
+export type NextActionType = 'send_now' | 'verify_email' | 'personalize_message' | 'create_draft' | 'wait_for_reply' | 'follow_up_in_3_days' | 'follow_up_in_7_days' | 'snooze' | 'ignore' | 'archive' | 'reactivate';
+
+export const NEXT_ACTION_META: Record<NextActionType, { label: string; color: string; priority: number }> = {
+  send_now:             { label: 'SEND NOW',        color: '#22c55e', priority: 1 },
+  follow_up_in_3_days:  { label: 'FOLLOW UP 3D',    color: '#ef4444', priority: 2 },
+  follow_up_in_7_days:  { label: 'FOLLOW UP 7D',    color: '#f97316', priority: 3 },
+  verify_email:         { label: 'VERIFY EMAIL',    color: '#3b82f6', priority: 4 },
+  personalize_message:  { label: 'PERSONALIZE',     color: '#a78bfa', priority: 5 },
+  create_draft:         { label: 'CREATE DRAFT',    color: '#60a5fa', priority: 6 },
+  wait_for_reply:       { label: 'WAITING',         color: '#94a3b8', priority: 7 },
+  reactivate:           { label: 'REACTIVATE',      color: '#22d3ee', priority: 8 },
+  snooze:               { label: 'SNOOZED',         color: '#64748b', priority: 9 },
+  ignore:               { label: 'IGNORE',          color: '#475569', priority: 10 },
+  archive:              { label: 'ARCHIVE',          color: '#475569', priority: 11 },
+};
