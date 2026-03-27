@@ -10,12 +10,13 @@ const S = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '10px 16px',
-    background: 'linear-gradient(180deg, rgba(59,130,246,0.04) 0%, rgba(10,13,25,0) 100%)',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    fontFamily: 'var(--vg-font-mono, "JetBrains Mono", "Fira Code", monospace)',
-    fontSize: '11px',
-    color: '#94a3b8',
+    padding: '16px 16px',
+    background: '#FFFFFF',
+    borderBottom: '1px solid #E2E8F0',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
+    fontSize: '12px',
+    color: '#334155',
   } as React.CSSProperties,
   stat: {
     display: 'flex',
@@ -23,44 +24,47 @@ const S = {
     gap: '6px',
   } as React.CSSProperties,
   statNumber: (color: string) => ({
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: 700,
     color,
     lineHeight: 1,
+    fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
+    fontVariantNumeric: 'tabular-nums',
   }),
   statLabel: {
-    color: '#64748b',
-    fontSize: '10px',
+    color: '#64748B',
+    fontSize: '11px',
     lineHeight: 1.2,
     maxWidth: '80px',
   } as React.CSSProperties,
   separator: {
     width: '1px',
     height: '28px',
-    background: 'rgba(255,255,255,0.06)',
+    background: '#E2E8F0',
   } as React.CSSProperties,
   bulkSection: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
     marginLeft: '8px',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    padding: '6px 10px',
+    borderRadius: '8px',
+    background: '#F8FAFC',
+    border: '1px solid #E2E8F0',
   } as React.CSSProperties,
   bulkLabel: {
-    color: '#64748b',
-    fontSize: '10px',
+    color: '#64748B',
+    fontSize: '11px',
   } as React.CSSProperties,
   bulkBtn: {
-    padding: '4px 10px',
-    borderRadius: '3px',
-    border: '1px solid rgba(255,255,255,0.08)',
-    background: 'rgba(255,255,255,0.03)',
-    color: '#94a3b8',
-    fontSize: '10px',
-    fontFamily: 'var(--vg-font-mono, monospace)',
+    padding: '5px 12px',
+    borderRadius: '6px',
+    border: '1px solid #CBD5E1',
+    background: '#FFFFFF',
+    color: '#334155',
+    fontSize: '11px',
+    fontWeight: 500,
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
     transition: 'all 0.15s',
   } as React.CSSProperties,
@@ -69,10 +73,11 @@ const S = {
     alignItems: 'center',
     gap: '10px',
     marginLeft: 'auto',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    background: 'rgba(34,197,94,0.06)',
-    border: '1px solid rgba(34,197,94,0.15)',
+    padding: '8px 14px',
+    borderRadius: '10px',
+    background: '#FFFFFF',
+    border: '1px solid rgba(34,197,94,0.20)',
+    boxShadow: '0 0 0 1px rgba(34,197,94,0.15), 0 4px 16px rgba(34,197,94,0.08)',
   } as React.CSSProperties,
   sendInfo: {
     display: 'flex',
@@ -81,16 +86,16 @@ const S = {
     maxWidth: '200px',
   } as React.CSSProperties,
   sendCompany: {
-    color: '#e4e9f4',
+    color: '#0F172A',
     fontWeight: 600,
-    fontSize: '12px',
+    fontSize: '13px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap' as const,
   } as React.CSSProperties,
   sendContact: {
-    color: '#64748b',
-    fontSize: '10px',
+    color: '#64748B',
+    fontSize: '11px',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap' as const,
@@ -99,27 +104,28 @@ const S = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '8px 20px',
-    borderRadius: '4px',
-    border: '1px solid rgba(34,197,94,0.4)',
-    background: 'rgba(34,197,94,0.12)',
-    color: '#22c55e',
-    fontSize: '13px',
+    padding: '10px 24px',
+    borderRadius: '8px',
+    border: 'none',
+    background: '#0F172A',
+    color: '#FFFFFF',
+    fontSize: '14px',
     fontWeight: 700,
-    fontFamily: 'var(--vg-font-mono, monospace)',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
     transition: 'all 0.15s',
-    letterSpacing: '1px',
+    letterSpacing: '0.05em',
     textDecoration: 'none',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
   } as React.CSSProperties,
   sendButtonDisabled: {
     opacity: 0.3,
     cursor: 'not-allowed',
   } as React.CSSProperties,
   selectedCount: {
-    color: '#3b82f6',
+    color: '#3B82F6',
     fontWeight: 600,
-    fontSize: '11px',
+    fontSize: '12px',
   } as React.CSSProperties,
 };
 
@@ -177,21 +183,21 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
     <div style={S.bar}>
       {/* Stats */}
       <div style={S.stat}>
-        <span style={S.statNumber('#22c55e')}>{stats.ready}</span>
+        <span style={S.statNumber('#22C55E')}>{stats.ready}</span>
         <span style={S.statLabel}>ready to send</span>
       </div>
 
       <div style={S.separator} />
 
       <div style={S.stat}>
-        <span style={S.statNumber(stats.followUps > 0 ? '#ef4444' : '#64748b')}>{stats.followUps}</span>
+        <span style={S.statNumber(stats.followUps > 0 ? '#EF4444' : '#64748B')}>{stats.followUps}</span>
         <span style={S.statLabel}>follow-ups due today</span>
       </div>
 
       <div style={S.separator} />
 
       <div style={S.stat}>
-        <span style={S.statNumber('#60a5fa')}>{stats.totalActive}</span>
+        <span style={S.statNumber('#3B82F6')}>{stats.totalActive}</span>
         <span style={S.statLabel}>total active</span>
       </div>
 
@@ -203,7 +209,7 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
           <>
             <span style={S.selectedCount}>{selectedIds.size} selected</span>
             <button
-              style={{ ...S.bulkBtn, color: '#34d399' }}
+              style={{ ...S.bulkBtn, color: '#22C55E', borderColor: 'rgba(34,197,94,0.3)' }}
               onClick={() => onBulkAction('mark_sent', selectedArray)}
             >
               Mark Sent
@@ -215,7 +221,7 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
               Snooze 7d
             </button>
             <button
-              style={{ ...S.bulkBtn, color: '#f87171' }}
+              style={{ ...S.bulkBtn, color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
               onClick={() => onBulkAction('archive', selectedArray)}
             >
               Archive

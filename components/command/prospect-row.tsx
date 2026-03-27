@@ -24,17 +24,18 @@ const S = {
     gridTemplateColumns: '1.5fr 1fr 1.4fr 60px 90px 100px 110px auto',
     alignItems: 'center',
     gap: '12px',
-    padding: '12px 16px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    fontFamily: 'var(--vg-font-mono, "JetBrains Mono", "Fira Code", monospace)',
-    fontSize: '13px',
-    color: '#e4e9f4',
+    padding: '14px 16px',
+    borderBottom: '1px solid #F1F5F9',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
+    fontSize: '14px',
+    color: '#334155',
     cursor: 'pointer',
     transition: 'background 0.15s',
-    minHeight: '52px',
+    minHeight: '56px',
+    background: '#FFFFFF',
   } as React.CSSProperties,
   rowHover: {
-    background: 'rgba(59,130,246,0.08)',
+    background: '#F8FAFC',
   } as React.CSSProperties,
   cell: (flex: number, minW?: number) => ({
     overflow: 'hidden',
@@ -56,16 +57,35 @@ const S = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '5px 10px',
-    borderRadius: '4px',
-    border: '1px solid rgba(255,255,255,0.10)',
-    background: 'rgba(255,255,255,0.04)',
-    color: '#cbd5e1',
-    fontSize: '11px',
-    fontFamily: 'var(--vg-font-mono, monospace)',
+    padding: '6px 12px',
+    borderRadius: '6px',
+    border: '1px solid #E2E8F0',
+    background: '#FFFFFF',
+    color: '#334155',
+    fontSize: '12px',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
     transition: 'all 0.15s',
     whiteSpace: 'nowrap' as const,
+    fontWeight: 500,
+  } as React.CSSProperties,
+  btnEmail: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '6px 14px',
+    borderRadius: '6px',
+    border: 'none',
+    background: '#0F172A',
+    color: '#FFFFFF',
+    fontSize: '12px',
+    fontWeight: 700,
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    whiteSpace: 'nowrap' as const,
+    textDecoration: 'none',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
   } as React.CSSProperties,
   btnDisabled: {
     opacity: 0.3,
@@ -78,34 +98,37 @@ const S = {
     flexWrap: 'wrap' as const,
   } as React.CSSProperties,
   detail: {
-    background: 'rgba(59,130,246,0.04)',
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    background: '#F8FAFC',
+    borderTop: '1px solid #E2E8F0',
+    borderBottom: '1px solid #E2E8F0',
     padding: '20px 24px',
-    fontFamily: 'var(--vg-font-mono, monospace)',
-    fontSize: '12px',
-    color: '#cbd5e1',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
+    fontSize: '13px',
+    color: '#334155',
   } as React.CSSProperties,
   detailSection: {
     marginBottom: '12px',
   } as React.CSSProperties,
   detailLabel: {
-    color: '#64748b',
+    color: '#64748B',
     fontSize: '10px',
     textTransform: 'uppercase' as const,
-    letterSpacing: '1px',
+    letterSpacing: '0.1em',
     marginBottom: '4px',
+    fontWeight: 600,
   } as React.CSSProperties,
   signalPill: {
     display: 'inline-block',
     padding: '2px 6px',
     margin: '2px 4px 2px 0',
-    borderRadius: '3px',
-    background: 'rgba(96,165,250,0.08)',
-    color: '#60a5fa',
-    fontSize: '10px',
+    borderRadius: '4px',
+    background: 'rgba(59,130,246,0.06)',
+    color: '#3B82F6',
+    fontSize: '11px',
+    border: '1px solid rgba(59,130,246,0.10)',
   } as React.CSSProperties,
   timeline: {
-    borderLeft: '2px solid rgba(255,255,255,0.06)',
+    borderLeft: '2px solid #E2E8F0',
     paddingLeft: '12px',
     marginTop: '8px',
   } as React.CSSProperties,
@@ -114,20 +137,21 @@ const S = {
     lineHeight: 1.4,
   } as React.CSSProperties,
   timelineDate: {
-    color: '#475569',
+    color: '#94A3B8',
     fontSize: '10px',
     marginRight: '8px',
+    fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
   } as React.CSSProperties,
   msgPreview: {
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '4px',
+    background: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '6px',
     padding: '10px 12px',
     marginTop: '6px',
     whiteSpace: 'pre-wrap' as const,
     lineHeight: 1.5,
-    color: '#cbd5e1',
-    fontSize: '11px',
+    color: '#334155',
+    fontSize: '13px',
   } as React.CSSProperties,
   heatDot: (tier: string) => ({
     display: 'inline-block',
@@ -135,16 +159,16 @@ const S = {
     height: '8px',
     borderRadius: '50%',
     marginRight: '4px',
-    background: tier === 'hot' ? '#ef4444' : tier === 'warm' ? '#f59e0b' : '#64748b',
-    boxShadow: tier === 'hot' ? '0 0 6px rgba(239,68,68,0.5)' : 'none',
+    background: tier === 'hot' ? '#EF4444' : tier === 'warm' ? '#F59E0B' : '#94A3B8',
+    boxShadow: tier === 'hot' ? '0 0 6px rgba(239,68,68,0.4)' : 'none',
   }),
   readyDot: (ready: boolean) => ({
     display: 'inline-block',
     width: '6px',
     height: '6px',
     borderRadius: '50%',
-    background: ready ? '#34d399' : '#475569',
-    boxShadow: ready ? '0 0 4px rgba(52,211,153,0.4)' : 'none',
+    background: ready ? '#22C55E' : '#CBD5E1',
+    boxShadow: ready ? '0 0 4px rgba(34,197,94,0.4)' : 'none',
   }),
   tooltip: {
     position: 'relative' as const,
@@ -168,7 +192,7 @@ function getBestMessage(account: Account): { subject?: string; body: string } | 
 }
 
 function formatDate(iso?: string): string {
-  if (!iso) return '—';
+  if (!iso) return '\u2014';
   const d = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
@@ -183,7 +207,7 @@ function buildMailtoUrl(account: Account): string {
   const email = account.financeLead?.email;
   if (!email) return '';
   const msg = getBestMessage(account);
-  const subject = encodeURIComponent(msg?.subject || `Ghost Tax — ${account.company} SaaS exposure`);
+  const subject = encodeURIComponent(msg?.subject || `Ghost Tax \u2014 ${account.company} SaaS exposure`);
   const body = encodeURIComponent(msg?.body || '');
   return `mailto:${email}?subject=${subject}&body=${body}`;
 }
@@ -248,17 +272,17 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
       >
         {/* Company */}
         <div style={S.cell(1.5, 120)}>
-          <span style={{ color: '#e4e9f4', fontWeight: 600 }}>{account.company}</span>
+          <span style={{ color: '#0F172A', fontWeight: 600 }}>{account.company}</span>
         </div>
 
         {/* Contact */}
         <div style={S.cell(1.2, 100)}>
-          <span>{account.financeLead?.name || '—'}</span>
+          <span style={{ color: '#334155' }}>{account.financeLead?.name || '\u2014'}</span>
         </div>
 
         {/* Email */}
         <div style={S.cell(1.3, 110)}>
-          <span style={{ color: hasEmail ? '#94a3b8' : '#475569' }}>
+          <span style={{ color: hasEmail ? '#64748B' : '#CBD5E1' }}>
             {account.financeLead?.email || 'no email'}
           </span>
           {emailMeta && (
@@ -270,7 +294,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
         {/* Language */}
         <div style={S.cell(0.4, 32)}>
-          <span style={{ color: '#64748b' }}>
+          <span style={{ color: '#64748B', fontSize: '12px' }}>
             {(account.detectedLanguage || 'en').toUpperCase()}
           </span>
         </div>
@@ -278,7 +302,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
         {/* Heat */}
         <div style={S.cell(0.5, 50)}>
           <span style={S.heatDot(heat)} />
-          <span style={{ color: heatMeta.color, fontSize: '10px', fontWeight: 600 }}>
+          <span style={{ color: heatMeta.color, fontSize: '11px', fontWeight: 600 }}>
             {heatMeta.label}
           </span>
         </div>
@@ -306,14 +330,18 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
         {/* Next Action Date */}
         <div style={S.cell(0.5, 50)}>
-          <span style={{ color: '#64748b', fontSize: '10px' }}>
+          <span style={{
+            color: '#94A3B8',
+            fontSize: '11px',
+            fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
+          }}>
             {formatDate(account.nextActionAt || account.followUpDueAt)}
           </span>
         </div>
 
         {/* Source */}
         <div style={S.cell(0.4, 36)}>
-          <span style={{ color: '#475569', fontSize: '10px' }}>
+          <span style={{ color: '#94A3B8', fontSize: '11px' }}>
             {account.country}
           </span>
         </div>
@@ -325,19 +353,19 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
         {/* Quick Actions */}
         <div style={S.actions} onClick={stopProp}>
-          {/* Email */}
+          {/* Email — THE biggest button */}
           {hasEmail ? (
             <a
               href={buildMailtoUrl(account)}
-              style={{ ...S.btn, color: '#3b82f6', textDecoration: 'none' }}
+              style={S.btnEmail}
               title={`Email ${account.financeLead.email}`}
               onClick={(e) => { e.stopPropagation(); onAction(account.id, 'email'); }}
             >
-              @
+              EMAIL
             </a>
           ) : (
-            <span style={{ ...S.btn, ...S.btnDisabled }} title="No email">
-              @
+            <span style={{ ...S.btnEmail, ...S.btnDisabled }} title="No email">
+              EMAIL
             </span>
           )}
 
@@ -375,7 +403,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
           {/* Mark Sent */}
           <button
-            style={{ ...S.btn, color: '#34d399' }}
+            style={{ ...S.btn, color: '#22C55E', borderColor: 'rgba(34,197,94,0.3)' }}
             title="Mark as sent"
             onClick={(e) => { e.stopPropagation(); onAction(account.id, 'mark_sent'); }}
           >
@@ -402,7 +430,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
           {/* Archive */}
           <button
-            style={{ ...S.btn, color: '#f87171' }}
+            style={{ ...S.btn, color: '#EF4444', borderColor: 'rgba(239,68,68,0.2)' }}
             title="Archive"
             onClick={(e) => { e.stopPropagation(); onAction(account.id, 'archive'); }}
           >
@@ -411,7 +439,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
 
           {/* LinkedIn */}
           <button
-            style={{ ...S.btn, ...(account.financeLead?.linkedIn ? { color: '#60a5fa' } : S.btnDisabled) }}
+            style={{ ...S.btn, ...(account.financeLead?.linkedIn ? { color: '#3B82F6', borderColor: 'rgba(59,130,246,0.2)' } : S.btnDisabled) }}
             title={account.financeLead?.linkedIn ? 'Open LinkedIn' : 'No LinkedIn URL'}
             disabled={!account.financeLead?.linkedIn}
             onClick={(e) => {
@@ -434,7 +462,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
           <div style={S.detailSection}>
             <div style={S.detailLabel}>SIGNALS ({account.signals.length})</div>
             {account.signals.length === 0 ? (
-              <span style={{ color: '#475569' }}>No signals detected</span>
+              <span style={{ color: '#94A3B8' }}>No signals detected</span>
             ) : (
               account.signals.map((sig, i) => (
                 <span key={i} style={S.signalPill}>
@@ -448,7 +476,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
           {account.whyNow && (
             <div style={S.detailSection}>
               <div style={S.detailLabel}>WHY NOW</div>
-              <div style={{ color: '#cbd5e1' }}>{account.whyNow}</div>
+              <div style={{ color: '#334155' }}>{account.whyNow}</div>
             </div>
           )}
 
@@ -456,9 +484,9 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
           {account.hypothesis?.summary && (
             <div style={S.detailSection}>
               <div style={S.detailLabel}>HYPOTHESIS</div>
-              <div style={{ color: '#cbd5e1' }}>{account.hypothesis.summary}</div>
+              <div style={{ color: '#334155' }}>{account.hypothesis.summary}</div>
               {account.hypothesis.hiddenExposure.length > 0 && (
-                <div style={{ marginTop: '4px', color: '#f87171', fontSize: '10px' }}>
+                <div style={{ marginTop: '4px', color: '#EF4444', fontSize: '11px' }}>
                   Exposure: {account.hypothesis.hiddenExposure.join(' | ')}
                 </div>
               )}
@@ -470,7 +498,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
             <div style={S.detailSection}>
               <div style={S.detailLabel}>MESSAGE PREVIEW</div>
               {msg.subject && (
-                <div style={{ color: '#e4e9f4', fontWeight: 600, marginBottom: '4px' }}>
+                <div style={{ color: '#0F172A', fontWeight: 600, marginBottom: '4px' }}>
                   Subject: {msg.subject}
                 </div>
               )}
@@ -486,7 +514,7 @@ export default function ProspectRow({ account, onAction, isSelected, onSelect, o
                 {account.timeline.slice(-10).reverse().map((evt, i) => (
                   <div key={i} style={S.timelineItem}>
                     <span style={S.timelineDate}>{formatDate(evt.date)}</span>
-                    <span style={{ color: '#cbd5e1' }}>{evt.detail}</span>
+                    <span style={{ color: '#334155' }}>{evt.detail}</span>
                   </div>
                 ))}
               </div>

@@ -25,15 +25,15 @@ const S = {
     bottom: 0,
     width: '520px',
     maxWidth: '100vw',
-    background: '#0c1021',
-    borderLeft: '1px solid rgba(255,255,255,0.08)',
-    boxShadow: '-8px 0 32px rgba(0,0,0,0.6)',
+    background: '#FFFFFF',
+    borderLeft: '1px solid #E2E8F0',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04)',
     zIndex: 1000,
     display: 'flex',
     flexDirection: 'column' as const,
-    fontFamily: 'var(--vg-font-mono, "JetBrains Mono", "Fira Code", monospace)',
-    fontSize: '11px',
-    color: '#e4e9f4',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
+    fontSize: '12px',
+    color: '#334155',
     overflow: 'hidden',
   } as React.CSSProperties,
   header: {
@@ -41,14 +41,14 @@ const S = {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '16px 20px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    background: 'rgba(59,130,246,0.03)',
+    borderBottom: '1px solid #E2E8F0',
+    background: '#FFFFFF',
     flexShrink: 0,
   } as React.CSSProperties,
   headerTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#e4e9f4',
+    color: '#0F172A',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap' as const,
@@ -60,15 +60,16 @@ const S = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '4px',
-    border: '1px solid rgba(255,255,255,0.08)',
-    background: 'rgba(255,255,255,0.03)',
-    color: '#94a3b8',
+    borderRadius: '6px',
+    border: '1px solid #E2E8F0',
+    background: '#FFFFFF',
+    color: '#64748B',
     fontSize: '14px',
     cursor: 'pointer',
     fontFamily: 'inherit',
     flexShrink: 0,
     marginLeft: '12px',
+    transition: 'all 0.15s',
   } as React.CSSProperties,
   body: {
     flex: 1,
@@ -79,10 +80,10 @@ const S = {
     marginBottom: '20px',
   } as React.CSSProperties,
   sectionTitle: {
-    color: '#475569',
-    fontSize: '9px',
+    color: '#64748B',
+    fontSize: '10px',
     textTransform: 'uppercase' as const,
-    letterSpacing: '1.2px',
+    letterSpacing: '0.1em',
     marginBottom: '8px',
     fontWeight: 600,
   } as React.CSSProperties,
@@ -97,19 +98,20 @@ const S = {
     gap: '2px',
   } as React.CSSProperties,
   infoLabel: {
-    color: '#475569',
-    fontSize: '9px',
+    color: '#64748B',
+    fontSize: '10px',
     textTransform: 'uppercase' as const,
-    letterSpacing: '0.8px',
+    letterSpacing: '0.1em',
   } as React.CSSProperties,
   infoValue: {
-    color: '#cbd5e1',
-    fontSize: '12px',
+    color: '#0F172A',
+    fontSize: '13px',
+    fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
   } as React.CSSProperties,
   badge: (color: string, bg: string) => ({
     display: 'inline-block',
     padding: '2px 8px',
-    borderRadius: '3px',
+    borderRadius: '4px',
     fontSize: '10px',
     fontWeight: 600,
     letterSpacing: '0.5px',
@@ -122,39 +124,40 @@ const S = {
     gap: '4px',
     padding: '3px 8px',
     margin: '2px 4px 2px 0',
-    borderRadius: '3px',
-    background: strength >= 4 ? 'rgba(239,68,68,0.08)' : strength >= 3 ? 'rgba(59,130,246,0.08)' : 'rgba(100,116,139,0.06)',
-    color: strength >= 4 ? '#ef4444' : strength >= 3 ? '#60a5fa' : '#64748b',
-    fontSize: '10px',
+    borderRadius: '4px',
+    background: strength >= 4 ? 'rgba(239,68,68,0.06)' : strength >= 3 ? 'rgba(59,130,246,0.06)' : 'rgba(100,116,139,0.04)',
+    border: strength >= 4 ? '1px solid rgba(239,68,68,0.12)' : strength >= 3 ? '1px solid rgba(59,130,246,0.12)' : '1px solid rgba(100,116,139,0.08)',
+    color: strength >= 4 ? '#EF4444' : strength >= 3 ? '#3B82F6' : '#64748B',
+    fontSize: '11px',
   }),
   msgBox: {
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '4px',
+    background: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '8px',
     padding: '12px 14px',
     marginTop: '6px',
   } as React.CSSProperties,
   msgSubject: {
-    color: '#e4e9f4',
+    color: '#0F172A',
     fontWeight: 600,
-    fontSize: '12px',
+    fontSize: '13px',
     marginBottom: '8px',
   } as React.CSSProperties,
   msgBody: {
-    color: '#94a3b8',
-    fontSize: '11px',
+    color: '#334155',
+    fontSize: '13px',
     whiteSpace: 'pre-wrap' as const,
     lineHeight: 1.6,
   } as React.CSSProperties,
   timeline: {
-    borderLeft: '2px solid rgba(255,255,255,0.06)',
+    borderLeft: '2px solid #E2E8F0',
     paddingLeft: '14px',
   } as React.CSSProperties,
   timelineItem: {
     position: 'relative' as const,
     marginBottom: '10px',
     paddingBottom: '10px',
-    borderBottom: '1px solid rgba(255,255,255,0.02)',
+    borderBottom: '1px solid #F1F5F9',
   } as React.CSSProperties,
   timelineDot: (color: string) => ({
     position: 'absolute' as const,
@@ -166,12 +169,13 @@ const S = {
     background: color,
   }),
   timelineDate: {
-    color: '#475569',
+    color: '#94A3B8',
     fontSize: '10px',
+    fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
   } as React.CSSProperties,
   timelineDetail: {
-    color: '#cbd5e1',
-    fontSize: '11px',
+    color: '#334155',
+    fontSize: '12px',
     marginTop: '2px',
   } as React.CSSProperties,
   actionsBar: {
@@ -179,32 +183,51 @@ const S = {
     flexWrap: 'wrap' as const,
     gap: '6px',
     padding: '12px 20px',
-    borderTop: '1px solid rgba(255,255,255,0.06)',
-    background: 'rgba(255,255,255,0.01)',
+    borderTop: '1px solid #E2E8F0',
+    background: '#F8FAFC',
     flexShrink: 0,
   } as React.CSSProperties,
   actionBtn: (color: string) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    border: `1px solid ${color}33`,
-    background: `${color}0a`,
+    padding: '8px 16px',
+    borderRadius: '6px',
+    border: `1px solid ${color}25`,
+    background: `${color}08`,
     color,
-    fontSize: '10px',
+    fontSize: '11px',
     fontWeight: 600,
-    fontFamily: 'var(--vg-font-mono, monospace)',
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
     transition: 'all 0.15s',
     textDecoration: 'none',
   } as React.CSSProperties),
+  actionBtnEmail: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    border: 'none',
+    background: '#0F172A',
+    color: '#FFFFFF',
+    fontSize: '13px',
+    fontWeight: 700,
+    fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    textDecoration: 'none',
+    flex: '1 1 100%',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+  } as React.CSSProperties,
   actionBtnDisabled: {
     opacity: 0.3,
     cursor: 'not-allowed',
   } as React.CSSProperties,
   copyFeedback: {
-    color: '#34d399',
+    color: '#22C55E',
     fontSize: '10px',
     marginLeft: '4px',
     fontWeight: 600,
@@ -215,7 +238,9 @@ const S = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0,0,0,0.4)',
+    background: 'rgba(0,0,0,0.10)',
+    backdropFilter: 'blur(4px)',
+    WebkitBackdropFilter: 'blur(4px)',
     zIndex: 999,
   } as React.CSSProperties,
 };
@@ -363,13 +388,13 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
               <div style={S.infoRow}>
                 <span style={S.infoLabel}>Email</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ ...S.infoValue, color: hasEmail ? '#cbd5e1' : '#475569' }}>
+                  <span style={{ ...S.infoValue, color: hasEmail ? '#0F172A' : '#94A3B8' }}>
                     {a.financeLead?.email || 'No email'}
                   </span>
                   {emailMeta && <span style={S.badge(emailMeta.color, 'transparent')}>{emailMeta.label}</span>}
                   {hasEmail && (
                     <button
-                      style={{ ...S.actionBtn('#3b82f6'), padding: '2px 6px', fontSize: '9px' }}
+                      style={{ ...S.actionBtn('#3B82F6'), padding: '2px 6px', fontSize: '9px' }}
                       onClick={() => handleCopy(a.financeLead.email!, 'email')}
                     >
                       {copiedField === 'email' ? 'Copied!' : 'Copy'}
@@ -381,7 +406,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
                 <span style={S.infoLabel}>LinkedIn</span>
                 <span style={S.infoValue}>
                   {a.financeLead?.linkedIn ? (
-                    <a href={a.financeLead.linkedIn} target="_blank" rel="noopener" style={{ color: '#60a5fa', textDecoration: 'none' }}>
+                    <a href={a.financeLead.linkedIn} target="_blank" rel="noopener" style={{ color: '#3B82F6', textDecoration: 'none' }}>
                       Open profile
                     </a>
                   ) : '\u2014'}
@@ -396,8 +421,8 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <span style={S.badge(outreachMeta.color, outreachMeta.bg)}>{outreachMeta.icon} {outreachMeta.label}</span>
               <span style={S.badge(nextMeta.color, 'transparent')}>{nextMeta.label}</span>
-              {a.nextActionAt && <span style={{ color: '#64748b', fontSize: '10px', alignSelf: 'center' }}>Due: {formatDate(a.nextActionAt)}</span>}
-              {a.followUpCount ? <span style={{ color: '#64748b', fontSize: '10px', alignSelf: 'center' }}>Follow-ups: {a.followUpCount}</span> : null}
+              {a.nextActionAt && <span style={{ color: '#64748B', fontSize: '10px', alignSelf: 'center' }}>Due: {formatDate(a.nextActionAt)}</span>}
+              {a.followUpCount ? <span style={{ color: '#64748B', fontSize: '10px', alignSelf: 'center' }}>Follow-ups: {a.followUpCount}</span> : null}
             </div>
           </div>
 
@@ -405,10 +430,10 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
           {(a.whyNow || a.hypothesis?.summary) && (
             <div style={S.section}>
               <div style={S.sectionTitle}>THESIS</div>
-              {a.whyNow && <div style={{ color: '#cbd5e1', marginBottom: '6px' }}><strong style={{ color: '#60a5fa' }}>Why now:</strong> {a.whyNow}</div>}
-              {a.hypothesis?.summary && <div style={{ color: '#cbd5e1', marginBottom: '6px' }}><strong style={{ color: '#a78bfa' }}>Hypothesis:</strong> {a.hypothesis.summary}</div>}
+              {a.whyNow && <div style={{ color: '#334155', marginBottom: '6px' }}><strong style={{ color: '#3B82F6' }}>Why now:</strong> {a.whyNow}</div>}
+              {a.hypothesis?.summary && <div style={{ color: '#334155', marginBottom: '6px' }}><strong style={{ color: '#7C3AED' }}>Hypothesis:</strong> {a.hypothesis.summary}</div>}
               {a.hypothesis?.hiddenExposure && a.hypothesis.hiddenExposure.length > 0 && (
-                <div style={{ color: '#f87171', fontSize: '10px', marginTop: '4px' }}>
+                <div style={{ color: '#EF4444', fontSize: '11px', marginTop: '4px' }}>
                   Hidden exposure: {a.hypothesis.hiddenExposure.join(' | ')}
                 </div>
               )}
@@ -419,13 +444,13 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
           <div style={S.section}>
             <div style={S.sectionTitle}>SIGNALS ({a.signals.length})</div>
             {a.signals.length === 0 ? (
-              <span style={{ color: '#475569' }}>No signals detected</span>
+              <span style={{ color: '#94A3B8' }}>No signals detected</span>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                 {a.signals.map((sig, i) => (
                   <span key={i} style={S.signalPill(sig.strength)}>
                     <strong>[{sig.strength}]</strong> {sig.type}: {sig.detail}
-                    {sig.source && <span style={{ color: '#475569', marginLeft: '4px' }}>({sig.source})</span>}
+                    {sig.source && <span style={{ color: '#94A3B8', marginLeft: '4px' }}>({sig.source})</span>}
                   </span>
                 ))}
               </div>
@@ -443,12 +468,12 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
                 </div>
                 <div style={S.infoRow}>
                   <span style={S.infoLabel}>Exposure</span>
-                  <span style={{ ...S.infoValue, color: '#f87171' }}>
+                  <span style={{ ...S.infoValue, color: '#EF4444' }}>
                     {a.scan.exposureLow.toLocaleString()}\u2013{a.scan.exposureHigh.toLocaleString()} {a.scan.currency}
                   </span>
                 </div>
               </div>
-              {a.scan.summary && <div style={{ color: '#94a3b8', marginTop: '6px' }}>{a.scan.summary}</div>}
+              {a.scan.summary && <div style={{ color: '#64748B', marginTop: '6px', fontSize: '12px' }}>{a.scan.summary}</div>}
             </div>
           )}
 
@@ -457,14 +482,14 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
             <div style={S.section}>
               <div style={S.sectionTitle}>
                 MESSAGE PREVIEW
-                <span style={{ marginLeft: '8px', color: '#475569', fontWeight: 400 }}>({bestMsg.channel})</span>
+                <span style={{ marginLeft: '8px', color: '#94A3B8', fontWeight: 400 }}>({bestMsg.channel})</span>
               </div>
               <div style={S.msgBox}>
                 {bestMsg.subject && (
                   <div style={S.msgSubject}>
                     Subject: {bestMsg.subject}
                     <button
-                      style={{ ...S.actionBtn('#3b82f6'), padding: '2px 6px', fontSize: '9px', marginLeft: '8px' }}
+                      style={{ ...S.actionBtn('#3B82F6'), padding: '2px 6px', fontSize: '9px', marginLeft: '8px' }}
                       onClick={() => handleCopy(bestMsg.subject!, 'subject')}
                     >
                       {copiedField === 'subject' ? 'Copied!' : 'Copy'}
@@ -474,7 +499,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
                 <div style={S.msgBody}>{bestMsg.body}</div>
                 <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
                   <button
-                    style={S.actionBtn('#94a3b8')}
+                    style={S.actionBtn('#64748B')}
                     onClick={() => handleCopy(bestMsg.body, 'body')}
                   >
                     {copiedField === 'body' ? 'Copied!' : 'Copy body'}
@@ -491,14 +516,14 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
               {a.strengths.length > 0 && (
                 <div style={{ marginBottom: '6px' }}>
                   {a.strengths.map((s, i) => (
-                    <div key={i} style={{ color: '#34d399', fontSize: '10px', marginBottom: '2px' }}>+ {s}</div>
+                    <div key={i} style={{ color: '#22C55E', fontSize: '11px', marginBottom: '2px' }}>+ {s}</div>
                   ))}
                 </div>
               )}
               {a.weaknesses.length > 0 && (
                 <div>
                   {a.weaknesses.map((w, i) => (
-                    <div key={i} style={{ color: '#f87171', fontSize: '10px', marginBottom: '2px' }}>- {w}</div>
+                    <div key={i} style={{ color: '#EF4444', fontSize: '11px', marginBottom: '2px' }}>- {w}</div>
                   ))}
                 </div>
               )}
@@ -511,7 +536,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
               <div style={S.sectionTitle}>HISTORY ({a.timeline.length} events)</div>
               <div style={S.timeline}>
                 {a.timeline.slice(-15).reverse().map((evt, i) => {
-                  const meta = TIMELINE_META[evt.type] || { label: evt.type, color: '#64748b' };
+                  const meta = TIMELINE_META[evt.type] || { label: evt.type, color: '#64748B' };
                   return (
                     <div key={i} style={S.timelineItem}>
                       <div style={S.timelineDot(meta.color)} />
@@ -531,10 +556,10 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
             <div style={S.section}>
               <div style={S.sectionTitle}>EXECUTION LOG</div>
               {a.executionLog.slice(-10).reverse().map((entry, i) => (
-                <div key={i} style={{ marginBottom: '4px', fontSize: '10px' }}>
-                  <span style={{ color: '#475569' }}>{formatDate(entry.date)}</span>
-                  <span style={{ color: '#94a3b8', marginLeft: '8px' }}>{entry.action}</span>
-                  {entry.result && <span style={{ color: '#64748b', marginLeft: '4px' }}>({entry.result})</span>}
+                <div key={i} style={{ marginBottom: '4px', fontSize: '11px' }}>
+                  <span style={{ color: '#94A3B8', fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)' }}>{formatDate(entry.date)}</span>
+                  <span style={{ color: '#334155', marginLeft: '8px' }}>{entry.action}</span>
+                  {entry.result && <span style={{ color: '#64748B', marginLeft: '4px' }}>({entry.result})</span>}
                 </div>
               ))}
             </div>
@@ -543,37 +568,37 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
 
         {/* Action Buttons Footer */}
         <div style={S.actionsBar}>
-          {/* Email Compose */}
+          {/* EMAIL — Full width primary button */}
           {hasEmail ? (
             <a
               href={buildMailto()}
-              style={S.actionBtn('#3b82f6')}
+              style={S.actionBtnEmail}
               onClick={() => onAction(a.id, 'email')}
             >
-              @ Email
+              EMAIL {a.financeLead?.email}
             </a>
           ) : (
-            <span style={{ ...S.actionBtn('#3b82f6'), ...S.actionBtnDisabled }}>@ No email</span>
+            <span style={{ ...S.actionBtnEmail, ...S.actionBtnDisabled }}>NO EMAIL AVAILABLE</span>
           )}
 
           {/* Gmail Draft (placeholder -> mailto) */}
           {hasEmail ? (
             <a
               href={buildMailto()}
-              style={S.actionBtn('#a78bfa')}
+              style={S.actionBtn('#7C3AED')}
               target="_blank"
               rel="noopener"
             >
               Gmail Draft
             </a>
           ) : (
-            <span style={{ ...S.actionBtn('#a78bfa'), ...S.actionBtnDisabled }}>Gmail Draft</span>
+            <span style={{ ...S.actionBtn('#7C3AED'), ...S.actionBtnDisabled }}>Gmail Draft</span>
           )}
 
           {/* Copy Email */}
           {hasEmail && (
             <button
-              style={S.actionBtn('#60a5fa')}
+              style={S.actionBtn('#3B82F6')}
               onClick={() => { handleCopy(a.financeLead.email!, 'femail'); onAction(a.id, 'copy_email'); }}
             >
               {copiedField === 'femail' ? 'Copied!' : 'Copy Email'}
@@ -583,7 +608,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
           {/* Copy Message */}
           {bestMsg && (
             <button
-              style={S.actionBtn('#94a3b8')}
+              style={S.actionBtn('#64748B')}
               onClick={() => { handleCopy(bestMsg.body, 'fbody'); onAction(a.id, 'copy_message'); }}
             >
               {copiedField === 'fbody' ? 'Copied!' : 'Copy Msg'}
@@ -592,7 +617,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
 
           {/* Mark Sent */}
           <button
-            style={S.actionBtn('#34d399')}
+            style={S.actionBtn('#22C55E')}
             onClick={() => onAction(a.id, 'mark_sent')}
           >
             Mark Sent
@@ -600,13 +625,13 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
 
           {/* Snooze */}
           <button
-            style={S.actionBtn('#64748b')}
+            style={S.actionBtn('#64748B')}
             onClick={() => onAction(a.id, 'snooze_3d')}
           >
             Snooze 3d
           </button>
           <button
-            style={S.actionBtn('#64748b')}
+            style={S.actionBtn('#64748B')}
             onClick={() => onAction(a.id, 'snooze_7d')}
           >
             Snooze 7d
@@ -614,7 +639,7 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
 
           {/* Archive */}
           <button
-            style={S.actionBtn('#f87171')}
+            style={S.actionBtn('#EF4444')}
             onClick={() => onAction(a.id, 'archive')}
           >
             Archive
@@ -626,13 +651,13 @@ export default function DetailPanel({ account, onAction, onClose }: DetailPanelP
               href={a.financeLead.linkedIn}
               target="_blank"
               rel="noopener"
-              style={S.actionBtn('#60a5fa')}
+              style={S.actionBtn('#3B82F6')}
               onClick={() => onAction(a.id, 'open_linkedin')}
             >
               LinkedIn
             </a>
           ) : (
-            <span style={{ ...S.actionBtn('#60a5fa'), ...S.actionBtnDisabled }}>LinkedIn</span>
+            <span style={{ ...S.actionBtn('#3B82F6'), ...S.actionBtnDisabled }}>LinkedIn</span>
           )}
         </div>
       </div>
