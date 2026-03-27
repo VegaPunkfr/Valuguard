@@ -13,7 +13,7 @@ export async function GET() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #060912 0%, #0c1220 50%, #111827 100%)",
+          background: "#FFFFFF",
           fontFamily: "system-ui, -apple-system, sans-serif",
           padding: "60px 80px",
         }}
@@ -61,7 +61,7 @@ export async function GET() {
             style={{
               fontSize: "72px",
               fontWeight: 800,
-              color: "#FFFFFF",
+              color: "#0F172A",
               letterSpacing: "-0.02em",
               lineHeight: 1,
             }}
@@ -72,7 +72,7 @@ export async function GET() {
             style={{
               fontSize: "28px",
               fontWeight: 400,
-              color: "#94a3b8",
+              color: "#64748B",
               textAlign: "center",
               lineHeight: 1.4,
               maxWidth: "700px",
@@ -90,21 +90,21 @@ export async function GET() {
             marginTop: "48px",
             padding: "24px 48px",
             borderRadius: "12px",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "#F8FAFC",
+            border: "1px solid #E2E8F0",
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <span style={{ fontSize: "32px", fontWeight: 700, color: "#3b82f6" }}>€490</span>
-            <span style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>One-time</span>
+            <span style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>One-time</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <span style={{ fontSize: "32px", fontWeight: 700, color: "#10b981" }}>48h</span>
-            <span style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>Delivery</span>
+            <span style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>Delivery</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <span style={{ fontSize: "32px", fontWeight: 700, color: "#3b82f6" }}>80x</span>
-            <span style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>Avg ROI</span>
+            <span style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>Avg ROI</span>
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export async function GET() {
             borderRadius: "8px",
             background: "#3b82f6",
             color: "#FFFFFF",
-            fontSize: "18px",
+            fontSize: "17px",
             fontWeight: 700,
           }}
         >
@@ -128,7 +128,7 @@ export async function GET() {
           style={{
             marginTop: "24px",
             fontSize: "16px",
-            color: "#475569",
+            color: "#94A3B8",
           }}
         >
           ghost-tax.com
