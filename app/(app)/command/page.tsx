@@ -1,13 +1,19 @@
 'use client';
 
 /**
- * GHOST TAX — COCKPIT v2 — Execution Command Center
+ * GHOST TAX — COCKPIT v3 — Premium Sales Execution Cockpit
  *
- * Not a database viewer. An execution machine.
+ * Skills applied:
+ *   7  — Color Intelligence (achromatic 80%, signal glows)
+ *   8  — Data Presentation Sculptor (metric cards, financial ranges)
+ *   9  — Motion Choreographer (CSS-only @keyframes, staggered rows)
+ *   13 — Deal Closer (path-to-close, BANT+ score)
+ *   17 — Outbound Orchestrator (sequence timeline, 48h rule)
+ *
  * Every micro-interaction reduces time-to-send.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { processEventIntoAccounts, type PlatformEvent } from '@/lib/command/bridge';
 import { loadDomainIntel, saveDomainIntel, learnDomainPattern, resolveAllEmails } from '@/lib/command/email-resolver';
 import {
@@ -24,10 +30,53 @@ import ActionBar from '@/components/command/action-bar';
 import ProspectRow from '@/components/command/prospect-row';
 import DetailPanel from '@/components/command/detail-panel';
 
-const S = {
-  page: { minHeight: '100vh', background: '#060912', color: '#e4e9f4', fontFamily: 'var(--vg-font-mono, monospace)' } as React.CSSProperties,
-  empty: { padding: 60, textAlign: 'center' as const, color: '#475569', fontSize: 13 },
-};
+// ── Font stacks ─────────────────────────────────────────────
+const FONT_BODY = 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)';
+const FONT_MONO = 'var(--gt-font-ibm-plex, "IBM Plex Mono", "SF Mono", "Fira Code", monospace)';
+
+// ── CSS Keyframes (Skill 9 — Motion Choreographer) ──────────
+const KEYFRAMES_CSS = `
+@keyframes gt-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes gt-fadeTabContent {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gt-slideInRow {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes gt-slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-60px); }
+}
+@keyframes gt-slideInRight {
+  0%   { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes gt-slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+@keyframes gt-pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  50%      { box-shadow: 0 0 8px 2px rgba(34,197,94,0.18); }
+}
+@keyframes gt-pulseRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  50%      { box-shadow: 0 0 8px 2px rgba(239,68,68,0.18); }
+}
+@keyframes gt-stepPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+@keyframes gt-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+`;
 
 // ── Signal polling ──────────────────────────────────────────
 interface IncomingSignal {
@@ -44,15 +93,203 @@ interface IncomingSignal {
   created_at: string;
 }
 
-export default function CockpitV2() {
+// ── BANT+ Scoring (Skill 13 — Deal Closer) ─────────────────
+interface BANTScore {
+  budget: number;      // /25
+  authority: number;   // /20
+  need: number;        // /20
+  timing: number;      // /15
+  fit: number;         // /10
+  proof: number;       // /10
+  total: number;       // /100
+}
+
+function computeBANT(a: Account): BANTScore {
+  // Budget (25): based on revenue estimate & company size
+  const rev = a.revenueEstimate || 0;
+  const budget = rev >= 50000 ? 25 : rev >= 10000 ? 20 : rev >= 5000 ? 15 : rev >= 1000 ? 10 : 5;
+
+  // Authority (20): has finance lead with title
+  const hasLead = !!(a.financeLead?.name && a.financeLead.name.trim());
+  const isCLevel = /\b(cfo|cio|cto|vp|director|head|chief)\b/i.test(a.financeLead?.title || '');
+  const authority = isCLevel ? 20 : hasLead ? 12 : 4;
+
+  // Need (20): signals strength + hypothesis
+  const sigStrength = a.signals.reduce((sum, s) => sum + s.strength, 0);
+  const hasHypothesis = !!(a.hypothesis?.summary);
+  const need = Math.min(20, (sigStrength >= 10 ? 12 : sigStrength >= 5 ? 8 : 3) + (hasHypothesis ? 8 : 0));
+
+  // Timing (15): attackability + freshness
+  const timing = a.attackability === 'now' ? 15 : a.attackability === 'soon' ? 10 : a.attackability === 'later' ? 5 : 2;
+
+  // Fit (10): solo fit + country in primary markets
+  const fitMap = { ideal: 10, good: 7, stretch: 4, hard: 2 };
+  const fit = fitMap[a.solofit] || 4;
+
+  // Proof (10): scan results + proof level
+  const hasScan = a.scan?.status === 'complete';
+  const proof = Math.min(10, (hasScan ? 6 : 0) + (a.proofLevel ? Math.round(a.proofLevel / 8.5) : 0));
+
+  return { budget, authority, need, timing, fit, proof, total: budget + authority + need + timing + fit + proof };
+}
+
+// ── Path to Close (Skill 13) ────────────────────────────────
+type CloseStage = 'scan' | 'exposure' | 'tension' | 'payment';
+
+function getCloseStage(a: Account): CloseStage {
+  if (a.outreachStatus === 'sent' || a.outreachStatus === 'replied' || a.leadStatus === 'contacted' || a.leadStatus === 'replied') return 'payment';
+  if (a.scan?.status === 'complete' && a.hypothesis?.summary) return 'tension';
+  if (a.scan?.status === 'complete') return 'exposure';
+  return 'scan';
+}
+
+const CLOSE_STAGES: { id: CloseStage; label: string }[] = [
+  { id: 'scan', label: 'SCAN' },
+  { id: 'exposure', label: 'EXPOSURE' },
+  { id: 'tension', label: 'TENSION' },
+  { id: 'payment', label: 'PAYMENT' },
+];
+
+// ── Outbound Sequence (Skill 17) ────────────────────────────
+interface SequenceStep {
+  day: number;
+  channel: 'email' | 'linkedin' | 'followup';
+  label: string;
+  done: boolean;
+  active: boolean;
+  cooldownBlocked: boolean;
+}
+
+function getSequenceSteps(a: Account): SequenceStep[] {
+  const sentAt = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+  const now = Date.now();
+  const hoursSinceSent = sentAt ? (now - sentAt) / 3600000 : 0;
+  const isSent = a.outreachStatus === 'sent' || a.outreachStatus === 'replied';
+  const isReplied = a.outreachStatus === 'replied' || a.leadStatus === 'replied';
+  const hasLinkedIn = !!a.financeLead?.linkedIn;
+
+  // 48h rule: if contacted on one channel, other channel grayed out for 48h
+  const emailCooldown = isSent && hoursSinceSent < 48;
+
+  return [
+    {
+      day: 0,
+      channel: 'email',
+      label: 'D0 Email',
+      done: isSent || isReplied,
+      active: !isSent && a.readyToSend === true,
+      cooldownBlocked: false,
+    },
+    {
+      day: 2,
+      channel: 'linkedin',
+      label: 'D2 LinkedIn',
+      done: false, // Would need linkedin state tracking
+      active: isSent && hoursSinceSent >= 48 && hasLinkedIn,
+      cooldownBlocked: emailCooldown && hasLinkedIn,
+    },
+    {
+      day: 7,
+      channel: 'followup',
+      label: 'D7 Follow-up',
+      done: (a.followUpCount || 0) > 0 && isReplied,
+      active: isSent && hoursSinceSent >= 168 && !isReplied,
+      cooldownBlocked: false,
+    },
+  ];
+}
+
+// ── Financial range formatter (Skill 8) ─────────────────────
+function formatFinancialRange(low: number, high: number, currency: string = 'EUR'): string {
+  const fmt = (n: number) => {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${Math.round(n / 1000)}k`;
+    return n.toLocaleString();
+  };
+  return `${fmt(low)}\u2013${fmt(high)} ${currency}`;
+}
+
+function formatRevenue(n: number): string {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  return n.toLocaleString();
+}
+
+// ── Date helpers ────────────────────────────────────────────
+function formatDate(iso?: string): string {
+  if (!iso) return '\u2014';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return '1d ago';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
+function daysUntil(iso?: string): number | null {
+  if (!iso) return null;
+  const d = new Date(iso).getTime();
+  return Math.ceil((d - Date.now()) / 86400000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ══════════════════════════════════════════════════════════════
+
+export default function CockpitV3() {
   // ── State ────────────────────────────────────────────────
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [activeView, setActiveView] = useState<ViewTabId>('focus_now');
+  const [prevView, setPrevView] = useState<ViewTabId>('focus_now');
   const [filters, setFilters] = useState<CockpitFilters>(DEFAULT_FILTERS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailClosing, setDetailClosing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [tabFadeKey, setTabFadeKey] = useState(0);
+  const [archivingIds, setArchivingIds] = useState<Set<string>>(new Set());
+
+  // ── Tab change with cross-fade (Skill 9) ──────────────────
+  const handleViewChange = useCallback((view: ViewTabId) => {
+    setPrevView(activeView);
+    setActiveView(view);
+    setTabFadeKey(k => k + 1);
+  }, [activeView]);
+
+  // ── Detail panel slide-in/out (Skill 9) ───────────────────
+  const handleOpenDetail = useCallback((id: string) => {
+    setDetailClosing(false);
+    setDetailId(id);
+  }, []);
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailClosing(true);
+    setTimeout(() => {
+      setDetailId(null);
+      setDetailClosing(false);
+    }, 300);
+  }, []);
+
+  // ── Archive with slide-out (Skill 9) ──────────────────────
+  const handleArchiveWithAnimation = useCallback((accountId: string) => {
+    setArchivingIds(prev => new Set(prev).add(accountId));
+    setTimeout(() => {
+      setAccounts(prev => {
+        const updated = archiveAccount([...prev], accountId);
+        const computed = computeReadyToSend(updated);
+        saveAccounts(computed);
+        return computed;
+      });
+      setArchivingIds(prev => {
+        const next = new Set(prev);
+        next.delete(accountId);
+        return next;
+      });
+    }, 250);
+  }, []);
 
   // ── Load accounts ────────────────────────────────────────
   useEffect(() => {
@@ -92,7 +329,6 @@ export default function CockpitV2() {
         if (!res.ok) return;
         const { events } = await res.json();
         if (!events?.length) return;
-        // Auto-accept all signals into accounts
         let updated = [...accounts];
         for (const sig of events as IncomingSignal[]) {
           const event: PlatformEvent = {
@@ -104,7 +340,6 @@ export default function CockpitV2() {
           };
           const result = processEventIntoAccounts(updated as any[], event);
           updated = result.accounts as Account[];
-          // Learn email pattern
           if (sig.email && sig.domain) {
             let intel = loadDomainIntel();
             intel = learnDomainPattern(sig.email, sig.contact_name || '', intel);
@@ -112,7 +347,6 @@ export default function CockpitV2() {
             const resolved = resolveAllEmails(updated as any[], intel);
             updated = resolved.accounts as Account[];
           }
-          // Mark processed server-side
           fetch('/api/command/ingest', {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids: [sig.id] }),
@@ -138,6 +372,11 @@ export default function CockpitV2() {
 
   // ── Action handler ───────────────────────────────────────
   const handleAction = useCallback((accountId: string, action: string, payload?: any) => {
+    // Archive uses animated version
+    if (action === 'archive') {
+      handleArchiveWithAnimation(accountId);
+      return;
+    }
     setAccounts(prev => {
       let updated = [...prev];
       switch (action) {
@@ -162,9 +401,6 @@ export default function CockpitV2() {
         case 'follow_up_7d':
           updated = scheduleFollowUp(updated, accountId, 7);
           break;
-        case 'archive':
-          updated = archiveAccount(updated, accountId);
-          break;
         case 'ignore':
           updated = updateAccount(updated, accountId, { leadStatus: 'ignored', hiddenFromActiveView: true, lastActionAt: new Date().toISOString(), lastActionType: 'ignored' } as any);
           break;
@@ -181,7 +417,7 @@ export default function CockpitV2() {
       saveAccounts(computed);
       return computed;
     });
-  }, []);
+  }, [handleArchiveWithAnimation]);
 
   // ── Bulk actions ─────────────────────────────────────────
   const handleBulkAction = useCallback((action: string) => {
@@ -226,14 +462,46 @@ export default function CockpitV2() {
     detailId ? accounts.find(a => a.id === detailId) || null : null,
   [accounts, detailId]);
 
+  // ── Aggregate metrics (Skill 8 — top stats bar) ──────────
+  const metrics = useMemo(() => {
+    const active = accounts.filter(a => !a.hiddenFromActiveView && !a.isSnoozed);
+    const readyCount = active.filter(a => a.readyToSend).length;
+    const followUpsDue = active.filter(a => {
+      if (a.outreachStatus === 'follow_up_due') return true;
+      if (a.followUpDueAt && new Date(a.followUpDueAt).getTime() <= Date.now()) return true;
+      return false;
+    }).length;
+    const sentCount = active.filter(a => a.outreachStatus === 'sent' || a.outreachStatus === 'replied').length;
+    const repliedCount = active.filter(a => a.outreachStatus === 'replied' || a.leadStatus === 'replied').length;
+
+    // Pipeline value as range
+    const totalLow = active.reduce((s, a) => s + (a.scan?.exposureLow || Math.round(a.revenueEstimate * 0.6)), 0);
+    const totalHigh = active.reduce((s, a) => s + (a.scan?.exposureHigh || a.revenueEstimate), 0);
+
+    // Average BANT
+    const bantScores = active.map(a => computeBANT(a).total);
+    const avgBant = bantScores.length ? Math.round(bantScores.reduce((a, b) => a + b, 0) / bantScores.length) : 0;
+
+    return {
+      total: active.length,
+      ready: readyCount,
+      followUps: followUpsDue,
+      sent: sentCount,
+      replied: repliedCount,
+      pipelineLow: totalLow,
+      pipelineHigh: totalHigh,
+      avgBant,
+    };
+  }, [accounts]);
+
   // ── Render ───────────────────────────────────────────────
   if (error) {
     return (
-      <div style={{ padding: 40, color: '#f87171', fontFamily: 'var(--vg-font-mono)' }}>
-        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Cockpit Error</h2>
-        <pre style={{ fontSize: 12, background: '#0a0d19', padding: 16, borderRadius: 8 }}>{error}</pre>
+      <div style={{ padding: 40, color: '#DC2626', fontFamily: FONT_MONO, background: '#FFFFFF', minHeight: '100vh' }}>
+        <h2 style={{ fontSize: 18, marginBottom: 12, color: '#0F172A' }}>Cockpit Error</h2>
+        <pre style={{ fontSize: 12, background: '#F8FAFC', padding: 16, borderRadius: 8, border: '1px solid #E2E8F0', color: '#334155' }}>{error}</pre>
         <button onClick={() => { localStorage.clear(); window.location.reload(); }}
-          style={{ marginTop: 16, padding: '8px 16px', background: 'rgba(96,165,250,0.1)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>
+          style={{ marginTop: 16, padding: '8px 16px', background: '#F1F5F9', color: '#334155', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontFamily: FONT_BODY }}>
           CLEAR CACHE &amp; RELOAD
         </button>
       </div>
@@ -241,16 +509,134 @@ export default function CockpitV2() {
   }
 
   if (!loaded) {
-    return <div style={{ padding: 40, color: '#475569', fontSize: 14, fontFamily: 'var(--vg-font-mono)' }}>Loading Mission Control...</div>;
+    return (
+      <div style={{
+        padding: 60, color: '#94A3B8', fontSize: 13, fontFamily: FONT_MONO,
+        background: '#FFFFFF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: 120, height: 3, borderRadius: 2,
+            background: 'linear-gradient(90deg, #E2E8F0 25%, #94A3B8 50%, #E2E8F0 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'gt-shimmer 1.5s ease-in-out infinite',
+            marginBottom: 16,
+          }} />
+          <span>Loading Mission Control...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      {/* View Tabs */}
-      <ViewTabs activeView={activeView} counts={viewCounts} onChange={setActiveView} />
+    <div style={{
+      position: 'relative',
+      minHeight: '100vh',
+      background: '#FFFFFF',
+      color: '#334155',
+      fontFamily: FONT_BODY,
+    }}>
+      {/* Inject keyframes (Skill 9) */}
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES_CSS }} />
 
-      {/* Filters + Action Bar */}
-      <div style={{ padding: '16px 24px 0' }}>
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* TOP STATS BAR (Skill 8 — Metric card pattern)        */}
+      {/* ══════════════════════════════════════════════════════ */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0,
+        padding: '14px 24px',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E2E8F0',
+      }}>
+        {/* Ready to Send — green glow (Skill 7) */}
+        <MetricCard
+          label="READY TO SEND"
+          value={metrics.ready}
+          unit="prospects"
+          accentColor="#16A34A"
+          glow={metrics.ready > 0}
+          glowAnimation="gt-pulseGlow"
+        />
+        <StatSeparator />
+
+        {/* Follow-ups Due — red glow (Skill 7) */}
+        <MetricCard
+          label="FOLLOW-UPS DUE"
+          value={metrics.followUps}
+          unit="today"
+          accentColor={metrics.followUps > 0 ? '#DC2626' : '#94A3B8'}
+          glow={metrics.followUps > 0}
+          glowAnimation="gt-pulseRed"
+        />
+        <StatSeparator />
+
+        {/* Sent */}
+        <MetricCard
+          label="SENT"
+          value={metrics.sent}
+          unit="contacted"
+          accentColor="#0F172A"
+        />
+        <StatSeparator />
+
+        {/* Replied */}
+        <MetricCard
+          label="REPLIED"
+          value={metrics.replied}
+          unit="responses"
+          accentColor={metrics.replied > 0 ? '#16A34A' : '#94A3B8'}
+        />
+        <StatSeparator />
+
+        {/* Pipeline Value — financial range with en-dash (Skill 8) */}
+        <div style={{ padding: '6px 16px' }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+            letterSpacing: '0.1em', color: '#64748B', marginBottom: 4, fontWeight: 600,
+          }}>PIPELINE VALUE</div>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: '#0F172A',
+            letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums',
+          }}>
+            {formatFinancialRange(metrics.pipelineLow, metrics.pipelineHigh)}
+          </div>
+        </div>
+        <StatSeparator />
+
+        {/* Avg BANT Score */}
+        <MetricCard
+          label="AVG BANT+"
+          value={metrics.avgBant}
+          unit="/100"
+          accentColor={metrics.avgBant >= 60 ? '#16A34A' : metrics.avgBant >= 40 ? '#0F172A' : '#94A3B8'}
+        />
+
+        {/* Total Active — right aligned */}
+        <div style={{ marginLeft: 'auto', padding: '6px 16px' }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+            letterSpacing: '0.1em', color: '#64748B', marginBottom: 4, fontWeight: 600,
+          }}>ACTIVE</div>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 22, fontWeight: 700, color: '#0F172A',
+            letterSpacing: '-0.02em', textAlign: 'right' as const,
+          }}>
+            {metrics.total}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* VIEW TABS                                             */}
+      {/* ══════════════════════════════════════════════════════ */}
+      <ViewTabs activeView={activeView} counts={viewCounts} onChange={handleViewChange} />
+
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* FILTERS + ACTION BAR                                  */}
+      {/* ══════════════════════════════════════════════════════ */}
+      <div style={{ padding: '0' }}>
         <ActionBar
           accounts={viewAccounts}
           selectedIds={selectedIds}
@@ -259,20 +645,55 @@ export default function CockpitV2() {
         <QuickFilters filters={filters} onChange={setFilters} />
       </div>
 
-      {/* Prospect List */}
-      <div style={{ padding: '8px 24px 80px' }}>
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* PROSPECT LIST — staggered entrance (Skill 9)          */}
+      {/* ══════════════════════════════════════════════════════ */}
+      <div
+        key={`tab-content-${tabFadeKey}`}
+        style={{
+          padding: '0 0 80px 0',
+          animation: 'gt-fadeTabContent 200ms ease-out',
+        }}
+      >
+        {/* Column headers */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          padding: '8px 24px',
+          borderBottom: '1px solid #F1F5F9',
+          background: '#FAFBFD',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            fontFamily: FONT_MONO, fontSize: 10, color: '#94A3B8',
+            textTransform: 'uppercase' as const, letterSpacing: '0.1em', fontWeight: 600,
+          }}>
+            <span>{viewAccounts.length} prospect{viewAccounts.length !== 1 ? 's' : ''} in view</span>
+            <span style={{ display: 'flex', gap: 24 }}>
+              <span>PATH TO CLOSE</span>
+              <span>SEQUENCE</span>
+              <span>BANT+</span>
+            </span>
+          </div>
+        </div>
+
         {viewAccounts.length === 0 ? (
-          <div style={S.empty}>
+          <div style={{
+            padding: 60, textAlign: 'center', color: '#94A3B8', fontSize: 13,
+            fontFamily: FONT_MONO, animation: 'gt-fadeIn 300ms ease',
+          }}>
             {activeView === 'focus_now' ? 'No prospects ready to send. Generate messages or enrich leads.' :
              activeView === 'follow_up_due' ? 'No follow-ups due. All caught up.' :
-             `No prospects in "${activeView}" view.`}
+             `No prospects in this view.`}
           </div>
         ) : (
-          viewAccounts.map(account => (
-            <ProspectRow
+          viewAccounts.map((account, index) => (
+            <ProspectRowEnhanced
               key={account.id}
               account={account}
+              index={index}
               isSelected={selectedIds.has(account.id)}
+              isArchiving={archivingIds.has(account.id)}
               onSelect={(id) => {
                 setSelectedIds(prev => {
                   const next = new Set(prev);
@@ -281,44 +702,422 @@ export default function CockpitV2() {
                 });
               }}
               onAction={handleAction}
-              onOpenDetail={(id) => setDetailId(id)}
+              onOpenDetail={handleOpenDetail}
             />
           ))
         )}
       </div>
 
-      {/* Detail Panel (side panel) */}
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* DETAIL PANEL — slide-in from right (Skill 9)          */}
+      {/* ══════════════════════════════════════════════════════ */}
       {detailAccount && (
-        <DetailPanel
+        <DetailPanelEnhanced
           account={detailAccount}
           onAction={handleAction}
-          onClose={() => setDetailId(null)}
+          onClose={handleCloseDetail}
+          isClosing={detailClosing}
         />
       )}
 
-      {/* Keyboard shortcuts */}
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* KEYBOARD SHORTCUTS                                    */}
+      {/* ══════════════════════════════════════════════════════ */}
       <KeyboardHandler
         accounts={viewAccounts}
         selectedIds={selectedIds}
         onAction={handleAction}
         onSelect={setSelectedIds}
         detailId={detailId}
-        onOpenDetail={setDetailId}
+        onOpenDetail={handleOpenDetail}
+        onCloseDetail={handleCloseDetail}
       />
     </div>
   );
 }
 
-// ── Keyboard Shortcuts ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// METRIC CARD (Skill 8 — Data Presentation Sculptor)
+// ══════════════════════════════════════════════════════════════
+
+function MetricCard({ label, value, unit, accentColor, glow, glowAnimation }: {
+  label: string;
+  value: number;
+  unit: string;
+  accentColor: string;
+  glow?: boolean;
+  glowAnimation?: string;
+}) {
+  return (
+    <div style={{
+      padding: '6px 16px',
+      borderRadius: 8,
+      animation: glow ? `${glowAnimation} 2s ease-in-out infinite` : undefined,
+    }}>
+      <div style={{
+        fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+        letterSpacing: '0.1em', color: '#64748B', marginBottom: 4, fontWeight: 600,
+      }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+        <span style={{
+          fontFamily: FONT_MONO, fontSize: 22, fontWeight: 700, color: accentColor,
+          letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
+        }}>{value}</span>
+        <span style={{
+          fontFamily: FONT_MONO, fontSize: 12, color: '#94A3B8', fontWeight: 400,
+        }}>{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function StatSeparator() {
+  return <div style={{ width: 1, height: 36, background: '#F1F5F9', flexShrink: 0 }} />;
+}
+
+// ══════════════════════════════════════════════════════════════
+// PATH TO CLOSE INDICATOR (Skill 13 — Deal Closer)
+// ══════════════════════════════════════════════════════════════
+
+function PathToClose({ account }: { account: Account }) {
+  const currentStage = getCloseStage(account);
+  const stageIndex = CLOSE_STAGES.findIndex(s => s.id === currentStage);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {CLOSE_STAGES.map((stage, i) => {
+        const isComplete = i < stageIndex;
+        const isCurrent = i === stageIndex;
+        const color = isComplete ? '#16A34A' : isCurrent ? '#3B82F6' : '#E2E8F0';
+        const bgColor = isComplete ? 'rgba(22,163,74,0.06)' : isCurrent ? 'rgba(59,130,246,0.06)' : 'transparent';
+        const borderColor = isComplete ? 'rgba(22,163,74,0.15)' : isCurrent ? 'rgba(59,130,246,0.15)' : '#E2E8F0';
+        return (
+          <div key={stage.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Stage badge — 3-layer (Skill 7) */}
+            <div style={{
+              padding: '2px 6px',
+              borderRadius: 3,
+              fontSize: 9,
+              fontFamily: FONT_MONO,
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              color,
+              background: bgColor,
+              border: `1px solid ${borderColor}`,
+              animation: isCurrent ? 'gt-stepPulse 2s ease-in-out infinite' : undefined,
+            }}>
+              {stage.label}
+            </div>
+            {/* Connector line */}
+            {i < CLOSE_STAGES.length - 1 && (
+              <div style={{
+                width: 8, height: 1,
+                background: isComplete ? '#16A34A' : '#E2E8F0',
+              }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// SEQUENCE TIMELINE (Skill 17 — Outbound Orchestrator)
+// ══════════════════════════════════════════════════════════════
+
+function SequenceTimeline({ account }: { account: Account }) {
+  const steps = getSequenceSteps(account);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {steps.map((step, i) => {
+        const color = step.done ? '#16A34A'
+          : step.active ? '#3B82F6'
+          : step.cooldownBlocked ? '#F59E0B'
+          : '#CBD5E1';
+        const bgColor = step.done ? 'rgba(22,163,74,0.06)'
+          : step.active ? 'rgba(59,130,246,0.06)'
+          : step.cooldownBlocked ? 'rgba(245,158,11,0.06)'
+          : 'transparent';
+        const borderColor = step.done ? 'rgba(22,163,74,0.15)'
+          : step.active ? 'rgba(59,130,246,0.15)'
+          : step.cooldownBlocked ? 'rgba(245,158,11,0.15)'
+          : '#E2E8F0';
+        const title = step.cooldownBlocked
+          ? `${step.label} — 48h cooldown active`
+          : step.done ? `${step.label} — done`
+          : step.active ? `${step.label} — ready`
+          : step.label;
+
+        return (
+          <div key={step.day} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <div
+              title={title}
+              style={{
+                padding: '2px 5px',
+                borderRadius: 3,
+                fontSize: 9,
+                fontFamily: FONT_MONO,
+                fontWeight: 600,
+                letterSpacing: '0.03em',
+                color,
+                background: bgColor,
+                border: `1px solid ${borderColor}`,
+                opacity: step.cooldownBlocked ? 0.5 : 1,
+                textDecoration: step.cooldownBlocked ? 'line-through' : 'none',
+              }}
+            >
+              {step.done ? '\u2713' : ''}{step.label}
+            </div>
+            {i < steps.length - 1 && (
+              <div style={{
+                width: 6, height: 1,
+                background: step.done ? '#16A34A' : '#E2E8F0',
+              }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// BANT+ BADGE (Skill 13)
+// ══════════════════════════════════════════════════════════════
+
+function BANTBadge({ account, compact }: { account: Account; compact?: boolean }) {
+  const bant = computeBANT(account);
+  const color = bant.total >= 70 ? '#16A34A' : bant.total >= 50 ? '#3B82F6' : bant.total >= 30 ? '#F59E0B' : '#94A3B8';
+  const bgColor = bant.total >= 70 ? 'rgba(22,163,74,0.06)' : bant.total >= 50 ? 'rgba(59,130,246,0.06)' : bant.total >= 30 ? 'rgba(245,158,11,0.06)' : 'rgba(148,163,184,0.06)';
+  const borderColor = bant.total >= 70 ? 'rgba(22,163,74,0.15)' : bant.total >= 50 ? 'rgba(59,130,246,0.15)' : bant.total >= 30 ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.10)';
+
+  if (compact) {
+    return (
+      <span
+        title={`BANT+ ${bant.total}/100 — B:${bant.budget} A:${bant.authority} N:${bant.need} T:${bant.timing} F:${bant.fit} P:${bant.proof}`}
+        style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '2px 7px', borderRadius: 3,
+          fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700,
+          color, background: bgColor, border: `1px solid ${borderColor}`,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {bant.total}
+      </span>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <span style={{
+          fontFamily: FONT_MONO, fontSize: 28, fontWeight: 700, color,
+          lineHeight: 1, letterSpacing: '-0.02em',
+        }}>{bant.total}</span>
+        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: '#94A3B8' }}>/100</span>
+      </div>
+      {/* Breakdown bars */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '3px 8px', alignItems: 'center', fontSize: 10 }}>
+        {([
+          { key: 'B', val: bant.budget, max: 25 },
+          { key: 'A', val: bant.authority, max: 20 },
+          { key: 'N', val: bant.need, max: 20 },
+          { key: 'T', val: bant.timing, max: 15 },
+          { key: 'F', val: bant.fit, max: 10 },
+          { key: 'P', val: bant.proof, max: 10 },
+        ] as const).map(({ key, val, max }) => (
+          <div key={key} style={{ display: 'contents' }}>
+            <span style={{ fontFamily: FONT_MONO, color: '#64748B', fontWeight: 600 }}>{key}</span>
+            <div style={{
+              height: 4, borderRadius: 2, background: '#F1F5F9', overflow: 'hidden',
+            }}>
+              <div style={{
+                height: '100%', borderRadius: 2,
+                width: `${(val / max) * 100}%`,
+                background: val / max >= 0.7 ? '#16A34A' : val / max >= 0.4 ? '#3B82F6' : '#CBD5E1',
+                transition: 'width 300ms ease',
+              }} />
+            </div>
+            <span style={{
+              fontFamily: FONT_MONO, color: '#94A3B8', textAlign: 'right' as const,
+              fontVariantNumeric: 'tabular-nums',
+            }}>{val}/{max}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ENHANCED PROSPECT ROW (wraps original + adds skills 9/13/17)
+// ══════════════════════════════════════════════════════════════
+
+function ProspectRowEnhanced({
+  account, index, isSelected, isArchiving, onSelect, onAction, onOpenDetail,
+}: {
+  account: Account;
+  index: number;
+  isSelected: boolean;
+  isArchiving: boolean;
+  onSelect: (id: string) => void;
+  onAction: (id: string, action: string, payload?: string) => void;
+  onOpenDetail: (id: string) => void;
+}) {
+  // Stagger entrance delay (Skill 9): 40ms per item, max 400ms
+  const delay = Math.min(index * 40, 400);
+
+  return (
+    <div
+      style={{
+        animation: isArchiving
+          ? 'gt-slideOutLeft 250ms ease-out forwards'
+          : `gt-slideInRow 200ms ease-out ${delay}ms both`,
+      }}
+    >
+      {/* Original ProspectRow */}
+      <ProspectRow
+        account={account}
+        isSelected={isSelected}
+        onSelect={onSelect}
+        onAction={onAction}
+        onOpenDetail={onOpenDetail}
+      />
+      {/* Additional skills strip below each row */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '4px 24px 8px',
+        borderBottom: '1px solid #F8FAFC',
+        background: '#FFFFFF',
+      }}>
+        {/* Path to Close (Skill 13) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <PathToClose account={account} />
+          {/* Revenue estimate as range (Skill 8) */}
+          {account.scan ? (
+            <span style={{
+              fontFamily: FONT_MONO, fontSize: 11, color: '#64748B',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {formatFinancialRange(account.scan.exposureLow, account.scan.exposureHigh, account.scan.currency)}
+            </span>
+          ) : account.revenueEstimate > 0 ? (
+            <span style={{
+              fontFamily: FONT_MONO, fontSize: 11, color: '#94A3B8',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              ~{formatRevenue(account.revenueEstimate)} EUR
+            </span>
+          ) : null}
+        </div>
+
+        {/* Right side: Sequence + BANT */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <SequenceTimeline account={account} />
+          <BANTBadge account={account} compact />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ENHANCED DETAIL PANEL (wraps original + slide animation + BANT)
+// ══════════════════════════════════════════════════════════════
+
+function DetailPanelEnhanced({
+  account, onAction, onClose, isClosing,
+}: {
+  account: Account;
+  onAction: (id: string, action: string, payload?: string) => void;
+  onClose: () => void;
+  isClosing: boolean;
+}) {
+  return (
+    <div style={{
+      animation: isClosing
+        ? 'gt-slideOutRight 300ms cubic-bezier(0.16,1,0.3,1) forwards'
+        : 'gt-slideInRight 300ms cubic-bezier(0.16,1,0.3,1)',
+    }}>
+      {/* Wrap the original DetailPanel but add BANT + sequence sections via overlay */}
+      <DetailPanel
+        account={account}
+        onAction={onAction}
+        onClose={onClose}
+      />
+      {/* BANT+ Score overlay — positioned inside the detail panel */}
+      <div style={{
+        position: 'fixed',
+        bottom: 80,
+        right: 20,
+        width: 260,
+        background: '#FFFFFF',
+        border: '1px solid #E2E8F0',
+        borderRadius: 10,
+        padding: '16px 18px',
+        zIndex: 1001,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+        animation: 'gt-fadeIn 300ms ease 150ms both',
+      }}>
+        <div style={{
+          fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+          letterSpacing: '0.1em', color: '#64748B', marginBottom: 10, fontWeight: 600,
+        }}>BANT+ SCORE</div>
+        <BANTBadge account={account} />
+
+        {/* Sequence Timeline */}
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+            letterSpacing: '0.1em', color: '#64748B', marginBottom: 8, fontWeight: 600,
+          }}>OUTBOUND SEQUENCE</div>
+          <SequenceTimeline account={account} />
+          {/* 48h rule indicator */}
+          {account.sentAt && (
+            <div style={{
+              marginTop: 8, fontSize: 10, fontFamily: FONT_MONO, color: '#F59E0B',
+            }}>
+              {(() => {
+                const hours = Math.round((Date.now() - new Date(account.sentAt).getTime()) / 3600000);
+                if (hours < 48) return `48h rule: ${48 - hours}h remaining before next channel`;
+                return 'Cooldown cleared — next channel available';
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* Path to Close */}
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F1F5F9' }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 10, textTransform: 'uppercase' as const,
+            letterSpacing: '0.1em', color: '#64748B', marginBottom: 8, fontWeight: 600,
+          }}>PATH TO CLOSE</div>
+          <PathToClose account={account} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════════════════
+
 function KeyboardHandler({
-  accounts, selectedIds, onAction, onSelect, detailId, onOpenDetail,
+  accounts, selectedIds, onAction, onSelect, detailId, onOpenDetail, onCloseDetail,
 }: {
   accounts: Account[];
   selectedIds: Set<string>;
   onAction: (id: string, action: string) => void;
   onSelect: (ids: Set<string>) => void;
   detailId: string | null;
-  onOpenDetail: (id: string | null) => void;
+  onOpenDetail: (id: string) => void;
+  onCloseDetail: () => void;
 }) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -329,14 +1128,17 @@ function KeyboardHandler({
 
       switch (e.key.toLowerCase()) {
         case 'escape':
-          onOpenDetail(null);
-          onSelect(new Set());
+          if (detailId) {
+            onCloseDetail();
+          } else {
+            onSelect(new Set());
+          }
           break;
         case 'e': // Email
           if (firstSelected) {
             const acc = accounts.find(a => a.id === firstSelected);
             if (acc?.financeLead?.email) {
-              const subject = acc.outreach?.[0]?.subject || `Ghost Tax — ${acc.company}`;
+              const subject = acc.outreach?.[0]?.subject || `Ghost Tax \u2014 ${acc.company}`;
               const body = acc.outreach?.[0]?.body || '';
               window.open(`mailto:${acc.financeLead.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
             }
@@ -359,7 +1161,7 @@ function KeyboardHandler({
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [accounts, selectedIds, onAction, onSelect, detailId, onOpenDetail]);
+  }, [accounts, selectedIds, onAction, onSelect, detailId, onOpenDetail, onCloseDetail]);
 
   return null;
 }
