@@ -107,6 +107,16 @@ vault_sessions, organizations, profiles, audit_requests, reports, anomalies, rec
 - RLS on all Supabase tables — no public reads on sensitive data
 - Dark theme (#060912) is brand identity — never light mode
 - Ranges, not point estimates — always [low, high] on financial figures
+- Make relay (/api/make/relay) est FIRE-AND-FORGET — si Make down, Ghost Tax continue normalement
+- Telegram = canal de vérité — double-write cockpit + Telegram sur chaque action critique
+
+## Make Nervous System (Automation Layer)
+- **Rule**: `.claude/rules/13-make-nervous-system.md` — architecture complète des 8 scénarios Make
+- **Skill**: `.claude/skills/make-nervous-system/SKILL.md` — guide de construction des blueprints Make
+- **Architecture doc**: `MAKE-ARCHITECTURE-GHOST-TAX.md` (racine Ghost-Tax/) — document détaillé
+- **Make IDs**: Org 6444101, Team 942964, zone eu1.make.com
+- **8 scénarios**: S1 Nerve Center, S2 Signal Fusion, S3 Enrichment Cascade, S4 Intelligence Pulse, S5 Outreach Orchestrator, S6 Response Tracker, S7 Deal Accelerator, S8 Timing Guardian
+- **Ordre d'implémentation**: S4 (Phase 1) → S1+S2 (Phase 2) → S3 (Phase 3) → S5+S6 (Phase 4) → S7+S8 (Phase 5)
 
 ## Editing Discipline
 - Always analyze the project before editing
