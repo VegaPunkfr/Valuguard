@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // ── Filter State ────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ export const DEFAULT_FILTERS: CockpitFilters = {
 
 const STORAGE_KEY = 'gt-cockpit-filters-v1';
 
-// ── Styles ──────────────────────────────────────────────────
+// ── Premium White Theme Styles ──────────────────────────────
 
 const S = {
   bar: {
@@ -36,16 +36,16 @@ const S = {
     flexWrap: 'wrap' as const,
     alignItems: 'center',
     gap: '6px',
-    padding: '12px 16px',
+    padding: '12px 20px',
     background: '#FFFFFF',
     borderBottom: '1px solid #F1F5F9',
     fontFamily: 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
-    fontSize: '11px',
+    fontSize: '12px',
   } as React.CSSProperties,
   group: {
     display: 'flex',
     alignItems: 'center',
-    gap: '3px',
+    gap: '4px',
   } as React.CSSProperties,
   groupLabel: {
     color: '#64748B',
@@ -54,41 +54,43 @@ const S = {
     letterSpacing: '0.1em',
     marginRight: '2px',
     userSelect: 'none' as const,
-    fontWeight: 500,
+    fontWeight: 600,
   } as React.CSSProperties,
   pill: (active: boolean) => ({
     display: 'inline-flex',
     alignItems: 'center',
-    padding: '4px 10px',
-    borderRadius: '10px',
+    padding: '5px 12px',
+    borderRadius: '6px',
     border: active ? '1px solid #3B82F6' : '1px solid #E2E8F0',
     background: active ? '#EFF6FF' : '#F1F5F9',
-    color: active ? '#3B82F6' : '#64748B',
-    fontSize: '11px',
+    color: active ? '#2563EB' : '#64748B',
+    fontSize: '12px',
     fontWeight: active ? 600 : 400,
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'all 0.12s ease',
     userSelect: 'none' as const,
     fontFamily: 'inherit',
   } as React.CSSProperties),
   separator: {
     width: '1px',
-    height: '18px',
-    background: '#E2E8F0',
+    height: '20px',
+    background: '#F1F5F9',
     margin: '0 4px',
+    flexShrink: 0,
   } as React.CSSProperties,
   clearBtn: {
-    padding: '4px 10px',
+    padding: '5px 12px',
     borderRadius: '6px',
-    border: '1px solid rgba(239,68,68,0.2)',
-    background: 'rgba(239,68,68,0.04)',
-    color: '#EF4444',
-    fontSize: '11px',
+    border: 'none',
+    background: 'transparent',
+    color: '#DC2626',
+    fontSize: '12px',
     fontWeight: 500,
     cursor: 'pointer',
     fontFamily: 'inherit',
     marginLeft: 'auto',
-    transition: 'all 0.12s',
+    transition: 'all 0.12s ease',
+    textDecoration: 'none',
   } as React.CSSProperties,
 };
 
@@ -126,6 +128,9 @@ export interface QuickFiltersProps {
 // ── Component ───────────────────────────────────────────────
 
 export default function QuickFilters({ filters, onChange }: QuickFiltersProps) {
+  const [clearHover, setClearHover] = useState(false);
+  const [hoverPill, setHoverPill] = useState<string | null>(null);
+
   // Persist to localStorage
   useEffect(() => {
     try {
@@ -171,10 +176,18 @@ export default function QuickFilters({ filters, onChange }: QuickFiltersProps) {
       with: 'With contact',
       without: 'No contact',
     };
+    const isActive = value !== 'all';
+    const pillKey = `tri-${field}`;
+    const isHovered = hoverPill === pillKey;
     return (
       <button
-        style={S.pill(value !== 'all')}
+        style={{
+          ...S.pill(isActive),
+          ...(isHovered && !isActive ? { background: '#F8FAFC' } : {}),
+        }}
         onClick={() => update({ [field]: cycleTriState(value, options) } as Partial<CockpitFilters>)}
+        onMouseEnter={() => setHoverPill(pillKey)}
+        onMouseLeave={() => setHoverPill(null)}
         title={`Click to cycle: ${options.join(' -> ')}`}
       >
         {displayMap[value] || value}
@@ -190,15 +203,25 @@ export default function QuickFilters({ filters, onChange }: QuickFiltersProps) {
     field: 'language' | 'country' | 'temperature' | 'nextActionType';
   }) => (
     <>
-      {values.map(v => (
-        <button
-          key={v.id}
-          style={S.pill(selected.includes(v.id))}
-          onClick={() => update({ [field]: toggleArray(selected, v.id) })}
-        >
-          {v.label}
-        </button>
-      ))}
+      {values.map(v => {
+        const isActive = selected.includes(v.id);
+        const pillKey = `${field}-${v.id}`;
+        const isHovered = hoverPill === pillKey;
+        return (
+          <button
+            key={v.id}
+            style={{
+              ...S.pill(isActive),
+              ...(isHovered && !isActive ? { background: '#F8FAFC' } : {}),
+            }}
+            onClick={() => update({ [field]: toggleArray(selected, v.id) })}
+            onMouseEnter={() => setHoverPill(pillKey)}
+            onMouseLeave={() => setHoverPill(null)}
+          >
+            {v.label}
+          </button>
+        );
+      })}
     </>
   );
 
@@ -307,8 +330,13 @@ export default function QuickFilters({ filters, onChange }: QuickFiltersProps) {
         <>
           <div style={S.separator} />
           <button
-            style={S.clearBtn}
+            style={{
+              ...S.clearBtn,
+              textDecoration: clearHover ? 'underline' : 'none',
+            }}
             onClick={() => onChange(DEFAULT_FILTERS)}
+            onMouseEnter={() => setClearHover(true)}
+            onMouseLeave={() => setClearHover(false)}
           >
             Clear all
           </button>

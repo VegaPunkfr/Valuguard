@@ -3,81 +3,90 @@
 import React, { useMemo } from 'react';
 import type { Account } from '@/types/command';
 
-// ── Styles ──────────────────────────────────────────────────
+// ── Premium White Theme Styles ──────────────────────────────
 
 const S = {
   bar: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '16px 16px',
+    gap: '16px',
+    padding: '16px 20px',
     background: '#FFFFFF',
     borderBottom: '1px solid #E2E8F0',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     fontFamily: 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
     fontSize: '12px',
     color: '#334155',
   } as React.CSSProperties,
-  stat: {
+  statBox: (accentColor: string, hasShadow: boolean) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-  } as React.CSSProperties,
+    gap: '8px',
+    padding: '8px 14px',
+    borderRadius: '10px',
+    background: '#FFFFFF',
+    boxShadow: hasShadow
+      ? `0 0 0 1px rgba(${accentColor},0.12), 0 2px 8px rgba(${accentColor},0.06)`
+      : '0 0 0 1px rgba(226,232,240,0.8)',
+  } as React.CSSProperties),
   statNumber: (color: string) => ({
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 700,
     color,
     lineHeight: 1,
     fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
     fontVariantNumeric: 'tabular-nums',
+    letterSpacing: '-0.02em',
   }),
   statLabel: {
     color: '#64748B',
     fontSize: '11px',
-    lineHeight: 1.2,
+    lineHeight: 1.3,
     maxWidth: '80px',
+    fontWeight: 500,
   } as React.CSSProperties,
   separator: {
     width: '1px',
-    height: '28px',
-    background: '#E2E8F0',
+    height: '32px',
+    background: '#F1F5F9',
   } as React.CSSProperties,
   bulkSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
     marginLeft: '8px',
-    padding: '6px 10px',
-    borderRadius: '8px',
-    background: '#F8FAFC',
-    border: '1px solid #E2E8F0',
+    padding: '8px 14px',
+    borderRadius: '10px',
+    background: '#FAFBFD',
+    border: '1px solid #F1F5F9',
   } as React.CSSProperties,
   bulkLabel: {
     color: '#64748B',
     fontSize: '11px',
+    fontWeight: 500,
   } as React.CSSProperties,
   bulkBtn: {
-    padding: '5px 12px',
+    padding: '6px 14px',
     borderRadius: '6px',
     border: '1px solid #CBD5E1',
     background: '#FFFFFF',
     color: '#334155',
-    fontSize: '11px',
+    fontSize: '12px',
     fontWeight: 500,
     fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
-    transition: 'all 0.15s',
+    transition: 'all 0.15s ease',
   } as React.CSSProperties,
   sendSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '12px',
     marginLeft: 'auto',
-    padding: '8px 14px',
+    padding: '8px 16px',
     borderRadius: '10px',
     background: '#FFFFFF',
     border: '1px solid rgba(34,197,94,0.20)',
-    boxShadow: '0 0 0 1px rgba(34,197,94,0.15), 0 4px 16px rgba(34,197,94,0.08)',
+    boxShadow: '0 0 0 1px rgba(34,197,94,0.12), 0 2px 8px rgba(34,197,94,0.06)',
   } as React.CSSProperties,
   sendInfo: {
     display: 'flex',
@@ -110,20 +119,20 @@ const S = {
     background: '#0F172A',
     color: '#FFFFFF',
     fontSize: '14px',
-    fontWeight: 700,
+    fontWeight: 600,
     fontFamily: 'var(--gt-font-dm-sans, "DM Sans", sans-serif)',
     cursor: 'pointer',
-    transition: 'all 0.15s',
-    letterSpacing: '0.05em',
+    transition: 'all 0.15s ease',
+    letterSpacing: '0.03em',
     textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+    boxShadow: '0 2px 8px rgba(15,23,42,0.15), 0 1px 3px rgba(15,23,42,0.10)',
   } as React.CSSProperties,
   sendButtonDisabled: {
     opacity: 0.3,
     cursor: 'not-allowed',
   } as React.CSSProperties,
   selectedCount: {
-    color: '#3B82F6',
+    color: '#2563EB',
     fontWeight: 600,
     fontSize: '12px',
   } as React.CSSProperties,
@@ -181,23 +190,25 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
 
   return (
     <div style={S.bar}>
-      {/* Stats */}
-      <div style={S.stat}>
-        <span style={S.statNumber('#22C55E')}>{stats.ready}</span>
+      {/* Stats — Ready to Send */}
+      <div style={S.statBox('34,197,94', true)}>
+        <span style={S.statNumber('#16A34A')}>{stats.ready}</span>
         <span style={S.statLabel}>ready to send</span>
       </div>
 
       <div style={S.separator} />
 
-      <div style={S.stat}>
-        <span style={S.statNumber(stats.followUps > 0 ? '#EF4444' : '#64748B')}>{stats.followUps}</span>
+      {/* Stats — Follow-ups Due */}
+      <div style={S.statBox('220,38,38', stats.followUps > 0)}>
+        <span style={S.statNumber(stats.followUps > 0 ? '#DC2626' : '#94A3B8')}>{stats.followUps}</span>
         <span style={S.statLabel}>follow-ups due today</span>
       </div>
 
       <div style={S.separator} />
 
-      <div style={S.stat}>
-        <span style={S.statNumber('#3B82F6')}>{stats.totalActive}</span>
+      {/* Stats — Total Active */}
+      <div style={S.statBox('226,232,240', false)}>
+        <span style={S.statNumber('#0F172A')}>{stats.totalActive}</span>
         <span style={S.statLabel}>total active</span>
       </div>
 
@@ -209,7 +220,7 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
           <>
             <span style={S.selectedCount}>{selectedIds.size} selected</span>
             <button
-              style={{ ...S.bulkBtn, color: '#22C55E', borderColor: 'rgba(34,197,94,0.3)' }}
+              style={{ ...S.bulkBtn, color: '#16A34A', borderColor: 'rgba(22,163,74,0.30)' }}
               onClick={() => onBulkAction('mark_sent', selectedArray)}
             >
               Mark Sent
@@ -221,7 +232,7 @@ export default function ActionBar({ accounts, selectedIds, onBulkAction }: Actio
               Snooze 7d
             </button>
             <button
-              style={{ ...S.bulkBtn, color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
+              style={{ ...S.bulkBtn, color: '#DC2626', borderColor: 'rgba(220,38,38,0.30)' }}
               onClick={() => onBulkAction('archive', selectedArray)}
             >
               Archive
