@@ -13,6 +13,7 @@
  * Every micro-interaction reduces time-to-send.
  */
 
+import React from 'react';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { processEventIntoAccounts, type PlatformEvent } from '@/lib/command/bridge';
 import { loadDomainIntel, saveDomainIntel, learnDomainPattern, resolveAllEmails } from '@/lib/command/email-resolver';
@@ -251,6 +252,7 @@ export default function CockpitV3() {
   const [loaded, setLoaded] = useState(false);
   const [tabFadeKey, setTabFadeKey] = useState(0);
   const [archivingIds, setArchivingIds] = useState<Set<string>>(new Set());
+  const [isMobile, setIsMobile] = useState(false);
 
   // ── Tab change with cross-fade (Skill 9) ──────────────────
   const handleViewChange = useCallback((view: ViewTabId) => {
@@ -289,6 +291,14 @@ export default function CockpitV3() {
         return next;
       });
     }, 250);
+  }, []);
+
+  // ── Mobile detection ─────────────────────────────────────
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // ── Load accounts ────────────────────────────────────────
@@ -546,9 +556,12 @@ export default function CockpitV3() {
         display: 'flex',
         alignItems: 'center',
         gap: 0,
-        padding: '14px 24px',
+        padding: isMobile ? '10px 12px' : '14px 24px',
         background: '#FFFFFF',
         borderBottom: '1px solid #E2E8F0',
+        overflowX: isMobile ? 'auto' : 'visible',
+        scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'],
+        WebkitOverflowScrolling: 'touch',
       }}>
         {/* Ready to Send — green glow (Skill 7) */}
         <MetricCard
@@ -653,6 +666,8 @@ export default function CockpitV3() {
         style={{
           padding: '0 0 80px 0',
           animation: 'gt-fadeTabContent 200ms ease-out',
+          overflowX: isMobile ? 'auto' : 'visible',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         {/* Column headers */}

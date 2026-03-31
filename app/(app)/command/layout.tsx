@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect, useState, useCallback } from 'react';
@@ -47,10 +48,15 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
   const [signalCount, setSignalCount] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     injectKeyframes();
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   /* ─── Signal polling ─── */
@@ -129,53 +135,64 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
         <div style={{
           maxWidth: 1440,
           margin: '0 auto',
-          padding: '0 32px',
+          padding: isMobile ? '0 12px' : '0 32px',
           display: 'flex',
           alignItems: 'center',
-          height: 56,
+          height: isMobile ? 48 : 56,
         }}>
 
-          {/* ── Back link ── */}
-          <a
-            href="https://ghost-tax.com"
-            style={{
-              textDecoration: 'none',
-              color: '#94A3B8',
-              fontSize: 12,
-              letterSpacing: '0.08em',
-              marginRight: 24,
-              transition: 'color 0.15s ease',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#64748B'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#94A3B8'; }}
-          >
-            &larr; GHOST-TAX.COM
-          </a>
+          {/* ── Back link (hidden on mobile) ── */}
+          {!isMobile && (
+            <a
+              href="https://ghost-tax.com"
+              style={{
+                textDecoration: 'none',
+                color: '#94A3B8',
+                fontSize: 12,
+                letterSpacing: '0.08em',
+                marginRight: 24,
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#64748B'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#94A3B8'; }}
+            >
+              &larr; GHOST-TAX.COM
+            </a>
+          )}
 
           {/* ── Logo ── */}
           <span style={{
-            fontSize: 15,
+            fontSize: isMobile ? 13 : 15,
             fontWeight: 700,
             letterSpacing: '0.10em',
             color: '#0F172A',
-            marginRight: 8,
+            marginRight: 6,
             userSelect: 'none',
+            flexShrink: 0,
           }}>
-            GHOST TAX
+            GT
           </span>
           <span style={{
-            fontSize: 12,
+            fontSize: isMobile ? 10 : 12,
             fontWeight: 600,
             letterSpacing: '0.16em',
             color: '#3B82F6',
-            marginRight: 36,
+            marginRight: isMobile ? 8 : 36,
             userSelect: 'none',
+            flexShrink: 0,
           }}>
-            COMMAND
+            CMD
           </span>
 
           {/* ── Nav tabs ── */}
-          <nav style={{ display: 'flex', gap: 0, flex: 1, height: '100%' }}>
+          <nav style={{
+            display: 'flex',
+            gap: 0,
+            flex: 1,
+            height: '100%',
+            overflowX: isMobile ? 'auto' : 'visible',
+            scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'],
+          }}>
             {NAV.map(item => {
               const active = isActive(item.href);
               const hovered = hoveredTab === item.href;
@@ -188,10 +205,10 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
                   onMouseLeave={() => setHoveredTab(null)}
                   style={{
                     textDecoration: 'none',
-                    fontSize: 13,
+                    fontSize: isMobile ? 11 : 13,
                     fontWeight: active ? 600 : 400,
-                    letterSpacing: '0.10em',
-                    padding: '0 18px',
+                    letterSpacing: isMobile ? '0.06em' : '0.10em',
+                    padding: isMobile ? '0 10px' : '0 18px',
                     display: 'flex',
                     alignItems: 'center',
                     position: 'relative',
@@ -202,8 +219,10 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
                         : '#94A3B8',
                     background: active ? 'rgba(59,130,246,0.04)' : 'transparent',
                     transition: 'color 0.2s ease, background 0.2s ease',
-                    height: 56,
+                    height: isMobile ? 48 : 56,
                     boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
                   {item.label}
@@ -250,20 +269,23 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          {/* ── Date stamp ── */}
-          <span style={{
-            fontSize: 12,
-            color: '#64748B',
-            letterSpacing: '0.06em',
-            fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
-          }}>
-            {mounted
-              ? new Date()
-                  .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                  .toUpperCase()
-              : ''
-            }
-          </span>
+          {/* ── Date stamp (hidden on mobile) ── */}
+          {!isMobile && (
+            <span style={{
+              fontSize: 12,
+              color: '#64748B',
+              letterSpacing: '0.06em',
+              fontFamily: 'var(--gt-font-ibm-plex, "IBM Plex Mono", monospace)',
+              flexShrink: 0,
+            }}>
+              {mounted
+                ? new Date()
+                    .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                    .toUpperCase()
+                : ''
+              }
+            </span>
+          )}
         </div>
       </header>
 
@@ -275,7 +297,7 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
         zIndex: 2,
         maxWidth: 1440,
         margin: '0 auto',
-        padding: '24px 32px 80px',
+        padding: isMobile ? '14px 12px 60px' : '24px 32px 80px',
       }}>
         {children}
       </main>
