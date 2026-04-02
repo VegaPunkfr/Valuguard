@@ -32,6 +32,18 @@ const C = {
   obs3:      "#0E1221",
 };
 
+// ─── Mobile breakpoint hook ───────────────────────────────────────────────────
+function useIsMobile(bp = 768): boolean {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const check = () => setM(window.innerWidth < bp);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [bp]);
+  return m;
+}
+
 // ─── Live Leak Counter — obsidian context only ────────────────────────────────
 const LeakCounter: React.FC = () => {
   const [amount, setAmount] = useState(294847);
@@ -72,6 +84,7 @@ const LeakCounter: React.FC = () => {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 const HeroSection: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [domain, setDomain] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -122,10 +135,10 @@ const HeroSection: React.FC = () => {
         className="gt-container gt-hero-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "1.2fr 0.8fr",
-          gap: "64px",
+          gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.8fr",
+          gap: isMobile ? "28px" : "64px",
           alignItems: "start",
-          padding: "56px 24px 0",
+          padding: isMobile ? "28px 16px 0" : "56px 24px 0",
         }}
       >
         {/* ── Left: editorial copy ── */}
@@ -258,11 +271,14 @@ const HeroSection: React.FC = () => {
               color: C.ink,
               background: "transparent",
               border: "none",
-              padding: "0",
+              padding: "12px 0",
               cursor: "pointer",
               textDecoration: "underline",
               fontFamily: "var(--gt-font-mono)",
               letterSpacing: "0.06em",
+              minHeight: "44px",
+              display: "inline-flex",
+              alignItems: "center",
             }}
           >
             {t("v2.hero.cta_free") || "→ Lancer un scan gratuit"}
@@ -385,6 +401,7 @@ const HeroSection: React.FC = () => {
 // ─── Stats Strip (dark obsidian bar) ─────────────────────────────────────────
 const StatsStrip: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [counts, setCounts] = useState([0, 0, 0, 0]);
   const targets = [21, 48, 12, 490];
 
@@ -420,16 +437,19 @@ const StatsStrip: React.FC = () => {
         className="gt-container gt-stats-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          padding: "0 24px",
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+          padding: isMobile ? "0 16px" : "0 24px",
         }}
       >
         {stats.map(({ val, label }, i) => (
           <div
             key={i}
             style={{
-              padding: "28px 24px",
-              borderRight: i < 3 ? `1px solid rgba(255,255,255,0.07)` : "none",
+              padding: isMobile ? "20px 12px" : "28px 24px",
+              borderRight: isMobile
+                ? (i % 2 === 0 ? `1px solid rgba(255,255,255,0.07)` : "none")
+                : (i < 3 ? `1px solid rgba(255,255,255,0.07)` : "none"),
+              borderBottom: isMobile && i < 2 ? `1px solid rgba(255,255,255,0.07)` : "none",
               textAlign: "center",
             }}
           >
@@ -467,6 +487,7 @@ const StatsStrip: React.FC = () => {
 // ─── Problem Section ──────────────────────────────────────────────────────────
 const ProblemSection: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
 
   const problems = [
     {
@@ -492,8 +513,8 @@ const ProblemSection: React.FC = () => {
   ];
 
   return (
-    <section style={{ background: C.paper, padding: "96px 0" }}>
-      <div className="gt-container" style={{ padding: "0 24px" }}>
+    <section style={{ background: C.paper, padding: isMobile ? "64px 0" : "96px 0" }}>
+      <div className="gt-container" style={{ padding: isMobile ? "0 16px" : "0 24px" }}>
         {/* Section header */}
         <div style={{ marginBottom: "64px" }}>
           <div
@@ -509,7 +530,7 @@ const ProblemSection: React.FC = () => {
           >
             {t("section.problem") || "LE PROBLÈME"}
           </div>
-          <div style={{ display: "flex", alignItems: "start", gap: "40px" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "start", gap: isMobile ? "16px" : "40px" }}>
             <h2
               style={{
                 fontSize: "clamp(40px, 4.5vw, 64px)",
@@ -557,9 +578,9 @@ const ProblemSection: React.FC = () => {
               className="gt-problem-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "64px 1fr auto",
+                gridTemplateColumns: isMobile ? "32px 1fr" : "64px 1fr auto",
                 alignItems: "center",
-                gap: "32px",
+                gap: isMobile ? "8px" : "32px",
                 padding: "24px 0",
                 borderBottom: `1px solid ${C.rule}`,
               }}
@@ -577,24 +598,31 @@ const ProblemSection: React.FC = () => {
               </div>
               <div
                 style={{
-                  fontSize: "17px",
+                  fontSize: isMobile ? "14px" : "17px",
                   fontWeight: 500,
                   color: C.ink,
                 }}
               >
                 {label}
+                {isMobile && (
+                  <div style={{ fontFamily: "var(--gt-font-mono)", fontSize: "13px", fontWeight: 700, color: C.red, marginTop: "4px" }}>
+                    {amount}
+                  </div>
+                )}
               </div>
-              <div
-                style={{
-                  fontFamily: "var(--gt-font-mono)",
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  color: C.red,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {amount}
-              </div>
+              {!isMobile && (
+                <div
+                  style={{
+                    fontFamily: "var(--gt-font-mono)",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    color: C.red,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {amount}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -640,6 +668,7 @@ const ProblemSection: React.FC = () => {
 // ─── Pipeline Section ─────────────────────────────────────────────────────────
 const PipelineSection: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [active, setActive] = useState<number | null>(null);
 
   const phases = [
@@ -667,8 +696,8 @@ const PipelineSection: React.FC = () => {
   ];
 
   return (
-    <section style={{ background: C.cream, padding: "96px 0" }}>
-      <div className="gt-container" style={{ padding: "0 24px" }}>
+    <section style={{ background: C.cream, padding: isMobile ? "56px 0" : "96px 0" }}>
+      <div className="gt-container" style={{ padding: isMobile ? "0 16px" : "0 24px" }}>
         {/* Header */}
         <div style={{ marginBottom: "56px" }}>
           <div
@@ -711,7 +740,7 @@ const PipelineSection: React.FC = () => {
           className="gt-pipeline-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
+            gridTemplateColumns: isMobile ? "repeat(3, 1fr)" : "repeat(7, 1fr)",
             gap: "0",
             border: `1px solid ${C.ink}`,
           }}
@@ -725,9 +754,11 @@ const PipelineSection: React.FC = () => {
                 onMouseEnter={() => setActive(i)}
                 onMouseLeave={() => setActive(null)}
                 style={{
-                  padding: "20px 14px",
-                  borderRight: (i % 7 < 6) ? `1px solid ${C.rule}` : "none",
-                  borderBottom: i < 14 ? `1px solid ${C.rule}` : "none",
+                  padding: isMobile ? "10px 6px" : "20px 14px",
+                  borderRight: isMobile
+                    ? (i % 3 < 2 ? `1px solid ${C.rule}` : "none")
+                    : (i % 7 < 6 ? `1px solid ${C.rule}` : "none"),
+                  borderBottom: i < (isMobile ? 18 : 14) ? `1px solid ${C.rule}` : "none",
                   background: isActive
                     ? C.obsidian
                     : isLast
@@ -755,7 +786,7 @@ const PipelineSection: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: "12px",
+                    fontSize: isMobile ? "9px" : "12px",
                     fontWeight: 700,
                     color: isActive || isLast ? C.parchment : C.ink,
                     marginBottom: "4px",
@@ -800,15 +831,16 @@ const PipelineSection: React.FC = () => {
 // ─── Proof Section ────────────────────────────────────────────────────────────
 const ProofSection: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
 
   return (
-    <section style={{ background: C.obsidian, padding: "80px 0" }}>
+    <section style={{ background: C.obsidian, padding: isMobile ? "56px 0" : "80px 0" }}>
       <div className="gt-container" style={{ padding: "0 24px" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "64px",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: isMobile ? "32px" : "64px",
             alignItems: "center",
           }}
         >
@@ -940,6 +972,7 @@ const ProofSection: React.FC = () => {
 // ─── Pricing Section ──────────────────────────────────────────────────────────
 const PricingSection: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRailA = async () => {
@@ -1046,8 +1079,8 @@ const PricingSection: React.FC = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "0",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+            gap: isMobile ? "1px" : "0",
             border: `1px solid rgba(36,48,78,0.50)`,
           }}
         >
@@ -1056,7 +1089,8 @@ const PricingSection: React.FC = () => {
               key={i}
               style={{
                 padding: "36px 28px",
-                borderRight: i < 2 ? `1px solid rgba(36,48,78,0.40)` : "none",
+                borderRight: !isMobile && i < 2 ? `1px solid rgba(36,48,78,0.40)` : "none",
+                borderBottom: isMobile && i < 2 ? `1px solid rgba(36,48,78,0.40)` : "none",
                 background: rail.highlight ? C.obs3 : C.paper,
                 display: "flex",
                 flexDirection: "column",
@@ -1215,6 +1249,7 @@ const PricingSection: React.FC = () => {
 // ─── Final CTA ────────────────────────────────────────────────────────────────
 const FinalCTA: React.FC = () => {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [domain, setDomain] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -1250,7 +1285,7 @@ const FinalCTA: React.FC = () => {
       <div
         className="gt-container"
         style={{
-          padding: "0 24px",
+          padding: isMobile ? "0 16px" : "0 24px",
           textAlign: "center",
           maxWidth: "760px",
           margin: "0 auto",
@@ -1382,10 +1417,4 @@ export function HomePageClient() {
       <HeroSection />
       <StatsStrip />
       <ProblemSection />
-      <PipelineSection />
-      <ProofSection />
-      <PricingSection />
-      <FinalCTA />
-    </main>
-  );
-}
+    
