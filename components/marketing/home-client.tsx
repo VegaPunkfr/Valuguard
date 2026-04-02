@@ -119,7 +119,7 @@ const HeroSection: React.FC = () => {
       />
 
       <div
-        className="gt-container"
+        className="gt-container gt-hero-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1.2fr 0.8fr",
@@ -417,7 +417,7 @@ const StatsStrip: React.FC = () => {
   return (
     <section style={{ background: C.obsidian }}>
       <div
-        className="gt-container"
+        className="gt-container gt-stats-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
@@ -554,6 +554,7 @@ const ProblemSection: React.FC = () => {
           {problems.map(({ num, amount, label }, i) => (
             <div
               key={i}
+              className="gt-problem-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "64px 1fr auto",
@@ -707,6 +708,7 @@ const PipelineSection: React.FC = () => {
 
         {/* 7×3 grid of phases */}
         <div
+          className="gt-pipeline-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(7, 1fr)",

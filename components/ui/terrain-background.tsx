@@ -25,9 +25,10 @@ export default function TerrainBackground({ opacity = 0.18 }: TerrainBackgroundP
       import("three").then((THREE) => {
         if (cancelled || !canvasRef.current) return;
 
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
         const canvas = canvasRef.current;
         renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.setPixelRatio(isMobile ? 1 : Math.min(devicePixelRatio, 2));
         renderer.setClearColor(0x000000, 0);
 
         const scene = new THREE.Scene();
@@ -42,7 +43,7 @@ export default function TerrainBackground({ opacity = 0.18 }: TerrainBackgroundP
           camera.updateProjectionMatrix();
         }
 
-        const SEG = 80, SW = 180, SH = 130;
+        const SEG = isMobile ? 30 : 80, SW = 180, SH = 130;
 
         // Fill mesh
         const geoFill = new THREE.PlaneGeometry(SW, SH, SEG, SEG);
@@ -66,7 +67,7 @@ export default function TerrainBackground({ opacity = 0.18 }: TerrainBackgroundP
         scene.add(meshWire);
 
         // Spark particles
-        const N_SPARKS = 55;
+        const N_SPARKS = isMobile ? 20 : 55;
         const sGeo = new THREE.BufferGeometry();
         const sPos = new Float32Array(N_SPARKS * 3);
         const sCol = new Float32Array(N_SPARKS * 3);

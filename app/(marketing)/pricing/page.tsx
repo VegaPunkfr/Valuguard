@@ -206,7 +206,7 @@ export default function PricingPage() {
 
         {/* Pricing cards — 3-column grid */}
         <Section style={{ paddingTop: 40, paddingBottom: 0 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div className="gt-pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
 
             {/* ═══ TIER 1: DETECT (tiered pricing) ═══ */}
             <div className="gt-card" style={{

@@ -109,8 +109,8 @@ export default function Navbar() {
             aria-expanded={mobileOpen}
             style={{
               display: "none", background: "none", border: "1px solid " + c.borderS,
-              borderRadius: 8, padding: "8px 10px", cursor: "pointer",
-              color: c.text2, fontSize: 20, lineHeight: 1,
+              borderRadius: 8, padding: "12px 14px", cursor: "pointer",
+              color: c.text2, fontSize: 24, lineHeight: 1,
             }}
           >
             {mobileOpen ? "\u2715" : "\u2630"}

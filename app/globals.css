@@ -998,3 +998,105 @@ input, button, select, textarea {
     border-top: 0.5pt solid #ccc;
   }
 }
+
+
+/* ═══ MOBILE RESPONSIVE SYSTEM ═══ */
+
+/* Tablet and below */
+@media (max-width: 768px) {
+  /* All inline grids with multiple columns → stack */
+  [style*="grid-template-columns: repeat(7"],
+  [style*="grid-template-columns: repeat(4"],
+  [style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Hero two-column layout → stack */
+  [style*="grid-template-columns: 1.2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stats strip → 2x2 grid */
+  [style*="gap: 48px"][style*="flex-wrap"] {
+    gap: 24px !important;
+    justify-content: space-around !important;
+  }
+
+  /* Reduce large font sizes */
+  [style*="fontSize: 32px"],
+  [style*="font-size: 32px"] {
+    font-size: clamp(20px, 5vw, 32px) !important;
+  }
+
+  [style*="fontSize: 28px"],
+  [style*="font-size: 28px"] {
+    font-size: clamp(18px, 4.5vw, 28px) !important;
+  }
+
+  /* Reduce paddings */
+  [style*="padding: 96px"] {
+    padding: 48px 16px !important;
+  }
+
+  [style*="padding: 64px"] {
+    padding: 32px 16px !important;
+  }
+
+  /* Pipeline grid special: 7 cols → 2 cols on tablet */
+  [style*="repeat(7, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Named grid overrides */
+  .gt-hero-grid { grid-template-columns: 1fr !important; }
+  .gt-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
+  .gt-pipeline-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .gt-problem-grid { grid-template-columns: 1fr !important; }
+  .gt-pricing-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* Phone */
+@media (max-width: 480px) {
+  /* All grids → single column */
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pipeline → single column on phone */
+  [style*="repeat(7, 1fr)"],
+  [style*="repeat(2, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce all horizontal padding */
+  .gt-container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Safe area for notched phones */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Named grid overrides — phone */
+  .gt-stats-grid { grid-template-columns: 1fr !important; }
+  .gt-pipeline-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Touch-friendly targets */
+@media (hover: none) and (pointer: coarse) {
+  a, button, [role="button"], summary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Disable hover effects on touch devices */
+  *:hover {
+    transform: none !important;
+  }
+}
