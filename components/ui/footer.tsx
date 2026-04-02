@@ -71,10 +71,10 @@ export default function Footer() {
         display: "flex", gap: 32, flexWrap: "wrap", alignItems: "center", justifyContent: "center",
       }}>
         {[
-          { val: "200+", label: t("footer.stat.analyses") || "analyses delivered" },
-          { val: "340k\u20ac", label: t("footer.stat.avgExposure") || "avg exposure found" },
-          { val: "48h", label: t("footer.stat.delivery") || "avg delivery" },
-          { val: "94%", label: t("footer.stat.actionRate") || "client action rate" },
+          { val: "21", label: t("footer.stat.phases") || "detection phases" },
+          { val: "48h", label: t("footer.stat.delivery") || "guaranteed delivery" },
+          { val: "€490", label: t("footer.stat.price") || "one-shot detection" },
+          { val: "12", label: t("footer.stat.leakTypes") || "leak types detected" },
         ].map((s) => (
           <div key={s.label} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
             <span style={{ fontFamily: f.mono, fontSize: 14, fontWeight: 700, color: "#F8FAFC" }}>{s.val}</span>

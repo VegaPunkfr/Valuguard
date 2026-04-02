@@ -116,7 +116,9 @@ export function I18nProvider({
   }, []);
 
   const t = useCallback((key: string, fb?: string): string => {
-    return messages[key] ?? fallback[key] ?? fb ?? key;
+    // Return resolved translation, or fallback, or empty string (never the raw key)
+    // Empty string allows component-level || "fallback text" to work
+    return messages[key] ?? fallback[key] ?? fb ?? "";
   }, [messages, fallback]);
 
   const formatCurrency = useCallback(
