@@ -105,14 +105,14 @@ const HeroSection: React.FC = () => {
     <section
       style={{
         background: C.parchment,
-        paddingTop: "80px",
+        paddingTop: "0",
       }}
     >
       {/* ── Top rule: double newspaper line ── */}
       <div
         style={{
-          borderTop: `2px solid ${C.ink}`,
-          borderBottom: `1px solid ${C.ink}`,
+          borderTop: `2px solid rgba(255,255,255,0.08)`,
+          borderBottom: `1px solid rgba(255,255,255,0.04)`,
           height: "6px",
           background: C.parchment,
         }}
@@ -1041,7 +1041,7 @@ const PricingSection: React.FC = () => {
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
             gap: "0",
-            border: `2px solid ${C.ink}`,
+            border: `1px solid rgba(36,48,78,0.50)`,
           }}
         >
           {rails.map((rail, i) => (
@@ -1049,8 +1049,8 @@ const PricingSection: React.FC = () => {
               key={i}
               style={{
                 padding: "36px 28px",
-                borderRight: i < 2 ? `1px solid ${C.ink}` : "none",
-                background: rail.highlight ? C.ink : C.paper,
+                borderRight: i < 2 ? `1px solid rgba(36,48,78,0.40)` : "none",
+                background: rail.highlight ? C.obs3 : C.paper,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
@@ -1088,7 +1088,7 @@ const PricingSection: React.FC = () => {
                   fontSize: "48px",
                   fontFamily: "var(--gt-font-mono)",
                   fontWeight: 700,
-                  color: rail.highlight ? C.parchment : C.ink,
+                  color: C.ink,
                   letterSpacing: "-0.03em",
                   lineHeight: 1,
                   marginBottom: "8px",
@@ -1235,7 +1235,7 @@ const FinalCTA: React.FC = () => {
   return (
     <section
       style={{
-        background: C.ink,
+        background: C.obsidian,
         padding: "96px 0",
         borderTop: `4px solid ${C.red}`,
       }}
@@ -1269,7 +1269,7 @@ const FinalCTA: React.FC = () => {
             fontWeight: 900,
             letterSpacing: "-0.04em",
             lineHeight: 0.95,
-            color: C.parchment,
+            color: C.ink,
             marginBottom: "24px",
           }}
         >

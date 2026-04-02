@@ -164,7 +164,7 @@ export default function AboutPage() {
                   {t("about.team.founder.bio")}
                 </p>
                 <a
-                  href="https://linkedin.com/in/edith-music"
+                  href="https://www.linkedin.com/in/jean-etienne-helene-309a0a158/?skipRedirect=true"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontFamily: f.mono, color: c.linkedin, textDecoration: "none", padding: "6px 14px", borderRadius: 8, background: "hsla(210, 89%, 40%, 0.08)", border: "1px solid hsla(210, 89%, 40%, 0.20)", transition: "opacity 200ms" }}
