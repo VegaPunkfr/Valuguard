@@ -16,7 +16,7 @@ import { homepageGraph } from "@/lib/schema";
 
 // ─── Palette (dark theme — matches Three.js terrain) ─────────────────────────
 const C = {
-  parchment: "transparent",
+  parchment: "#e4e9f4",
   paper:     "rgba(10,13,25,0.85)",
   cream:     "rgba(14,18,33,0.80)",
   ink:       "#E2E8F0",
@@ -26,7 +26,7 @@ const C = {
   red:       "#D62828",
   cyan:      "#00CFC4",
   gold:      "#B28C28",
-  green:     "#1A7A4A",
+  green:     "#34d399",
   obsidian:  "#060912",
   obs2:      "#0A0D19",
   obs3:      "#0E1221",
@@ -104,7 +104,7 @@ const HeroSection: React.FC = () => {
   return (
     <section
       style={{
-        background: C.parchment,
+        background: "transparent",
         paddingTop: "0",
       }}
     >
@@ -114,7 +114,7 @@ const HeroSection: React.FC = () => {
           borderTop: `2px solid rgba(255,255,255,0.08)`,
           borderBottom: `1px solid rgba(255,255,255,0.04)`,
           height: "6px",
-          background: C.parchment,
+          background: "transparent",
         }}
       />
 
@@ -234,8 +234,8 @@ const HeroSection: React.FC = () => {
               disabled={isLoading}
               style={{
                 padding: "14px 28px",
-                background: C.ink,
-                color: C.parchment,
+                background: C.cyan,
+                color: C.obsidian,
                 border: "none",
                 fontFamily: "var(--gt-font-mono)",
                 fontWeight: 700,
@@ -724,7 +724,7 @@ const PipelineSection: React.FC = () => {
                   background: isActive
                     ? C.obsidian
                     : isLast
-                    ? C.ink
+                    ? C.obs2
                     : C.paper,
                   cursor: "pointer",
                   transition: "background 150ms ease",
@@ -997,7 +997,7 @@ const PricingSection: React.FC = () => {
   ];
 
   return (
-    <section style={{ background: C.parchment, padding: "96px 0" }}>
+    <section style={{ background: "transparent", padding: "96px 0" }}>
       <div className="gt-container" style={{ padding: "0 24px" }}>
         {/* Header */}
         <div
@@ -1148,8 +1148,8 @@ const PricingSection: React.FC = () => {
                   disabled={isLoading}
                   style={{
                     padding: "13px 0",
-                    background: C.parchment,
-                    color: C.ink,
+                    background: C.cyan,
+                    color: C.obsidian,
                     border: "none",
                     fontFamily: "var(--gt-font-mono)",
                     fontWeight: 700,
@@ -1363,7 +1363,7 @@ export function HomePageClient() {
   return (
     <main
       style={{
-        background: C.parchment,
+        background: "transparent",
         fontFamily: "var(--gt-font-sans)",
       }}
     >
