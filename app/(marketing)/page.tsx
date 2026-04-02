@@ -13,17 +13,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 
-// ─── Palette (from ghost-tax-light-design SKILL) ─────────────────────────────
+// ─── Palette (dark theme — matches Three.js terrain) ─────────────────────────
 const C = {
-  parchment: "#F8F5EE",
-  paper:     "#FFFFFF",
-  cream:     "#F4F0E6",
-  ink:       "#0C0A12",
-  ink2:      "#2E2B3A",
-  ink3:      "#6B6880",
-  rule:      "#DCD9D2",
+  parchment: "transparent",
+  paper:     "rgba(10,13,25,0.85)",
+  cream:     "rgba(14,18,33,0.80)",
+  ink:       "#E2E8F0",
+  ink2:      "#CBD5E1",
+  ink3:      "#94A3B8",
+  rule:      "rgba(255,255,255,0.08)",
   red:       "#D62828",
-  cyan:      "#00BCD4",
+  cyan:      "#00CFC4",
   gold:      "#B28C28",
   green:     "#1A7A4A",
   obsidian:  "#060912",
