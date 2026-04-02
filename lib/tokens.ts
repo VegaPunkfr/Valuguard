@@ -42,38 +42,38 @@ export const sp = {
   "7": "104px",
 } as const;
 
-/* ── Colors — Enterprise Light ───────────────────── */
+/* ── Colors — Dark Institutional (Ghost Tax Brand) ── */
 export const c = {
-  bg:       "#FFFFFF",
-  surface:  "#F8FAFC",
-  card:     "#F8FAFC",
-  elevated: "#F1F5F9",
-  raised:   "#E2E8F0",
+  bg:       "#060912",
+  surface:  "#0a0d19",
+  card:     "#0e1221",
+  elevated: "#121828",
+  raised:   "#171e30",
 
-  border:   "#E2E8F0",
-  borderS:  "#CBD5E1",
-  borderSS: "#94A3B8",
+  border:   "rgba(36,48,78,0.28)",
+  borderS:  "rgba(36,48,78,0.50)",
+  borderSS: "rgba(36,48,78,0.70)",
 
-  text1: "#0F172A",
-  text2: "#475569",
-  text3: "#64748B",
-  text4: "#94A3B8",
+  text1: "#e4e9f4",
+  text2: "#8d9bb5",
+  text3: "#55637d",
+  text4: "#3a4560",
 
-  accent:   "#0F172A",
-  accentHi: "#1E293B",
-  accentBg: "rgba(15,23,42,0.04)",
-  accentBd: "rgba(15,23,42,0.12)",
+  accent:   "#22d3ee",
+  accentHi: "#67e8f9",
+  accentBg: "rgba(34,211,238,0.06)",
+  accentBd: "rgba(34,211,238,0.18)",
 
-  green:    "#059669",
-  greenBg:  "rgba(5,150,105,0.06)",
-  greenBd:  "rgba(5,150,105,0.18)",
-  red:      "#DC2626",
-  redBg:    "rgba(220,38,38,0.06)",
-  redBd:    "rgba(220,38,38,0.18)",
-  amber:    "#3b82f6",
-  amberBg:  "rgba(59,130,246,0.06)",
-  amberBd:  "rgba(59,130,246,0.18)",
-  cyan:     "#0891B2",
+  green:    "#34d399",
+  greenBg:  "rgba(52,211,153,0.08)",
+  greenBd:  "rgba(52,211,153,0.20)",
+  red:      "#ef4444",
+  redBg:    "rgba(239,68,68,0.08)",
+  redBd:    "rgba(239,68,68,0.20)",
+  amber:    "#f59e0b",
+  amberBg:  "rgba(245,158,11,0.08)",
+  amberBd:  "rgba(245,158,11,0.20)",
+  cyan:     "#22d3ee",
   linkedin: "#0A66C2",
 } as const;
 
@@ -83,26 +83,26 @@ export const f = {
   sans: "var(--gt-font-sans, system-ui, -apple-system, sans-serif)",
 } as const;
 
-/* ── Panel style (enterprise — flat, no glass) ──── */
+/* ── Panel style (dark institutional) ──────────── */
 export const panel: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid " + c.border,
+  background: "#0e1221",
+  border: "1px solid rgba(36,48,78,0.40)",
   borderRadius: 18,
-  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+  boxShadow: "0 4px 24px rgba(0,0,0,0.40)",
 };
 
 /* ── Card style ─────────────────────────────────── */
 export const card: React.CSSProperties = {
-  background: c.card,
-  border: "1px solid " + c.border,
+  background: "#121828",
+  border: "1px solid rgba(36,48,78,0.40)",
   borderRadius: 18,
-  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.30)",
 };
 
 /* ── Inset box ──────────────────────────────────── */
 export const inset: React.CSSProperties = {
-  background: "#F1F5F9",
-  border: "1px solid " + c.border,
+  background: "#0a0d19",
+  border: "1px solid rgba(36,48,78,0.28)",
   borderRadius: 10,
 };
 
@@ -202,9 +202,9 @@ export const inputBase: React.CSSProperties = {
   width: "100%",
   padding: "12px 16px",
   borderRadius: 10,
-  border: "1px solid " + c.borderS,
-  background: "#FFFFFF",
-  color: c.text1,
+  border: "1px solid rgba(36,48,78,0.50)",
+  background: "#0a0d19",
+  color: "#e4e9f4",
   fontSize: 15,
   outline: "none",
   boxSizing: "border-box",

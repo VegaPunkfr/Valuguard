@@ -212,7 +212,7 @@ function MetricBar({ metric: m, t, formatCurrency: fc }: { metric: MetricResult;
           </span>
         </div>
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: "#F1F5F9", position: "relative", overflow: "hidden" }}>
+      <div style={{ height: 4, borderRadius: 2, background: "#0a0d19", position: "relative", overflow: "hidden" }}>
         <div style={{
           position: "absolute", left: 0, top: 0, height: "100%",
           width: barW + "%", borderRadius: 2,
@@ -332,7 +332,7 @@ export default function PeerGapAnalysis() {
             </strong>{" "}
             {t("peergap.ofcomp")} {t(result.peerNameKey)}.
           </p>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "7px 16px", borderRadius: 8, background: "#F8FAFC", border: "1px solid " + overallCol + "25" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "7px 16px", borderRadius: 8, background: "#121828", border: "1px solid " + overallCol + "25" }}>
             <span className="gt-label">{t("peergap.overall")}</span>
             <span className="gt-mono" style={{ fontSize: 26, fontWeight: 800, color: overallCol }}>P{result.overall}</span>
           </div>

@@ -145,7 +145,7 @@ export default function PricingPage() {
           </p>
 
           {/* Currency indicator */}
-          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 8, background: "#F1F5F9", border: `1px solid #E2E8F0` }}>
+          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 8, background: "#0a0d19", border: "1px solid rgba(36,48,78,0.40)" }}>
             <span style={{ fontSize: 11, fontFamily: f.mono, color: c.text3 }}>
               {t("pricing.currencyNote").replace("{currency}", isUSD ? "USD" : "EUR")}
             </span>
@@ -360,7 +360,7 @@ export default function PricingPage() {
               </div>
 
               {/* Billing toggle */}
-              <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 7, background: "#F1F5F9", border: `1px solid #E2E8F0`, marginBottom: 12, alignSelf: "stretch" }}>
+              <div style={{ display: "flex", gap: 2, padding: 2, borderRadius: 7, background: "#0a0d19", border: "1px solid rgba(36,48,78,0.40)", marginBottom: 12, alignSelf: "stretch" }}>
                 <button
                   onClick={() => setBillingCycle("monthly")}
                   style={{

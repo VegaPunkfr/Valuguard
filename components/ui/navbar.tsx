@@ -45,10 +45,10 @@ export default function Navbar() {
           zIndex: 100,
           minHeight: 56,
           padding: scrolled ? "10px 0" : "14px 0",
-          background: scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.60)",
+          background: scrolled ? "rgba(6,9,18,0.98)" : "rgba(6,9,18,0.75)",
           backdropFilter: "blur(20px) saturate(1.2)",
           WebkitBackdropFilter: "blur(20px) saturate(1.2)",
-          borderBottom: scrolled ? "1px solid " + c.border : "1px solid transparent",
+          borderBottom: scrolled ? "1px solid rgba(36,48,78,0.40)" : "1px solid transparent",
           transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
         }}
       >
@@ -56,7 +56,7 @@ export default function Navbar() {
           {/* Logo */}
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <img src="/favicon.svg" alt="Ghost Tax" width={30} height={30} style={{ borderRadius: 8 }} />
-            <span style={{ fontSize: 15, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".04em", color: c.accent }}>
+            <span style={{ fontSize: 15, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".04em", color: "#e4e9f4" }}>
               Ghost Tax
             </span>
           </a>
@@ -104,7 +104,7 @@ export default function Navbar() {
         className="gt-mobile gt-mobile-drawer"
         style={{
           position: "fixed", top: 56, left: 0, right: 0, zIndex: 99,
-          background: "rgba(255,255,255,0.98)",
+          background: "rgba(6,9,18,0.98)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderBottom: "1px solid " + c.border,

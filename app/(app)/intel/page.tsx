@@ -35,23 +35,23 @@ const DecisionPackTeaser = lazy(() => import("@/components/ui/decision-pack-teas
 // ── Design tokens ─────────────────────────────────────
 
 const C = {
-  bg:      "#FFFFFF",
-  surface: "#F8FAFC",
-  panel:   "#FFFFFF",
-  inset:   "#F1F5F9",
-  raised:  "#E2E8F0",
-  border:  "#E2E8F0",
-  borderS: "#CBD5E1",
-  text1:   "#0F172A",
-  text2:   "#475569",
-  text3:   "#64748B",
-  text4:   "#94A3B8",
-  green:   "#059669",
-  amber:   "#3b82f6",
-  red:     "#DC2626",
-  blue:    "#0F172A",
-  blueHi:  "#1E293B",
-  cyan:    "#0891B2",
+  bg:      "#060912",
+  surface: "#0a0d19",
+  panel:   "#0e1221",
+  inset:   "#121828",
+  raised:  "#171e30",
+  border:  "rgba(36,48,78,0.28)",
+  borderS: "rgba(36,48,78,0.50)",
+  text1:   "#e4e9f4",
+  text2:   "#8d9bb5",
+  text3:   "#55637d",
+  text4:   "#3a4560",
+  green:   "#34d399",
+  amber:   "#f59e0b",
+  red:     "#ef4444",
+  blue:    "#3b82f6",
+  blueHi:  "#60a5fa",
+  cyan:    "#22d3ee",
 } as const;
 
 const MO = "var(--font-mono)";
@@ -325,7 +325,7 @@ export default function IntelPage() {
         </div>
 
         {/* ── Scan Form ──────────────────────── */}
-        <div className="gt-card" style={{ padding: "28px 24px", marginBottom: 20, borderRadius: 16, background: "#FFFFFF", border: `1px solid ${C.borderS}`, position: "relative" }}>
+        <div className="gt-card" style={{ padding: "28px 24px", marginBottom: 20, borderRadius: 16, background: C.panel, border: `1px solid ${C.borderS}`, position: "relative" }}>
           {running && (
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, overflow: "hidden", borderRadius: "16px 16px 0 0" }}>
               <div style={{ height: 2, background: `linear-gradient(90deg, transparent, ${C.blue}, transparent)`, animation: "vg-scan 2s linear infinite" }} />
@@ -1001,7 +1001,7 @@ export default function IntelPage() {
                 <div style={{ marginBottom: 12 }}>
                   <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.causal.secondaryCauses")}</p>
                   {phases.causalGraph.secondaryCauses.map((c: string, i: number) => (
-                    <p key={i} style={{ fontSize: 11, color: C.text2, padding: "5px 10px", borderRadius: "var(--r-xs)", background: "#F1F5F9", marginBottom: 3 }}>{c}</p>
+                    <p key={i} style={{ fontSize: 11, color: C.text2, padding: "5px 10px", borderRadius: "var(--r-xs)", background: C.inset, marginBottom: 3 }}>{c}</p>
                   ))}
                 </div>
               )}
@@ -1603,7 +1603,7 @@ export default function IntelPage() {
                           setCopyFeedback(activeMemo);
                           setTimeout(() => setCopyFeedback(null), 2000);
                         }}
-                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "#F1F5F9", color: copyFeedback === activeMemo ? C.green : C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
+                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: C.inset, color: copyFeedback === activeMemo ? C.green : C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
                         {copyFeedback === activeMemo ? t("intel.circulation.copied") : t("intel.circulation.copy")}
                       </button>
                       <button
@@ -1611,7 +1611,7 @@ export default function IntelPage() {
                           trackEvent(EVENTS.CIRCULATION_PRINT_OPENED, { memo: activeMemo });
                           window.print();
                         }}
-                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: "#F1F5F9", color: C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
+                        style={{ padding: "4px 10px", borderRadius: "var(--r-xs)", border: `1px solid ${C.border}`, background: C.inset, color: C.text4, fontSize: 9, fontFamily: MO, cursor: "pointer", transition: "color 0.15s" }}>
                         {t("intel.circulation.print")}
                       </button>
                     </div>
@@ -1857,7 +1857,7 @@ export default function IntelPage() {
           {/* ═══ META FOOTER ═══ */}
 
           {phases.complete && (
-            <div style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "#F1F5F9", border: `1px solid ${C.border}`, marginTop: 6 }}>
+            <div style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: C.inset, border: `1px solid ${C.border}`, marginTop: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                 <span style={{ fontSize: 8, fontFamily: MO, color: C.text4 }}>ID: {phases.complete.analysisId}</span>
                 <span style={{ fontSize: 8, fontFamily: MO, color: C.text4 }}>{t("intel.meta.sources")} {phases.complete.dataSources?.join(", ")}</span>
@@ -1917,7 +1917,7 @@ function LayerLabel({ num, label }: { num: string; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
       <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 800, color: "rgba(59,130,246,0.25)", letterSpacing: ".04em" }}>{num}</span>
-      <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "#0F172A" }}>{label}</span>
+      <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: C.text1 }}>{label}</span>
     </div>
   );
 }
@@ -2034,11 +2034,11 @@ function PaywallBlur({ children, onAttempt, label }: { children: React.ReactNode
           padding: "20px 28px", borderRadius: 12,
           background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)",
         }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.text1} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#0F172A", letterSpacing: "0.02em" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.text1, letterSpacing: "0.02em" }}>
             {label || t("intel.paywall.unlockDecisionPack")}
           </span>
           <span style={{ fontSize: 10, fontWeight: 600, color: "#1E293B" }}>
@@ -2175,7 +2175,7 @@ function SignalTier({ tier, color, signals }: { tier: string; color: string; sig
                 {s.severity?.toUpperCase()}
               </span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: "#0F172A", marginBottom: 2 }}>{s.label}</p>
+                <p style={{ fontSize: 12, fontWeight: 600, color: C.text1, marginBottom: 2 }}>{s.label}</p>
                 <p style={{ fontSize: 11, color: "#475569", lineHeight: 1.4 }}>{s.description}</p>
                 {s.impactEurRange && (
                   <p style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#3b82f6", marginTop: 3 }}>

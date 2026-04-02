@@ -40,11 +40,11 @@
   --gt-text-3:    #565a63;
   --gt-text-4:    #3a3f4a;
 
-  /* ── Brand — Signal Blue */
-  --gt-accent:    #4d8cff;
-  --gt-accent-hi: #6da3ff;
-  --gt-accent-bg: rgba(77,140,255,0.06);
-  --gt-accent-bd: rgba(77,140,255,0.12);
+  /* ── Brand — Ghost Tax Cyan */
+  --gt-accent:    #22d3ee;
+  --gt-accent-hi: #67e8f9;
+  --gt-accent-bg: rgba(34,211,238,0.06);
+  --gt-accent-bd: rgba(34,211,238,0.18);
 
   /* ── Signals (matched to ghost-tax.com) */
   --gt-green:     #00d47b;
@@ -185,7 +185,7 @@
 
 /* ── Backward-compat: vg-* classes (intel page) ── */
 .vg-panel {
-  background: #FFFFFF;
+  background: var(--gt-card);
   border: 1px solid var(--gt-border);
   border-radius: var(--gt-r-md);
   position: relative;
@@ -195,7 +195,7 @@
   padding: 10px 14px;
   border-radius: var(--gt-r-md);
   border: 1px solid var(--gt-border-s);
-  background: #FFFFFF;
+  background: var(--gt-surface);
   color: var(--gt-text-1);
   font-size: 14px;
   font-family: var(--gt-font-mono);
@@ -221,8 +221,8 @@
   padding: 14px 28px;
   border-radius: var(--gt-r-md);
   border: none;
-  background: #0F172A;
-  color: #fff;
+  background: #22d3ee;
+  color: #060912;
   font-size: 13px;
   font-weight: 700;
   font-family: var(--gt-font-mono);
@@ -230,11 +230,11 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: all 150ms ease;
-  box-shadow: var(--gt-shadow-sm);
+  box-shadow: 0 4px 20px rgba(34,211,238,0.30);
 }
 .vg-btn-primary:hover {
-  background: #1E293B;
-  box-shadow: var(--gt-shadow-md);
+  background: #67e8f9;
+  box-shadow: 0 6px 28px rgba(34,211,238,0.45);
   transform: translateY(-1px);
 }
 .vg-btn-primary:active {
@@ -270,7 +270,7 @@
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid var(--gt-border-s);
-  background: #FFFFFF;
+  background: var(--gt-surface);
   color: var(--gt-text-1);
   font-size: 14px;
   font-family: var(--gt-font-sans);
@@ -290,10 +290,10 @@
   cursor: not-allowed;
 }
 .gt-card {
-  background: #FFFFFF;
+  background: var(--gt-card);
   border: 1px solid var(--gt-border);
   border-radius: 18px;
-  box-shadow: var(--gt-shadow-sm);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.40);
 }
 .gt-btn-primary {
   display: inline-flex;
@@ -414,7 +414,7 @@ input, button, select, textarea {
   left: 50%;
   width: 0;
   height: 1.5px;
-  background: #0F172A;
+  background: #22d3ee;
   transition: width 200ms ease, left 200ms ease;
 }
 .gt-nav-link:hover::after,
@@ -435,10 +435,10 @@ input, button, select, textarea {
 
 /* Card — primary container */
 .gt-card {
-  background: #FFFFFF;
+  background: var(--gt-card);
   border: 1px solid var(--gt-border);
   border-radius: var(--gt-r-xl);
-  box-shadow: var(--gt-shadow-sm);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.40);
   position: relative;
   overflow: hidden;
 }
@@ -455,12 +455,12 @@ input, button, select, textarea {
   transform: translateY(-1px);
 }
 
-/* Elevated panel (enterprise — solid background) */
+/* Elevated panel (dark institutional) */
 .gt-panel {
-  background: #FFFFFF;
-  border: 1px solid var(--gt-border);
+  background: var(--gt-elevated);
+  border: 1px solid var(--gt-border-s);
   border-radius: var(--gt-r-xl);
-  box-shadow: var(--gt-shadow-md);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.40);
 }
 
 /* Inset surface */

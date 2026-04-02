@@ -74,7 +74,7 @@ function StageRow({
         gap: 10,
         padding: "12px 14px",
         borderRadius: 8,
-        background: "#F8FAFC",
+        background: "#121828",
         border: `1px solid ${c.border}`,
         alignItems: "start",
         fontSize: 11,

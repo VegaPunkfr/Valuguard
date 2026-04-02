@@ -16,7 +16,7 @@ export default function IntelBenchmarksContent() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#FFFFFF",
+        background: "#060912",
         color: "#1a1a1a",
         fontFamily: "var(--font-sans)",
       }}
@@ -104,7 +104,7 @@ export default function IntelBenchmarksContent() {
                 display: "block",
                 padding: "20px 22px",
                 borderRadius: 10,
-                background: "#F8FAFC",
+                background: "#121828",
                 border: "1px solid #E2E8F0",
                 textDecoration: "none",
                 color: "inherit",
@@ -169,7 +169,7 @@ export default function IntelBenchmarksContent() {
           style={{
             padding: "16px 20px",
             borderRadius: 8,
-            background: "#F8FAFC",
+            background: "#121828",
             border: "1px solid #E2E8F0",
           }}
         >

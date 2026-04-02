@@ -60,7 +60,7 @@ export default function AboutPage() {
                 { title: t("about.belief4.title"), desc: t("about.belief4.desc") },
               ].map(function (b) {
                 return (
-                  <div key={b.title} style={{ padding: "18px 20px", borderRadius: 10, background: "#F8FAFC", border: "1px solid " + c.border }}>
+                  <div key={b.title} style={{ padding: "18px 20px", borderRadius: 10, background: "#121828", border: "1px solid " + c.border }}>
                     <p style={{ fontSize: 15, fontWeight: 700, color: c.text1, marginBottom: 4 }}>{b.title}</p>
                     <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.6 }}>{b.desc}</p>
                   </div>
@@ -116,7 +116,7 @@ export default function AboutPage() {
                 },
               ].map(function (item) {
                 return (
-                  <div key={item.label} style={{ padding: "16px 18px", borderRadius: 10, background: "#F8FAFC", border: "1px solid " + c.border }}>
+                  <div key={item.label} style={{ padding: "16px 18px", borderRadius: 10, background: "#121828", border: "1px solid " + c.border }}>
                     <p style={{ fontFamily: f.mono, fontSize: 11, fontWeight: 700, color: c.accent, letterSpacing: ".06em", marginBottom: 6 }}>
                       {item.label}
                     </p>

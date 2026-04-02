@@ -123,7 +123,7 @@ function CaseCard({ cs, t }: { cs: CaseStudy; t: (k: string) => string }) {
       <div style={{
         padding: "16px 24px",
         borderBottom: `1px solid ${c.border}`,
-        background: "#F8FAFC",
+        background: "#121828",
         display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
       }}>
         <span style={{
@@ -143,7 +143,7 @@ function CaseCard({ cs, t }: { cs: CaseStudy; t: (k: string) => string }) {
       {/* Stats row */}
       <div style={{
         display: "flex", borderBottom: `1px solid ${c.border}`,
-        background: "#F1F5F9",
+        background: "#0a0d19",
       }}>
         {cs.highlightStats.map((stat, i) => (
           <div key={i} style={{ display: "flex", flex: 1 }}>

@@ -380,7 +380,7 @@ export default function BoardReport() {
             color: c.text2,
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-            background: "#F8FAFC",
+            background: "#121828",
             padding: 16,
             borderRadius: 9,
             border: "1px solid " + c.border,

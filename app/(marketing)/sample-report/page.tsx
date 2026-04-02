@@ -283,7 +283,7 @@ export default function SampleReport() {
           <div className="gt-panel" style={{ padding: 18 }}>
             <p className="gt-section-label" style={{ marginBottom: 8 }}>{t("sample.export.label")}</p>
             <p style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>{t("sample.export.title")}</p>
-            <pre style={{ fontFamily: f.mono, fontSize: 9, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#F8FAFC", padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 300, overflow: "auto", marginBottom: 14 }}>
+            <pre style={{ fontFamily: f.mono, fontSize: 9, lineHeight: 1.6, color: c.text2, whiteSpace: "pre-wrap", wordBreak: "break-word", background: "#121828", padding: 14, borderRadius: 8, border: "1px solid " + c.border, maxHeight: 300, overflow: "auto", marginBottom: 14 }}>
               {genSummaryText()}
             </pre>
             <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>

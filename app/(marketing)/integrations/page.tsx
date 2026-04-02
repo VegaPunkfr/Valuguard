@@ -128,7 +128,7 @@ function PluginCard({ plugin, t }: { plugin: PluginDef; t: (k: string) => string
         marginTop: 2,
         padding: "7px 10px",
         borderRadius: 6,
-        background: "#F8FAFC",
+        background: "#121828",
         border: "1px solid " + c.border,
       }}>
         <p style={{ fontFamily: f.mono, fontSize: 9, color: c.text4, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 3 }}>
