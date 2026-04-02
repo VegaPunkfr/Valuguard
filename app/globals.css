@@ -578,7 +578,7 @@ input, button, select, textarea {
   padding: 12px 16px;
   border-radius: var(--gt-r-md);
   border: 1px solid var(--gt-border-s);
-  background: #FFFFFF;
+  background: var(--gt-surface);
   color: var(--gt-text-1);
   font-size: 15px;
   outline: none;

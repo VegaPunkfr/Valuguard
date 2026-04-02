@@ -53,13 +53,32 @@ export default function Navbar() {
         }}
       >
         <div className="gt-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Logo */}
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <img src="/favicon.svg" alt="Ghost Tax" width={30} height={30} style={{ borderRadius: 8 }} />
-            <span style={{ fontSize: 15, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".04em", color: "#e4e9f4" }}>
-              Ghost Tax
-            </span>
-          </a>
+          {/* Logo + optional back button */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {pathname !== "/" && (
+              <button
+                onClick={() => window.history.back()}
+                aria-label={t("nav.back") || "Retour"}
+                style={{
+                  display: "flex", alignItems: "center", gap: 5,
+                  background: "none", border: "none", cursor: "pointer",
+                  color: c.text3, fontSize: 13, fontFamily: f.mono,
+                  padding: "4px 8px", borderRadius: 6, transition: "color 150ms",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = c.text1)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = c.text3)}
+              >
+                <span style={{ fontSize: 16, lineHeight: 1 }}>←</span>
+                <span>{t("nav.back") || "Retour"}</span>
+              </button>
+            )}
+            <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+              <img src="/favicon.svg" alt="Ghost Tax" width={30} height={30} style={{ borderRadius: 8 }} />
+              <span style={{ fontSize: 15, fontFamily: f.mono, fontWeight: 700, letterSpacing: ".04em", color: "#e4e9f4" }}>
+                Ghost Tax
+              </span>
+            </a>
+          </div>
 
           {/* Desktop nav */}
           <div className="gt-desktop" style={{ display: "flex", gap: 24, alignItems: "center" }}>
