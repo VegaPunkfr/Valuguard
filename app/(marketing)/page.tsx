@@ -279,7 +279,7 @@ const HeroSection: React.FC = () => {
               letterSpacing: "0.06em",
             }}
           >
-            200+ analyses · 0% d&apos;exposition zéro · €294k exposition moyenne
+            21 phases autonomes · Livraison 48h · Zéro accès système
           </div>
         </div>
 
@@ -314,10 +314,10 @@ const HeroSection: React.FC = () => {
 
           {/* Metrics */}
           {[
-            { val: "€294 000",   lbl: "Exposition moyenne détectée",    color: C.green },
-            { val: "200+",       lbl: "Analyses livrées",                color: C.cyan },
-            { val: "0%",         lbl: "Aucune exposition — jamais",      color: C.red },
-            { val: "127k-340k",  lbl: "Fourchette EUR typique / an",     color: C.gold },
+            { val: "48H",        lbl: "Délai de livraison garanti",      color: C.green },
+            { val: "21",         lbl: "Phases de détection autonomes",   color: C.cyan },
+            { val: "€490",       lbl: "Détection one-shot, pas abonnement", color: C.red },
+            { val: "12",         lbl: "Types de fuites détectées",       color: C.gold },
             { val: "48 HEURES",  lbl: "Détection → pack décisionnel",    color: C.parchment },
           ].map(({ val, lbl, color }, i) => (
             <div
@@ -385,7 +385,7 @@ const HeroSection: React.FC = () => {
 const StatsStrip: React.FC = () => {
   const { t } = useI18n();
   const [counts, setCounts] = useState([0, 0, 0, 0]);
-  const targets = [200, 294, 21, 100];
+  const targets = [21, 48, 12, 490];
 
   useEffect(() => {
     const timers = targets.map((target, i) => {
@@ -407,10 +407,10 @@ const StatsStrip: React.FC = () => {
   }, []);
 
   const stats = [
-    { val: `${counts[0]}+`,   label: t("stats.analyses")   || "Analyses livrées" },
-    { val: `€${counts[1]}k`,  label: t("stats.exposure")   || "Exposition moyenne" },
-    { val: `${counts[2]}`,    label: t("stats.phases")     || "Phases IA" },
-    { val: `${counts[3]}%`,   label: t("stats.zero")       || "Taux de détection" },
+    { val: `${counts[0]}`,    label: t("stats.phases")     || "Phases de détection IA" },
+    { val: `${counts[1]}h`,   label: t("stats.delivery")   || "Livraison garantie" },
+    { val: `${counts[2]}`,    label: t("stats.leakTypes")  || "Types de fuites" },
+    { val: `€${counts[3]}`,   label: t("stats.price")      || "Détection one-shot" },
   ];
 
   return (
@@ -612,7 +612,7 @@ const ProblemSection: React.FC = () => {
               color: "rgba(141,155,181,0.7)",
             }}
           >
-            {t("v2.problem.never_zero") || "EN 200+ ANALYSES"}
+            {t("v2.problem.never_zero") || "PIPELINE AUTONOME 21 PHASES"}
           </div>
           <div
             style={{
@@ -880,8 +880,8 @@ const ProofSection: React.FC = () => {
               LIVRABLES — DECISION PACK
             </div>
             {[
-              ["EXPOSITION TOTALE",         "127k → 340k EUR/an", C.green],
-              ["VITESSE DE PERTE",          "€890 / jour", C.red],
+              ["EXPOSITION TOTALE",         "Quantifiée en EUR/an", C.green],
+              ["VITESSE DE PERTE",          "Calculée en EUR/jour", C.red],
               ["COÛT DU RETARD",            "Composé, non linéaire", C.gold],
               ["PREUVES DOCUMENTÉES",       "Signaux + sources", C.cyan],
               ["SCÉNARIOS",                 "3 niveaux de correction", C.parchment],

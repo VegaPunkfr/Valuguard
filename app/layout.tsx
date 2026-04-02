@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, DM_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
@@ -19,18 +19,7 @@ const fontMono = JetBrains_Mono({
   display: "swap",
 });
 
-const fontDmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--gt-font-dm-sans",
-  display: "swap",
-});
-
-const fontIbmPlex = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--gt-font-ibm-plex",
-  display: "swap",
-});
+/* DM Sans and IBM Plex Mono removed — 2 fonts max for performance */
 
 /* ─── Constants ─────────────────────────────────────── */
 const SITE_URL = "https://ghost-tax.com";
@@ -38,7 +27,7 @@ const SITE_NAME = "Ghost Tax";
 const TITLE = "Ghost Tax \u2014 AI Financial Control Plane for SaaS & AI Spend";
 const DESCRIPTION =
   "Ghost Tax detects hidden SaaS, AI & cloud spending exposure. " +
-  "$490 one-time analysis. Board-ready decision pack in 48 hours. Used by 200+ companies.";
+  "$490 one-time analysis. Board-ready decision pack in 48 hours. 21-phase autonomous detection.";
 
 /* ─── Metadata (merged from layout-meta.js) ─────────── */
 export const metadata: Metadata = {
@@ -102,9 +91,18 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
     shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Ghost Tax",
   },
   robots: {
     index: true,
@@ -273,16 +271,38 @@ function JsonLdScripts() {
   );
 }
 
+/* ─── SSR locale detection ────────────────────────────── */
+function detectLocaleSSR(): "en" | "fr" | "de" | "nl" {
+  try {
+    const { cookies } = require("next/headers");
+    const cookieStore = cookies();
+    const stored = cookieStore.get("vg-locale")?.value;
+    if (stored && ["en", "fr", "de", "nl"].includes(stored)) return stored as any;
+  } catch {}
+  return "en";
+}
+
+function loadMessagesSSR(locale: "en" | "fr" | "de" | "nl"): Record<string, string> {
+  try {
+    return require(`@/messages/${locale}.json`);
+  } catch {
+    return require("@/messages/en.json");
+  }
+}
+
 /* ─── Root Layout ───────────────────────────────────── */
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const ssrLocale = detectLocaleSSR();
+  const ssrMessages = loadMessagesSSR(ssrLocale);
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={ssrLocale} suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} ${fontDmSans.variable} ${fontIbmPlex.variable} font-sans antialiased`}
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
         style={{ background: "#060912" }}
       >
         <JsonLdScripts />
@@ -296,7 +316,7 @@ export default function RootLayout({
             }}
           />
         )}
-        <I18nProvider>
+        <I18nProvider initialLocale={ssrLocale} initialMessages={ssrMessages}>
           <ErrorBoundary>
             {children}
           </ErrorBoundary>

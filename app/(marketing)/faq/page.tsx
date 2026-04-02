@@ -1,15 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { c } from "@/lib/tokens";
 import Section from "@/components/ui/section";
-import FaqItem from "@/components/ui/faq-item";
 
 export default function FaqPage() {
   const { t } = useI18n();
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   const categories = [
     {
@@ -55,8 +52,6 @@ export default function FaqPage() {
     },
   ];
 
-  let globalIdx = 0;
-
   return (
     <div style={{ minHeight: "100vh", background: c.bg, color: c.text1 }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px" }}>
@@ -71,15 +66,22 @@ export default function FaqPage() {
           </p>
         </Section>
 
-        {categories.map(function (cat) {
+        {categories.map(function (cat, catIdx) {
           return (
             <Section key={cat.title} style={{ paddingTop: 40, paddingBottom: 0 }}>
               <p className="gt-section-label" style={{ letterSpacing: ".12em" }}>{cat.title}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {cat.items.map(function (item) {
-                  const idx = globalIdx++;
+                {cat.items.map(function (item, itemIdx) {
                   return (
-                    <FaqItem key={idx} q={item.q} a={item.a} isOpen={openIdx === idx} onClick={function () { setOpenIdx(openIdx === idx ? null : idx); }} />
+                    <details key={`${catIdx}-${itemIdx}`} className="gt-panel" style={{ padding: 0, overflow: "hidden" }}>
+                      <summary style={{ padding: "18px 20px", fontSize: 15, fontWeight: 600, color: c.text1, cursor: "pointer", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        {item.q}
+                        <span style={{ fontSize: 18, color: c.text3, flexShrink: 0, marginLeft: 12 }}>+</span>
+                      </summary>
+                      <div style={{ padding: "0 20px 18px", borderTop: `1px solid ${c.border}` }}>
+                        <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.7, paddingTop: 14 }}>{item.a}</p>
+                      </div>
+                    </details>
                   );
                 })}
               </div>

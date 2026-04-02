@@ -34,14 +34,19 @@ export function getCurrencySymbol(locale: PricingLocale): string {
 }
 
 // ── Rail A: Flat pricing (launch strategy — impulse buy) ──
+// Geographic pricing: DE/DACH = 590 EUR (premium market), others = 490 EUR
 export const RAIL_A_PRICE = {
   eur: 490,
+  eur_de: 590,
   usd: 490,
 } as const;
 
-export function getRailAPrice(_headcount: number | undefined, locale: PricingLocale): number {
+export function getRailAPrice(_headcount: number | undefined, locale: PricingLocale, country?: string): number {
   const currency = getCurrency(locale);
-  return currency === "usd" ? RAIL_A_PRICE.usd : RAIL_A_PRICE.eur;
+  if (currency === "usd") return RAIL_A_PRICE.usd;
+  // Germany/DACH premium pricing
+  const isDACH = locale === "de" || ["DE", "AT", "CH"].includes((country || "").toUpperCase());
+  return isDACH ? RAIL_A_PRICE.eur_de : RAIL_A_PRICE.eur;
 }
 
 // ── All Rails ──
@@ -52,6 +57,7 @@ export const RAILS = {
     name_en: "Financial Exposure Detection",
     name_de: "Finanzielle Expositions-Erkennung",
     price_eur: 490,
+    price_eur_de: 590,
     price_usd: 490,
     currency: "eur" as const,
     type: "one_time" as const,
@@ -217,7 +223,7 @@ export const REVENUE_MODEL = {
   target_eur: 7_000_000,
   target_months: 24,
   blended_arpu: {
-    rail_a_avg: 490, // Flat launch price (EUR)
+    rail_a_avg: 520, // Blended: 490 EUR standard + 590 EUR DACH
     rail_b_stabilize: 4990,
     rail_b_monitor_monthly: 1990,
     rail_b_monitor_annual: 19900,

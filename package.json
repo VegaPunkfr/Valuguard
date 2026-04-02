@@ -17,12 +17,14 @@
     "@stripe/stripe-js": "^8.11.0",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
+    "@types/three": "^0.183.1",
     "exa-js": "^2.7.0",
     "lucide-react": "^0.400.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "stripe": "^20.4.1"
+    "stripe": "^20.4.1",
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
