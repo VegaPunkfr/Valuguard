@@ -12,9 +12,10 @@ git add messages/fr.json
 git add messages/en.json
 git add messages/de.json
 git add "app/(marketing)/about/page.tsx"
+git add "app/(marketing)/pricing/page.tsx"
 
 echo Commit en cours...
-git commit -m "fix: visibilite complete - textes boutons phase21 couleurs fondateur"
+git commit -m "fix: visibilite complete - textes boutons phase21 couleurs headline garantie fondateur"
 
 echo Push vers Vercel...
 git push

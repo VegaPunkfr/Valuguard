@@ -514,15 +514,20 @@ const ProblemSection: React.FC = () => {
               style={{
                 fontSize: "clamp(40px, 4.5vw, 64px)",
                 fontWeight: 900,
-                lineHeight: 1.0,
+                lineHeight: 1.05,
                 letterSpacing: "-0.03em",
                 color: C.ink,
                 flex: 1,
                 maxWidth: "520px",
               }}
             >
-              {t("v2.problem.title") ||
-                "Le CFO ne sait pas.\u00a0Le CTO ne sait pas.\u00a0Personne ne regarde."}
+              {t("v2.problem.title_1") || "Le CFO ne sait pas."}
+              <br />
+              <span style={{ color: C.ink2 }}>
+                {t("v2.problem.title_2") || "Le CTO ne sait pas."}
+              </span>
+              <br />
+              {t("v2.problem.title_3") || "Personne ne regarde."}
             </h2>
             <p
               style={{

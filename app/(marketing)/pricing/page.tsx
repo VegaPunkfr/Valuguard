@@ -475,7 +475,7 @@ export default function PricingPage() {
           <div className="gt-panel" style={{
             padding: "32px 36px", maxWidth: 720, margin: "0 auto",
             border: `1px solid ${c.greenBd}`,
-            background: "linear-gradient(135deg, rgba(52,211,153,0.04) 0%, #F8FAFC 100%)",
+            background: "linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(10,13,25,0.95) 100%)",
             borderRadius: 14,
             textAlign: "center",
           }}>
