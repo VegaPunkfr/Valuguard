@@ -1124,6 +1124,95 @@ export const VERTICALS: VerticalData[] = [
     ],
     ctaCountry: "nordics",
   },
+
+  {
+    slug: "netherlands",
+    type: "country",
+    title: "Ghost Tax Netherlands — IT Cost Intelligence for Dutch Companies",
+    description:
+      "Dutch companies waste 19-32% of IT budgets on Amsterdam tech hub SaaS sprawl, scale-up tool fragmentation, and EU compliance overlap. Detect your exposure in 48 hours.",
+    ogTitle: "Ghost Tax Netherlands: Practical IT Savings for Pragmatic Dutch Companies",
+    hero: {
+      label: "NETHERLANDS MARKET EXPOSURE",
+      headline: "Dutch companies waste 19-32% on scale-up SaaS sprawl and compliance overlap",
+      highlightedWord: "19-32%",
+      stat: "1,850 EUR per employee per year in median waste",
+      statSource: "CBS Digitization Survey 2025, Gartner Benelux IT 2025, Ghost Tax analysis",
+      subtext:
+        "The Netherlands punches above its weight in tech: Amsterdam is Europe's #3 startup hub, Dutch companies adopt SaaS at the highest per-capita rate in the EU, and the practical 'doe maar normaal' culture means IT budgets are rarely questioned — until the waste becomes impossible to ignore.",
+    },
+    painPoints: [
+      {
+        title: "Amsterdam Tech Hub SaaS Sprawl",
+        description:
+          "Amsterdam's dense tech ecosystem drives aggressive SaaS adoption. Companies layer Adyen + Mollie + Stripe for payments, Recruitee + Homerun + LinkedIn Recruiter for hiring, and multiple analytics platforms without consolidation.",
+        costRange: "35k-180k EUR/yr",
+      },
+      {
+        title: "Dutch Scale-Up Tool Fragmentation",
+        description:
+          "Fast-growing Dutch scale-ups (Booking.com alumni, Takeaway.com network) adopt tools at sprint speed but never consolidate. Engineering teams run 4-6 overlapping dev tools, each adopted during a different growth phase.",
+        costRange: "40k-220k EUR/yr",
+      },
+      {
+        title: "EU Compliance Costs (DORA/NIS2)",
+        description:
+          "Dutch financial and critical infrastructure companies face DORA, NIS2, and DNB regulatory requirements simultaneously. Each regulation triggers separate compliance tooling with 60-70% capability overlap.",
+        costRange: "25k-150k EUR/yr",
+      },
+      {
+        title: "Multi-Cloud Complexity",
+        description:
+          "Dutch companies disproportionately adopt multi-cloud strategies (AWS + Azure + GCP). Amsterdam's AMS-IX connectivity makes it easy to spread workloads, but cost visibility fragments across three billing systems with no unified governance.",
+        costRange: "50k-300k EUR/yr",
+      },
+    ],
+    stats: [
+      { label: "IT spend per employee (NL)", value: "11,800 EUR/yr", note: "18% above EU average" },
+      { label: "SaaS tools per Dutch company", value: "150-310", note: "Mid-market range (50-500 emp)" },
+      { label: "Multi-cloud adoption rate", value: "62%", note: "Highest in Continental Europe" },
+      { label: "Scale-up tool accumulation", value: "2.8x growth", note: "Tool count grows 2.8x faster than headcount" },
+    ],
+    testimonial: {
+      quote:
+        "We thought our IT stack was lean — we're Dutch, we're supposed to be practical. Ghost Tax found 186 tools for 280 people. Three separate payment integrations, two CRM systems nobody knew coexisted, and 62 unused cloud instances. 310k EUR/year recovered.",
+      attribution: "CFO, Dutch SaaS Scale-Up (280 employees)",
+      context: "Detection completed in 38 hours. Multi-cloud rationalization roadmap included.",
+    },
+    faq: [
+      {
+        question: "How much do Dutch companies waste on IT?",
+        answer:
+          "Dutch companies waste 19-32% of IT budgets, with per-employee waste of 1,850 EUR/year. For a 300-person Dutch company spending 150k EUR/month on IT, total invisible waste is typically 340k-580k EUR/year. The biggest drivers are Amsterdam tech hub SaaS sprawl, scale-up tool fragmentation, and EU regulatory compliance overlap.",
+      },
+      {
+        question: "What makes IT waste in the Netherlands different?",
+        answer:
+          "Three Netherlands-specific factors: (1) Amsterdam tech hub density — the highest SaaS adoption per capita in the EU creates vendor sprawl, (2) scale-up culture — Dutch scale-ups grow tools 2.8x faster than headcount without consolidation cycles, and (3) multi-cloud complexity — 62% of Dutch companies run multi-cloud, fragmenting cost visibility across AWS, Azure, and GCP.",
+      },
+      {
+        question: "Does Ghost Tax cover Dutch and Benelux-specific vendors?",
+        answer:
+          "Yes. Ghost Tax's detection engine covers Adyen, Mollie, Exact Online, AFAS, Twinfield, Recruitee, Homerun, and the broader Dutch/Benelux SaaS ecosystem. The engine detects overlap between Dutch regional tools and international alternatives — a pattern responsible for 30-40% of waste in Netherlands mid-market companies.",
+      },
+      {
+        question: "What does Ghost Tax cost for Dutch companies?",
+        answer:
+          "Ghost Tax's Detection Scan costs 490 EUR (eenmalig). The average Netherlands detection finds 310k-580k EUR in recoverable annual spend. For Dutch companies with 200+ employees, the ROI is typically 630-1,180x the scan cost. The Decision Pack is delivered in English, the standard language for Dutch B2B.",
+      },
+    ],
+    keywords: [
+      "it cost audit netherlands",
+      "saas spend dutch companies",
+      "hidden it costs netherlands",
+      "dutch company saas waste",
+      "amsterdam tech hub it spending",
+      "netherlands cloud optimization",
+      "ghost tax netherlands",
+      "exact online alternative",
+    ],
+    ctaCountry: "netherlands",
+  },
 ];
 
 /** Helper: get vertical by slug */

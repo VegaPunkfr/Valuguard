@@ -1,58 +1,51 @@
-// Server-only — IndexNow API for instant Bing/Yandex indexing
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-const INDEXNOW_KEY = "2ddb109598fcb9f87cc47c58b2f5b32d";
-const HOST = "https://ghost-tax.com";
+const INDEXNOW_KEY = "ghost-tax-indexnow-2026";
 
-const CORE_URLS = [
-  "/",
-  "/platform",
-  "/pricing",
-  "/intel",
-  "/methodology",
-  "/security-vault",
-  "/about",
-  "/faq",
-  "/ghost-tax",
-  "/contact",
-  "/intel-benchmarks",
-  "/procurement",
-  "/estimator",
-  "/case-studies",
-  "/integrations",
-];
+export async function GET() {
+  // Return the key for verification
+  return new NextResponse(INDEXNOW_KEY, { headers: { "Content-Type": "text/plain" } });
+}
 
-export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+export async function POST(req: NextRequest) {
+  const secret = req.headers.get("x-cron-secret") || "";
+  if (secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const urlList = CORE_URLS.map((path) => `${HOST}${path}`);
+  const body = await req.json();
+  const urls: string[] = body.urls || [];
 
-  try {
-    const res = await fetch("https://api.indexnow.org/IndexNow", {
+  if (urls.length === 0) {
+    return NextResponse.json({ error: "No URLs provided" }, { status: 400 });
+  }
+
+  // Submit to IndexNow (Bing + Yandex + Naver)
+  const payload = {
+    host: "ghost-tax.com",
+    key: INDEXNOW_KEY,
+    keyLocation: "https://ghost-tax.com/api/indexnow",
+    urlList: urls.map(u => u.startsWith("http") ? u : `https://ghost-tax.com${u}`),
+  };
+
+  const results = await Promise.allSettled([
+    fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        host: "ghost-tax.com",
-        key: INDEXNOW_KEY,
-        keyLocation: `${HOST}/${INDEXNOW_KEY}.txt`,
-        urlList,
-      }),
-    });
+      body: JSON.stringify(payload),
+    }),
+    fetch("https://www.bing.com/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  ]);
 
-    return NextResponse.json({
-      status: res.status,
-      submitted: urlList.length,
-      message: res.status === 200 ? "Submitted to IndexNow" : "IndexNow response: " + res.statusText,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "IndexNow submission failed", detail: String(error) },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    submitted: urls.length,
+    results: results.map((r, i) => ({
+      endpoint: i === 0 ? "indexnow.org" : "bing.com",
+      status: r.status === "fulfilled" ? r.value.status : "failed",
+    })),
+  });
 }
