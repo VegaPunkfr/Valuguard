@@ -116,6 +116,21 @@ export function saveAccounts(accounts: Account[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
+/**
+ * Sync with Supabase osint_prospects via /api/command/prospects-sync.
+ * Data Bridge — pulls live prospect data from the OSINT pipeline.
+ */
+export async function syncWithOsintProspects(): Promise<{ accounts: any[]; total: number }> {
+  try {
+    const res = await fetch('/api/command/prospects-sync', { cache: 'no-store' });
+    if (!res.ok) return { accounts: [], total: 0 };
+    const { accounts, total } = await res.json();
+    return { accounts: accounts || [], total: total || 0 };
+  } catch {
+    return { accounts: [], total: 0 };
+  }
+}
+
 export function resetToSeed(): Account[] {
   saveAccounts(SEED_ACCOUNTS);
   return [...SEED_ACCOUNTS];

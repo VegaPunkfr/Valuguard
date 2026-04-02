@@ -293,6 +293,32 @@ export default function CaseStudies() {
   return (
     <div style={{ minHeight: "100vh", fontFamily: f.sans, color: c.text1, padding: "0 14px 64px" }}
          className="gt-container">
+      {/* JSON-LD Structured Data — WebPage + BreadcrumbList + ItemList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://ghost-tax.com/case-studies/#webpage",
+          url: "https://ghost-tax.com/case-studies",
+          name: "Case Studies — Ghost Tax",
+          description: "Real-world SaaS, Cloud and AI spend analysis results. Anonymized CFO case studies with quantified ROI.",
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "Case Studies", item: "https://ghost-tax.com/case-studies" },
+          ],
+        }) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

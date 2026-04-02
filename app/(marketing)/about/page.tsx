@@ -245,32 +245,30 @@ export default function AboutPage() {
 
       </div>
 
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD Structured Data — AboutPage + BreadcrumbList */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Ghost Tax SAS",
-          url: "https://ghost-tax.com",
-          logo: "https://ghost-tax.com/favicon.svg",
+          "@type": "AboutPage",
+          "@id": "https://ghost-tax.com/about/#webpage",
+          url: "https://ghost-tax.com/about",
+          name: "About Ghost Tax",
           description: "Decision Intelligence platform that detects hidden financial exposure in SaaS, AI, and Cloud spending.",
-          foundingDate: "2025",
-          /* TODO: Verify founder name — displayed as HELENE but LinkedIn URL is edith-music. Update if needed. */
-          founder: {
-            "@type": "Person",
-            name: "Edith",
-            jobTitle: "Founder & CEO",
-          },
-          contactPoint: {
-            "@type": "ContactPoint",
-            email: "audits@ghost-tax.com",
-            contactType: "sales",
-          },
-          address: {
-            "@type": "PostalAddress",
-            addressCountry: "FR",
-          },
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "About", item: "https://ghost-tax.com/about" },
+          ],
         }) }}
       />
 

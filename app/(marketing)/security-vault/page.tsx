@@ -115,6 +115,32 @@ export default function SecurityVault() {
 
   return (
     <div style={{ minHeight: "100vh", fontFamily: f.sans, color: c.text1, padding: "0 14px 64px" }}>
+      {/* JSON-LD Structured Data — WebPage + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://ghost-tax.com/security-vault/#webpage",
+          url: "https://ghost-tax.com/security-vault",
+          name: "Security Vault — Ghost Tax",
+          description: "Zero-Knowledge audit protocol, SOC 2-ready infrastructure, US data residency, GDPR compliance. Trust architecture for Ghost Tax.",
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "Security", item: "https://ghost-tax.com/security-vault" },
+          ],
+        }) }}
+      />
       <div style={{ maxWidth: 1020, margin: "0 auto" }}>
 
         {/* -- RETOUR -- */}

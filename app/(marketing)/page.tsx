@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
+import { homepageGraph } from "@/lib/schema";
 
 // ─── Palette (dark theme — matches Three.js terrain) ─────────────────────────
 const C = {
@@ -1366,6 +1367,11 @@ export default function HomePage() {
         fontFamily: "var(--gt-font-sans)",
       }}
     >
+      {/* Global @graph JSON-LD — Organization, WebSite, WebApplication, Product, Service */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageGraph) }}
+      />
       <HeroSection />
       <StatsStrip />
       <ProblemSection />

@@ -111,7 +111,32 @@ export default function FaqPage() {
 
       </div>
 
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD Structured Data — WebPage + BreadcrumbList + FAQPage */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://ghost-tax.com/faq/#webpage",
+          url: "https://ghost-tax.com/faq",
+          name: "FAQ — Ghost Tax",
+          description: "Frequently asked questions about Ghost Tax SaaS spend detection, pricing, and methodology.",
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "FAQ", item: "https://ghost-tax.com/faq" },
+          ],
+        }) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({

@@ -293,6 +293,33 @@ export default function ContactPage() {
         </Section>
       </div>
 
+      {/* JSON-LD Structured Data — WebPage + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://ghost-tax.com/contact/#webpage",
+          url: "https://ghost-tax.com/contact",
+          name: "Contact — Ghost Tax",
+          description: "Contact Ghost Tax for SaaS spend detection, stabilization protocols, or enterprise mission control.",
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "Contact", item: "https://ghost-tax.com/contact" },
+          ],
+        }) }}
+      />
+
       <style>{`
         @media (max-width: 640px) {
           .gt-contact-row { grid-template-columns: 1fr !important; }

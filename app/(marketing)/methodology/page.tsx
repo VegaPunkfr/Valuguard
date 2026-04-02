@@ -92,6 +92,25 @@ export default function Methodology() {
         }
       `}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://ghost-tax.com/methodology/#webpage",
+        url: "https://ghost-tax.com/methodology",
+        name: "Detection Methodology — Ghost Tax",
+        description: "How Ghost Tax detects hidden SaaS, AI, and Cloud spend exposure using a 21-phase intelligence pipeline.",
+        isPartOf: { "@id": "https://ghost-tax.com/#website" },
+        about: { "@id": "https://ghost-tax.com/#organization" },
+        inLanguage: "en-US",
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+          { "@type": "ListItem", position: 2, name: "Methodology", item: "https://ghost-tax.com/methodology" },
+        ],
+      }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "FAQPage",
         mainEntity: [
           { "@type": "Question", name: "What data does Ghost Tax observe?", acceptedAnswer: { "@type": "Answer", text: "Ghost Tax observes public data only: company domain, publicly referenced technology stack, hiring signals, and user-declared inputs (headcount, spend, industry). No internal systems are accessed at the detection stage." } },

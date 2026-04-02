@@ -525,6 +525,33 @@ export default function PlatformPage() {
 
       </div>
 
+      {/* JSON-LD Structured Data — WebPage + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://ghost-tax.com/platform/#webpage",
+          url: "https://ghost-tax.com/platform",
+          name: "Platform Architecture — Ghost Tax",
+          description: "21-phase autonomous intelligence pipeline for SaaS, AI, and Cloud spend detection. NDJSON streaming, pgvector, Next.js 15.",
+          isPartOf: { "@id": "https://ghost-tax.com/#website" },
+          about: { "@id": "https://ghost-tax.com/#organization" },
+          inLanguage: "en-US",
+        }) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://ghost-tax.com" },
+            { "@type": "ListItem", position: 2, name: "Platform", item: "https://ghost-tax.com/platform" },
+          ],
+        }) }}
+      />
+
       <style>{`
         @media (max-width: 768px) {
           .vg-flow-grid { grid-template-columns: 1fr 1fr !important; }
