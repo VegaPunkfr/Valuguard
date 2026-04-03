@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call Apollo API
-    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
+    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

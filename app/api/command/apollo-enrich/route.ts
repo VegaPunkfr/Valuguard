@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     // Search Apollo for all decision-maker titles at this domain
     const allTitles = BUYING_ROLES.flatMap(r => r.titles)
 
-    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
+    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
