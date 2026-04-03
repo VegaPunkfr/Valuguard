@@ -467,7 +467,7 @@ export async function runAutoPipeline(): Promise<{
       // Skip duplicates
       if (accounts.some(a => a.domain === prospect.domain)) continue;
 
-      const account: Account = {
+      const account = {
         id: `auto-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         company: prospect.company || prospect.domain,
         domain: prospect.domain,
@@ -475,13 +475,24 @@ export async function runAutoPipeline(): Promise<{
         status: 'outreach_ready',
         financeLead: prospect.financeLead || null,
         signals: prospect.signals || [],
-        outreach: [],
+        outreach: [] as any[],
         revenueEstimate: prospect.revenueEstimate || 0,
         headcount: prospect.headcount || 0,
         industry: prospect.industry || '',
-        replied: false,
-        converted: false,
-      };
+        score: 0,
+        tier: 'unknown',
+        employeeRange: '',
+        website: prospect.domain ? `https://${prospect.domain}` : '',
+        mainSignal: '',
+        whyNow: '',
+        strengths: [],
+        weaknesses: [],
+        timeline: [],
+        executionLog: [],
+        nextAction: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as Account;
 
       // If prospect came with a draft message, add it
       if (prospect.message) {
