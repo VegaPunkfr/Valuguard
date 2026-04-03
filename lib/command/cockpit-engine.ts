@@ -436,6 +436,53 @@ export async function generateMissingMessages(
   return generated;
 }
 
+// ── Auto-Pipeline : remplit le cockpit automatiquement ────
+
+/**
+ * Appelle /api/command/auto-pipeline pour chercher des prospects
+ * sur Apollo, générer des messages IA, et les injecter dans le cockpit.
+ *
+ * Appelé automatiquement au chargement du cockpit si la queue est vide.
+ * Edith ne fait RIEN — le cockpit se remplit tout seul.
+ */
+export async function runAutoPipeline(): Promise<{
+  added: number;
+  withMessages: number;
+}> {
+  try {
+    const res = await fetch('/api/command/auto-pipeline');
+    if (!res.ok) return { added: 0, withMessages: 0 };
+
+    const data = await res.json();
+    const newProspects = data.prospects || [];
+
+    if (newProspects.length === 0) return { added: 0, withMessages: 0 };
+
+    // Merge into existing accounts
+    const accounts = loadAccounts();
+    const existingDomains = new Set(accounts.map(a => a.domain));
+    let added = 0;
+
+    for (const prospect of newProspects) {
+      if (existingDomains.has(prospect.domain)) continue;
+      accounts.push(prospect as any);
+      added++;
+      pushActivity('🔍', `Nouveau prospect : ${prospect.company} (${prospect.country})`);
+    }
+
+    if (added > 0) {
+      saveAccounts(accounts);
+    }
+
+    return {
+      added,
+      withMessages: newProspects.filter((p: any) => p.outreach?.length > 0).length,
+    };
+  } catch {
+    return { added: 0, withMessages: 0 };
+  }
+}
+
 // ── Formatting Helpers ────────────────────────────────────
 
 export function fmtEur(amount: number): string {
