@@ -1,106 +1,114 @@
 'use client';
 
 /**
- * GHOST TAX — COMMAND SHELL
- * Base vierge. Position fixed z-100.
- * Palette officielle rules/05-ui-brand.md
+ * GHOST TAX — MISSION CONTROL SHELL V7
+ * Spec Fellow. Position fixed z-100.
+ * Nav: PIPELINE · SIGNAUX · SÉQUENCES · INTELLIGENCE
  */
 
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isInSendingWindow } from '@/lib/command/sending-windows';
 
 const P = {
   bg:      '#060912',
-  surface: '#0a0d19',
-  panel:   '#0e1221',
-  border:  'rgba(36,48,78,0.28)',
-  text1:   '#e4e9f4',
-  text2:   '#8d9bb5',
-  text3:   '#55637d',
-  text4:   '#3a4560',
-  cyan:    '#22d3ee',
-  blue:    '#3b82f6',
-  green:   '#34d399',
+  surface: '#0C1019',
+  border:  'rgba(255,255,255,0.06)',
+  text1:   '#F1F5F9',
+  text2:   '#94A3B8',
+  text3:   '#475569',
+  cyan:    '#22D3EE',
+  green:   '#34D399',
 } as const;
-
-const FM = 'var(--font-mono)';
-const FS = 'var(--font-sans)';
+const FM = "var(--vg-font-mono,'JetBrains Mono',monospace)";
+const FS = "var(--vg-font-sans,'Inter',system-ui,sans-serif)";
 
 const TABS = [
-  { id: 'overview',  label: 'OVERVIEW',  href: '/command'          },
-  { id: 'accounts',  label: 'ACCOUNTS',  href: '/command/accounts' },
-  { id: 'outreach',  label: 'OUTREACH',  href: '/command/outreach' },
-  { id: 'scan',      label: 'SCAN',      href: '/command/scan'     },
-  { id: 'brief',     label: 'BRIEF',     href: '/command/brief'    },
+  { id: 'pipeline',     label: 'PIPELINE',     href: '/command'            },
+  { id: 'signaux',      label: 'SIGNAUX',      href: '/command/accounts'   },
+  { id: 'sequences',    label: 'SÉQUENCES',    href: '/command/outreach'   },
+  { id: 'intelligence', label: 'INTELLIGENCE', href: '/command/scan'       },
 ] as const;
 
 function LiveClock() {
-  const [time, setTime] = useState('');
+  const [text, setText] = useState('');
   useEffect(() => {
-    const tick = () =>
-      setTime(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    const tick = () => {
+      const now = new Date();
+      const d = now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const t = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      setText(`${d} · ${t}`);
+    };
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
   }, []);
+  return <span>{text}</span>;
+}
+
+function SendingWindowBadge() {
+  const [badge, setBadge] = useState('');
+  useEffect(() => {
+    try {
+      const de = isInSendingWindow('DE');
+      if (de.inWindow) setBadge(`DE ${de.minutesLeft}min`);
+      else {
+        const nl = isInSendingWindow('NL');
+        if (nl.inWindow) setBadge(`NL ${nl.minutesLeft}min`);
+      }
+    } catch { /* sending-windows may not be ready */ }
+  }, []);
+  if (!badge) return null;
   return (
-    <span style={{ fontFamily: FM, fontSize: 10, color: P.text4, letterSpacing: '.1em' }}>
-      {time}
+    <span style={{
+      fontFamily: FM, fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
+      padding: '2px 8px', borderRadius: 4,
+      color: P.green, background: `${P.green}12`, border: `1px solid ${P.green}20`,
+    }}>
+      {badge}
     </span>
   );
 }
 
 export default function CommandLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const activeTab = [...TABS].reverse().find(t => pathname.startsWith(t.href))?.id ?? 'overview';
+  const activeTab = [...TABS].reverse().find(t => pathname.startsWith(t.href))?.id ?? 'pipeline';
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
-      background: P.bg,
-      color: P.text1,
-      fontFamily: FS,
-      display: 'flex',
-      flexDirection: 'column',
+      background: P.bg, color: P.text1, fontFamily: FS,
+      display: 'flex', flexDirection: 'column',
     }}>
 
-      {/* ── Nav bar ───────────────────────────────────── */}
+      {/* ── Header 48px ── */}
       <header style={{
-        flexShrink: 0,
-        height: 48,
+        flexShrink: 0, height: 48,
         background: P.surface,
         borderBottom: `1px solid ${P.border}`,
-        display: 'flex',
-        alignItems: 'center',
-        paddingLeft: 24,
-        paddingRight: 24,
-        gap: 0,
+        display: 'flex', alignItems: 'center',
+        padding: '0 24px', gap: 0,
       }}>
 
-        {/* Wordmark */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 36 }}>
-          <div style={{
-            width: 5, height: 5, borderRadius: '50%',
-            background: P.cyan,
-            boxShadow: `0 0 8px ${P.cyan}80`,
-          }} />
-          <span style={{
-            fontFamily: FM, fontSize: 10, fontWeight: 700,
-            letterSpacing: '.22em', color: P.text1,
-            textTransform: 'uppercase' as const,
-          }}>
-            Ghost Tax
-          </span>
-          <span style={{
-            fontFamily: FM, fontSize: 9, color: P.text4,
-            letterSpacing: '.1em',
-          }}>
-            /CMD
-          </span>
-        </div>
+        {/* GT wordmark */}
+        <span style={{
+          fontFamily: FM, fontSize: 10, fontWeight: 700,
+          letterSpacing: '.18em', color: P.text2,
+          marginRight: 24,
+        }}>
+          GT
+        </span>
 
-        {/* Tabs */}
+        {/* Label */}
+        <span style={{
+          fontFamily: FM, fontSize: 9, letterSpacing: '.1em',
+          color: P.text3, marginRight: 24,
+        }}>
+          MISSION CONTROL
+        </span>
+
+        {/* Nav tabs */}
         <nav style={{ display: 'flex', alignItems: 'stretch', height: '100%', flex: 1 }}>
           {TABS.map(tab => {
             const active = activeTab === tab.id;
@@ -109,19 +117,15 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
                 key={tab.id}
                 href={tab.href}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: 'flex', alignItems: 'center',
                   padding: '0 14px',
-                  fontFamily: FM,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '.14em',
+                  fontFamily: FM, fontSize: 10, fontWeight: active ? 700 : 500,
+                  letterSpacing: '.12em',
                   textDecoration: 'none',
                   color: active ? P.cyan : P.text3,
                   borderBottom: active ? `2px solid ${P.cyan}` : '2px solid transparent',
                   borderTop: '2px solid transparent',
                   transition: 'color .12s',
-                  whiteSpace: 'nowrap' as const,
                 }}
               >
                 {tab.label}
@@ -130,11 +134,17 @@ export default function CommandLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* Clock */}
-        <LiveClock />
+        {/* Right side: date + window */}
+        <div style={{
+          fontFamily: FM, fontSize: 10, color: P.text3,
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <LiveClock />
+          <SendingWindowBadge />
+        </div>
       </header>
 
-      {/* ── Content ───────────────────────────────────── */}
+      {/* ── Content ── */}
       <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {children}
       </main>
