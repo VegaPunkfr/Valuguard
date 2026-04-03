@@ -199,6 +199,24 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // FIL 5: Auto-update social proof (non-blocking)
+      if (meta.domain) {
+        try {
+          if (db) {
+            // Increment total analyses counter
+            await (db as any).rpc('increment_claim', { claim_key: 'total_analyses' });
+            // Store anonymized case study data
+            await (db as any).from('social_proof').insert({
+              industry: meta.industry || 'tech',
+              country: meta.country || 'DE',
+              headcount_range: meta.headcount || '100-500',
+              exposure_range: meta.exposure || 'significant',
+              created_at: new Date().toISOString(),
+            });
+          }
+        } catch { /* FIL 5: non-blocking — social proof update failure is non-fatal */ }
+      }
+
       if (!meta.domain) {
         console.warn("[Ghost Tax] No domain in session metadata — delivery skipped. Session:", session.id);
       }

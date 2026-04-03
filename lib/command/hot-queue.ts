@@ -490,6 +490,218 @@ export function checkDuplicateRisk(
  * Find the best candidate from warm backlog to promote to hot queue.
  * Respects safety checks and quality thresholds.
  */
+// ── FIL 3: Response Feedback Loop ──────────────────────────
+
+const RESPONSE_LOG_KEY = 'gt-response-log';
+
+export interface ResponseLogEntry {
+  domain: string;
+  angle: string;
+  channel: string;
+  country: string;
+  industry: string;
+  headcount: number;
+  sequenceStep: string;
+  messageWordCount: number;
+  sentAt: string;
+  repliedAt: string | null;
+  convertedAt: string | null;
+  outcome: 'replied' | 'ignored' | 'converted' | 'unsubscribed';
+}
+
+export interface ResponseStats {
+  replyRateByAngle: Record<string, number>;
+  replyRateByChannel: Record<string, number>;
+  replyRateByCountry: Record<string, number>;
+  bestAngleChannelCombo: { angle: string; channel: string; rate: number };
+  avgReplyTimeHours: number;
+}
+
+function loadResponseLog(): ResponseLogEntry[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(RESPONSE_LOG_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+}
+
+function saveResponseLog(entries: ResponseLogEntry[]): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(RESPONSE_LOG_KEY, JSON.stringify(entries));
+}
+
+export function logResponse(entry: ResponseLogEntry): void {
+  const log = loadResponseLog();
+  // Deduplicate: update existing entry for same domain+sequenceStep, or append
+  const idx = log.findIndex(
+    e => e.domain === entry.domain && e.sequenceStep === entry.sequenceStep
+  );
+  if (idx >= 0) {
+    log[idx] = entry;
+  } else {
+    log.push(entry);
+  }
+  saveResponseLog(log);
+}
+
+export function getResponseStats(): ResponseStats {
+  const log = loadResponseLog();
+
+  const replyRateByAngle: Record<string, number> = {};
+  const replyRateByChannel: Record<string, number> = {};
+  const replyRateByCountry: Record<string, number> = {};
+
+  // Group by angle
+  const angleGroups: Record<string, ResponseLogEntry[]> = {};
+  const channelGroups: Record<string, ResponseLogEntry[]> = {};
+  const countryGroups: Record<string, ResponseLogEntry[]> = {};
+  const comboGroups: Record<string, ResponseLogEntry[]> = {};
+
+  for (const entry of log) {
+    // Angle
+    if (!angleGroups[entry.angle]) angleGroups[entry.angle] = [];
+    angleGroups[entry.angle].push(entry);
+    // Channel
+    if (!channelGroups[entry.channel]) channelGroups[entry.channel] = [];
+    channelGroups[entry.channel].push(entry);
+    // Country
+    if (!countryGroups[entry.country]) countryGroups[entry.country] = [];
+    countryGroups[entry.country].push(entry);
+    // Combo
+    const comboKey = `${entry.angle}||${entry.channel}`;
+    if (!comboGroups[comboKey]) comboGroups[comboKey] = [];
+    comboGroups[comboKey].push(entry);
+  }
+
+  const calcRate = (entries: ResponseLogEntry[]) => {
+    if (entries.length === 0) return 0;
+    const replied = entries.filter(e => e.outcome === 'replied' || e.outcome === 'converted').length;
+    return Math.round((replied / entries.length) * 100);
+  };
+
+  for (const [angle, entries] of Object.entries(angleGroups)) {
+    replyRateByAngle[angle] = calcRate(entries);
+  }
+  for (const [channel, entries] of Object.entries(channelGroups)) {
+    replyRateByChannel[channel] = calcRate(entries);
+  }
+  for (const [country, entries] of Object.entries(countryGroups)) {
+    replyRateByCountry[country] = calcRate(entries);
+  }
+
+  // Best combo
+  let bestCombo = { angle: '', channel: '', rate: 0 };
+  for (const [key, entries] of Object.entries(comboGroups)) {
+    const rate = calcRate(entries);
+    if (rate > bestCombo.rate || (rate === bestCombo.rate && entries.length > (comboGroups[`${bestCombo.angle}||${bestCombo.channel}`]?.length || 0))) {
+      const [angle, channel] = key.split('||');
+      bestCombo = { angle, channel, rate };
+    }
+  }
+
+  // Avg reply time
+  const repliedEntries = log.filter(e => e.repliedAt && e.sentAt);
+  let avgReplyTimeHours = 0;
+  if (repliedEntries.length > 0) {
+    const totalHours = repliedEntries.reduce((sum, e) => {
+      const sent = new Date(e.sentAt).getTime();
+      const replied = new Date(e.repliedAt!).getTime();
+      return sum + (replied - sent) / (1000 * 60 * 60);
+    }, 0);
+    avgReplyTimeHours = Math.round((totalHours / repliedEntries.length) * 10) / 10;
+  }
+
+  return {
+    replyRateByAngle,
+    replyRateByChannel,
+    replyRateByCountry,
+    bestAngleChannelCombo: bestCombo,
+    avgReplyTimeHours,
+  };
+}
+
+/**
+ * Recalculate heat score weights based on feedback data.
+ * Only adjusts after 30+ logged sends to avoid premature optimization.
+ * Returns adjusted weight multipliers for heat score breakdown categories.
+ */
+export function recalcHeatWeights(): Record<string, number> | null {
+  const log = loadResponseLog();
+  if (log.length < 30) return null; // Not enough data
+
+  const stats = getResponseStats();
+
+  // Base multipliers (1.0 = no change)
+  const weights: Record<string, number> = {
+    signalFreshness: 1.0,
+    signalStrength: 1.0,
+    angleQuality: 1.0,
+    outreachReadiness: 1.0,
+    channelClarity: 1.0,
+    responseProb: 1.0,
+    solofitScore: 1.0,
+    expectedValue: 1.0,
+    proofLevel: 1.0,
+  };
+
+  // Overall reply rate
+  const totalSent = log.length;
+  const totalReplied = log.filter(e => e.outcome === 'replied' || e.outcome === 'converted').length;
+  const overallRate = totalReplied / totalSent;
+
+  // Boost angle quality weight if certain angles clearly outperform
+  const angleRates = Object.values(stats.replyRateByAngle);
+  if (angleRates.length >= 2) {
+    const maxAngleRate = Math.max(...angleRates);
+    const minAngleRate = Math.min(...angleRates);
+    if (maxAngleRate - minAngleRate > 15) {
+      // High variance between angles — angle selection matters more
+      weights.angleQuality = 1.3;
+    }
+  }
+
+  // Boost channel clarity if one channel dominates
+  const channelRates = Object.values(stats.replyRateByChannel);
+  if (channelRates.length >= 2) {
+    const maxChRate = Math.max(...channelRates);
+    const minChRate = Math.min(...channelRates);
+    if (maxChRate - minChRate > 20) {
+      weights.channelClarity = 1.4;
+    }
+  }
+
+  // Boost signal freshness if fresh signals correlate with replies
+  const freshReplies = log.filter(e =>
+    (e.outcome === 'replied' || e.outcome === 'converted')
+  );
+  if (freshReplies.length > 0 && overallRate > 0) {
+    // If conversion rate is above 15%, proof and signals are working
+    if (overallRate > 0.15) {
+      weights.signalFreshness = 1.2;
+      weights.proofLevel = 1.2;
+    }
+  }
+
+  // If reply times are fast (<24h avg), boost responseProb weight
+  if (stats.avgReplyTimeHours > 0 && stats.avgReplyTimeHours < 24) {
+    weights.responseProb = 1.25;
+  }
+
+  // If conversions happen, boost expected value weight
+  const conversions = log.filter(e => e.outcome === 'converted').length;
+  if (conversions >= 3) {
+    weights.expectedValue = 1.3;
+  }
+
+  return weights;
+}
+
+// ── Queue Replenishment ─────────────────────────────────────
+
+/**
+ * Find the best candidate from warm backlog to promote to hot queue.
+ * Respects safety checks and quality thresholds.
+ */
 export function findReplenishmentCandidate(
   queue: QueueState,
   accounts: Account[],
