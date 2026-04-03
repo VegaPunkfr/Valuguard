@@ -79,9 +79,9 @@ export default function SequencesPage() {
         borderRadius: 10, overflow: 'hidden',
       }}>
         {[
-          { n: stats.pending,   label: 'pending',   color: P.amber },
-          { n: stats.overdue,   label: 'overdue',   color: P.red   },
-          { n: stats.sent,      label: 'sent',      color: P.green },
+          { n: stats.totalPending, label: 'pending',   color: P.amber },
+          { n: stats.dueNow,      label: 'overdue',   color: P.red   },
+          { n: stats.totalSent,    label: 'sent',      color: P.green },
           { n: waitingEntries.length, label: 'awaiting', color: P.cyan },
         ].map((m, i) => (
           <div key={m.label} style={{
