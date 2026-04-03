@@ -750,7 +750,7 @@ export default function MissionControl() {
                 <div style={{display:'flex',gap:2,background:P.panel,borderRadius:8,padding:3}}>
                   {(['daily','weekly','monthly'] as const).map(tab=>(
                     <button key={tab} onClick={()=>setChartTab(tab)} style={{
-                      padding:'4px 9px', borderRadius:5, border:'none', cursor:'pointer',
+                      padding:'4px 9px', borderRadius:5, cursor:'pointer',
                       fontFamily:F.mono, fontSize:8, fontWeight:700, letterSpacing:'.08em', textTransform:'uppercase',
                       background: chartTab===tab ? P.surface : 'transparent',
                       color: chartTab===tab ? P.cyan : P.text3,
