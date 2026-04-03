@@ -15,9 +15,10 @@ git add "app/(marketing)/about/page.tsx"
 git add "app/(marketing)/pricing/page.tsx"
 git add "app/(app)/command/page.tsx"
 git add "app/api/command/send-approved/route.ts"
+git add "app/(app)/dashboard/DashboardClient.tsx"
 
 echo Commit en cours...
-git commit -m "feat: Mission Control cockpit - briefing, approbation Tinder-style, bilan session"
+git commit -m "feat: Executive Dashboard v4 + Mission Control cockpit"
 
 echo Push vers Vercel...
 git push
