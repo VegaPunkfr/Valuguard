@@ -632,7 +632,7 @@ export default function DashboardClient({
                 <div style={{ display: "flex", gap: 2, background: P.panel, borderRadius: 8, padding: 3 }}>
                   {(["daily","weekly","monthly"] as const).map(tab => (
                     <button key={tab} onClick={() => setChartTab(tab)} style={{
-                      padding: "5px 10px", borderRadius: 6, border: "none", cursor: "pointer",
+                      padding: "5px 10px", borderRadius: 6, cursor: "pointer",
                       fontFamily: F.mono, fontSize: 9, fontWeight: 600,
                       letterSpacing: "0.08em", textTransform: "uppercase",
                       background: chartTab === tab ? P.surface : "transparent",
