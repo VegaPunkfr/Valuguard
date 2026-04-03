@@ -1417,4 +1417,11 @@ export function HomePageClient() {
       <HeroSection />
       <StatsStrip />
       <ProblemSection />
+      <PipelineSection />
+      <ProofSection />
+      <PricingSection />
+      <FinalCTA />
+    </main>
+  );
+}
     

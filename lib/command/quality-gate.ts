@@ -32,7 +32,7 @@ export interface QualityCriterion {
   isHardBlock: boolean; // If true, failing this = instant block
 }
 
-export type GateVerdict = 'pass' | 'review' | 'block';
+export type GateVerdict = 'auto_send' | 'approve' | 'enrich' | 'snooze' | 'pass' | 'review' | 'block';
 
 export interface QualityGateResult {
   verdict: GateVerdict;
@@ -274,31 +274,41 @@ export function evaluateQualityGate(
 
   const totalScore = criteria.reduce((s, c) => s + c.score, 0);
 
-  // Verdict
+  // Verdict — GRADUATED (4 levels, not binary)
+  // 🟢 auto_send (80+): High confidence, send without Edith's approval
+  // 🟡 approve (50-79): Good enough, needs Edith's approval
+  // 🟠 enrich (30-49): Missing data, re-scan or find better email first
+  // 🔴 snooze (<30 or hard blocks): Not ready, try again in 30 days
   let verdict: GateVerdict;
-  if (hardBlocks.length > 0) {
-    verdict = 'block';
-  } else if (totalScore >= 70) {
-    verdict = 'pass';
-  } else if (totalScore >= 55) {
-    verdict = 'review';
+  if (hardBlocks.length > 0 && hardBlocks.some(b => /dropped|blocked/i.test(b))) {
+    verdict = 'snooze';  // Only truly dead accounts get snoozed
+  } else if (hardBlocks.length > 0) {
+    verdict = 'enrich';  // Missing email/name = enrichable, not dead
+  } else if (totalScore >= 80) {
+    verdict = 'auto_send';
+  } else if (totalScore >= 50) {
+    verdict = 'approve';
+  } else if (totalScore >= 30) {
+    verdict = 'enrich';
   } else {
-    verdict = 'block';
+    verdict = 'snooze';
   }
 
-  const readyToSend = verdict === 'pass';
+  // Backward compat
+  if (verdict === 'auto_send') { /* also counts as pass */ }
+  const readyToSend = verdict === 'auto_send' || verdict === 'approve';
 
   // Summary
   let summary: string;
-  if (verdict === 'pass') {
-    summary = `Quality gate PASSED (${totalScore}/100). ${criteria.filter(c => c.passed).length}/10 criteria met. Ready for Hélène approval.`;
-  } else if (verdict === 'review') {
-    summary = `Quality gate REVIEW (${totalScore}/100). Close to threshold. ${warnings.length} warning(s): ${warnings.slice(0, 2).join('; ')}.`;
+  if (verdict === 'auto_send') {
+    summary = `🟢 AUTO-SEND (${totalScore}/100). High confidence. Will be sent at optimal window without approval.`;
+  } else if (verdict === 'approve') {
+    summary = `🟡 APPROVE (${totalScore}/100). Good quality. Waiting for Edith's approval.`;
+  } else if (verdict === 'enrich') {
+    const enrichActions = hardBlocks.length > 0 ? hardBlocks.join(', ') : `Score ${totalScore}/100 — needs better data`;
+    summary = `🟠 ENRICH (${totalScore}/100). ${enrichActions}. Will retry after enrichment.`;
   } else {
-    const blockReasons = hardBlocks.length > 0
-      ? `Hard blocks: ${hardBlocks.join(', ')}.`
-      : `Score too low (${totalScore}/100).`;
-    summary = `Quality gate BLOCKED. ${blockReasons} Fix issues before outreach.`;
+    summary = `🔴 SNOOZE (${totalScore}/100). Not ready. Will retry in 30 days.`;
   }
 
   return {
