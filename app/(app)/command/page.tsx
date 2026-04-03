@@ -1,11 +1,16 @@
 'use client';
 
 /**
- * GHOST TAX — MISSION CONTROL v6
+ * GHOST TAX — MISSION CONTROL v7
  *
- * Design: Linear/Vercel/Raycast aesthetic.
- * Une seule colonne. Zéro bruit. Un seul objectif :
- * Edith ouvre, voit, approuve, ferme. 2 minutes max.
+ * Design: Linear / Vercel / Raycast.
+ * Une seule colonne. Zéro bruit. 2 minutes max.
+ *
+ * v7 changes vs v6:
+ *  - Suppression du hack position:fixed sur le wrapper principal
+ *    (le layout command/layout.tsx gère maintenant le fullscreen dark shell)
+ *  - L'overlay approbation garde position:fixed zIndex:400
+ *  - Tout le reste identique
  */
 
 import { useState, useEffect } from 'react';
@@ -45,7 +50,6 @@ const KF = `
 // ── Helpers ────────────────────────────────────────────────
 const DAYS   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-
 const FLAGS: Record<string, string> = { DE:'🇩🇪', NL:'🇳🇱', AT:'🇦🇹', CH:'🇨🇭', FR:'🇫🇷', GB:'🇬🇧', US:'🇺🇸', BE:'🇧🇪' };
 
 function fmtDate(d: Date) {
@@ -62,7 +66,7 @@ function fmtEur(n: number) {
 function flag(c: string) { return FLAGS[c] || '🌍'; }
 
 function getExposure(a: Account): { low: number; high: number; daily: number } | null {
-  if (a.scan && a.scan.exposureLow && a.scan.exposureHigh) {
+  if (a.scan?.exposureLow && a.scan?.exposureHigh) {
     const avg = (a.scan.exposureLow + a.scan.exposureHigh) / 2;
     return { low: a.scan.exposureLow, high: a.scan.exposureHigh, daily: Math.round(avg / 365) };
   }
@@ -77,14 +81,14 @@ function secToLabel(s: number) {
   return s >= 60 ? `${Math.floor(s/60)} min ${s%60} sec` : `${s} sec`;
 }
 
-// ── Main Component ─────────────────────────────────────────
+// ── Component ──────────────────────────────────────────────
 export default function MissionControl() {
   const [mounted,      setMounted]      = useState(false);
   const [accounts,     setAccounts]     = useState<Account[]>([]);
   const [liPost,       setLiPost]       = useState<LinkedInPost | null>(null);
   const [now,          setNow]          = useState(new Date());
 
-  // Approval state
+  // Overlay state
   const [overlayOpen,  setOverlayOpen]  = useState(false);
   const [cardIdx,      setCardIdx]      = useState(0);
   const [cardAnim,     setCardAnim]     = useState<'swL'|'swR'|'in'|null>(null);
@@ -110,7 +114,7 @@ export default function MissionControl() {
 
   if (!mounted) return <div style={{ background: P.bg, minHeight: '100vh' }} />;
 
-  // ── Derived data ──────────────────────────────────────────
+  // ── Derived ───────────────────────────────────────────────
   const plan   = getTodayPlan();
   const market = plan.markets[0] || 'DE';
   const win    = isInSendingWindow(market);
@@ -126,10 +130,9 @@ export default function MissionControl() {
     .sort((a, b) => b.score - a.score)
     .slice(0, 10);
 
-  const card: Account | undefined = readyQueue[cardIdx];
+  const card: Account | undefined  = readyQueue[cardIdx];
   const draft: OutreachDraft | undefined = card?.outreach?.find(o => o.status === 'draft');
-
-  const exp = card ? getExposure(card) : null;
+  const exp        = card ? getExposure(card) : null;
   const sessionSec = Math.round((Date.now() - sessionStart) / 1000);
 
   const winLabel = win.inWindow
@@ -169,18 +172,18 @@ export default function MissionControl() {
       return;
     }
 
-    // Email
+    // Email path
     setSending(true);
     try {
       const res = await fetch('/api/command/send-approved', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to:        card.financeLead.email,
-          subject:   draft.subject || `Ghost Tax · ${card.company}`,
-          textBody:  draft.body,
-          domain:    card.domain || card.website,
-          prospectId:card.id,
+          to:         card.financeLead.email,
+          subject:    draft.subject || `Ghost Tax · ${card.company}`,
+          textBody:   draft.body,
+          domain:     card.domain || card.website,
+          prospectId: card.id,
         }),
       });
       if (res.ok) {
@@ -225,13 +228,9 @@ export default function MissionControl() {
       <style>{KF}</style>
 
       {/* ════════════════════════════════════════════════════
-          MAIN PAGE
+          MAIN PAGE — renders naturally in layout's <main>
          ════════════════════════════════════════════════════ */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 200,
-        background: P.bg, overflowY: 'auto',
-        fontFamily: F.sans, color: P.text1,
-      }}>
+      <div style={{ background: P.bg, fontFamily: F.sans, color: P.text1 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '52px 32px 80px' }}>
 
           {/* ── Header ── */}
@@ -266,12 +265,12 @@ export default function MissionControl() {
             gap: 10, marginBottom: 44,
             animation: 'mc-fade .4s ease .05s both',
           }}>
-            {([
-              { v: sentCount,          label: 'envoyés',   icon: '✅', hi: false },
-              { v: readyQueue.length,  label: 'à valider', icon: '📬', hi: readyQueue.length > 0 },
-              { v: followCount,        label: 'follow-up', icon: '🔄', hi: false },
-              { v: '—',               label: 'revenus',   icon: '💰', hi: false },
-            ] as const).map((k, i) => (
+            {[
+              { v: sentCount,         label: 'envoyés',   icon: '✅', hi: false },
+              { v: readyQueue.length, label: 'à valider', icon: '📬', hi: readyQueue.length > 0 },
+              { v: followCount,       label: 'follow-up', icon: '🔄', hi: false },
+              { v: '—',              label: 'revenus',   icon: '💰', hi: false },
+            ].map((k, i) => (
               <div key={i} style={{
                 background: P.surface,
                 border: `1px solid ${k.hi ? P.cyan + '28' : P.border}`,
@@ -311,10 +310,7 @@ export default function MissionControl() {
                     {' '}· ~{Math.max(30, readyQueue.length * 45)} sec
                   </span>
                 </div>
-                <div style={{
-                  fontFamily: F.mono, fontSize: 11, color: P.text3,
-                  marginBottom: 28,
-                }}>
+                <div style={{ fontFamily: F.mono, fontSize: 11, color: P.text3, marginBottom: 28 }}>
                   Approuve, passe ou skip — toi seul décides
                 </div>
                 <button
@@ -329,7 +325,7 @@ export default function MissionControl() {
                     width: '100%', maxWidth: 340, margin: '0 auto',
                   }}
                 >
-                  Commencer l'approbation →
+                  Commencer l&apos;approbation →
                 </button>
               </div>
             ) : (
@@ -355,15 +351,15 @@ export default function MissionControl() {
                 color: P.text3, marginBottom: 18,
                 paddingBottom: 10, borderBottom: `1px solid ${P.border}`,
               }}>
-                Pipeline
+                Pipeline · {pipeline.length} comptes
               </div>
               <div>
                 {pipeline.map((a, i) => {
                   const d = a.outreach?.find(o => o.status === 'draft');
                   const s = a.outreach?.some(o => o.status === 'sent');
                   const statusColor = s ? P.text3 : d ? P.cyan : P.text3;
-                  const statusLabel = s ? '📤 envoyé' : d
-                    ? (d.channel === 'linkedin' ? '💬 prêt' : '📧 prêt')
+                  const statusLabel = s ? '📤 envoyé'
+                    : d ? (d.channel === 'linkedin' ? '💬 prêt' : '📧 prêt')
                     : '⏳ en cours';
                   return (
                     <div key={a.id} style={{
@@ -371,9 +367,7 @@ export default function MissionControl() {
                       padding: '11px 0', borderBottom: `1px solid ${P.border}`,
                       animation: `mc-fade .3s ease ${0.15 + i * 0.03}s both`,
                     }}>
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>
-                        {flag(a.country)}
-                      </span>
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{flag(a.country)}</span>
                       <span style={{
                         fontSize: 13, color: P.text1, flex: 1,
                         minWidth: 0, overflow: 'hidden',
@@ -457,7 +451,8 @@ export default function MissionControl() {
       </div>
 
       {/* ════════════════════════════════════════════════════
-          APPROVAL OVERLAY
+          APPROVAL OVERLAY — position:fixed z-400
+          (au-dessus du command layout z-100)
          ════════════════════════════════════════════════════ */}
       {overlayOpen && (
         <div style={{
@@ -465,6 +460,7 @@ export default function MissionControl() {
           background: P.bg, display: 'flex',
           flexDirection: 'column', fontFamily: F.sans,
         }}>
+
           {/* Top bar */}
           <div style={{
             display: 'flex', alignItems: 'center',
@@ -578,8 +574,7 @@ export default function MissionControl() {
                 <button
                   onClick={() => setOverlayOpen(false)}
                   style={{
-                    background: P.surface,
-                    border: `1px solid ${P.border}`,
+                    background: P.surface, border: `1px solid ${P.border}`,
                     borderRadius: 8, padding: '12px 32px',
                     fontFamily: F.mono, fontSize: 11,
                     color: P.text2, cursor: 'pointer',
@@ -605,7 +600,10 @@ export default function MissionControl() {
               >
                 {/* Contact header */}
                 <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                  <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', color: P.text1, marginBottom: 6 }}>
+                  <div style={{
+                    fontSize: 22, fontWeight: 600, letterSpacing: '-.01em',
+                    color: P.text1, marginBottom: 6,
+                  }}>
                     {card.financeLead.name !== 'Unknown' ? card.financeLead.name : card.company}
                   </div>
                   <div style={{ fontSize: 13, color: P.text2 }}>
@@ -680,7 +678,7 @@ export default function MissionControl() {
                   </div>
                 )}
 
-                {/* Send feedback */}
+                {/* Feedback */}
                 {feedback && (
                   <div style={{
                     fontFamily: F.mono, fontSize: 11, textAlign: 'center',
@@ -701,7 +699,8 @@ export default function MissionControl() {
                       border: `1px solid ${P.border}`,
                       borderRadius: 8, padding: '14px 0',
                       fontFamily: F.mono, fontSize: 12,
-                      color: P.text3, cursor: (cardAnim || sending) ? 'default' : 'pointer',
+                      color: P.text3,
+                      cursor: (cardAnim || sending) ? 'default' : 'pointer',
                       letterSpacing: '.06em', textTransform: 'uppercase',
                     }}
                   >
@@ -711,8 +710,10 @@ export default function MissionControl() {
                     onClick={handleApprove}
                     disabled={!!cardAnim || sending}
                     style={{
-                      flex: 2, background: sending ? P.surface : P.cyan,
-                      border: 'none', borderRadius: 8, padding: '14px 0',
+                      flex: 2,
+                      background: sending ? P.surface : P.cyan,
+                      border: sending ? `1px solid ${P.border}` : 'none',
+                      borderRadius: 8, padding: '14px 0',
                       fontFamily: F.mono, fontSize: 13, fontWeight: 700,
                       color: sending ? P.text3 : '#000',
                       cursor: (cardAnim || sending) ? 'default' : 'pointer',

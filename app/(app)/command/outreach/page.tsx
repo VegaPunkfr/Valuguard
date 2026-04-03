@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * GHOST TAX — OUTREACH CONSOLE v2
+ * Clean rebuild — palette correcte, JetBrains Mono + Inter.
+ * Business logic identique v1 — seulement le skin est refait.
+ */
+
 import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -11,38 +17,78 @@ import { READINESS_META, QUEUE_TIER_META } from '@/types/command';
 import { loadAccounts, saveAccounts, calcProbability, calcExpectedValue } from '@/lib/command/store';
 import { selectAngle, type SelectedAngle } from '@/lib/command/angles';
 import { selectChannel } from '@/lib/command/channels';
-import { processMessages, critiqueMessage as critiqueSingle } from '@/lib/command/messages';
+import { processMessages } from '@/lib/command/messages';
 import { assessReadiness } from '@/lib/command/readiness';
 import {
   calcHeatScore, buildQueue, loadLedger, saveLedger, loadLocks, saveLocks,
   createLedgerEntry, checkSendSafety, markLedgerSent, markLedgerWaiting,
-  markLedgerNoResponse, supersedeLedgerEntry, messageFingerprint,
-  checkDuplicateRisk, type QueueState, type QueueEntry,
+  markLedgerNoResponse, checkDuplicateRisk, type QueueState,
 } from '@/lib/command/hot-queue';
 
-// ── Style Tokens ────────────────────────────────────────────
+// ── Design tokens ───────────────────────────────────────────
+const P = {
+  bg:      '#060912',
+  surface: '#0C1019',
+  panel:   '#0F1624',
+  border:  'rgba(255,255,255,0.06)',
+  text1:   '#F1F5F9',
+  text2:   '#94A3B8',
+  text3:   '#475569',
+  text4:   '#2D3A4E',
+  cyan:    '#22D3EE',
+  green:   '#34D399',
+  amber:   '#FBBF24',
+  red:     '#F87171',
+  blue:    '#60A5FA',
+  violet:  '#A78BFA',
+  redBg:   'rgba(248,113,113,0.08)',
+  blueBg:  'rgba(96,165,250,0.08)',
+  greenBg: 'rgba(52,211,153,0.08)',
+};
+const FM = "var(--vg-font-mono,'JetBrains Mono',monospace)";
+const FS = "var(--vg-font-sans,'Inter',system-ui,sans-serif)";
 
-const mono: React.CSSProperties = { fontFamily: 'var(--vg-font-mono, monospace)' };
-const box: React.CSSProperties = { background: '#0a0d19', border: '1px solid rgba(36,48,78,0.25)', borderRadius: 10, padding: '18px 22px' };
-const lbl: React.CSSProperties = { ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', color: '#475569', textTransform: 'uppercase' as const };
+// Shared style helpers
+const box: React.CSSProperties = {
+  background: P.surface,
+  border: `1px solid ${P.border}`,
+  borderRadius: 10,
+  padding: '18px 22px',
+};
+const lbl: React.CSSProperties = {
+  fontFamily: FM, fontSize: 9, fontWeight: 700,
+  letterSpacing: '.18em', color: P.text3,
+  textTransform: 'uppercase' as const, marginBottom: 10,
+};
 const pill = (color: string, bg: string): React.CSSProperties => ({
-  ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', padding: '3px 9px',
-  borderRadius: 4, color, background: bg, display: 'inline-block',
+  fontFamily: FM, fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
+  padding: '3px 8px', borderRadius: 4, color, background: bg, display: 'inline-block',
+});
+const actionBtn = (color: string): React.CSSProperties => ({
+  fontFamily: FM, fontSize: 11, fontWeight: 600, padding: '6px 14px', borderRadius: 4,
+  background: `${color}12`, color, border: `1px solid ${color}25`, cursor: 'pointer',
+  display: 'inline-block', textAlign: 'center' as const,
 });
 
-const CH_CLR: Record<string, string> = { linkedin: '#60a5fa', email: '#34d399', hold: '#3b82f6' };
-const GRADE_CLR: Record<string, string> = { strong: '#34d399', acceptable: '#60a5fa', weak: '#60a5fa', rewrite: '#f87171' };
+const CH_CLR: Record<string, string> = {
+  linkedin: P.blue, email: P.green, hold: '#8B5CF6',
+};
+const GRADE_CLR: Record<string, string> = {
+  strong: P.green, acceptable: P.blue, weak: P.amber, rewrite: P.red,
+};
 const MSG_TYPE_LABELS: Record<MessageType, string> = {
-  linkedin_note: 'LI NOTE', linkedin_message: 'LI MESSAGE', linkedin_followup: 'LI FOLLOW-UP',
-  email_main: 'EMAIL', email_followup: 'EMAIL FOLLOW-UP', ultra_short: 'ULTRA-SHORT',
+  linkedin_note:      'LI NOTE',
+  linkedin_message:   'LI MSG',
+  linkedin_followup:  'LI FOLLOW-UP',
+  email_main:         'EMAIL',
+  email_followup:     'EMAIL FOLLOW-UP',
+  ultra_short:        'ULTRA-SHORT',
 };
 
-// ── Tab types ───────────────────────────────────────────────
-
+// ── Tab type ─────────────────────────────────────────────────
 type TabId = 'hot' | 'review' | 'all';
 
-// ── Pre-computed account state ──────────────────────────────
-
+// ── Pre-computed account ─────────────────────────────────────
 interface ComputedAccount {
   account: Account;
   angle: SelectedAngle;
@@ -56,23 +102,21 @@ interface ComputedAccount {
   duplicateRisk: boolean;
 }
 
-// ── Main Component ──────────────────────────────────────────
-
+// ── Main Component ───────────────────────────────────────────
 function OutreachConsole() {
-  const searchParams = useSearchParams();
-  const focusAccount = searchParams.get('account');
+  const searchParams  = useSearchParams();
+  const focusAccount  = searchParams.get('account');
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
-  const [locks, setLocks] = useState<ContactLock[]>([]);
-  const [ready, setReady] = useState(false);
-  const [tab, setTab] = useState<TabId>('hot');
-  const [expandedId, setExpandedId] = useState<string | null>(focusAccount);
+  const [accounts,  setAccounts]  = useState<Account[]>([]);
+  const [ledger,    setLedger]    = useState<LedgerEntry[]>([]);
+  const [locks,     setLocks]     = useState<ContactLock[]>([]);
+  const [ready,     setReady]     = useState(false);
+  const [tab,       setTab]       = useState<TabId>('hot');
+  const [expandedId,  setExpandedId]  = useState<string | null>(focusAccount);
   const [expandedMsg, setExpandedMsg] = useState<string | null>(null);
   const [generatedMessages, setGeneratedMessages] = useState<Record<string, MessageVariant[]>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Load data
   useEffect(() => {
     setAccounts(loadAccounts());
     setLedger(loadLedger());
@@ -81,28 +125,27 @@ function OutreachConsole() {
   }, []);
 
   const persistAccounts = useCallback((u: Account[]) => { setAccounts(u); saveAccounts(u); }, []);
-  const persistLedger = useCallback((l: LedgerEntry[]) => { setLedger(l); saveLedger(l); }, []);
-  const persistLocks = useCallback((l: ContactLock[]) => { setLocks(l); saveLocks(l); }, []);
+  const persistLedger   = useCallback((l: LedgerEntry[]) => { setLedger(l); saveLedger(l); }, []);
+  const persistLocks    = useCallback((l: ContactLock[]) => { setLocks(l); saveLocks(l); }, []);
 
   // Compute all account states
   const computed = useMemo(() => {
     const map = new Map<string, ComputedAccount>();
     for (const a of accounts) {
       if (a.status === 'dropped') continue;
-      const angle = selectAngle(a);
-      const channel = selectChannel(a);
-      const msgs = generatedMessages[a.id] || [];
-      const accountLedger = ledger.filter(e => e.accountId === a.id);
-      const readiness = assessReadiness(a, angle, channel, msgs, accountLedger);
-      const heat = calcHeatScore(a);
-      const dup = checkDuplicateRisk(a.id, accounts, ledger);
+      const angle    = selectAngle(a);
+      const channel  = selectChannel(a);
+      const msgs     = generatedMessages[a.id] || [];
+      const acctLedger = ledger.filter(e => e.accountId === a.id);
+      const readiness  = assessReadiness(a, angle, channel, msgs, acctLedger);
+      const heat       = calcHeatScore(a);
+      const dup        = checkDuplicateRisk(a.id, accounts, ledger);
 
       map.set(a.id, {
-        account: a,
-        angle, channel, readiness, heat,
-        probability: calcProbability(a),
+        account: a, angle, channel, readiness, heat,
+        probability:   calcProbability(a),
         expectedValue: calcExpectedValue(a),
-        messages: msgs,
+        messages:  msgs,
         queueTier: heat.total >= 60 ? 'hot' : heat.total >= 35 ? 'warm' : 'cold',
         duplicateRisk: dup.isDuplicate,
       });
@@ -110,10 +153,10 @@ function OutreachConsole() {
     return map;
   }, [accounts, ledger, generatedMessages]);
 
-  // Build queue
-  const queue = useMemo(() => buildQueue(accounts.filter(a => a.status !== 'dropped'), ledger), [accounts, ledger]);
+  const queue = useMemo(() =>
+    buildQueue(accounts.filter(a => a.status !== 'dropped'), ledger),
+  [accounts, ledger]);
 
-  // Get computed by queue tier
   const hotAccounts = useMemo(() =>
     queue.hot.map(e => computed.get(e.accountId)).filter(Boolean) as ComputedAccount[],
   [queue, computed]);
@@ -129,16 +172,13 @@ function OutreachConsole() {
     [...computed.values()].sort((a, b) => b.heat.total - a.heat.total),
   [computed]);
 
-  // ── Actions ─────────────────────────────────────────────
-
+  // ── Handlers ─────────────────────────────────────────────
   const handleGenerateMessages = useCallback((accountId: string) => {
     const c = computed.get(accountId);
     if (!c) return;
-    const channel = c.channel.primary === 'hold' ? 'email' : c.channel.primary;
-    const msgs = processMessages(c.account, c.angle, channel as OutreachChannel);
+    const ch = c.channel.primary === 'hold' ? 'email' : c.channel.primary;
+    const msgs = processMessages(c.account, c.angle, ch as OutreachChannel);
     setGeneratedMessages(prev => ({ ...prev, [accountId]: msgs }));
-
-    // Create ledger entries
     const newEntries = msgs.map(m =>
       createLedgerEntry(accountId, c.account.financeLead.name, m.channel, m.type, m.body)
     );
@@ -151,17 +191,14 @@ function OutreachConsole() {
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
 
-  const handleMarkSent = useCallback((accountId: string, channel: OutreachChannel, msgType: MessageType, body: string) => {
+  const handleMarkSent = useCallback((
+    accountId: string, channel: OutreachChannel, msgType: MessageType, body: string,
+  ) => {
     const c = computed.get(accountId);
     if (!c) return;
-
     const safety = checkSendSafety(accountId, c.account.financeLead.name, channel, body, ledger, locks);
-    if (!safety.safe) {
-      alert(`BLOCKED: ${safety.reason}`);
-      return;
-    }
+    if (!safety.safe) { alert(`BLOCKED: ${safety.reason}`); return; }
 
-    // Find or create ledger entry
     let entryId = ledger.find(e =>
       e.accountId === accountId && e.channel === channel && e.messageType === msgType && !e.superseded
     )?.id;
@@ -172,11 +209,7 @@ function OutreachConsole() {
       persistLedger([...ledger, entry]);
     }
 
-    // Mark sent + add cooldown
-    const updated = markLedgerSent(ledger, entryId);
-    persistLedger(updated);
-
-    // Update message status
+    persistLedger(markLedgerSent(ledger, entryId));
     setGeneratedMessages(prev => ({
       ...prev,
       [accountId]: (prev[accountId] || []).map(m =>
@@ -198,69 +231,83 @@ function OutreachConsole() {
   }, [ledger, persistLedger]);
 
   const handleHold = useCallback((accountId: string) => {
-    const c = computed.get(accountId);
-    if (!c) return;
-    // Supersede active entries
     const updated = ledger.map(e =>
       e.accountId === accountId && !e.superseded && e.status !== 'sent'
-        ? { ...e, superseded: true }
-        : e
+        ? { ...e, superseded: true } : e
     );
     persistLedger(updated);
-  }, [computed, ledger, persistLedger]);
+  }, [ledger, persistLedger]);
 
-  if (!ready) return null;
-
-  // ── Tab Counts ────────────────────────────────────────
+  if (!ready) return <div style={{ background: P.bg, minHeight: '100vh' }} />;
 
   const tabCounts = { hot: hotAccounts.length, review: reviewAccounts.length, all: allAccounts.length };
 
+  // ── Render ─────────────────────────────────────────────
   return (
-    <div style={mono}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 6 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e4e9f4', margin: 0 }}>Outreach Command</h1>
-        <span style={{ fontSize: 12, color: '#3b82f6', fontWeight: 600, letterSpacing: '0.12em' }}>SEMI-AUTO</span>
+    <div style={{ background: P.bg, fontFamily: FS, color: P.text1, padding: '32px 28px 80px' }}>
+
+      {/* ── Header ── */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Ghost Tax · Outreach Console
+        </div>
+        <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, letterSpacing: '-.02em' }}>
+          Outreach Command
+        </h1>
+        {/* Queue Stats */}
+        <div style={{ display: 'flex', gap: 20, fontFamily: FM, fontSize: 12, color: P.text3 }}>
+          <span><span style={{ color: P.red, fontWeight: 700 }}>{queue.stats.hotCount}</span> hot</span>
+          <span><span style={{ color: P.blue, fontWeight: 700 }}>{queue.stats.warmCount}</span> warm</span>
+          <span><span style={{ color: P.violet, fontWeight: 700 }}>{queue.stats.holdCount}</span> hold</span>
+          <span>{queue.stats.slotsAvailable} slots free</span>
+          <span>{queue.stats.inCooldown} cooling</span>
+          <span>{queue.stats.waitingResponse} awaiting</span>
+        </div>
       </div>
 
-      {/* Queue Stats Bar */}
-      <div style={{ display: 'flex', gap: 24, marginBottom: 20, fontSize: 13, color: '#64748b' }}>
-        <span><b style={{ color: '#ef4444' }}>{queue.stats.hotCount}</b> hot</span>
-        <span><b style={{ color: '#3b82f6' }}>{queue.stats.warmCount}</b> warm</span>
-        <span><b style={{ color: '#3b82f6' }}>{queue.stats.holdCount}</b> hold</span>
-        <span>{queue.stats.slotsAvailable} slots free</span>
-        <span>{queue.stats.inCooldown} cooling</span>
-        <span>{queue.stats.waitingResponse} awaiting</span>
-      </div>
-
-      {/* Discipline */}
-      <div style={{ fontSize: 12, color: '#60a5fa', lineHeight: 1.6, background: 'rgba(96,165,250,0.03)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(96,165,250,0.08)', marginBottom: 20 }}>
+      {/* ── Discipline Note ── */}
+      <div style={{
+        fontFamily: FM, fontSize: 11, color: P.blue, lineHeight: 1.7,
+        background: P.blueBg, borderRadius: 8, padding: '12px 16px',
+        border: `1px solid rgba(96,165,250,0.12)`, marginBottom: 24,
+      }}>
         Research → Channel → Angle → Draft → Critique → Rewrite → Review → Send. Never send without human review. Quality over volume.
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid rgba(36,48,78,0.20)' }}>
+      {/* ── Tabs ── */}
+      <div style={{
+        display: 'flex', gap: 0, marginBottom: 24,
+        borderBottom: `1px solid ${P.border}`,
+      }}>
         {([
-          { id: 'hot' as TabId, label: 'HOT QUEUE', count: tabCounts.hot, color: '#ef4444' },
-          { id: 'review' as TabId, label: 'REVIEW QUEUE', count: tabCounts.review, color: '#60a5fa' },
-          { id: 'all' as TabId, label: 'ALL ACCOUNTS', count: tabCounts.all, color: '#64748b' },
-        ]).map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            style={{
-              ...mono, fontSize: 13, fontWeight: tab === t.id ? 700 : 400,
-              letterSpacing: '0.10em', padding: '12px 20px', border: 'none', cursor: 'pointer',
-              color: tab === t.id ? '#e4e9f4' : '#55637d', background: 'transparent',
-              borderBottom: tab === t.id ? `2px solid ${t.color}` : '2px solid transparent',
-            }}
-          >
-            {t.label} <span style={{ color: t.color, marginLeft: 6 }}>{t.count}</span>
-          </button>
-        ))}
+          { id: 'hot'    as TabId, label: 'HOT QUEUE',    count: tabCounts.hot,    color: P.red    },
+          { id: 'review' as TabId, label: 'REVIEW QUEUE', count: tabCounts.review, color: P.blue   },
+          { id: 'all'    as TabId, label: 'ALL ACCOUNTS', count: tabCounts.all,    color: P.text3  },
+        ] as const).map(t => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              style={{
+                fontFamily: FM, fontSize: 11, fontWeight: active ? 700 : 400,
+                letterSpacing: '.1em', padding: '10px 18px',
+                borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+                borderBottom: active ? `2px solid ${t.color}` : '2px solid transparent',
+                cursor: 'pointer', background: 'transparent',
+                color: active ? P.text1 : P.text3,
+                marginBottom: -1,
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              {t.label}&nbsp;
+              <span style={{ color: t.color }}>{t.count}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Content */}
+      {/* ── Tab content ── */}
       {tab === 'hot' && (
         <HotQueueTab
           accounts={hotAccounts}
@@ -298,13 +345,17 @@ function OutreachConsole() {
           onGenerate={handleGenerateMessages}
         />
       )}
+
     </div>
   );
 }
 
-// ── Hot Queue Tab ───────────────────────────────────────────
-
-function HotQueueTab({ accounts, queue, expandedId, expandedMsg, copiedId, onToggle, onToggleMsg, onGenerate, onCopy, onMarkSent, onMarkWaiting, onMarkNoResponse, onHold }: {
+// ── Hot Queue Tab ────────────────────────────────────────────
+function HotQueueTab({
+  accounts, queue, expandedId, expandedMsg, copiedId,
+  onToggle, onToggleMsg, onGenerate, onCopy, onMarkSent,
+  onMarkWaiting, onMarkNoResponse, onHold,
+}: {
   accounts: ComputedAccount[];
   queue: QueueState;
   expandedId: string | null;
@@ -321,9 +372,13 @@ function HotQueueTab({ accounts, queue, expandedId, expandedMsg, copiedId, onTog
 }) {
   if (accounts.length === 0) {
     return (
-      <div style={{ ...box, textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 15, color: '#64748b', marginBottom: 6 }}>No accounts in hot queue</div>
-        <div style={{ fontSize: 13, color: '#475569' }}>All accounts below heat threshold (60/100) or in cooldown.</div>
+      <div style={{ ...box, textAlign: 'center', padding: '40px 24px' }}>
+        <div style={{ fontFamily: FM, fontSize: 13, color: P.text3, marginBottom: 6 }}>
+          No accounts in hot queue
+        </div>
+        <div style={{ fontFamily: FM, fontSize: 11, color: P.text4 }}>
+          All accounts below heat threshold (60/100) or in cooldown.
+        </div>
       </div>
     );
   }
@@ -353,9 +408,11 @@ function HotQueueTab({ accounts, queue, expandedId, expandedMsg, copiedId, onTog
   );
 }
 
-// ── Review Queue Tab ────────────────────────────────────────
-
-function ReviewQueueTab({ accounts, expandedId, expandedMsg, copiedId, onToggle, onToggleMsg, onCopy, onMarkSent }: {
+// ── Review Queue Tab ─────────────────────────────────────────
+function ReviewQueueTab({
+  accounts, expandedId, expandedMsg, copiedId,
+  onToggle, onToggleMsg, onCopy, onMarkSent,
+}: {
   accounts: ComputedAccount[];
   expandedId: string | null;
   expandedMsg: string | null;
@@ -367,17 +424,21 @@ function ReviewQueueTab({ accounts, expandedId, expandedMsg, copiedId, onToggle,
 }) {
   if (accounts.length === 0) {
     return (
-      <div style={{ ...box, textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 15, color: '#64748b' }}>No messages pending review</div>
-        <div style={{ fontSize: 13, color: '#475569' }}>Generate messages from the Hot Queue tab first.</div>
+      <div style={{ ...box, textAlign: 'center', padding: '40px 24px' }}>
+        <div style={{ fontFamily: FM, fontSize: 13, color: P.text3, marginBottom: 6 }}>
+          No messages pending review
+        </div>
+        <div style={{ fontFamily: FM, fontSize: 11, color: P.text4 }}>
+          Generate messages from the Hot Queue tab first.
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{ ...lbl, color: '#60a5fa', marginBottom: 10 }}>
-        MESSAGES READY FOR REVIEW ({accounts.length})
+      <div style={{ ...lbl, color: P.blue, marginBottom: 12 }}>
+        Messages ready for review ({accounts.length})
       </div>
       {accounts.map(c => (
         <AccountRow
@@ -397,9 +458,10 @@ function ReviewQueueTab({ accounts, expandedId, expandedMsg, copiedId, onToggle,
   );
 }
 
-// ── All Accounts Tab ────────────────────────────────────────
-
-function AllAccountsTab({ accounts, expandedId, onToggle, onGenerate }: {
+// ── All Accounts Tab ─────────────────────────────────────────
+function AllAccountsTab({
+  accounts, expandedId, onToggle, onGenerate,
+}: {
   accounts: ComputedAccount[];
   expandedId: string | null;
   onToggle: (id: string) => void;
@@ -412,28 +474,39 @@ function AllAccountsTab({ accounts, expandedId, onToggle, onGenerate }: {
         if (tierAccounts.length === 0) return null;
         const meta = QUEUE_TIER_META[tier];
         return (
-          <div key={tier} style={{ marginBottom: 20 }}>
-            <div style={{ ...lbl, color: meta.color, marginBottom: 8 }}>
+          <div key={tier} style={{ marginBottom: 24 }}>
+            <div style={{ ...lbl, color: meta.color, marginBottom: 10 }}>
               {meta.label} ({tierAccounts.length})
             </div>
             {tierAccounts.map(c => (
               <div key={c.account.id} style={{ ...box, marginBottom: 6, padding: '10px 14px' }}>
-                <div onClick={() => onToggle(c.account.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <div
+                  onClick={() => onToggle(c.account.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+                >
                   <HeatBadge score={c.heat.total} />
-                  <span style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4', flex: 1 }}>{c.account.company}</span>
-                  <span style={{ fontSize: 12, color: '#64748b' }}>{c.account.financeLead.name}</span>
-                  <span style={{ fontSize: 12, color: '#475569' }}>{c.account.country}</span>
-                  <span style={pill(CH_CLR[c.channel.primary] || '#64748b', `${CH_CLR[c.channel.primary] || '#64748b'}18`)}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: P.text1, flex: 1 }}>
+                    {c.account.company}
+                  </span>
+                  <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>
+                    {c.account.financeLead.name}
+                  </span>
+                  <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>
+                    {c.account.country}
+                  </span>
+                  <span style={pill(CH_CLR[c.channel.primary] || P.text3, `${CH_CLR[c.channel.primary] || P.text3}18`)}>
                     {c.channel.primary.toUpperCase()}
                   </span>
                   <ReadinessBadge status={c.readiness.status} />
-                  <span style={{ fontSize: 12, color: '#475569' }}>EV €{c.expectedValue.toLocaleString()}</span>
+                  <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>
+                    EV €{c.expectedValue.toLocaleString()}
+                  </span>
                 </div>
                 {expandedId === c.account.id && (
-                  <div style={{ marginTop: 10 }}>
+                  <div style={{ marginTop: 12 }}>
                     <IntelGrid c={c} />
                     {c.messages.length === 0 && c.readiness.status !== 'do_not_send' && (
-                      <button onClick={() => onGenerate(c.account.id)} style={actionBtn('#3b82f6')}>
+                      <button onClick={() => onGenerate(c.account.id)} style={actionBtn(P.blue)}>
                         GENERATE MESSAGES
                       </button>
                     )}
@@ -448,9 +521,13 @@ function AllAccountsTab({ accounts, expandedId, onToggle, onGenerate }: {
   );
 }
 
-// ── Account Row (reusable) ──────────────────────────────────
-
-function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onToggleMsg, onGenerate, onCopy, onMarkSent, onMarkWaiting, onMarkNoResponse, onHold, showHeat, showMessages }: {
+// ── Account Row ──────────────────────────────────────────────
+function AccountRow({
+  c, rank, expanded, expandedMsg, copiedId,
+  onToggle, onToggleMsg, onGenerate, onCopy, onMarkSent,
+  onMarkWaiting, onMarkNoResponse, onHold,
+  showHeat, showMessages,
+}: {
   c: ComputedAccount;
   rank?: number;
   expanded: boolean;
@@ -471,40 +548,48 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
     <div style={{ ...box, marginBottom: 8 }}>
       {/* Collapsed Header */}
       <div onClick={onToggle} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-        {rank && <span style={{ fontSize: 13, fontWeight: 700, color: '#3a4560', width: 28, textAlign: 'right' }}>#{rank}</span>}
+        {rank !== undefined && (
+          <span style={{ fontFamily: FM, fontSize: 11, fontWeight: 700, color: P.text4, width: 24, textAlign: 'right' }}>
+            #{rank}
+          </span>
+        )}
         <HeatBadge score={c.heat.total} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: '#e4e9f4' }}>{c.account.company}</span>
-          <span style={{ fontSize: 13, color: '#64748b', marginLeft: 8 }}>{c.account.financeLead.name}</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: P.text1 }}>{c.account.company}</span>
+          <span style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginLeft: 8 }}>
+            {c.account.financeLead.name}
+          </span>
         </div>
-        <span style={{ fontSize: 12, color: '#475569' }}>{c.account.country}</span>
-        <span style={pill(CH_CLR[c.channel.primary] || '#64748b', `${CH_CLR[c.channel.primary] || '#64748b'}18`)}>
+        <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>{c.account.country}</span>
+        <span style={pill(CH_CLR[c.channel.primary] || P.text3, `${CH_CLR[c.channel.primary] || P.text3}18`)}>
           {c.channel.primary.toUpperCase()}
         </span>
-        <span style={{ fontSize: 12, color: '#475569' }}>{c.angle.primary.label.split(' ').slice(0, 3).join(' ')}</span>
+        <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>
+          {c.angle.primary.label.split(' ').slice(0, 3).join(' ')}
+        </span>
         <ReadinessBadge status={c.readiness.status} />
-        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>P:{c.probability}%</span>
-        <span style={{ fontSize: 12, color: '#34d399', fontWeight: 600 }}>EV:€{c.expectedValue.toLocaleString()}</span>
-        {c.duplicateRisk && <span style={pill('#f87171', 'rgba(248,113,113,0.12)')}>DUP RISK</span>}
-        <span style={{ fontSize: 11, color: '#3a4560' }}>{expanded ? '▾' : '▸'}</span>
+        <span style={{ fontFamily: FM, fontSize: 11, fontWeight: 700, color: P.text2 }}>
+          P:{c.probability}%
+        </span>
+        <span style={{ fontFamily: FM, fontSize: 11, fontWeight: 700, color: P.green }}>
+          EV:€{c.expectedValue.toLocaleString()}
+        </span>
+        {c.duplicateRisk && (
+          <span style={pill(P.red, 'rgba(248,113,113,0.12)')}>DUP RISK</span>
+        )}
+        <span style={{ fontFamily: FM, fontSize: 11, color: P.text4 }}>
+          {expanded ? '▾' : '▸'}
+        </span>
       </div>
 
       {/* Expanded Detail */}
       {expanded && (
         <div style={{ marginTop: 14 }}>
-          {/* Intelligence Grid */}
           <IntelGrid c={c} />
-
-          {/* Channel Analysis */}
           <ChannelPanel c={c} />
-
-          {/* Angle Analysis */}
           <AnglePanel c={c} />
-
-          {/* Readiness Assessment */}
           <ReadinessPanel c={c} />
 
-          {/* Messages */}
           {c.messages.length > 0 && onToggleMsg && onCopy && (
             <MessagesPanel
               c={c}
@@ -519,28 +604,35 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
           {/* Actions */}
           <div style={{ display: 'flex', gap: 6, marginTop: 12, flexWrap: 'wrap' }}>
             {c.messages.length === 0 && onGenerate && c.readiness.status !== 'do_not_send' && (
-              <button onClick={onGenerate} style={actionBtn('#3b82f6')}>GENERATE MESSAGES</button>
+              <button onClick={onGenerate} style={actionBtn(P.blue)}>GENERATE MESSAGES</button>
             )}
             {c.account.financeLead.linkedIn && (
-              <a href={c.account.financeLead.linkedIn} target="_blank" rel="noopener" style={{ ...actionBtn('#60a5fa'), textDecoration: 'none' }}>
+              <a href={c.account.financeLead.linkedIn} target="_blank" rel="noopener"
+                style={{ ...actionBtn(P.blue), textDecoration: 'none' }}>
                 OPEN LINKEDIN
               </a>
             )}
             {onCopy && c.channel.primary === 'email' && c.messages.find(m => m.type === 'email_main') && (
               <button onClick={() => {
                 const msg = c.messages.find(m => m.type === 'email_main')!;
-                const mailto = `mailto:?subject=${encodeURIComponent(msg.subject || '')}&body=${encodeURIComponent(msg.body)}`;
-                window.open(mailto);
-              }} style={actionBtn('#34d399')}>
+                window.open(`mailto:?subject=${encodeURIComponent(msg.subject || '')}&body=${encodeURIComponent(msg.body)}`);
+              }} style={actionBtn(P.green)}>
                 OPEN IN EMAIL CLIENT
               </button>
             )}
-            <Link href={`/command/accounts/${c.account.id}`} style={{ ...actionBtn('#64748b'), textDecoration: 'none' }}>
+            <Link href={`/command/accounts/${c.account.id}`}
+              style={{ ...actionBtn(P.text3), textDecoration: 'none' }}>
               VIEW ACCOUNT
             </Link>
-            {onMarkWaiting && <button onClick={onMarkWaiting} style={actionBtn('#3b82f6')}>MARK WAITING</button>}
-            {onMarkNoResponse && <button onClick={onMarkNoResponse} style={actionBtn('#94a3b8')}>NO RESPONSE</button>}
-            {onHold && <button onClick={onHold} style={actionBtn('#f87171')}>HOLD</button>}
+            {onMarkWaiting && (
+              <button onClick={onMarkWaiting} style={actionBtn(P.blue)}>MARK WAITING</button>
+            )}
+            {onMarkNoResponse && (
+              <button onClick={onMarkNoResponse} style={actionBtn(P.text2)}>NO RESPONSE</button>
+            )}
+            {onHold && (
+              <button onClick={onHold} style={actionBtn(P.red)}>HOLD</button>
+            )}
           </div>
         </div>
       )}
@@ -548,118 +640,147 @@ function AccountRow({ c, rank, expanded, expandedMsg, copiedId, onToggle, onTogg
   );
 }
 
-// ── Intelligence Grid ───────────────────────────────────────
-
+// ── Intelligence Grid ────────────────────────────────────────
 function IntelGrid({ c }: { c: ComputedAccount }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>
-      <MetricCell label="HEAT" value={`${c.heat.total}/100`} color={c.heat.total >= 60 ? '#ef4444' : c.heat.total >= 35 ? '#3b82f6' : '#64748b'} />
-      <MetricCell label="PROBABILITY" value={`${c.probability}%`} color="#60a5fa" />
-      <MetricCell label="EXPECTED VALUE" value={`€${c.expectedValue.toLocaleString()}`} color="#34d399" />
-      <MetricCell label="REVENUE EST." value={`€${c.account.revenueEstimate.toLocaleString()}`} color="#94a3b8" />
-      <MetricCell label="CHANNEL" value={c.channel.primary.toUpperCase()} color={CH_CLR[c.channel.primary] || '#64748b'} />
-      <MetricCell label="CHANNEL CONF." value={`${c.channel.confidence}%`} color="#475569" />
-      <MetricCell label="ANGLE CONF." value={`${c.angle.confidence}%`} color="#475569" />
-      <MetricCell label="SOLOFIT" value={c.account.solofit.toUpperCase()} color={c.account.solofit === 'ideal' ? '#34d399' : c.account.solofit === 'good' ? '#60a5fa' : '#60a5fa'} />
+    <div style={{
+      display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+      gap: 8, marginBottom: 12,
+    }}>
+      <MetricCell label="HEAT"        value={`${c.heat.total}/100`}   color={c.heat.total >= 60 ? P.red : c.heat.total >= 35 ? P.blue : P.text3} />
+      <MetricCell label="PROBABILITY" value={`${c.probability}%`}     color={P.blue} />
+      <MetricCell label="EXP. VALUE"  value={`€${c.expectedValue.toLocaleString()}`} color={P.green} />
+      <MetricCell label="REVENUE EST."value={`€${c.account.revenueEstimate.toLocaleString()}`} color={P.text2} />
+      <MetricCell label="CHANNEL"     value={c.channel.primary.toUpperCase()} color={CH_CLR[c.channel.primary] || P.text3} />
+      <MetricCell label="CH CONF."    value={`${c.channel.confidence}%`}  color={P.text3} />
+      <MetricCell label="ANG CONF."   value={`${c.angle.confidence}%`}   color={P.text3} />
+      <MetricCell label="SOLOFIT"     value={c.account.solofit.toUpperCase()} color={c.account.solofit === 'ideal' ? P.green : P.blue} />
     </div>
   );
 }
 
 function MetricCell({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ padding: '8px 10px', borderRadius: 6, background: 'rgba(14,18,33,0.5)', border: '1px solid rgba(36,48,78,0.12)' }}>
-      <div style={{ ...lbl, fontSize: 11, marginBottom: 3 }}>{label}</div>
-      <div style={{ ...mono, fontSize: 16, fontWeight: 700, color }}>{value}</div>
+    <div style={{ padding: '8px 10px', borderRadius: 6, background: P.panel, border: `1px solid ${P.border}` }}>
+      <div style={{ ...lbl, fontSize: 9, marginBottom: 3 }}>{label}</div>
+      <div style={{ fontFamily: FM, fontSize: 14, fontWeight: 700, color }}>{value}</div>
     </div>
   );
 }
 
-// ── Channel Panel ───────────────────────────────────────────
-
+// ── Channel Panel ────────────────────────────────────────────
 function ChannelPanel({ c }: { c: ComputedAccount }) {
   return (
-    <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(59,130,246,0.03)', border: '1px solid rgba(59,130,246,0.08)', marginBottom: 10 }}>
-      <div style={{ ...lbl, color: '#3b82f6', marginBottom: 6, fontSize: 11 }}>CHANNEL RECOMMENDATION</div>
+    <div style={{
+      padding: '10px 14px', borderRadius: 6, marginBottom: 10,
+      background: 'rgba(96,165,250,0.03)', border: '1px solid rgba(96,165,250,0.08)',
+    }}>
+      <div style={{ ...lbl, color: P.blue, marginBottom: 6 }}>Channel Recommendation</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div>
-          <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Primary:</b> {c.channel.primary.toUpperCase()}</div>
+          <div style={{ fontFamily: FM, fontSize: 12, color: P.text2, marginBottom: 2 }}>
+            <b style={{ color: P.text1 }}>Primary:</b> {c.channel.primary.toUpperCase()}
+          </div>
           {c.channel.secondary && (
-            <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 2 }}><b style={{ color: '#e4e9f4' }}>Secondary:</b> {c.channel.secondary.toUpperCase()}</div>
+            <div style={{ fontFamily: FM, fontSize: 12, color: P.text2, marginBottom: 2 }}>
+              <b style={{ color: P.text1 }}>Secondary:</b> {c.channel.secondary.toUpperCase()}
+            </div>
           )}
-          <div style={{ fontSize: 13, color: '#94a3b8' }}><b style={{ color: '#e4e9f4' }}>Sequence:</b> {c.channel.sequence.replace(/_/g, ' ')}</div>
+          <div style={{ fontFamily: FM, fontSize: 12, color: P.text2 }}>
+            <b style={{ color: P.text1 }}>Sequence:</b> {c.channel.sequence.replace(/_/g, ' ')}
+          </div>
         </div>
         <div>
-          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6 }}><b style={{ color: '#60a5fa' }}>Why:</b> {c.channel.whyPrimary}</div>
-          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginTop: 4 }}><b style={{ color: '#475569' }}>Why not other:</b> {c.channel.whyNotOthers}</div>
+          <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, lineHeight: 1.6 }}>
+            <b style={{ color: P.blue }}>Why: </b>{c.channel.whyPrimary}
+          </div>
+          <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, lineHeight: 1.6, marginTop: 4 }}>
+            <b style={{ color: P.text4 }}>Why not: </b>{c.channel.whyNotOthers}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Angle Panel ─────────────────────────────────────────────
-
+// ── Angle Panel ──────────────────────────────────────────────
 function AnglePanel({ c }: { c: ComputedAccount }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-      {/* Primary Angle */}
-      <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.08)' }}>
-        <div style={{ ...lbl, color: '#34d399', marginBottom: 4, fontSize: 11 }}>PRIMARY ANGLE</div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#e4e9f4', marginBottom: 6 }}>{c.angle.primary.label}</div>
-        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
-          <b style={{ color: '#60a5fa' }}>CFO tension:</b> {c.angle.primary.cfoTension}
+      <div style={{
+        padding: '10px 14px', borderRadius: 6,
+        background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.08)',
+      }}>
+        <div style={{ ...lbl, color: P.green, marginBottom: 4 }}>Primary Angle</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: P.text1, marginBottom: 6 }}>
+          {c.angle.primary.label}
         </div>
-        <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 3 }}>
-          <b style={{ color: '#60a5fa' }}>Financial reading:</b> {c.angle.primary.financialReading}
+        <div style={{ fontFamily: FM, fontSize: 11, color: P.text2, lineHeight: 1.6, marginBottom: 2 }}>
+          <b style={{ color: P.blue }}>CFO tension: </b>{c.angle.primary.cfoTension}
         </div>
-        <div style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>
-          <b>Avoid:</b> {c.angle.primary.avoid}
+        <div style={{ fontFamily: FM, fontSize: 11, color: P.text2, lineHeight: 1.6, marginBottom: 2 }}>
+          <b style={{ color: P.blue }}>Financial: </b>{c.angle.primary.financialReading}
+        </div>
+        <div style={{ fontFamily: FM, fontSize: 11, color: P.red, lineHeight: 1.6 }}>
+          <b>Avoid: </b>{c.angle.primary.avoid}
         </div>
       </div>
 
-      {/* Secondary + Why Not */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {c.angle.secondary && (
-          <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(96,165,250,0.03)', border: '1px solid rgba(96,165,250,0.08)' }}>
-            <div style={{ ...lbl, color: '#60a5fa', marginBottom: 3, fontSize: 11 }}>SECONDARY ANGLE</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#e4e9f4' }}>{c.angle.secondary.label}</div>
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{c.angle.secondary.cfoTension.slice(0, 100)}...</div>
+          <div style={{
+            padding: '10px 14px', borderRadius: 6,
+            background: 'rgba(96,165,250,0.03)', border: '1px solid rgba(96,165,250,0.08)',
+          }}>
+            <div style={{ ...lbl, color: P.blue, marginBottom: 3 }}>Secondary Angle</div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: P.text1 }}>
+              {c.angle.secondary.label}
+            </div>
+            <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginTop: 2 }}>
+              {c.angle.secondary.cfoTension.slice(0, 100)}…
+            </div>
           </div>
         )}
-        <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(14,18,33,0.4)', border: '1px solid rgba(36,48,78,0.08)' }}>
-          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 11 }}>WHY NOT OTHER ANGLES</div>
-          <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{c.angle.whyNotOthers}</div>
+        <div style={{ padding: '10px 14px', borderRadius: 6, background: P.panel, border: `1px solid ${P.border}` }}>
+          <div style={{ ...lbl, marginBottom: 3 }}>Why not other angles</div>
+          <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, lineHeight: 1.5 }}>
+            {c.angle.whyNotOthers}
+          </div>
         </div>
-        <div style={{ padding: '10px 14px', borderRadius: 6, background: 'rgba(14,18,33,0.4)', border: '1px solid rgba(36,48,78,0.08)' }}>
-          <div style={{ ...lbl, color: '#475569', marginBottom: 3, fontSize: 11 }}>WHY NOW</div>
-          <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>{c.account.whyNow}</div>
+        <div style={{ padding: '10px 14px', borderRadius: 6, background: P.panel, border: `1px solid ${P.border}` }}>
+          <div style={{ ...lbl, marginBottom: 3 }}>Why now</div>
+          <div style={{ fontFamily: FM, fontSize: 11, color: P.text2, lineHeight: 1.6 }}>
+            {c.account.whyNow}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Readiness Panel ─────────────────────────────────────────
-
+// ── Readiness Panel ──────────────────────────────────────────
 function ReadinessPanel({ c }: { c: ComputedAccount }) {
   const meta = READINESS_META[c.readiness.status];
   return (
-    <div style={{ padding: '10px 14px', borderRadius: 6, background: `${meta.color}08`, border: `1px solid ${meta.color}15`, marginBottom: 10 }}>
+    <div style={{
+      padding: '10px 14px', borderRadius: 6, marginBottom: 10,
+      background: `${meta.color}06`, border: `1px solid ${meta.color}12`,
+    }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <div style={{ ...lbl, color: meta.color, fontSize: 11, margin: 0 }}>OUTREACH READINESS</div>
+        <div style={{ ...lbl, color: meta.color, margin: 0 }}>Outreach Readiness</div>
         <ReadinessBadge status={c.readiness.status} />
       </div>
       {c.readiness.blockers.length > 0 && (
         <div style={{ marginBottom: 4 }}>
           {c.readiness.blockers.map((b, i) => (
-            <div key={i} style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>— {b}</div>
+            <div key={i} style={{ fontFamily: FM, fontSize: 11, color: P.red, lineHeight: 1.6 }}>— {b}</div>
           ))}
         </div>
       )}
       {c.readiness.reasons.length > 0 && (
         <div>
           {c.readiness.reasons.map((r, i) => (
-            <div key={i} style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>+ {r}</div>
+            <div key={i} style={{ fontFamily: FM, fontSize: 11, color: P.text2, lineHeight: 1.6 }}>+ {r}</div>
           ))}
         </div>
       )}
@@ -667,9 +788,10 @@ function ReadinessPanel({ c }: { c: ComputedAccount }) {
   );
 }
 
-// ── Messages Panel ──────────────────────────────────────────
-
-function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSent }: {
+// ── Messages Panel ───────────────────────────────────────────
+function MessagesPanel({
+  c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSent,
+}: {
   c: ComputedAccount;
   expandedMsg: string | null;
   copiedId: string | null;
@@ -679,98 +801,129 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
 }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ ...lbl, color: '#a78bfa', marginBottom: 6, fontSize: 11 }}>MESSAGES ({c.messages.length})</div>
+      <div style={{ ...lbl, color: P.violet, marginBottom: 6 }}>
+        Messages ({c.messages.length})
+      </div>
       {c.messages.map(msg => {
-        const msgKey = `${c.account.id}-${msg.id}`;
-        const isOpen = expandedMsg === msgKey;
-        const grade = msg.critique?.overallGrade || 'draft';
-        const gradeColor = GRADE_CLR[grade] || '#64748b';
+        const msgKey    = `${c.account.id}-${msg.id}`;
+        const isOpen    = expandedMsg === msgKey;
+        const grade     = msg.critique?.overallGrade || 'draft';
+        const gradeColor = GRADE_CLR[grade] || P.text3;
 
         return (
-          <div key={msg.id} style={{ marginBottom: 4, borderRadius: 6, border: `1px solid ${gradeColor}12`, overflow: 'hidden' }}>
+          <div key={msg.id} style={{
+            marginBottom: 4, borderRadius: 6, overflow: 'hidden',
+            border: `1px solid ${gradeColor}18`,
+          }}>
             {/* Message Header */}
-            <div onClick={() => onToggleMsg(isOpen ? null : msgKey)} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', cursor: 'pointer',
-              background: `${gradeColor}06`,
-            }}>
-              <span style={{ ...mono, fontSize: 11, fontWeight: 700, color: CH_CLR[msg.channel] || '#64748b', width: 90 }}>
+            <div
+              onClick={() => onToggleMsg(isOpen ? null : msgKey)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '7px 10px', cursor: 'pointer',
+                background: `${gradeColor}05`,
+              }}
+            >
+              <span style={{
+                fontFamily: FM, fontSize: 10, fontWeight: 700,
+                color: CH_CLR[msg.channel] || P.text3, width: 90,
+              }}>
                 {MSG_TYPE_LABELS[msg.type] || msg.type}
               </span>
-              <span style={{ fontSize: 12, color: '#64748b', flex: 1 }}>{msg.body.split('\n')[0].slice(0, 60)}...</span>
-              <span style={{ fontSize: 11, color: '#475569' }}>{msg.wordCount}w</span>
+              <span style={{ fontFamily: FM, fontSize: 11, color: P.text3, flex: 1 }}>
+                {msg.body.split('\n')[0].slice(0, 60)}…
+              </span>
+              <span style={{ fontFamily: FM, fontSize: 10, color: P.text4 }}>{msg.wordCount}w</span>
               {msg.critique && (
                 <span style={pill(gradeColor, `${gradeColor}15`)}>{grade.toUpperCase()}</span>
               )}
-              {msg.status === 'sent' && <span style={pill('#34d399', 'rgba(52,211,153,0.12)')}>SENT</span>}
-              {msg.rewriteSummary && <span style={{ fontSize: 11, color: '#a78bfa' }}>REWRITTEN</span>}
+              {msg.status === 'sent' && (
+                <span style={pill(P.green, 'rgba(52,211,153,0.12)')}>SENT</span>
+              )}
+              {msg.rewriteSummary && (
+                <span style={{ fontFamily: FM, fontSize: 10, color: P.violet }}>REWRITTEN</span>
+              )}
             </div>
 
             {/* Expanded Message */}
             {isOpen && (
-              <div style={{ padding: 12, background: 'rgba(6,9,18,0.5)' }}>
+              <div style={{ padding: 12, background: 'rgba(6,9,18,0.6)' }}>
                 {/* Critique */}
                 {msg.critique && (
                   <div style={{ marginBottom: 10 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       {msg.critique.issues.length > 0 && (
-                        <div style={{ padding: '8px 10px', borderRadius: 4, background: 'rgba(248,113,113,0.03)', border: '1px solid rgba(248,113,113,0.06)' }}>
-                          <div style={{ ...lbl, color: '#f87171', marginBottom: 3, fontSize: 11 }}>ISSUES</div>
+                        <div style={{
+                          padding: '8px 10px', borderRadius: 4,
+                          background: 'rgba(248,113,113,0.03)', border: '1px solid rgba(248,113,113,0.06)',
+                        }}>
+                          <div style={{ ...lbl, color: P.red, marginBottom: 3 }}>Issues</div>
                           {msg.critique.issues.map((issue, j) => (
-                            <div key={j} style={{ fontSize: 12, color: '#f87171', lineHeight: 1.6 }}>— {issue}</div>
+                            <div key={j} style={{ fontFamily: FM, fontSize: 11, color: P.red, lineHeight: 1.6 }}>— {issue}</div>
                           ))}
                         </div>
                       )}
                       {msg.critique.strengths.length > 0 && (
-                        <div style={{ padding: '8px 10px', borderRadius: 4, background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.06)' }}>
-                          <div style={{ ...lbl, color: '#34d399', marginBottom: 3, fontSize: 11 }}>STRENGTHS</div>
+                        <div style={{
+                          padding: '8px 10px', borderRadius: 4,
+                          background: 'rgba(52,211,153,0.03)', border: '1px solid rgba(52,211,153,0.06)',
+                        }}>
+                          <div style={{ ...lbl, color: P.green, marginBottom: 3 }}>Strengths</div>
                           {msg.critique.strengths.map((s, j) => (
-                            <div key={j} style={{ fontSize: 12, color: '#34d399', lineHeight: 1.6 }}>+ {s}</div>
+                            <div key={j} style={{ fontFamily: FM, fontSize: 11, color: P.green, lineHeight: 1.6 }}>+ {s}</div>
                           ))}
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>
+                    <div style={{ fontFamily: FM, fontSize: 11, color: P.text2, marginTop: 6 }}>
                       <b style={{ color: gradeColor }}>Score: {msg.critique.score}/12</b> — {msg.critique.summary}
                     </div>
                   </div>
                 )}
 
-                {/* Rewrite note */}
                 {msg.rewriteSummary && (
-                  <div style={{ fontSize: 12, color: '#a78bfa', marginBottom: 8, padding: '4px 8px', borderRadius: 3, background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.08)' }}>
+                  <div style={{
+                    fontFamily: FM, fontSize: 11, color: P.violet, marginBottom: 8,
+                    padding: '4px 8px', borderRadius: 3,
+                    background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.08)',
+                  }}>
                     {msg.rewriteSummary}
                   </div>
                 )}
 
-                {/* Subject */}
-                {msg.subject && <div style={{ fontSize: 13, color: '#e4e9f4', marginBottom: 6 }}><b>Subject:</b> {msg.subject}</div>}
+                {msg.subject && (
+                  <div style={{ fontFamily: FM, fontSize: 12, color: P.text1, marginBottom: 6 }}>
+                    <b>Subject:</b> {msg.subject}
+                  </div>
+                )}
 
-                {/* Body */}
                 <pre style={{
-                  ...mono, fontSize: 13, color: '#94a3b8', lineHeight: 1.6, whiteSpace: 'pre-wrap',
-                  margin: 0, padding: 12, background: '#060912', borderRadius: 4, border: '1px solid rgba(36,48,78,0.12)',
-                }}>{msg.body}</pre>
+                  fontFamily: FM, fontSize: 12, color: P.text2, lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap', margin: 0, padding: 12,
+                  background: P.bg, borderRadius: 4, border: `1px solid ${P.border}`,
+                }}>
+                  {msg.body}
+                </pre>
 
-                {/* Actions */}
+                {/* Message Actions */}
                 <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                  <button onClick={() => onCopy(msg.body, msg.id)} style={actionBtn(copiedId === msg.id ? '#34d399' : '#60a5fa')}>
+                  <button onClick={() => onCopy(msg.body, msg.id)} style={actionBtn(copiedId === msg.id ? P.green : P.blue)}>
                     {copiedId === msg.id ? 'COPIED' : 'COPY'}
                   </button>
                   {msg.subject && (
-                    <button onClick={() => onCopy(`Subject: ${msg.subject}\n\n${msg.body}`, `${msg.id}-full`)} style={actionBtn('#60a5fa')}>
+                    <button onClick={() => onCopy(`Subject: ${msg.subject}\n\n${msg.body}`, `${msg.id}-full`)} style={actionBtn(P.blue)}>
                       COPY WITH SUBJECT
                     </button>
                   )}
                   {msg.status !== 'sent' && onMarkSent && (
-                    <button onClick={() => onMarkSent(c.account.id, msg.channel, msg.type, msg.body)} style={actionBtn('#34d399')}>
+                    <button onClick={() => onMarkSent(c.account.id, msg.channel, msg.type, msg.body)} style={actionBtn(P.green)}>
                       MARK SENT
                     </button>
                   )}
                   {msg.channel === 'email' && msg.subject && (
                     <button onClick={() => {
-                      const mailto = `mailto:?subject=${encodeURIComponent(msg.subject!)}&body=${encodeURIComponent(msg.body)}`;
-                      window.open(mailto);
-                    }} style={actionBtn('#34d399')}>
+                      window.open(`mailto:?subject=${encodeURIComponent(msg.subject!)}&body=${encodeURIComponent(msg.body)}`);
+                    }} style={actionBtn(P.green)}>
                       OPEN EMAIL CLIENT
                     </button>
                   )}
@@ -784,13 +937,13 @@ function MessagesPanel({ c, expandedMsg, copiedId, onToggleMsg, onCopy, onMarkSe
   );
 }
 
-// ── Small Components ────────────────────────────────────────
-
+// ── Small Components ─────────────────────────────────────────
 function HeatBadge({ score }: { score: number }) {
-  const color = score >= 60 ? '#ef4444' : score >= 35 ? '#3b82f6' : '#64748b';
+  const color = score >= 60 ? P.red : score >= 35 ? P.blue : P.text3;
   return (
     <span style={{
-      ...mono, fontSize: 14, fontWeight: 700, color, width: 38, textAlign: 'center',
+      fontFamily: FM, fontSize: 13, fontWeight: 700, color,
+      width: 36, textAlign: 'center',
       padding: '3px 0', borderRadius: 4, background: `${color}12`,
     }}>
       {score}
@@ -803,19 +956,14 @@ function ReadinessBadge({ status }: { status: ReadinessStatus }) {
   return <span style={pill(meta.color, meta.bg)}>{meta.label}</span>;
 }
 
-function actionBtn(color: string): React.CSSProperties {
-  return {
-    ...mono, fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 4,
-    background: `${color}0a`, color, border: `1px solid ${color}20`, cursor: 'pointer',
-    display: 'inline-block', textAlign: 'center',
-  };
-}
-
 // ── Page Export ──────────────────────────────────────────────
-
 export default function OutreachPage() {
   return (
-    <Suspense fallback={<div style={{ fontFamily: 'var(--vg-font-mono, monospace)', color: '#475569', padding: 40 }}>Loading outreach command...</div>}>
+    <Suspense fallback={
+      <div style={{ background: P.bg, minHeight: '100vh', fontFamily: FM, color: P.text3, padding: 40 }}>
+        Loading outreach command…
+      </div>
+    }>
       <OutreachConsole />
     </Suspense>
   );
