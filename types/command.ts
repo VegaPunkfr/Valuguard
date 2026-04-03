@@ -13,6 +13,8 @@ export type AccountStatus =
   | 'qualified'
   | 'outreach_ready'
   | 'contacted'
+  | 'replied'
+  | 'converted'
   | 'dropped';
 
 export const STATUS_META: Record<AccountStatus, {
@@ -29,7 +31,9 @@ export const STATUS_META: Record<AccountStatus, {
   qualified:       { label: 'QUALIFIED',      color: '#34d399', bg: 'rgba(52,211,153,0.10)', border: 'rgba(52,211,153,0.20)', order: 5 },
   outreach_ready:  { label: 'OUTREACH READY', color: '#a78bfa', bg: 'rgba(167,139,250,0.10)', border: 'rgba(167,139,250,0.20)', order: 6 },
   contacted:       { label: 'CONTACTED',      color: '#94a3b8', bg: 'rgba(148,163,184,0.08)', border: 'rgba(148,163,184,0.15)', order: 7 },
-  dropped:         { label: 'DROPPED',        color: '#f87171', bg: 'rgba(248,113,113,0.08)', border: 'rgba(248,113,113,0.15)', order: 8 },
+  replied:         { label: 'REPLIED',        color: '#34d399', bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  order: 8 },
+  converted:       { label: 'CONVERTED',      color: '#22d3ee', bg: 'rgba(34,211,238,0.08)',  border: 'rgba(34,211,238,0.15)',  order: 9 },
+  dropped:         { label: 'DROPPED',        color: '#f87171', bg: 'rgba(248,113,113,0.08)', border: 'rgba(248,113,113,0.15)', order: 10 },
 };
 
 // ── Decision Dimensions ──────────────────────────────────
@@ -170,6 +174,7 @@ export interface Account {
   domain: string;
   country: Country;
   industry: string;
+  headcount?: number;
   employeeRange: string;
   website: string;
 

@@ -141,7 +141,7 @@ export default function MissionControlV7() {
     const queue = pipeline.filter(p => p.heat >= 60).length;
     let follow = 0;
     try { follow = getAllPendingFollowUps().length; } catch {}
-    const rev = accounts.filter(a => a.status === 'contacted' || (a as any).status === 'replied').reduce((s, a) => s + (a.revenueEstimate || 0), 0);
+    const rev = accounts.filter(a => a.status === 'contacted' || a.status === 'replied').reduce((s, a) => s + (a.revenueEstimate || 0), 0);
     return { auto, queue, follow, rev };
   }, [accounts, pipeline, ready]);
 
@@ -267,7 +267,7 @@ export default function MissionControlV7() {
                 {a.financeLead.title || 'CFO'} · {a.company}
               </div>
               <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginTop: 2 }}>
-                <Flag country={a.country} /> {a.country} · {(a as any).headcount || '?'} emp · {(a as any).industry}
+                <Flag country={a.country} /> {a.country} · {a.headcount || '?'} emp · {a.industry}
               </div>
             </div>
 
@@ -424,7 +424,7 @@ export default function MissionControlV7() {
             ? 'pr\u00eat'
             : a.status === 'contacted'
               ? 'envoy\u00e9'
-              : (a as any).status === 'replied'
+              : a.status === 'replied'
                 ? 'r\u00e9pondu'
                 : a.status === 'dropped'
                   ? 'drop'

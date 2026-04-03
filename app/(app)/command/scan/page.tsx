@@ -68,7 +68,7 @@ export default function IntelligencePage() {
   const accountStats = useMemo(() => {
     const active    = accounts.filter(a => a.status !== 'dropped');
     const contacted = accounts.filter(a => a.status === 'contacted');
-    const replied   = accounts.filter(a => (a as any).status === 'replied');
+    const replied   = accounts.filter(a => a.status === 'replied');
     return { active: active.length, contacted: contacted.length, replied: replied.length };
   }, [accounts]);
 
