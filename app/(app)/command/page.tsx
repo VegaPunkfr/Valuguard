@@ -30,6 +30,7 @@ import QuickFilters, { applyCockpitFilters, DEFAULT_FILTERS, type CockpitFilters
 import ActionBar from '@/components/command/action-bar';
 import ProspectRow from '@/components/command/prospect-row';
 import DetailPanel from '@/components/command/detail-panel';
+import { getTodayPlan, isInSendingWindow } from '@/lib/command/sending-windows';
 
 // ── Font stacks ─────────────────────────────────────────────
 const FONT_BODY = 'var(--gt-font-dm-sans, "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)';
@@ -76,6 +77,26 @@ const KEYFRAMES_CSS = `
 @keyframes gt-shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+@keyframes mc-cardEnter {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes mc-swipeLeft {
+  from { opacity: 1; transform: translateX(0) rotate(0deg); }
+  to   { opacity: 0; transform: translateX(-120%) rotate(-12deg); }
+}
+@keyframes mc-swipeRight {
+  from { opacity: 1; transform: translateX(0) rotate(0deg); }
+  to   { opacity: 0; transform: translateX(120%) rotate(12deg); }
+}
+@keyframes mc-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes mc-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 `;
 
@@ -244,6 +265,15 @@ export default function CockpitV3() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [activeView, setActiveView] = useState<ViewTabId>('focus_now');
   const [prevView, setPrevView] = useState<ViewTabId>('focus_now');
+
+  // ── Mission Control State ─────────────────────────────
+  type MCMode = 'briefing' | 'approval' | 'done' | 'cockpit';
+  const [mcMode, setMcMode] = useState<MCMode>('briefing');
+  const [approvalQueue, setApprovalQueue] = useState<Account[]>([]);
+  const [approvalIndex, setApprovalIndex] = useState(0);
+  const [approvedList, setApprovedList] = useState<Account[]>([]);
+  const [passedList, setPassedList] = useState<Account[]>([]);
+  const [cardAnim, setCardAnim] = useState<'left' | 'right' | null>(null);
   const [filters, setFilters] = useState<CockpitFilters>(DEFAULT_FILTERS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -309,6 +339,11 @@ export default function CockpitV3() {
       accs = computeReadyToSend(accs);
       setAccounts(accs);
       setLoaded(true);
+      // Build approval queue from ready-to-send accounts
+      const queue = accs
+        .filter(a => a.readyToSend && !a.hiddenFromActiveView)
+        .sort((a, b) => (b.score || 0) - (a.score || 0));
+      setApprovalQueue(queue);
 
       // Sync with Sarah (non-blocking)
       fetch('/api/command/sync', { cache: 'no-store' })
@@ -504,6 +539,86 @@ export default function CockpitV3() {
     };
   }, [accounts]);
 
+  // ── Mission Control Handlers ─────────────────────────────
+  const handleApprove = useCallback((account: Account) => {
+    setCardAnim('right');
+    setTimeout(() => {
+      setApprovedList(prev => [...prev, account]);
+      setCardAnim(null);
+      if (approvalIndex + 1 >= approvalQueue.length) {
+        setMcMode('done');
+      } else {
+        setApprovalIndex(i => i + 1);
+      }
+    }, 380);
+  }, [approvalIndex, approvalQueue.length]);
+
+  const handlePass = useCallback((account: Account) => {
+    setCardAnim('left');
+    setTimeout(() => {
+      setPassedList(prev => [...prev, account]);
+      setCardAnim(null);
+      if (approvalIndex + 1 >= approvalQueue.length) {
+        setMcMode('done');
+      } else {
+        setApprovalIndex(i => i + 1);
+      }
+    }, 380);
+  }, [approvalIndex, approvalQueue.length]);
+
+  const handleEnterApproval = useCallback(() => {
+    setApprovalIndex(0);
+    setApprovedList([]);
+    setPassedList([]);
+    setCardAnim(null);
+    const queue = accounts
+      .filter(a => a.readyToSend && !a.hiddenFromActiveView)
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+    setApprovalQueue(queue);
+    setMcMode('approval');
+  }, [accounts]);
+
+  // ── Mission Control Screens ──────────────────────────────
+  if (mcMode === 'briefing') {
+    return <MCBriefingScreen
+      accounts={accounts}
+      metrics={metrics}
+      onEnterApproval={handleEnterApproval}
+      onOpenCockpit={() => setMcMode('cockpit')}
+    />;
+  }
+
+  if (mcMode === 'approval') {
+    const currentCard = approvalQueue[approvalIndex];
+    if (!currentCard) {
+      // Empty queue
+      return <MCDoneScreen
+        approved={approvedList}
+        passed={passedList}
+        onBackToBriefing={() => setMcMode('briefing')}
+        onOpenCockpit={() => setMcMode('cockpit')}
+      />;
+    }
+    return <MCApprovalScreen
+      card={currentCard}
+      index={approvalIndex}
+      total={approvalQueue.length}
+      cardAnim={cardAnim}
+      onApprove={() => handleApprove(currentCard)}
+      onPass={() => handlePass(currentCard)}
+      onBackToBriefing={() => setMcMode('briefing')}
+    />;
+  }
+
+  if (mcMode === 'done') {
+    return <MCDoneScreen
+      approved={approvedList}
+      passed={passedList}
+      onBackToBriefing={() => setMcMode('briefing')}
+      onOpenCockpit={() => setMcMode('cockpit')}
+    />;
+  }
+
   // ── Render ───────────────────────────────────────────────
   if (error) {
     return (
@@ -639,6 +754,28 @@ export default function CockpitV3() {
             {metrics.total}
           </div>
         </div>
+
+        {/* Mission Control Button */}
+        <button
+          onClick={() => setMcMode('briefing')}
+          style={{
+            marginLeft: 16,
+            padding: '7px 14px',
+            background: '#060912',
+            color: '#22d3ee',
+            border: '1px solid rgba(34,211,238,0.25)',
+            borderRadius: 7,
+            fontFamily: FONT_MONO,
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            cursor: 'pointer',
+            textTransform: 'uppercase' as const,
+            whiteSpace: 'nowrap' as const,
+          }}
+        >
+          ⟵ MISSION CTRL
+        </button>
       </div>
 
       {/* ══════════════════════════════════════════════════════ */}
@@ -1179,4 +1316,837 @@ function KeyboardHandler({
   }, [accounts, selectedIds, onAction, onSelect, detailId, onOpenDetail, onCloseDetail]);
 
   return null;
+}
+
+// ══════════════════════════════════════════════════════════════
+// MISSION CONTROL — DARK THEME PALETTE
+// ══════════════════════════════════════════════════════════════
+
+const MC = {
+  bg:         '#060912',
+  surface:    '#0A0D19',
+  panel:      '#0e1221',
+  border:     'rgba(36,48,78,0.35)',
+  borderHi:   'rgba(34,211,238,0.20)',
+  text1:      '#e4e9f4',
+  text2:      '#8d9bb5',
+  text3:      '#55637d',
+  cyan:       '#22d3ee',
+  green:      '#34d399',
+  amber:      '#f59e0b',
+  red:        '#ef4444',
+};
+
+// ══════════════════════════════════════════════════════════════
+// MC BRIEFING SCREEN
+// ══════════════════════════════════════════════════════════════
+
+function MCBriefingScreen({
+  accounts,
+  metrics,
+  onEnterApproval,
+  onOpenCockpit,
+}: {
+  accounts: Account[];
+  metrics: { ready: number; followUps: number; sent: number; replied: number; pipelineLow: number; pipelineHigh: number };
+  onEnterApproval: () => void;
+  onOpenCockpit: () => void;
+}) {
+  const todayPlan = getTodayPlan();
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Current window status for primary market
+  const primaryMarket = todayPlan.markets[0] || 'DE';
+  const windowStatus = isInSendingWindow(primaryMarket);
+
+  // Day of week label
+  const dayLabels = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const dayLabel = dayLabels[now.getDay()];
+
+  // Format time
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // LinkedIn post idea by pillar
+  const linkedinIdeas: Record<string, string> = {
+    leak_of_week:    '💡 "Votre entreprise paye probablement 3x trop pour ce service SaaS. Voici comment le détecter en 5 min..."',
+    contrarian:      '🔥 "Les audits IT coûtent 6 mois et 50k€. Il y a une meilleure façon."',
+    social_proof:    '✅ "Client sous NDA : 127k EUR d\'économies détectées en 48h. Voici la méthodologie."',
+    founder_journey: '🏗️ "J\'ai passé 3 ans à analyser des stacks SaaS de PME européennes. Ce que j\'ai découvert m\'a surpris."',
+    data_insight:    '📊 "En 200+ analyses, aucune entreprise n\'avait zéro exposition. La moyenne est de 23% du budget IT."',
+  };
+  const linkedinPost = linkedinIdeas[todayPlan.linkedinPostPillar] || linkedinIdeas['data_insight'];
+
+  // Format financial range
+  const fmtRange = (lo: number, hi: number) => {
+    const f = (n: number) => n >= 1000000 ? `${(n/1000000).toFixed(1)}M` : n >= 1000 ? `${Math.round(n/1000)}k` : `${n}`;
+    return `${f(lo)}–${f(hi)} EUR`;
+  };
+
+  // Window badge
+  const windowBadge = windowStatus.inWindow
+    ? { label: `FENÊTRE ACTIVE — ${primaryMarket}`, color: MC.green, dot: true }
+    : { label: todayPlan.isFollowUpDay ? 'JOUR FOLLOW-UP' : `Prochaine fenêtre : ${primaryMarket}`, color: MC.text3, dot: false };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: MC.bg,
+      color: MC.text1,
+      fontFamily: FONT_BODY,
+      position: 'relative',
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES_CSS }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 28px',
+        borderBottom: `1px solid ${MC.border}`,
+        background: MC.surface,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{
+            fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700,
+            letterSpacing: '0.14em', color: MC.cyan, textTransform: 'uppercase',
+          }}>GHOST TAX — MISSION CONTROL</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          {/* Window status dot */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            {windowBadge.dot && (
+              <div style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: MC.green,
+                animation: 'mc-pulse 2s ease-in-out infinite',
+              }} />
+            )}
+            <span style={{
+              fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600,
+              letterSpacing: '0.1em', color: windowBadge.color,
+              textTransform: 'uppercase',
+            }}>{windowBadge.label}</span>
+          </div>
+          <button
+            onClick={onOpenCockpit}
+            style={{
+              padding: '6px 14px',
+              background: 'transparent',
+              color: MC.text2,
+              border: `1px solid ${MC.border}`,
+              borderRadius: 6,
+              fontFamily: FONT_MONO,
+              fontSize: 10, fontWeight: 600,
+              letterSpacing: '0.08em',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+            }}
+          >
+            COCKPIT →
+          </button>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 28px 80px' }}>
+
+        {/* Date + time */}
+        <div style={{ marginBottom: 36 }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.12em', color: MC.text3, textTransform: 'uppercase', marginBottom: 6,
+          }}>BRIEFING DU {dayLabel.toUpperCase()}</div>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 32, fontWeight: 700,
+            color: MC.text1, letterSpacing: '-0.02em',
+          }}>{timeStr}</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 13, color: MC.text2, marginTop: 4 }}>
+            {dateStr} · Marchés cibles : {todayPlan.markets.join(', ')}
+          </div>
+        </div>
+
+        {/* 3 Counters */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1,
+          border: `1px solid ${MC.border}`, borderRadius: 12, overflow: 'hidden',
+          marginBottom: 28,
+        }}>
+          {[
+            {
+              label: 'PRÊTS À ENVOYER',
+              value: metrics.ready,
+              unit: 'prospects',
+              color: metrics.ready > 0 ? MC.green : MC.text3,
+              glow: metrics.ready > 0,
+            },
+            {
+              label: 'FOLLOW-UPS DUS',
+              value: metrics.followUps,
+              unit: 'aujourd\'hui',
+              color: metrics.followUps > 0 ? MC.amber : MC.text3,
+              glow: false,
+            },
+            {
+              label: 'PIPELINE',
+              value: null,
+              unit: fmtRange(metrics.pipelineLow, metrics.pipelineHigh),
+              color: MC.cyan,
+              glow: false,
+            },
+          ].map((m, i) => (
+            <div key={i} style={{
+              background: MC.surface,
+              padding: '24px 28px',
+              borderRight: i < 2 ? `1px solid ${MC.border}` : 'none',
+              boxShadow: m.glow ? `inset 0 0 40px rgba(52,211,153,0.04)` : 'none',
+            }}>
+              <div style={{
+                fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+                letterSpacing: '0.14em', color: MC.text3, textTransform: 'uppercase', marginBottom: 10,
+              }}>{m.label}</div>
+              {m.value !== null ? (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{
+                    fontFamily: FONT_MONO, fontSize: 40, fontWeight: 700,
+                    color: m.color, letterSpacing: '-0.03em', lineHeight: 1,
+                  }}>{m.value}</span>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: MC.text3 }}>{m.unit}</span>
+                </div>
+              ) : (
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: 22, fontWeight: 700,
+                  color: m.color, letterSpacing: '-0.02em',
+                }}>{m.unit}</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* LinkedIn post idea */}
+        <div style={{
+          background: MC.surface,
+          border: `1px solid ${MC.border}`,
+          borderLeft: `3px solid ${MC.cyan}`,
+          borderRadius: 10,
+          padding: '20px 24px',
+          marginBottom: 28,
+        }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.14em', color: MC.cyan, textTransform: 'uppercase', marginBottom: 12,
+          }}>POST LINKEDIN DU JOUR · {todayPlan.linkedinPostPillar.replace(/_/g, ' ').toUpperCase()}</div>
+          <div style={{
+            fontSize: 14, color: MC.text1, lineHeight: 1.6,
+          }}>{linkedinPost}</div>
+          <div style={{ marginTop: 12, fontSize: 12, color: MC.text3, fontFamily: FONT_MONO }}>
+            → Adapte, personalise et publie depuis LinkedIn directement.
+          </div>
+        </div>
+
+        {/* Sending windows */}
+        <div style={{
+          background: MC.surface,
+          border: `1px solid ${MC.border}`,
+          borderRadius: 10,
+          padding: '20px 24px',
+          marginBottom: 40,
+        }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.14em', color: MC.text3, textTransform: 'uppercase', marginBottom: 14,
+          }}>FENÊTRES D'ENVOI</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {todayPlan.windows.map((w, i) => {
+              const isActive = windowStatus.inWindow && i === 0;
+              return (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 14px',
+                  borderRadius: 7,
+                  background: isActive ? 'rgba(52,211,153,0.06)' : MC.panel,
+                  border: `1px solid ${isActive ? 'rgba(52,211,153,0.20)' : MC.border}`,
+                }}>
+                  {isActive && (
+                    <div style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: MC.green, animation: 'mc-pulse 1.5s ease-in-out infinite',
+                      flexShrink: 0,
+                    }} />
+                  )}
+                  <span style={{
+                    fontFamily: FONT_MONO, fontSize: 13, fontWeight: 700,
+                    color: isActive ? MC.green : MC.text2,
+                  }}>{w.start} – {w.end} CET</span>
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: 4,
+                    fontSize: 9, fontWeight: 700, fontFamily: FONT_MONO,
+                    letterSpacing: '0.1em', textTransform: 'uppercase',
+                    color: w.quality === 'primary' ? MC.cyan : MC.text3,
+                    background: w.quality === 'primary' ? 'rgba(34,211,238,0.08)' : 'transparent',
+                    border: `1px solid ${w.quality === 'primary' ? 'rgba(34,211,238,0.15)' : MC.border}`,
+                  }}>{w.quality === 'primary' ? 'PRIME' : 'SECONDAIRE'}</span>
+                  <span style={{ fontSize: 12, color: MC.text3 }}>{w.reason}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CTA Buttons */}
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={onEnterApproval}
+            disabled={metrics.ready === 0}
+            style={{
+              flex: 2,
+              padding: '18px 28px',
+              background: metrics.ready > 0 ? MC.cyan : MC.surface,
+              color: metrics.ready > 0 ? '#060912' : MC.text3,
+              border: `1px solid ${metrics.ready > 0 ? MC.cyan : MC.border}`,
+              borderRadius: 10,
+              fontFamily: FONT_MONO,
+              fontSize: 13, fontWeight: 800,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              cursor: metrics.ready > 0 ? 'pointer' : 'not-allowed',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {metrics.ready > 0
+              ? `⚡ APPROUVER LES ENVOIS (${metrics.ready})`
+              : 'AUCUN PROSPECT PRÊT'}
+          </button>
+          <button
+            onClick={onOpenCockpit}
+            style={{
+              flex: 1,
+              padding: '18px 28px',
+              background: 'transparent',
+              color: MC.text1,
+              border: `1px solid ${MC.border}`,
+              borderRadius: 10,
+              fontFamily: FONT_MONO,
+              fontSize: 13, fontWeight: 700,
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            VOIR LE PIPELINE
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// MC APPROVAL SCREEN — Tinder-style cards
+// ══════════════════════════════════════════════════════════════
+
+function MCApprovalScreen({
+  card,
+  index,
+  total,
+  cardAnim,
+  onApprove,
+  onPass,
+  onBackToBriefing,
+}: {
+  card: Account;
+  index: number;
+  total: number;
+  cardAnim: 'left' | 'right' | null;
+  onApprove: () => void;
+  onPass: () => void;
+  onBackToBriefing: () => void;
+}) {
+  // Get best outreach message
+  const outreachMsg = card.outreach?.[0];
+  const channel = outreachMsg?.channel || 'email';
+
+  const handleEmailApprove = async () => {
+    // Fire email via API (best-effort), then mark approved
+    if (channel === 'email' && card.financeLead?.email && outreachMsg?.body) {
+      try {
+        await fetch('/api/command/send-approved', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: card.financeLead.email,
+            subject: outreachMsg.subject || `Ghost Tax — ${card.company}`,
+            textBody: outreachMsg.body,
+            domain: card.domain,
+            prospectId: card.id,
+          }),
+        });
+      } catch {}
+    }
+    onApprove();
+  };
+
+  const handleLinkedInApprove = () => {
+    if (card.financeLead?.linkedIn) {
+      // Copy message to clipboard
+      if (outreachMsg?.body) {
+        navigator.clipboard.writeText(outreachMsg.body).catch(() => {});
+      }
+      // Open LinkedIn profile
+      window.open(card.financeLead.linkedIn, '_blank');
+    }
+    onApprove();
+  };
+
+  const handleApproveClick = () => {
+    if (channel === 'linkedin') {
+      handleLinkedInApprove();
+    } else {
+      handleEmailApprove();
+    }
+  };
+
+  const cardAnimation = cardAnim === 'right'
+    ? 'mc-swipeRight 380ms cubic-bezier(0.16,1,0.3,1) forwards'
+    : cardAnim === 'left'
+    ? 'mc-swipeLeft 380ms cubic-bezier(0.16,1,0.3,1) forwards'
+    : 'mc-cardEnter 300ms cubic-bezier(0.16,1,0.3,1) both';
+
+  const progress = ((index) / total) * 100;
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: MC.bg,
+      color: MC.text1,
+      fontFamily: FONT_BODY,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES_CSS }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 28px',
+        borderBottom: `1px solid ${MC.border}`,
+        background: MC.surface,
+        flexShrink: 0,
+      }}>
+        <button
+          onClick={onBackToBriefing}
+          style={{
+            background: 'transparent', color: MC.text2,
+            border: 'none', cursor: 'pointer',
+            fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            padding: '4px 0',
+          }}
+        >
+          ← BRIEFING
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700,
+            letterSpacing: '0.14em', color: MC.cyan, textTransform: 'uppercase',
+          }}>MODE APPROBATION</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: MC.text3, marginTop: 2 }}>
+            {index + 1} / {total}
+          </div>
+        </div>
+        <div style={{ width: 80 }} /> {/* spacer */}
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: 2, background: MC.surface }}>
+        <div style={{
+          height: '100%',
+          width: `${progress}%`,
+          background: MC.cyan,
+          transition: 'width 300ms ease',
+        }} />
+      </div>
+
+      {/* Card */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '32px 20px 20px',
+      }}>
+        <div
+          key={`card-${card.id}-${index}`}
+          style={{
+            width: '100%', maxWidth: 520,
+            animation: cardAnimation,
+          }}
+        >
+          {/* Company card */}
+          <div style={{
+            background: MC.surface,
+            border: `1px solid ${MC.border}`,
+            borderRadius: 16,
+            overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+          }}>
+            {/* Card header */}
+            <div style={{
+              padding: '24px 28px 20px',
+              borderBottom: `1px solid ${MC.border}`,
+              background: MC.panel,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{
+                    fontSize: 22, fontWeight: 800, color: MC.text1,
+                    letterSpacing: '-0.01em', marginBottom: 4,
+                  }}>{card.company}</div>
+                  <div style={{ fontSize: 13, color: MC.text2 }}>{card.domain}</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{
+                    fontFamily: FONT_MONO, fontSize: 28, fontWeight: 700,
+                    color: (card.score || 0) >= 70 ? MC.green : (card.score || 0) >= 50 ? MC.amber : MC.text2,
+                    letterSpacing: '-0.02em', lineHeight: 1,
+                  }}>{card.score || '—'}</div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: MC.text3, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>HEAT SCORE</div>
+                </div>
+              </div>
+
+              {/* Contact */}
+              {card.financeLead?.name && (
+                <div style={{
+                  marginTop: 14, padding: '10px 14px',
+                  background: MC.bg, borderRadius: 8,
+                  border: `1px solid ${MC.border}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: `rgba(34,211,238,0.12)`,
+                      border: `1px solid rgba(34,211,238,0.20)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700, color: MC.cyan,
+                      flexShrink: 0,
+                    }}>
+                      {card.financeLead.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: MC.text1 }}>{card.financeLead.name}</div>
+                      <div style={{ fontSize: 11, color: MC.text2 }}>{card.financeLead.title}</div>
+                    </div>
+                    <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                      <span style={{
+                        fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        color: channel === 'email' ? MC.cyan : '#a78bfa',
+                        padding: '2px 7px',
+                        background: channel === 'email' ? 'rgba(34,211,238,0.08)' : 'rgba(167,139,250,0.08)',
+                        border: `1px solid ${channel === 'email' ? 'rgba(34,211,238,0.15)' : 'rgba(167,139,250,0.15)'}`,
+                        borderRadius: 4,
+                      }}>
+                        {channel === 'email' ? '@ EMAIL' : 'LI LINKEDIN'}
+                      </span>
+                      {card.country && (
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: MC.text3 }}>{card.country}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Revenue estimate */}
+            {card.revenueEstimate > 0 && (
+              <div style={{
+                padding: '12px 28px',
+                borderBottom: `1px solid ${MC.border}`,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: MC.text3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  EXPOSITION EST.
+                </span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700, color: MC.green }}>
+                  ~{card.revenueEstimate >= 1000 ? `${Math.round(card.revenueEstimate / 1000)}k` : card.revenueEstimate} EUR
+                </span>
+              </div>
+            )}
+
+            {/* Message preview */}
+            {outreachMsg?.body && (
+              <div style={{ padding: '20px 28px' }}>
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+                  letterSpacing: '0.12em', color: MC.text3, textTransform: 'uppercase', marginBottom: 10,
+                }}>APERÇU DU MESSAGE</div>
+                {outreachMsg.subject && (
+                  <div style={{
+                    fontSize: 12, fontWeight: 600, color: MC.text1,
+                    marginBottom: 8, fontFamily: FONT_MONO,
+                    borderBottom: `1px solid ${MC.border}`, paddingBottom: 8,
+                  }}>
+                    Objet : {outreachMsg.subject}
+                  </div>
+                )}
+                <div style={{
+                  fontSize: 12, color: MC.text2, lineHeight: 1.65,
+                  maxHeight: 120, overflow: 'hidden',
+                  maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                }}>
+                  {outreachMsg.body}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button
+              onClick={onPass}
+              style={{
+                flex: 1,
+                padding: '16px 0',
+                background: 'transparent',
+                color: MC.text2,
+                border: `1px solid ${MC.border}`,
+                borderRadius: 12,
+                fontFamily: FONT_MONO,
+                fontSize: 13, fontWeight: 700,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              ← PASSER
+            </button>
+            <button
+              onClick={handleApproveClick}
+              style={{
+                flex: 2,
+                padding: '16px 0',
+                background: MC.green,
+                color: '#060912',
+                border: 'none',
+                borderRadius: 12,
+                fontFamily: FONT_MONO,
+                fontSize: 14, fontWeight: 800,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                cursor: 'pointer',
+                boxShadow: '0 0 24px rgba(52,211,153,0.25)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {channel === 'linkedin' ? 'APPROUVER + OUVRIR LI →' : 'APPROUVER + ENVOYER →'}
+            </button>
+          </div>
+
+          {/* Hint */}
+          <div style={{
+            textAlign: 'center', marginTop: 14,
+            fontFamily: FONT_MONO, fontSize: 10, color: MC.text3,
+          }}>
+            {channel === 'linkedin'
+              ? 'Le message sera copié dans le presse-papier · LinkedIn s\'ouvrira dans un nouvel onglet'
+              : 'L\'email sera envoyé via Resend depuis reports@ghost-tax.com'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// MC DONE SCREEN — Session Summary
+// ══════════════════════════════════════════════════════════════
+
+function MCDoneScreen({
+  approved,
+  passed,
+  onBackToBriefing,
+  onOpenCockpit,
+}: {
+  approved: Account[];
+  passed: Account[];
+  onBackToBriefing: () => void;
+  onOpenCockpit: () => void;
+}) {
+  const totalRevEst = approved.reduce((s, a) => s + (a.revenueEstimate || 0), 0);
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: MC.bg,
+      color: MC.text1,
+      fontFamily: FONT_BODY,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES_CSS }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 28px',
+        borderBottom: `1px solid ${MC.border}`,
+        background: MC.surface,
+      }}>
+        <button
+          onClick={onBackToBriefing}
+          style={{
+            background: 'transparent', color: MC.text2,
+            border: 'none', cursor: 'pointer',
+            fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+            letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 0',
+          }}
+        >
+          ← NOUVEAU BRIEFING
+        </button>
+        <div style={{
+          fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.14em', color: MC.cyan, textTransform: 'uppercase',
+        }}>BILAN DE SESSION</div>
+        <button
+          onClick={onOpenCockpit}
+          style={{
+            padding: '6px 14px',
+            background: 'transparent', color: MC.text2,
+            border: `1px solid ${MC.border}`, borderRadius: 6,
+            fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600,
+            letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+          }}
+        >
+          COCKPIT →
+        </button>
+      </div>
+
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: '60px 28px' }}>
+        {/* Trophy */}
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{
+            fontSize: 52, marginBottom: 16,
+          }}>
+            {approved.length > 0 ? '🎯' : '✅'}
+          </div>
+          <div style={{
+            fontSize: 28, fontWeight: 800, color: MC.text1,
+            letterSpacing: '-0.02em', marginBottom: 8,
+          }}>
+            Session terminée
+          </div>
+          <div style={{ fontSize: 14, color: MC.text2 }}>
+            {approved.length > 0
+              ? `${approved.length} message${approved.length > 1 ? 's' : ''} approuvé${approved.length > 1 ? 's' : ''} — ${passed.length} passé${passed.length > 1 ? 's' : ''}`
+              : 'Aucun envoi cette session'}
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr',
+          gap: 12, marginBottom: 32,
+        }}>
+          {[
+            { label: 'APPROUVÉS', value: approved.length, color: MC.green },
+            { label: 'PASSÉS', value: passed.length, color: MC.text2 },
+            {
+              label: 'EXPOSITION CIBLÉE',
+              value: totalRevEst >= 1000 ? `~${Math.round(totalRevEst / 1000)}k EUR` : `${totalRevEst} EUR`,
+              color: MC.cyan,
+              isString: true,
+            },
+            { label: 'MARCHÉS', value: [...new Set(approved.map(a => a.country).filter(Boolean))].join(', ') || '—', isString: true, color: MC.text2 },
+          ].map((s, i) => (
+            <div key={i} style={{
+              background: MC.surface, border: `1px solid ${MC.border}`,
+              borderRadius: 10, padding: '20px 22px',
+            }}>
+              <div style={{
+                fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+                letterSpacing: '0.14em', color: MC.text3, textTransform: 'uppercase', marginBottom: 8,
+              }}>{s.label}</div>
+              <div style={{
+                fontFamily: FONT_MONO,
+                fontSize: s.isString ? 16 : 32,
+                fontWeight: 700, color: s.color,
+                letterSpacing: '-0.02em',
+              }}>
+                {s.value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Approved list */}
+        {approved.length > 0 && (
+          <div style={{
+            background: MC.surface, border: `1px solid ${MC.border}`,
+            borderRadius: 10, overflow: 'hidden', marginBottom: 24,
+          }}>
+            <div style={{
+              padding: '14px 20px',
+              borderBottom: `1px solid ${MC.border}`,
+              fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700,
+              letterSpacing: '0.14em', color: MC.text3, textTransform: 'uppercase',
+            }}>ENVOIS APPROUVÉS</div>
+            {approved.map((a, i) => (
+              <div key={a.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 20px',
+                borderBottom: i < approved.length - 1 ? `1px solid ${MC.border}` : 'none',
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: MC.text1 }}>{a.company}</div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: MC.text3 }}>{a.financeLead?.name} · {a.financeLead?.title}</div>
+                </div>
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700,
+                  color: MC.green, textTransform: 'uppercase', letterSpacing: '0.06em',
+                }}>✓ ENVOYÉ</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={onBackToBriefing}
+            style={{
+              flex: 1,
+              padding: '16px 0',
+              background: MC.cyan,
+              color: '#060912',
+              border: 'none',
+              borderRadius: 10,
+              fontFamily: FONT_MONO,
+              fontSize: 12, fontWeight: 800,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            NOUVEAU BRIEFING
+          </button>
+          <button
+            onClick={onOpenCockpit}
+            style={{
+              flex: 1,
+              padding: '16px 0',
+              background: 'transparent',
+              color: MC.text1,
+              border: `1px solid ${MC.border}`,
+              borderRadius: 10,
+              fontFamily: FONT_MONO,
+              fontSize: 12, fontWeight: 700,
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            VOIR LE PIPELINE
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

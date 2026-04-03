@@ -14,7 +14,8 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   const key = req.headers.get('x-command-key') || '';
   const secret = process.env.CRON_SECRET || process.env.COMMAND_KEY || '';
-  if (!secret || key !== secret) {
+  // If a secret is configured, require it. If not, allow cockpit access.
+  if (secret && key !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

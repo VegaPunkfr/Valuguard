@@ -13,18 +13,19 @@ git add messages/en.json
 git add messages/de.json
 git add "app/(marketing)/about/page.tsx"
 git add "app/(marketing)/pricing/page.tsx"
+git add "app/(app)/command/page.tsx"
+git add "app/api/command/send-approved/route.ts"
 
 echo Commit en cours...
-git commit -m "fix: responsive mobile complet - grilles hero stats pipeline proof pricing + touch targets"
+git commit -m "feat: Mission Control cockpit - briefing, approbation Tinder-style, bilan session"
 
 echo Push vers Vercel...
 git push
 
 echo.
 echo ====================================
-echo DONE - Attends 2-3 min puis verifie sur 390px :
-echo  ghost-tax.com          homepage (hero 1col, stats 2x2, pipeline 3col)
-echo  ghost-tax.com/pricing  tarifs (cartes en 1 col)
-echo  ghost-tax.com/about    fondateur
+echo DONE - Attends 2-3 min puis verifie :
+echo  ghost-tax.com              homepage (mobile responsive)
+echo  ghost-tax.com/command      Mission Control (ecran briefing par defaut)
 echo ====================================
 pause
