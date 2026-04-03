@@ -460,41 +460,53 @@ export async function runAutoPipeline(): Promise<{
 
     // Merge into existing accounts
     const accounts = loadAccounts();
-    const existingDomains = new Set(accounts.map(a => a.domain));
     let added = 0;
+    let withMessages = 0;
 
     for (const prospect of newProspects) {
-      if (existingDomains.has(prospect.domain)) continue;
-      accounts.push(prospect as any);
+      // Skip duplicates
+      if (accounts.some(a => a.domain === prospect.domain)) continue;
+
+      const account: Account = {
+        id: `auto-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        company: prospect.company || prospect.domain,
+        domain: prospect.domain,
+        country: prospect.country || 'DE',
+        status: 'outreach_ready',
+        financeLead: prospect.financeLead || null,
+        signals: prospect.signals || [],
+        outreach: [],
+        revenueEstimate: prospect.revenueEstimate || 0,
+        headcount: prospect.headcount || 0,
+        industry: prospect.industry || '',
+        replied: false,
+        converted: false,
+      };
+
+      // If prospect came with a draft message, add it
+      if (prospect.message) {
+        account.outreach = [{
+          channel: prospect.message.channel || 'email',
+          status: 'draft',
+          subject: prospect.message.subject || '',
+          body: prospect.message.body || '',
+          createdAt: new Date().toISOString(),
+        } as any];
+        withMessages++;
+      }
+
+      accounts.push(account);
+      pushActivity('🔍', `Nouveau prospect: ${account.company} (${account.country})`);
       added++;
-      pushActivity('🔍', `Nouveau prospect : ${prospect.company} (${prospect.country})`);
     }
 
     if (added > 0) {
       saveAccounts(accounts);
     }
 
-    return {
-      added,
-      withMessages: newProspects.filter((p: any) => p.outreach?.length > 0).length,
-    };
-  } catch {
+    return { added, withMessages };
+  } catch (err) {
+    console.error('Auto-pipeline error:', err);
     return { added: 0, withMessages: 0 };
   }
-}
-
-// ── Formatting Helpers ────────────────────────────────────
-
-export function fmtEur(amount: number): string {
-  if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M €`;
-  if (amount >= 1_000) return `${Math.round(amount / 1_000)}k €`;
-  return `${Math.round(amount)} €`;
-}
-
-export function fmtDuration(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  if (minutes === 0) return `${seconds}s`;
-  return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
 }

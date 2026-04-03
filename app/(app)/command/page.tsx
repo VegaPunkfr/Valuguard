@@ -1,15 +1,16 @@
 'use client';
 
 /**
- * GHOST TAX — MISSION CONTROL V9
- * cockpit-engine.ts + AI message generation.
- * buildCockpitState() + generateMissingMessages() = pipeline vivant.
+ * GHOST TAX — MISSION CONTROL V10
+ * Auto-pipeline: Apollo search → enrich → AI messages → cockpit.
+ * Edith ouvre le cockpit, il se remplit tout seul.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   buildCockpitState,
+  runAutoPipeline,
   sendApprovedEmail,
   handleLinkedInApproval,
   setupKeyboardShortcuts,
@@ -66,13 +67,63 @@ function Flag({ country }: { country: string }) {
 }
 
 // ── Spinner ───────────────────────────────────────────────
-function Spinner() {
+function Spinner({ size = 14 }: { size?: number }) {
   return (
     <span style={{
-      display: 'inline-block', width: 14, height: 14,
+      display: 'inline-block', width: size, height: size,
       border: `2px solid ${P.text4}`, borderTopColor: P.cyan,
       borderRadius: '50%', animation: 'spin 0.8s linear infinite',
     }} />
+  );
+}
+
+// ── Loading Screen ────────────────────────────────────────
+function LoadingScreen({ message, detail }: { message: string; detail?: string }) {
+  return (
+    <div style={{
+      background: P.bg, minHeight: '100%', fontFamily: FS,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{ textAlign: 'center', maxWidth: 480, padding: 32 }}>
+        <div style={{ marginBottom: 24 }}>
+          <Spinner size={32} />
+        </div>
+
+        <div style={{
+          fontFamily: FM, fontSize: 14, fontWeight: 700, color: P.cyan,
+          marginBottom: 12, letterSpacing: '.04em',
+        }}>
+          {message}
+        </div>
+
+        {detail && (
+          <div style={{
+            fontFamily: FM, fontSize: 11, color: P.text3,
+            lineHeight: 1.8, maxWidth: 360, margin: '0 auto',
+          }}>
+            {detail}
+          </div>
+        )}
+
+        <div style={{
+          marginTop: 24, height: 3, background: P.text4,
+          borderRadius: 2, overflow: 'hidden', maxWidth: 280,
+          margin: '24px auto 0',
+        }}>
+          <div style={{
+            height: '100%', background: P.cyan, borderRadius: 2,
+            animation: 'loading-bar 3s ease-in-out infinite',
+          }} />
+        </div>
+
+        <div style={{
+          fontFamily: FM, fontSize: 10, color: P.text4,
+          marginTop: 16, letterSpacing: '.06em',
+        }}>
+          Temps estim{'\u00e9'} : ~45 secondes
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -80,10 +131,12 @@ function Spinner() {
 // ── MAIN PAGE ─────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
 
-export default function MissionControlV9() {
+export default function MissionControlV10() {
   const [state, setState] = useState<CockpitState | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [genResult, setGenResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Chargement du cockpit...');
+  const [loadingDetail, setLoadingDetail] = useState<string | undefined>();
+  const [refreshing, setRefreshing] = useState(false);
   const [approvalMode, setApprovalMode] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sessionStart, setSessionStart] = useState(0);
@@ -93,35 +146,56 @@ export default function MissionControlV9() {
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // ── Load state + auto-generate missing messages ──
+  // ── Boot: load state + auto-pipeline if empty ──
   useEffect(() => {
-    async function init() {
-      const initialState = buildCockpitState();
-      setState(initialState);
+    async function boot() {
+      setLoading(true);
 
-      // If no messages to approve, try generating them
-      if (initialState.approvalQueue.length === 0) {
-        const accounts = loadAccounts();
-        const eligibleCount = accounts.filter(a =>
-          a.status !== 'dropped' &&
-          a.signals?.length > 0 &&
-          a.financeLead?.name &&
-          !a.outreach?.some((o: any) => o.status === 'draft')
-        ).length;
+      // 1. Charger l'état existant
+      setLoadingMessage('Chargement du cockpit...');
+      let cockpitState = buildCockpitState();
 
-        if (eligibleCount > 0) {
-          setGenerating(true);
-          const generated = await generateMissingMessages(accounts);
-          setGenerating(false);
-          if (generated > 0) {
-            setGenResult(`${generated} message${generated > 1 ? 's' : ''} IA g\u00e9n\u00e9r\u00e9${generated > 1 ? 's' : ''}`);
-            setState(buildCockpitState());
-            setTimeout(() => setGenResult(null), 4000);
+      // 2. Si la queue est vide → lancer le pipeline automatique
+      if (cockpitState.approvalQueue.length === 0) {
+        setLoadingMessage('\ud83d\udd0d Recherche de prospects sur Apollo...');
+        setLoadingDetail('Le syst\u00e8me cherche des CFOs et CIOs,\nscanne leurs entreprises, et g\u00e9n\u00e8re\ndes messages personnalis\u00e9s.');
+
+        const { added, withMessages } = await runAutoPipeline();
+
+        if (added > 0) {
+          setLoadingMessage(`\u2705 ${added} prospect${added > 1 ? 's' : ''} trouv\u00e9${added > 1 ? 's' : ''}`);
+          setLoadingDetail(undefined);
+
+          // 3. Si des prospects n'ont pas de messages → les générer
+          if (withMessages < added) {
+            setLoadingMessage('\ud83e\udd16 G\u00e9n\u00e9ration des messages IA...');
+            setLoadingDetail(`${added - withMessages} message${(added - withMessages) > 1 ? 's' : ''} \u00e0 g\u00e9n\u00e9rer...`);
+            const accounts = loadAccounts();
+            const generated = await generateMissingMessages(accounts);
+            if (generated > 0) {
+              setLoadingMessage(`\u2705 ${added} prospects, ${withMessages + generated} messages \u2014 pr\u00eats \u00e0 valider`);
+            }
+          } else {
+            setLoadingMessage(`\u2705 ${added} prospects avec messages \u2014 pr\u00eats \u00e0 valider`);
           }
+
+          // Small delay so user sees the success message
+          await new Promise(r => setTimeout(r, 1200));
+
+          // 4. Recharger l'état
+          cockpitState = buildCockpitState();
+        } else {
+          // Pipeline found nothing — still load the cockpit
+          setLoadingMessage('Aucun nouveau prospect disponible');
+          setLoadingDetail(undefined);
+          await new Promise(r => setTimeout(r, 800));
         }
       }
+
+      setState(cockpitState);
+      setLoading(false);
     }
-    init();
+    boot();
   }, []);
 
   // ── Tab title badge ──
@@ -181,7 +255,7 @@ export default function MissionControlV9() {
 
   const closeApproval = useCallback(() => {
     if (approved + skipped > 0) {
-      pushActivity('\ud83c\udfaf', `Session: ${approved} approuv\u00e9${approved > 1 ? 's' : ''}, ${skipped} pass\u00e9${skipped > 1 ? 's' : ''}, ${fmtDuration(elapsed)}`);
+      pushActivity('\ud83c\udfaf', `Session: ${approved} approuv\u00e9${approved > 1 ? 's' : ''}, ${skipped} pass\u00e9${skipped > 1 ? 's' : ''}, ${fmtDuration(elapsed * 1000)}`);
     }
     setApprovalMode(false);
     setState(buildCockpitState());
@@ -203,20 +277,19 @@ export default function MissionControlV9() {
     setApprovalMode(true);
   }
 
-  // ── Manual generate trigger ──
-  async function handleGenerate() {
-    setGenerating(true);
-    setGenResult(null);
-    const accounts = loadAccounts();
-    const generated = await generateMissingMessages(accounts);
-    setGenerating(false);
-    if (generated > 0) {
-      setGenResult(`\u2705 ${generated} message${generated > 1 ? 's' : ''} g\u00e9n\u00e9r\u00e9${generated > 1 ? 's' : ''}`);
-      setState(buildCockpitState());
-    } else {
-      setGenResult('\u26a0\ufe0f Aucun prospect \u00e9ligible');
+  // ── Refresh pipeline ──
+  async function handleRefresh() {
+    setRefreshing(true);
+    const { added, withMessages } = await runAutoPipeline();
+    if (added > 0 && withMessages < added) {
+      const accounts = loadAccounts();
+      await generateMissingMessages(accounts);
     }
-    setTimeout(() => setGenResult(null), 4000);
+    setState(buildCockpitState());
+    setRefreshing(false);
+    if (added > 0) {
+      pushActivity('\ud83d\udd04', `Pipeline refresh: ${added} nouveaux prospects`);
+    }
   }
 
   // ── Copy LinkedIn post ──
@@ -228,7 +301,23 @@ export default function MissionControlV9() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  // Loading
+  // ── LOADING SCREEN ──
+  if (loading) {
+    return (
+      <>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @keyframes loading-bar {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 95%; }
+          }
+        `}</style>
+        <LoadingScreen message={loadingMessage} detail={loadingDetail} />
+      </>
+    );
+  }
+
   if (!state) return <div style={{ background: P.bg, minHeight: '100%' }} />;
 
   const { brief, approvalQueue, autoSentCount, followUpsDue, revenueEUR, linkedinPost, activityFeed, pipelineValueEUR } = state;
@@ -249,9 +338,10 @@ export default function MissionControlV9() {
           background: P.bg, color: P.text1, fontFamily: FS,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <div style={{ textAlign: 'center', maxWidth: 440 }}>
             <div style={{ fontFamily: FM, fontSize: 14, color: P.green, letterSpacing: '.1em', marginBottom: 12 }}>
-              {'\ud83c\udfaf'} SESSION TERMIN{'\u00c9'}E {'\u00b7'} {fmtDuration(elapsed)}
+              {'\ud83c\udfaf'} SESSION TERMIN{'\u00c9'}E {'\u00b7'} {fmtDuration(elapsed * 1000)}
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 32, margin: '24px 0' }}>
               <div>
@@ -314,6 +404,7 @@ export default function MissionControlV9() {
         background: P.bg, color: P.text1, fontFamily: FS,
         display: 'flex', flexDirection: 'column',
       }}>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         {/* Top bar */}
         <div style={{
           height: 48, padding: '0 24px',
@@ -330,7 +421,7 @@ export default function MissionControlV9() {
             {currentIdx + 1}/{approvalQueue.length}
           </span>
           <span style={{ fontFamily: FM, fontSize: 10, color: P.text3 }}>
-            {fmtDuration(elapsed)}
+            {fmtDuration(elapsed * 1000)}
           </span>
           <div style={{ flex: 1, height: 2, background: P.text4, borderRadius: 1 }}>
             <div style={{ width: `${progress}%`, height: '100%', background: P.cyan, borderRadius: 1, transition: 'width .3s' }} />
@@ -356,7 +447,7 @@ export default function MissionControlV9() {
               </div>
             </div>
 
-            {/* Exposure — THE conviction moment */}
+            {/* Exposure */}
             <div style={{
               background: P.surface, border: `1px solid ${P.border}`,
               borderRadius: 10, padding: '16px 20px', marginBottom: 20,
@@ -443,8 +534,14 @@ export default function MissionControlV9() {
       minHeight: '100%', padding: '28px 28px 80px',
       maxWidth: 800, margin: '0 auto',
     }}>
-      {/* CSS animation for spinner */}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes loading-bar {
+          0% { width: 0%; }
+          50% { width: 70%; }
+          100% { width: 95%; }
+        }
+      `}</style>
 
       {/* ── HEADER ── */}
       <div style={{ marginBottom: 20 }}>
@@ -464,30 +561,7 @@ export default function MissionControlV9() {
       </div>
 
       {/* ── ACTION BANNER ── */}
-      {generating ? (
-        <div style={{
-          background: P.surface, border: `1px solid ${P.border}`,
-          borderRadius: 12, padding: '24px 28px', marginBottom: 28,
-          textAlign: 'center',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-            <Spinner />
-            <span style={{ fontFamily: FM, fontSize: 12, color: P.cyan }}>
-              G{'\u00e9'}n{'\u00e9'}ration de messages personnalis{'\u00e9'}s...
-            </span>
-          </div>
-        </div>
-      ) : genResult ? (
-        <div style={{
-          background: P.surface, border: `1px solid ${P.border}`,
-          borderRadius: 12, padding: '20px 28px', marginBottom: 28,
-          textAlign: 'center',
-        }}>
-          <div style={{ fontFamily: FM, fontSize: 12, color: P.green }}>
-            {genResult}
-          </div>
-        </div>
-      ) : approvalQueue.length > 0 ? (
+      {approvalQueue.length > 0 ? (
         <div style={{
           background: P.surface, border: `1px solid ${P.border}`,
           borderRadius: 12, padding: '24px 28px', marginBottom: 28,
@@ -524,13 +598,6 @@ export default function MissionControlV9() {
           <div style={{ fontFamily: FM, fontSize: 12, color: P.green, marginBottom: 12 }}>
             Rien {'\u00e0'} faire. Prochain briefing demain 8:25.
           </div>
-          <button onClick={handleGenerate} style={{
-            fontFamily: FM, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-            padding: '8px 20px', borderRadius: 6, cursor: 'pointer',
-            border: `1px solid ${P.cyan}30`, background: `${P.cyan}08`, color: P.cyan,
-          }}>
-            {'\ud83e\udd16'} G{'\u00c9'}N{'\u00c9'}RER LES MESSAGES IA
-          </button>
         </div>
       )}
 
@@ -593,6 +660,20 @@ export default function MissionControlV9() {
             </Link>
           );
         })}
+      </div>
+
+      {/* ── REFRESH BUTTON ── */}
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <button onClick={handleRefresh} disabled={refreshing} style={{
+          fontFamily: FM, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
+          padding: '10px 24px', borderRadius: 6, cursor: refreshing ? 'wait' : 'pointer',
+          border: `1px solid ${P.cyan}20`, background: `${P.cyan}06`, color: P.cyan,
+          opacity: refreshing ? 0.6 : 1,
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+        }}>
+          {refreshing ? <Spinner size={12} /> : null}
+          {refreshing ? 'RECHERCHE EN COURS...' : '\ud83d\udd04 CHERCHER DE NOUVEAUX PROSPECTS'}
+        </button>
       </div>
 
       {/* ── LINKEDIN POST ── */}
