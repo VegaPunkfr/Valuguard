@@ -365,30 +365,14 @@ export async function generateAIMessage(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         prospect: {
-          firstName: account.financeLead?.name?.split(' ')[0] || '',
-          lastName: account.financeLead?.name?.split(' ').slice(1).join(' ') || '',
-          title: account.financeLead?.title || 'CFO',
           company: account.company,
           domain: account.domain,
           country: account.country,
-          headcount: account.headcount,
-          industry: account.industry,
-          signals: account.signals?.map(s => typeof s === 'string' ? s : s.type) || [],
-        },
-        scan: account.scan ? {
-          exposureLow: account.scan.exposureLow,
-          exposureHigh: account.scan.exposureHigh,
-          dailyLoss: Math.round(((account.scan.exposureLow + account.scan.exposureHigh) / 2) / 365),
-          confidence: 65,
-          signals: account.scan.vendors?.slice(0, 3).map(v => ({
-            label: v, impactLow: 10000, impactHigh: 50000, evidenceClass: 'inferred',
-          })) || [],
-        } : {
-          exposureLow: account.revenueEstimate * 0.8 || 100000,
-          exposureHigh: account.revenueEstimate * 1.2 || 300000,
-          dailyLoss: Math.round((account.revenueEstimate || 200000) / 365),
-          confidence: 45,
-          signals: [],
+          industry: (account as any).industry || '',
+          headcount: (account as any).headcount || 0,
+          financeLead: account.financeLead,
+          signals: account.signals || [],
+          revenueEstimate: account.revenueEstimate || 0,
         },
         channel,
         sequenceStep,
@@ -397,63 +381,57 @@ export async function generateAIMessage(
 
     if (!res.ok) return null;
     const data = await res.json();
-    return { subject: data.subject, body: data.body, language: data.language };
+    return {
+      subject: data.subject,
+      body: data.body,
+      language: data.language || 'en',
+    };
   } catch {
     return null;
   }
 }
 
-/**
- * Generate AI messages for all prospects without drafts.
- * Called from the cockpit when messages are needed.
- * Returns the number of messages generated.
- */
-export async function generateMissingMessages(accounts: Account[]): Promise<number> {
+// ── Generate Missing Messages for All Prospects ───────────
+
+export async function generateMissingMessages(
+  accounts: Account[],
+): Promise<number> {
   let generated = 0;
 
   for (const account of accounts) {
     if (account.status === 'dropped') continue;
     if (!account.signals || account.signals.length === 0) continue;
-    if (account.outreach?.some(o => o.status === 'draft')) continue; // Already has draft
 
-    const channel = ['DE', 'AT', 'CH'].includes(account.country)
-      ? ('email' as const) // DE prefers email
-      : ('linkedin_dm' as const);
+    // Skip if already has a draft
+    const hasDraft = account.outreach?.some((o: any) => o.status === 'draft');
+    if (hasDraft) continue;
 
-    const result = await generateAIMessage(account, channel, 'M1');
-    if (result) {
-      // Add the generated message as an outreach draft
-      account.outreach = account.outreach || [];
-      account.outreach.push({
-        channel: channel === 'linkedin_dm' ? 'linkedin' : 'email',
-        subject: result.subject,
-        body: result.body,
-        hook: result.body.split('\n')[0] || '',
-        status: 'draft',
-      });
-      generated++;
-      pushActivity('🤖', `Message IA généré pour ${account.company} (${result.language})`);
-    }
+    // Skip if no finance lead
+    if (!account.financeLead?.name) continue;
+
+    // Determine channel
+    const channel = account.financeLead?.email ? 'email' : 'linkedin_dm';
+
+    const msg = await generateAIMessage(account, channel, 'M1');
+    if (!msg) continue;
+
+    // Add draft to account outreach
+    if (!account.outreach) (account as any).outreach = [];
+    account.outreach.push({
+      channel: channel === 'linkedin_dm' ? 'linkedin' : 'email',
+      status: 'draft',
+      subject: msg.subject || '',
+      body: msg.body,
+      createdAt: new Date().toISOString(),
+    } as any);
+
+    pushActivity('\ud83e\udd16', `Message IA g\u00e9n\u00e9r\u00e9 pour ${account.company} (${msg.language})`);
+    generated++;
   }
 
-  // Save updated accounts
   if (generated > 0) {
     saveAccounts(accounts);
   }
 
   return generated;
-}
-
-// ── Format helpers ─────────────────────────────────────────
-
-export function fmtEur(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}k`;
-  return `${Math.round(n)}`;
-}
-
-export function fmtDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }

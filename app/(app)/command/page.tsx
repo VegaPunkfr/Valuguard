@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * GHOST TAX — MISSION CONTROL V8
- * Câblé sur cockpit-engine.ts — les 22 moteurs connectés.
- * Tout passe par buildCockpitState(). Zéro calcul manuel.
+ * GHOST TAX — MISSION CONTROL V9
+ * cockpit-engine.ts + AI message generation.
+ * buildCockpitState() + generateMissingMessages() = pipeline vivant.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -15,11 +15,13 @@ import {
   setupKeyboardShortcuts,
   updateTabTitle,
   pushActivity,
+  generateMissingMessages,
   fmtEur,
   fmtDuration,
   type CockpitState,
   type ApprovalItem,
 } from '@/lib/command/cockpit-engine';
+import { loadAccounts } from '@/lib/command/store';
 
 // ── Tokens ───────────────────────────────────────────────
 const P = {
@@ -63,12 +65,25 @@ function Flag({ country }: { country: string }) {
   return <span style={{ fontSize: 12 }}>{flags[country] || country}</span>;
 }
 
+// ── Spinner ───────────────────────────────────────────────
+function Spinner() {
+  return (
+    <span style={{
+      display: 'inline-block', width: 14, height: 14,
+      border: `2px solid ${P.text4}`, borderTopColor: P.cyan,
+      borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+    }} />
+  );
+}
+
 // ══════════════════════════════════════════════════════════
 // ── MAIN PAGE ─────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
 
-export default function MissionControlV8() {
+export default function MissionControlV9() {
   const [state, setState] = useState<CockpitState | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [genResult, setGenResult] = useState<string | null>(null);
   const [approvalMode, setApprovalMode] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sessionStart, setSessionStart] = useState(0);
@@ -78,9 +93,35 @@ export default function MissionControlV8() {
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // ── Load state from engine ──
+  // ── Load state + auto-generate missing messages ──
   useEffect(() => {
-    setState(buildCockpitState());
+    async function init() {
+      const initialState = buildCockpitState();
+      setState(initialState);
+
+      // If no messages to approve, try generating them
+      if (initialState.approvalQueue.length === 0) {
+        const accounts = loadAccounts();
+        const eligibleCount = accounts.filter(a =>
+          a.status !== 'dropped' &&
+          a.signals?.length > 0 &&
+          a.financeLead?.name &&
+          !a.outreach?.some((o: any) => o.status === 'draft')
+        ).length;
+
+        if (eligibleCount > 0) {
+          setGenerating(true);
+          const generated = await generateMissingMessages(accounts);
+          setGenerating(false);
+          if (generated > 0) {
+            setGenResult(`${generated} message${generated > 1 ? 's' : ''} IA g\u00e9n\u00e9r\u00e9${generated > 1 ? 's' : ''}`);
+            setState(buildCockpitState());
+            setTimeout(() => setGenResult(null), 4000);
+          }
+        }
+      }
+    }
+    init();
   }, []);
 
   // ── Tab title badge ──
@@ -123,7 +164,6 @@ export default function MissionControlV8() {
       if (currentIdx + 1 < state.approvalQueue.length) {
         setCurrentIdx(i => i + 1);
       }
-      // If last item, stay in approval mode to show end screen
     }, 1200);
   }, [state, currentIdx]);
 
@@ -140,9 +180,12 @@ export default function MissionControlV8() {
   }, [state, currentIdx]);
 
   const closeApproval = useCallback(() => {
+    if (approved + skipped > 0) {
+      pushActivity('\ud83c\udfaf', `Session: ${approved} approuv\u00e9${approved > 1 ? 's' : ''}, ${skipped} pass\u00e9${skipped > 1 ? 's' : ''}, ${fmtDuration(elapsed)}`);
+    }
     setApprovalMode(false);
-    setState(buildCockpitState()); // Refresh
-  }, []);
+    setState(buildCockpitState());
+  }, [approved, skipped, elapsed]);
 
   useEffect(() => {
     if (!approvalMode) return;
@@ -160,6 +203,22 @@ export default function MissionControlV8() {
     setApprovalMode(true);
   }
 
+  // ── Manual generate trigger ──
+  async function handleGenerate() {
+    setGenerating(true);
+    setGenResult(null);
+    const accounts = loadAccounts();
+    const generated = await generateMissingMessages(accounts);
+    setGenerating(false);
+    if (generated > 0) {
+      setGenResult(`\u2705 ${generated} message${generated > 1 ? 's' : ''} g\u00e9n\u00e9r\u00e9${generated > 1 ? 's' : ''}`);
+      setState(buildCockpitState());
+    } else {
+      setGenResult('\u26a0\ufe0f Aucun prospect \u00e9ligible');
+    }
+    setTimeout(() => setGenResult(null), 4000);
+  }
+
   // ── Copy LinkedIn post ──
   function handleCopyLinkedIn() {
     if (!state?.linkedinPost) return;
@@ -172,7 +231,7 @@ export default function MissionControlV8() {
   // Loading
   if (!state) return <div style={{ background: P.bg, minHeight: '100%' }} />;
 
-  const { brief, approvalQueue, autoSentCount, followUpsDue, totalSent, revenueEUR, linkedinPost, activityFeed, pipelineValueEUR } = state;
+  const { brief, approvalQueue, autoSentCount, followUpsDue, revenueEUR, linkedinPost, activityFeed, pipelineValueEUR } = state;
 
   // ══════════════════════════════════════════════════════
   // ── APPROVAL OVERLAY ────────────────────────────────
@@ -192,7 +251,7 @@ export default function MissionControlV8() {
         }}>
           <div style={{ textAlign: 'center', maxWidth: 440 }}>
             <div style={{ fontFamily: FM, fontSize: 14, color: P.green, letterSpacing: '.1em', marginBottom: 12 }}>
-              SESSION TERMIN{'\u00c9'}E {'\u00b7'} {fmtDuration(elapsed)}
+              {'\ud83c\udfaf'} SESSION TERMIN{'\u00c9'}E {'\u00b7'} {fmtDuration(elapsed)}
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 32, margin: '24px 0' }}>
               <div>
@@ -276,19 +335,15 @@ export default function MissionControlV8() {
           <div style={{ flex: 1, height: 2, background: P.text4, borderRadius: 1 }}>
             <div style={{ width: `${progress}%`, height: '100%', background: P.cyan, borderRadius: 1, transition: 'width .3s' }} />
           </div>
-          <span style={{ fontFamily: FM, fontSize: 10, color: P.green }}>
-            {approved} {'\u2705'}
-          </span>
-          <span style={{ fontFamily: FM, fontSize: 10, color: P.text3 }}>
-            {skipped} {'\u23ed\ufe0f'}
-          </span>
+          <span style={{ fontFamily: FM, fontSize: 10, color: P.green }}>{approved} {'\u2705'}</span>
+          <span style={{ fontFamily: FM, fontSize: 10, color: P.text3 }}>{skipped} {'\u23ed\ufe0f'}</span>
         </div>
 
         {/* Card */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <div style={{ width: '100%', maxWidth: 560 }}>
 
-            {/* Contact info */}
+            {/* Contact */}
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
                 {a.financeLead?.name || a.company}
@@ -301,7 +356,7 @@ export default function MissionControlV8() {
               </div>
             </div>
 
-            {/* Exposure box — THE conviction moment */}
+            {/* Exposure — THE conviction moment */}
             <div style={{
               background: P.surface, border: `1px solid ${P.border}`,
               borderRadius: 10, padding: '16px 20px', marginBottom: 20,
@@ -319,10 +374,8 @@ export default function MissionControlV8() {
 
             {/* Message preview */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontFamily: FM, fontSize: 10, color: P.cyan, fontWeight: 700, letterSpacing: '.1em' }}>
-                  {item.channel === 'email' ? 'EMAIL' : 'LINKEDIN'} {'\u00b7'} {item.message.language.toUpperCase()}
-                </span>
+              <div style={{ fontFamily: FM, fontSize: 10, color: P.cyan, fontWeight: 700, letterSpacing: '.1em', marginBottom: 8 }}>
+                {item.channel === 'email' ? 'EMAIL' : 'LINKEDIN'} {'\u00b7'} {item.message.language.toUpperCase()}
               </div>
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
@@ -342,11 +395,11 @@ export default function MissionControlV8() {
               </div>
             </div>
 
-            {/* Action feedback */}
+            {/* Feedback */}
             {lastAction && (
               <div style={{
-                fontFamily: FM, fontSize: 12, color: lastAction.startsWith('\u2705') ? P.green : lastAction.startsWith('\u274c') ? P.red : P.cyan,
-                textAlign: 'center', padding: '8px 0', marginBottom: 8,
+                fontFamily: FM, fontSize: 12, textAlign: 'center', padding: '8px 0', marginBottom: 8,
+                color: lastAction.startsWith('\u2705') ? P.green : lastAction.startsWith('\u274c') ? P.red : P.cyan,
               }}>
                 {lastAction}
               </div>
@@ -390,8 +443,10 @@ export default function MissionControlV8() {
       minHeight: '100%', padding: '28px 28px 80px',
       maxWidth: 800, margin: '0 auto',
     }}>
+      {/* CSS animation for spinner */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      {/* ── ZONE 1 — HEADER ── */}
+      {/* ── HEADER ── */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, letterSpacing: '.06em' }}>
           {brief.dayOfWeek} {brief.date}
@@ -408,8 +463,31 @@ export default function MissionControlV8() {
         </div>
       </div>
 
-      {/* ── ZONE 2 — ACTION BANNER ── */}
-      {approvalQueue.length > 0 ? (
+      {/* ── ACTION BANNER ── */}
+      {generating ? (
+        <div style={{
+          background: P.surface, border: `1px solid ${P.border}`,
+          borderRadius: 12, padding: '24px 28px', marginBottom: 28,
+          textAlign: 'center',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            <Spinner />
+            <span style={{ fontFamily: FM, fontSize: 12, color: P.cyan }}>
+              G{'\u00e9'}n{'\u00e9'}ration de messages personnalis{'\u00e9'}s...
+            </span>
+          </div>
+        </div>
+      ) : genResult ? (
+        <div style={{
+          background: P.surface, border: `1px solid ${P.border}`,
+          borderRadius: 12, padding: '20px 28px', marginBottom: 28,
+          textAlign: 'center',
+        }}>
+          <div style={{ fontFamily: FM, fontSize: 12, color: P.green }}>
+            {genResult}
+          </div>
+        </div>
+      ) : approvalQueue.length > 0 ? (
         <div style={{
           background: P.surface, border: `1px solid ${P.border}`,
           borderRadius: 12, padding: '24px 28px', marginBottom: 28,
@@ -443,39 +521,42 @@ export default function MissionControlV8() {
           borderRadius: 12, padding: '20px 28px', marginBottom: 28,
           textAlign: 'center',
         }}>
-          <div style={{ fontFamily: FM, fontSize: 12, color: P.green }}>
+          <div style={{ fontFamily: FM, fontSize: 12, color: P.green, marginBottom: 12 }}>
             Rien {'\u00e0'} faire. Prochain briefing demain 8:25.
           </div>
+          <button onClick={handleGenerate} style={{
+            fontFamily: FM, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
+            padding: '8px 20px', borderRadius: 6, cursor: 'pointer',
+            border: `1px solid ${P.cyan}30`, background: `${P.cyan}08`, color: P.cyan,
+          }}>
+            {'\ud83e\udd16'} G{'\u00c9'}N{'\u00c9'}RER LES MESSAGES IA
+          </button>
         </div>
       )}
 
-      {/* ── ZONE 3 — METRICS ── */}
+      {/* ── METRICS ── */}
       <div style={{
         display: 'flex', gap: 0, marginBottom: 28,
         background: P.surface, border: `1px solid ${P.border}`,
         borderRadius: 10, overflow: 'hidden',
       }}>
         {[
-          { n: autoSentCount,       label: 'auto',   color: P.cyan  },
-          { n: approvalQueue.length, label: 'queue',  color: P.amber },
-          { n: followUpsDue,        label: 'follow', color: P.red   },
-          { n: fmtEur(revenueEUR),  label: 'rev',    color: P.green },
+          { n: autoSentCount,        label: 'auto',   color: P.cyan  },
+          { n: approvalQueue.length,  label: 'queue',  color: P.amber },
+          { n: followUpsDue,         label: 'follow', color: P.red   },
+          { n: fmtEur(revenueEUR),   label: 'rev',    color: P.green },
         ].map((m, i) => (
           <div key={m.label} style={{
             flex: 1, padding: '14px 0', textAlign: 'center',
             borderRight: i < 3 ? `1px solid ${P.border}` : 'none',
           }}>
-            <div style={{ fontFamily: FM, fontSize: 20, fontWeight: 800, color: m.color }}>
-              {m.n}
-            </div>
-            <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, letterSpacing: '.1em', marginTop: 2 }}>
-              {m.label}
-            </div>
+            <div style={{ fontFamily: FM, fontSize: 20, fontWeight: 800, color: m.color }}>{m.n}</div>
+            <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, letterSpacing: '.1em', marginTop: 2 }}>{m.label}</div>
           </div>
         ))}
       </div>
 
-      {/* ── ZONE 4 — PIPELINE ── */}
+      {/* ── PIPELINE ── */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ ...lbl, marginBottom: 10 }}>
           PIPELINE {'\u00b7'} {approvalQueue.length + autoSentCount} comptes
@@ -514,7 +595,7 @@ export default function MissionControlV8() {
         })}
       </div>
 
-      {/* ── ZONE 5 — LINKEDIN POST ── */}
+      {/* ── LINKEDIN POST ── */}
       {linkedinPost && (
         <div style={{
           background: P.surface, border: `1px solid ${P.border}`,
@@ -538,7 +619,7 @@ export default function MissionControlV8() {
         </div>
       )}
 
-      {/* ── ZONE 6 — ACTIVITY FEED ── */}
+      {/* ── ACTIVITY FEED ── */}
       {activityFeed.length > 0 && (
         <div>
           <div style={{ ...lbl, marginBottom: 10 }}>Activit{'\u00e9'}</div>
