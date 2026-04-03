@@ -141,7 +141,7 @@ export default function MissionControlV7() {
     const queue = pipeline.filter(p => p.heat >= 60).length;
     let follow = 0;
     try { follow = getAllPendingFollowUps().length; } catch {}
-    const rev = accounts.filter(a => a.status === 'contacted' || a.status === 'replied').reduce((s, a) => s + (a.revenueEstimate || 0), 0);
+    const rev = accounts.filter(a => a.status === 'contacted' || (a as any).status === 'replied').reduce((s, a) => s + (a.revenueEstimate || 0), 0);
     return { auto, queue, follow, rev };
   }, [accounts, pipeline, ready]);
 
@@ -267,7 +267,7 @@ export default function MissionControlV7() {
                 {a.financeLead.title || 'CFO'} · {a.company}
               </div>
               <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginTop: 2 }}>
-                <Flag country={a.country} /> {a.country} · {a.headcount || '?'} emp · {a.industry}
+                <Flag country={a.country} /> {a.country} · {(a as any).headcount || '?'} emp · {(a as any).industry}
               </div>
             </div>
 
@@ -424,7 +424,7 @@ export default function MissionControlV7() {
             ? 'pr\u00eat'
             : a.status === 'contacted'
               ? 'envoy\u00e9'
-              : a.status === 'replied'
+              : (a as any).status === 'replied'
                 ? 'r\u00e9pondu'
                 : a.status === 'dropped'
                   ? 'drop'
@@ -465,7 +465,7 @@ export default function MissionControlV7() {
             fontFamily: FM, fontSize: 12, color: P.text2, lineHeight: 1.7,
             maxHeight: 80, overflow: 'hidden',
           }}>
-            {linkedInPost.hook}
+            {(linkedInPost as any).hook || (linkedInPost as any).body || ''}
           </div>
           <button onClick={handleCopyLinkedIn} style={{
             fontFamily: FM, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',

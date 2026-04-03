@@ -57,8 +57,8 @@ export default function IntelligencePage() {
 
   useEffect(() => { setAccounts(loadAccounts()); setReady(true); }, []);
 
-  const stats: ResponseStats | null = useMemo(() => {
-    try { return getResponseStats(); } catch { return null; }
+  const stats: any = useMemo(() => {
+    try { return getResponseStats() as any; } catch { return null; }
   }, [ready]);
 
   const weights = useMemo(() => {
@@ -68,7 +68,7 @@ export default function IntelligencePage() {
   const accountStats = useMemo(() => {
     const active    = accounts.filter(a => a.status !== 'dropped');
     const contacted = accounts.filter(a => a.status === 'contacted');
-    const replied   = accounts.filter(a => a.status === 'replied');
+    const replied   = accounts.filter(a => (a as any).status === 'replied');
     return { active: active.length, contacted: contacted.length, replied: replied.length };
   }, [accounts]);
 
@@ -86,8 +86,8 @@ export default function IntelligencePage() {
 
       {/* Overview stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 32 }}>
-        <StatCard label="Total envoy{'\u00e9'}s" value={stats?.totalSent ?? 0} color={P.cyan} />
-        <StatCard label="R{'\u00e9'}ponses" value={stats?.totalReplied ?? 0} color={P.green} sub={stats ? `${((stats.totalReplied / Math.max(stats.totalSent, 1)) * 100).toFixed(1)}% taux` : '—'} />
+        <StatCard label="Total envoy{'\u00e9'}s" value={(stats as any)?.totalSent ?? 0} color={P.cyan} />
+        <StatCard label="R{'\u00e9'}ponses" value={(stats as any)?.totalReplied ?? 0} color={P.green} sub={stats ? `${(((stats as any).totalReplied / Math.max((stats as any).totalSent, 1)) * 100).toFixed(1)}% taux` : '—'} />
         <StatCard label="Contact{'\u00e9'}s" value={accountStats.contacted} color={P.amber} />
         <StatCard label="Actifs" value={accountStats.active} color={P.text2} />
       </div>
@@ -99,7 +99,7 @@ export default function IntelligencePage() {
           <div style={{ marginBottom: 28 }}>
             <div style={{ ...lbl, marginBottom: 12, color: P.cyan }}>Taux par canal</div>
             <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, padding: '14px 18px' }}>
-              {stats.byChannel && Object.entries(stats.byChannel).map(([ch, data]) => (
+              {stats.byChannel && Object.entries(stats.byChannel).map(([ch, data]: [string, any]) => (
                 <RateBar key={ch} label={ch.toUpperCase()} rate={data.replyRate * 100} color={ch === 'email' ? P.green : P.cyan} />
               ))}
               {(!stats.byChannel || Object.keys(stats.byChannel).length === 0) && (
@@ -114,7 +114,7 @@ export default function IntelligencePage() {
           <div style={{ marginBottom: 28 }}>
             <div style={{ ...lbl, marginBottom: 12, color: P.amber }}>Taux par pays</div>
             <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, padding: '14px 18px' }}>
-              {stats.byCountry && Object.entries(stats.byCountry).map(([c, data]) => (
+              {stats.byCountry && Object.entries(stats.byCountry).map(([c, data]: [string, any]) => (
                 <RateBar key={c} label={c} rate={data.replyRate * 100} color={P.amber} />
               ))}
               {(!stats.byCountry || Object.keys(stats.byCountry).length === 0) && (
@@ -129,7 +129,7 @@ export default function IntelligencePage() {
           <div style={{ marginBottom: 28 }}>
             <div style={{ ...lbl, marginBottom: 12, color: P.green }}>Taux par angle</div>
             <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, padding: '14px 18px' }}>
-              {stats.byAngle && Object.entries(stats.byAngle).map(([a, data]) => (
+              {stats.byAngle && Object.entries(stats.byAngle).map(([a, data]: [string, any]) => (
                 <RateBar key={a} label={a.replace(/_/g, ' ')} rate={data.replyRate * 100} color={P.green} />
               ))}
               {(!stats.byAngle || Object.keys(stats.byAngle).length === 0) && (

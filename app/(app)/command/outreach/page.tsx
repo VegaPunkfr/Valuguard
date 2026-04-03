@@ -42,7 +42,7 @@ export default function SequencesPage() {
   }, [ready]);
 
   const stats = useMemo(() => {
-    try { return getFollowUpStats(); } catch { return { pending: 0, sent: 0, cancelled: 0, overdue: 0 }; }
+    try { return getFollowUpStats(); } catch { return { totalPending: 0, dueNow: 0, totalSent: 0, totalCancelled: 0, byStep: {} }; }
   }, [ready]);
 
   // Outreach history from ledger
@@ -121,9 +121,9 @@ export default function SequencesPage() {
                   border: `1px solid ${isOverdue ? P.red : P.amber}20`,
                   padding: '2px 6px', borderRadius: 3, flexShrink: 0,
                 }}>
-                  {fu.step.toUpperCase()}
+                  {fu.sequenceStep.toUpperCase()}
                 </span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: P.text1, flex: 1 }}>{fu.domain}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: P.text1, flex: 1 }}>{fu.prospectDomain}</span>
                 <span style={{ fontFamily: FM, fontSize: 10, color: isOverdue ? P.red : P.text3 }}>
                   {isOverdue ? `${Math.abs(daysUntil)}j overdue` : `J+${daysUntil}`}
                 </span>
