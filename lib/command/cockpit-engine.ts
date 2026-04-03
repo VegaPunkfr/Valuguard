@@ -352,6 +352,98 @@ export function setupKeyboardShortcuts(
   return () => window.removeEventListener('keydown', handler);
 }
 
+// ── AI Message Generation (calls server-side API) ──────────
+
+export async function generateAIMessage(
+  account: Account,
+  channel: 'email' | 'linkedin_dm' = 'email',
+  sequenceStep: 'M1' | 'M2' | 'M3' | 'M4' | 'M5' = 'M1',
+): Promise<{ subject?: string; body: string; language: string } | null> {
+  try {
+    const res = await fetch('/api/command/generate-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect: {
+          firstName: account.financeLead?.name?.split(' ')[0] || '',
+          lastName: account.financeLead?.name?.split(' ').slice(1).join(' ') || '',
+          title: account.financeLead?.title || 'CFO',
+          company: account.company,
+          domain: account.domain,
+          country: account.country,
+          headcount: account.headcount,
+          industry: account.industry,
+          signals: account.signals?.map(s => typeof s === 'string' ? s : s.type) || [],
+        },
+        scan: account.scan ? {
+          exposureLow: account.scan.exposureLow,
+          exposureHigh: account.scan.exposureHigh,
+          dailyLoss: Math.round(((account.scan.exposureLow + account.scan.exposureHigh) / 2) / 365),
+          confidence: 65,
+          signals: account.scan.vendors?.slice(0, 3).map(v => ({
+            label: v, impactLow: 10000, impactHigh: 50000, evidenceClass: 'inferred',
+          })) || [],
+        } : {
+          exposureLow: account.revenueEstimate * 0.8 || 100000,
+          exposureHigh: account.revenueEstimate * 1.2 || 300000,
+          dailyLoss: Math.round((account.revenueEstimate || 200000) / 365),
+          confidence: 45,
+          signals: [],
+        },
+        channel,
+        sequenceStep,
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { subject: data.subject, body: data.body, language: data.language };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Generate AI messages for all prospects without drafts.
+ * Called from the cockpit when messages are needed.
+ * Returns the number of messages generated.
+ */
+export async function generateMissingMessages(accounts: Account[]): Promise<number> {
+  let generated = 0;
+
+  for (const account of accounts) {
+    if (account.status === 'dropped') continue;
+    if (!account.signals || account.signals.length === 0) continue;
+    if (account.outreach?.some(o => o.status === 'draft')) continue; // Already has draft
+
+    const channel = ['DE', 'AT', 'CH'].includes(account.country)
+      ? ('email' as const) // DE prefers email
+      : ('linkedin_dm' as const);
+
+    const result = await generateAIMessage(account, channel, 'M1');
+    if (result) {
+      // Add the generated message as an outreach draft
+      account.outreach = account.outreach || [];
+      account.outreach.push({
+        channel: channel === 'linkedin_dm' ? 'linkedin' : 'email',
+        subject: result.subject,
+        body: result.body,
+        hook: result.body.split('\n')[0] || '',
+        status: 'draft',
+      });
+      generated++;
+      pushActivity('🤖', `Message IA généré pour ${account.company} (${result.language})`);
+    }
+  }
+
+  // Save updated accounts
+  if (generated > 0) {
+    saveAccounts(accounts);
+  }
+
+  return generated;
+}
+
 // ── Format helpers ─────────────────────────────────────────
 
 export function fmtEur(n: number): string {
