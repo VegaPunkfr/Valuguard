@@ -510,3 +510,19 @@ export async function runAutoPipeline(): Promise<{
     return { added: 0, withMessages: 0 };
   }
 }
+
+// ── Formatting Helpers ──────────────────────────────────────
+
+export function fmtEur(amount: number): string {
+  if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M €`;
+  if (amount >= 1_000) return `${Math.round(amount / 1_000)}k €`;
+  return `${Math.round(amount)} €`;
+}
+
+export function fmtDuration(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes === 0) return `${seconds}s`;
+  return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+}
