@@ -1,13 +1,13 @@
 @echo off
 echo ============================================================
-echo  GHOST TAX — COMMAND COCKPIT REBUILD v2
-echo  Commit + push all rebuilt command pages
+echo  GHOST TAX — COCKPIT REBUILD (BASE VIERGE)
+echo  Tous les onglets refaits from scratch
 echo ============================================================
 
 cd /d "%~dp0"
 
 echo.
-echo [1/4] Staging rebuilt files...
+echo [1/4] Staging...
 git add app/(app)/command/layout.tsx
 git add app/(app)/command/page.tsx
 git add app/(app)/command/accounts/page.tsx
@@ -16,45 +16,32 @@ git add app/(app)/command/scan/page.tsx
 git add app/(app)/command/brief/page.tsx
 
 echo.
-echo [2/4] Checking staged files...
+echo [2/4] Files staged:
 git diff --cached --name-only
 
 echo.
-echo [3/4] Committing...
-git commit -m "feat(command): full cockpit rebuild v2 — dark shell + clean design tokens
+echo [3/4] Commit...
+git commit -m "feat(command): cockpit full rebuild from scratch
 
-- layout.tsx: fixed root cause (was white #FAFBFD + wrong fonts)
-  Now position:fixed dark shell at z-index 100, provides dark env
-  for all child routes. JetBrains Mono + Inter. Nav: OVERVIEW /
-  ACCOUNTS / OUTREACH / SCAN / BRIEF.
+Layout: shell position:fixed z-100, eclipses Navbar/Footer.
+Palette officielle rules/05 (bg #060912, var(--font-mono/sans)).
+Zero code legacy - tout reimplementé proprement.
 
-- page.tsx (overview): v7 — removed z-index:200 hack, renders
-  naturally in layout shell. Hot-queue, approval overlay, LinkedIn
-  poster all preserved.
-
-- accounts/page.tsx: v2 — full table with SortTh + Pill, clean palette.
-
-- outreach/page.tsx: v2 — all business logic preserved (hot-queue,
-  angles, channels, messages, ledger/locks safety). Clean P palette
-  + FM/FS fonts. No duplicate style props.
-
-- scan/page.tsx: v2 — batch scan helper, queue stats, priority list.
-
-- brief/page.tsx: v2 — KPI strip, executive summary, Attack Now /
-  Outreach Ready / Scan Needed / Kill Review sections.
-
-Design tokens: bg #060912, surface #0C1019, JetBrains Mono, Inter.
-Architecture: layout covers app Navbar (z50) at z100, approval
-overlay at z400."
+Pages:
+- layout.tsx: shell dark + live clock + nav cyan active
+- page.tsx: overview KPI + hot queue table + quick links
+- accounts/page.tsx: table triable + search + filter status
+- outreach/page.tsx: hot/review/all tabs, logique hotqueue intacte
+- scan/page.tsx: grid 2 colonnes scan needed / recently scanned
+- brief/page.tsx: KPI strip + executive summary + 4 sections"
 
 echo.
-echo [4/4] Pushing to main (Vercel auto-deploy)...
+echo [4/4] Push...
 git push origin main
 
 echo.
 echo ============================================================
-echo  DONE — Vercel build triggered.
-echo  Check: https://vercel.com/dashboard
-echo  Live:  https://ghost-tax.com/command
+echo  DONE — Vercel build en cours
+echo  https://ghost-tax.com/command
 echo ============================================================
 pause

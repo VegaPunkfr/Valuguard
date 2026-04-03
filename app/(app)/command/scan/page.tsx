@@ -1,46 +1,50 @@
 'use client';
 
 /**
- * GHOST TAX — SCAN CENTER v2
- * Clean rebuild — palette correcte, JetBrains Mono + Inter.
+ * GHOST TAX — SCAN CENTER
+ * Base vierge. Palette officielle.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { loadAccounts, saveAccounts, getScanNeeded } from '@/lib/command/store';
+import { calcHeatScore } from '@/lib/command/hot-queue';
 import type { Account } from '@/types/command';
-import { CONVICTION_META } from '@/types/command';
-import { loadAccounts, saveAccounts, updateAccount, getScanNeeded } from '@/lib/command/store';
 
-// ── Tokens ─────────────────────────────────────────────────
+// ── Tokens ───────────────────────────────────────────────
 const P = {
   bg:      '#060912',
-  surface: '#0C1019',
-  panel:   '#0F1624',
-  border:  'rgba(255,255,255,0.06)',
-  text1:   '#F1F5F9',
-  text2:   '#94A3B8',
-  text3:   '#475569',
-  cyan:    '#22D3EE',
-  green:   '#34D399',
-  red:     '#F87171',
-};
-const FM = "var(--vg-font-mono,'JetBrains Mono',monospace)";
-const FS = "var(--vg-font-sans,'Inter',system-ui,sans-serif)";
+  surface: '#0a0d19',
+  panel:   '#0e1221',
+  border:  'rgba(36,48,78,0.28)',
+  text1:   '#e4e9f4',
+  text2:   '#8d9bb5',
+  text3:   '#55637d',
+  text4:   '#3a4560',
+  green:   '#34d399',
+  amber:   '#f59e0b',
+  red:     '#ef4444',
+  blue:    '#3b82f6',
+  blueHi:  '#60a5fa',
+  cyan:    '#22d3ee',
+} as const;
+const FM = 'var(--font-mono)';
+const FS = 'var(--font-sans)';
 
-const box: React.CSSProperties = {
-  background: P.surface,
-  border: `1px solid ${P.border}`,
-  borderRadius: 10,
-  padding: '20px 24px',
-};
-const lbl: React.CSSProperties = {
-  fontFamily: FM, fontSize: 9, fontWeight: 700,
-  letterSpacing: '.18em', color: P.text3,
-  textTransform: 'uppercase', marginBottom: 14,
-};
+const lbl = (c?: string): React.CSSProperties => ({
+  fontFamily: FM, fontSize: 9, fontWeight: 700, letterSpacing: '.16em',
+  textTransform: 'uppercase' as const, color: c ?? P.text3,
+});
+const pill = (color: string): React.CSSProperties => ({
+  fontFamily: FM, fontSize: 9, fontWeight: 700, padding: '2px 7px',
+  borderRadius: 4, color, background: `${color}12`, border: `1px solid ${color}22`,
+  display: 'inline-block', letterSpacing: '.06em',
+});
 
+// ── Main ─────────────────────────────────────────────────
 export default function ScanPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [queued,   setQueued]   = useState<Set<string>>(new Set());
   const [ready,    setReady]    = useState(false);
 
   useEffect(() => {
@@ -48,184 +52,150 @@ export default function ScanPage() {
     setReady(true);
   }, []);
 
-  const persist = useCallback((u: Account[]) => {
-    setAccounts(u);
-    saveAccounts(u);
-  }, []);
+  const scanNeeded = useMemo(() => getScanNeeded(accounts), [accounts]);
+  const scanned    = useMemo(() => accounts.filter(a => !!a.scan && a.status !== 'dropped').sort((a, b) => (b.scan?.completedAt || '').localeCompare(a.scan?.completedAt || '')), [accounts]);
 
-  if (!ready) return <div style={{ background: P.bg, minHeight: '100vh' }} />;
+  const heatByAccount = useMemo(() =>
+    new Map(accounts.map(a => [a.id, calcHeatScore(a).total])),
+  [accounts]);
 
-  const needsScan = getScanNeeded(accounts);
-  const queued    = accounts.filter(a => a.status === 'scan_queued');
-  const scanned   = accounts.filter(a => a.scan?.status === 'complete');
-  const domains   = needsScan.map(a => a.domain);
-
-  function queueAll() {
-    let updated = [...accounts];
-    for (const a of needsScan) {
-      updated = updateAccount(updated, a.id, { status: 'scan_queued' });
-    }
-    persist(updated);
+  function toggleQueue(id: string) {
+    setQueued(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
   }
+  function queueAll() { setQueued(new Set(scanNeeded.map(a => a.id))); }
+  function clearQueue() { setQueued(new Set()); }
+
+  if (!ready) return <div style={{ background: P.bg, minHeight: '100%' }} />;
 
   return (
-    <div style={{ background: P.bg, fontFamily: FS, color: P.text1, padding: '32px 28px 80px' }}>
+    <div style={{ background: P.bg, fontFamily: FS, color: P.text1, minHeight: '100%', padding: '28px 28px 80px' }}>
 
       {/* ── Header ── */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 6 }}>
-          Ghost Tax · Scan Center
-        </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, letterSpacing: '-.02em' }}>
-          Intelligence Scan
-        </h1>
-        <div style={{ fontFamily: FM, fontSize: 12, color: P.text3 }}>
-          {needsScan.length} à scanner
-          {' · '}
-          <span style={{ color: P.cyan }}>{queued.length} en queue</span>
-          {' · '}
-          <span style={{ color: P.green }}>{scanned.length} complétés</span>
-        </div>
+      <div style={{ marginBottom: 20 }}>
+        <span style={lbl(P.cyan)}>Ghost Tax · Scan</span>
+        <h1 style={{ margin: '6px 0 0', fontSize: 20, fontWeight: 800, letterSpacing: '-.02em' }}>Scan Center</h1>
       </div>
 
-      {/* ── Grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-
-        {/* Batch scan helper */}
-        <div style={box}>
-          <div style={lbl}>Batch Scan — Domains</div>
-          <pre style={{
-            fontFamily: FM, fontSize: 12, color: P.text2,
-            margin: '0 0 14px', padding: '14px 16px',
-            background: P.bg, borderRadius: 6,
-            border: `1px solid ${P.border}`,
-            whiteSpace: 'pre-wrap', maxHeight: 200,
-            overflowY: 'auto', lineHeight: 1.7,
-          }}>
-            {domains.length > 0 ? domains.join('\n') : 'Tous les comptes sont scannés ✓'}
-          </pre>
-          <div style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginBottom: 12, lineHeight: 1.6 }}>
-            Endpoint: <span style={{ color: P.cyan }}>POST /api/scan/batch</span><br />
-            Requiert: Authorization Bearer CRON_SECRET
+      {/* ── Stats strip ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, marginBottom: 28 }}>
+        {[
+          { label: 'SCAN NEEDED',  value: scanNeeded.length, color: P.amber },
+          { label: 'QUEUED',       value: queued.size,       color: P.blue  },
+          { label: 'COMPLETED',    value: scanned.length,    color: P.green },
+          { label: 'TOTAL',        value: accounts.filter(a => a.status !== 'dropped').length, color: P.text2 },
+        ].map(s => (
+          <div key={s.label} style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, padding: '16px 20px' }}>
+            <div style={lbl()}>{s.label}</div>
+            <div style={{ fontFamily: FM, fontSize: 26, fontWeight: 800, color: s.color, marginTop: 4 }}>{s.value}</div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={() => navigator.clipboard.writeText(domains.join('\n'))}
-              style={{
-                fontFamily: FM, fontSize: 11, fontWeight: 600,
-                padding: '7px 14px', borderRadius: 5, cursor: 'pointer',
-                background: 'rgba(34,211,238,0.08)',
-                color: P.cyan,
-                border: `1px solid rgba(34,211,238,0.18)`,
-              }}
-            >
-              COPIER DOMAINS
-            </button>
-            <button
-              onClick={() => navigator.clipboard.writeText(
-                JSON.stringify({ secret: 'YOUR_CRON_SECRET', domains }, null, 2)
-              )}
-              style={{
-                fontFamily: FM, fontSize: 11, fontWeight: 600,
-                padding: '7px 14px', borderRadius: 5, cursor: 'pointer',
-                background: 'rgba(96,165,250,0.08)',
-                color: '#60A5FA',
-                border: '1px solid rgba(96,165,250,0.18)',
-              }}
-            >
-              COPIER JSON
-            </button>
-          </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Queue stats */}
-        <div style={box}>
-          <div style={lbl}>Statut Pipeline</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-            {[
-              { label: 'À scanner',         value: needsScan.length, color: P.text1 },
-              { label: 'En queue',           value: queued.length,    color: P.cyan  },
-              { label: 'Scans complets',     value: scanned.length,   color: P.green },
-              { label: 'Total comptes',      value: accounts.length,  color: P.text3 },
-            ].map(row => (
-              <div key={row.label} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: 6,
-                background: P.bg, border: `1px solid ${P.border}`,
-              }}>
-                <span style={{ fontFamily: FM, fontSize: 11, color: P.text3 }}>{row.label}</span>
-                <span style={{ fontFamily: FM, fontSize: 16, fontWeight: 700, color: row.color }}>{row.value}</span>
+      {/* ── Two columns ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}>
+
+        {/* Scan Needed */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={lbl(P.amber)}>Scan needed — {scanNeeded.length}</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={queueAll} style={{ fontFamily: FM, fontSize: 9, fontWeight: 700, letterSpacing: '.1em', padding: '5px 10px', borderRadius: 4, cursor: 'pointer', background: `${P.blue}10`, color: P.blue, border: `1px solid ${P.blue}22` }}>QUEUE ALL</button>
+              <button onClick={clearQueue} style={{ fontFamily: FM, fontSize: 9, fontWeight: 700, letterSpacing: '.1em', padding: '5px 10px', borderRadius: 4, cursor: 'pointer', background: 'transparent', color: P.text3, border: `1px solid ${P.border}` }}>CLEAR</button>
+            </div>
+          </div>
+
+          <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, overflow: 'hidden' }}>
+            {!scanNeeded.length ? (
+              <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+                <span style={{ fontFamily: FM, fontSize: 10, color: P.text4 }}>All accounts scanned</span>
               </div>
-            ))}
+            ) : (
+              scanNeeded.map(a => {
+                const heat = heatByAccount.get(a.id) || 0;
+                const inQ  = queued.has(a.id);
+                const hCol = heat >= 60 ? P.red : heat >= 40 ? P.amber : P.text3;
+                return (
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: `1px solid ${P.border}` }}>
+                    <div style={{ fontFamily: FM, fontSize: 12, fontWeight: 800, color: hCol, background: `${hCol}12`, border: `1px solid ${hCol}25`, borderRadius: 4, padding: '1px 0', width: 32, textAlign: 'center' as const }}>
+                      {heat}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: P.text1 }}>{a.company}</div>
+                      <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, marginTop: 1 }}>{a.country} · {a.industry}</div>
+                    </div>
+                    <button onClick={() => toggleQueue(a.id)} style={{ fontFamily: FM, fontSize: 9, fontWeight: 700, letterSpacing: '.08em', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', background: inQ ? `${P.amber}12` : 'transparent', color: inQ ? P.amber : P.text3, border: `1px solid ${inQ ? P.amber + '30' : P.border}` }}>
+                      {inQ ? 'IN QUEUE' : 'QUEUE'}
+                    </button>
+                    <Link href={`/command/accounts/${a.id}`} style={{ fontFamily: FM, fontSize: 9, color: P.blue, textDecoration: 'none', letterSpacing: '.06em' }}>VIEW</Link>
+                  </div>
+                );
+              })
+            )}
           </div>
-          {needsScan.length > 0 && (
-            <button
-              onClick={queueAll}
-              style={{
-                width: '100%', fontFamily: FM, fontSize: 11, fontWeight: 700,
-                padding: '10px 0', borderRadius: 6, cursor: 'pointer',
-                background: 'rgba(34,211,238,0.10)',
-                color: P.cyan,
-                border: `1px solid rgba(34,211,238,0.20)`,
-                letterSpacing: '.08em', textTransform: 'uppercase',
-              }}
-            >
-              Mettre tout en queue ({needsScan.length})
-            </button>
-          )}
+        </div>
+
+        {/* Recently Scanned */}
+        <div>
+          <div style={{ marginBottom: 12 }}>
+            <span style={lbl(P.green)}>Recently scanned — {scanned.length}</span>
+          </div>
+
+          <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, overflow: 'hidden' }}>
+            {!scanned.length ? (
+              <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+                <span style={{ fontFamily: FM, fontSize: 10, color: P.text4 }}>No scans yet</span>
+              </div>
+            ) : (
+              scanned.slice(0, 15).map(a => {
+                const heat = heatByAccount.get(a.id) || 0;
+                const hCol = heat >= 60 ? P.red : heat >= 40 ? P.amber : P.text3;
+                return (
+                  <Link key={a.id} href={`/command/accounts/${a.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: `1px solid ${P.border}`, textDecoration: 'none', transition: 'background .1s' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = P.panel)}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                    <div style={{ fontFamily: FM, fontSize: 12, fontWeight: 800, color: hCol, background: `${hCol}12`, border: `1px solid ${hCol}25`, borderRadius: 4, padding: '1px 0', width: 32, textAlign: 'center' as const }}>
+                      {heat}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: P.text1 }}>{a.company}</div>
+                      <div style={{ fontFamily: FM, fontSize: 9, color: P.text3, marginTop: 1 }}>{a.country} · {a.scan?.completedAt?.slice(0, 10) || '—'}</div>
+                    </div>
+                    <span style={pill(P.green)}>SCANNED</span>
+                  </Link>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Scan queue ── */}
-      <div style={box}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={lbl}>Queue prioritaire ({needsScan.length})</div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {needsScan.length === 0 && (
-            <div style={{ fontFamily: FM, fontSize: 12, color: P.text3, textAlign: 'center', padding: '20px 0' }}>
-              ✓ Aucun compte en attente de scan
+      {/* ── Queue ── */}
+      {queued.size > 0 && (
+        <div>
+          <div style={{ marginBottom: 12 }}>
+            <span style={lbl(P.blue)}>Active queue — {queued.size} accounts</span>
+          </div>
+          <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, padding: '16px 20px' }}>
+            <div style={{ fontFamily: FM, fontSize: 11, color: P.text2, lineHeight: 1.8 }}>
+              {[...queued].map(id => {
+                const a = accounts.find(x => x.id === id);
+                if (!a) return null;
+                return (
+                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: P.amber, flexShrink: 0 }} />
+                    <span style={{ color: P.text1, fontWeight: 600 }}>{a.company}</span>
+                    <span style={{ color: P.text3 }}>{a.country} · {a.financeLead.name}</span>
+                    <button onClick={() => toggleQueue(id)} style={{ fontFamily: FM, fontSize: 8, color: P.red, background: 'transparent', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}>REMOVE</button>
+                  </div>
+                );
+              })}
             </div>
-          )}
-          {needsScan.map(a => (
-            <div key={a.id} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '10px 14px', borderRadius: 6,
-              background: a.status === 'scan_queued'
-                ? 'rgba(34,211,238,0.04)'
-                : P.bg,
-              border: `1px solid ${a.status === 'scan_queued'
-                ? 'rgba(34,211,238,0.12)'
-                : P.border}`,
-            }}>
-              <span style={{ fontFamily: FM, fontSize: 14, fontWeight: 700, color: CONVICTION_META[a.conviction].color, width: 24 }}>
-                {a.score}
-              </span>
-              <Link href={`/command/accounts/${a.id}`} style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: P.text1 }}>{a.company}</span>
-                <span style={{ fontFamily: FM, fontSize: 11, color: P.text3, marginLeft: 8 }}>{a.domain}</span>
-              </Link>
-              <span style={{ fontFamily: FM, fontSize: 10, color: P.text3, flexShrink: 0 }}>
-                {a.country} · {a.industry}
-              </span>
-              <button
-                onClick={() => persist(updateAccount(accounts, a.id, { status: 'scan_queued' }))}
-                style={{
-                  fontFamily: FM, fontSize: 10, fontWeight: 600,
-                  padding: '4px 10px', borderRadius: 4,
-                  background: a.status === 'scan_queued'
-                    ? 'rgba(34,211,238,0.10)' : 'rgba(255,255,255,0.04)',
-                  color: a.status === 'scan_queued' ? P.cyan : P.text3,
-                  border: `1px solid ${a.status === 'scan_queued' ? 'rgba(34,211,238,0.20)' : P.border}`,
-                  cursor: 'pointer', flexShrink: 0,
-                }}
-              >
-                {a.status === 'scan_queued' ? '✓ QUEUED' : '+ QUEUE'}
-              </button>
+            <div style={{ marginTop: 14, fontFamily: FM, fontSize: 10, color: P.text3 }}>
+              Tip: run the scan in your terminal with <code style={{ color: P.cyan, background: `${P.cyan}10`, padding: '1px 6px', borderRadius: 3 }}>npm run scan</code> or trigger via the Make S4 cron.
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );
