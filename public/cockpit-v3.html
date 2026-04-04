@@ -432,8 +432,8 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .ri-task{font-size:14px;color:var(--t1);line-height:1.4}
 .ri-time{font-family:var(--mono);font-size:12px;color:var(--t3);margin-top:2px}
 
-/* ── MORNING BRIEF ── */
-.brief-panel{width:100%;background:var(--s1);border-bottom:1px solid var(--bd);padding:20px 24px;overflow-y:auto;max-height:55vh;display:none;flex-direction:column;gap:16px;animation:fade-in .3s ease}
+/* ── MORNING BRIEF (own view) ── */
+.brief-panel{width:100%;background:var(--s1);padding:20px 24px;overflow-y:auto;flex-direction:column;gap:16px;animation:fade-in .3s ease;max-width:800px;margin:0 auto}
 .brief-panel.visible{display:flex}
 .brief-header{display:flex;align-items:center;justify-content:space-between}
 .brief-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2);display:flex;align-items:center;gap:8px}
@@ -502,12 +502,11 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .mode-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--t3);transition:all .15s}
 .mode-btn.active-assisted{background:rgba(240,165,0,.15);border-color:rgba(240,165,0,.3);color:#F0A500}
 .mode-btn.active-auto{background:rgba(0,207,196,.15);border-color:rgba(0,207,196,.4);color:#00CFC4;animation:pulse-cyan 2s infinite}
-.auto-banner{position:fixed;top:52px;left:0;right:0;z-index:99;padding:10px 20px;display:none;align-items:center;gap:10px;background:rgba(0,207,196,.04);border-bottom:1px solid rgba(0,207,196,.15);animation:fade-in .3s ease}
-.auto-banner.visible{display:flex}
-.auto-banner-dot{width:8px;height:8px;border-radius:50%;background:#00CFC4;animation:pulse-grn 1.5s infinite;flex-shrink:0}
-.auto-banner-text{font-family:var(--mono);font-size:11px;color:#00CFC4;flex:1}
-.auto-banner-pause{padding:4px 10px;border-radius:4px;border:1px solid rgba(229,53,74,.3);background:rgba(229,53,74,.08);color:var(--red);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all 140ms}
-.auto-banner-pause:hover{background:rgba(229,53,74,.15)}
+.auto-badge{display:none;align-items:center;gap:5px;padding:3px 10px;border-radius:5px;background:rgba(0,207,196,.08);border:1px solid rgba(0,207,196,.25);cursor:pointer;transition:all 140ms;animation:pulse-cyan 2s infinite}
+.auto-badge.visible{display:flex}
+.auto-badge:hover{background:rgba(0,207,196,.14)}
+.auto-badge-dot{width:6px;height:6px;border-radius:50%;background:#00CFC4;flex-shrink:0}
+.auto-badge-text{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#00CFC4}
 </style>
 </head>
 <body>
@@ -534,6 +533,10 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="tb-sync" id="tb-sync"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Sync Apollo · il y a 4 min</span></div>
     <button class="tb-btn" onclick="toggleBrief()" style="margin-right:4px">📋 Brief</button>
     <button class="tb-btn primary" id="btn-prospecter" onclick="showView('apollo')">+ Prospecter</button>
+    <div class="auto-badge" id="auto-badge" onclick="setMode('assisted')" title="Cliquer pour désactiver le mode autonome">
+      <div class="auto-badge-dot"></div>
+      <span class="auto-badge-text">⚡ Bot actif</span>
+    </div>
     <div class="mode-toggle">
       <button class="mode-btn active-assisted" id="mode-assisted" onclick="setMode('assisted')">🟡 ASSISTÉ</button>
       <button class="mode-btn" id="mode-auto" onclick="setMode('autonomous')">⚡ AUTONOME</button>
@@ -541,12 +544,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
 </div>
 
-<!-- AUTONOMOUS BANNER -->
-<div class="auto-banner" id="auto-banner">
-  <div class="auto-banner-dot"></div>
-  <span class="auto-banner-text">⚡ MODE AUTONOME — 8 stratégies de chasse · Messages IA 6 couches · Max 10/jour · Cooldown 72h · Le bot travaille pour vous 24/7</span>
-  <button class="auto-banner-pause" onclick="setMode('assisted')">PAUSE</button>
-</div>
+<!-- compact auto badge lives inside tb-right -->
 
 <!-- APP BODY -->
 <div class="app-body">
@@ -567,7 +565,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
     </div>
     <div class="nav-sep"></div>
-    <div class="nav-item" title="Paramètres">
+    <div class="nav-item" title="Paramètres" onclick="comingSoon(this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
     </div>
   </nav>
@@ -578,10 +576,14 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <!-- ══════════════════════════════════════════
          VIEW 1: COCKPIT (3 panels)
     ══════════════════════════════════════════ -->
-    <div class="view-panel visible" id="view-cockpit" style="flex-direction:column">
+    <!-- ══════════════════════════════════════════
+         VIEW 0: MORNING BRIEF (standalone)
+    ══════════════════════════════════════════ -->
+    <div class="view-panel" id="view-brief" style="justify-content:center;overflow-y:auto;background:var(--bg)">
+      <div class="brief-panel visible" id="brief-panel"></div>
+    </div>
 
-      <!-- MORNING BRIEF -->
-      <div class="brief-panel" id="brief-panel"></div>
+    <div class="view-panel visible" id="view-cockpit" style="flex-direction:column">
 
       <!-- TRIPLE PANEL (source + detail + action) -->
       <div style="display:flex;flex:1;overflow:hidden" id="triple-panel">
@@ -1141,6 +1143,15 @@ function selectLead(id){
   renderActionPanel(p);
 }
 
+function deselectLead(){
+  activeLeadId = null;
+  renderLeads();
+  document.getElementById('detail-empty').style.display='';
+  document.getElementById('detail-content').style.display='none';
+  document.getElementById('action-content').innerHTML = `<div style="padding:24px 16px;text-align:center;color:var(--t3)"><p style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.5">Sélectionnez un prospect</p></div>`;
+  document.getElementById('act-panel-title').textContent = "Centre d'action";
+}
+
 function renderDetail(p){
   document.getElementById('detail-empty').style.display='none';
   const dc = document.getElementById('detail-content');
@@ -1148,6 +1159,9 @@ function renderDetail(p){
   dc.innerHTML = `
     <!-- HEADER -->
     <div class="dh">
+      <div style="margin-bottom:10px">
+        <button onclick="deselectLead()" style="background:none;border:1px solid var(--bd);border-radius:5px;padding:3px 10px;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);transition:all 140ms" onmouseover="this.style.borderColor='var(--bds)';this.style.color='var(--t1)'" onmouseout="this.style.borderColor='var(--bd)';this.style.color='var(--t3)'">← Retour</button>
+      </div>
       <div class="dh-top">
         <div class="dh-icon" style="border-color:rgba(0,207,196,.2);color:var(--cyan)">${p.icon}</div>
         <div class="dh-info">
@@ -1164,9 +1178,9 @@ function renderDetail(p){
           </div>
         </div>
         <div class="dh-actions">
-          <button class="dh-act-btn">LinkedIn</button>
-          <button class="dh-act-btn">Enrichir</button>
-          <button class="dh-act-btn cta">Contacter →</button>
+          <button class="dh-act-btn" onclick="comingSoon(this)">LinkedIn</button>
+          <button class="dh-act-btn" onclick="apolloEnrich(${p.id})">Enrichir</button>
+          <button class="dh-act-btn cta" onclick="comingSoon(this)">Contacter →</button>
         </div>
       </div>
     </div>
@@ -1828,14 +1842,34 @@ function schedulePost(){
 // ════════════════════════════════════════
 function showView(view){
   currentView = view;
-  document.querySelectorAll('.view-panel').forEach(el=>el.classList.remove('visible'));
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+view).classList.add('visible');
+  // Force mutual exclusion: hide ALL view panels, then show selected
+  document.querySelectorAll('.view-panel').forEach(el=>{
+    el.classList.remove('visible');
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>el.classList.remove('active'));
+  const target = document.getElementById('view-'+view);
+  if(target){
+    target.classList.add('visible');
+    target.style.display = 'flex';
+  }
   const ni = document.querySelector(`[data-view="${view}"]`);
   if(ni) ni.classList.add('active');
   if(view==='apollo') renderApolloResults();
   if(view==='sequences') renderSequences();
   if(view==='linkedin') initLinkedIn();
+}
+
+// ════════════════════════════════════════
+// COMING SOON FEEDBACK
+// ════════════════════════════════════════
+function comingSoon(btn) {
+  if(!btn || btn.dataset.csLock) return;
+  btn.dataset.csLock = '1';
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Bientôt';
+  btn.style.opacity = '.6';
+  setTimeout(()=>{ btn.textContent = orig; btn.style.opacity = '1'; delete btn.dataset.csLock; }, 1200);
 }
 
 // ════════════════════════════════════════
@@ -1903,10 +1937,10 @@ function apolloEnrich(id){
   btn.style.color = 'var(--grn)';
 }
 
-function apolloContacts(id){ alert('Ouverture du panneau contacts Apollo…'); }
-function apolloJobs(id){ alert('Chargement des offres d\'emploi Apollo…'); }
+function apolloContacts(id){ comingSoon(event.target); }
+function apolloJobs(id){ comingSoon(event.target); }
 function apolloSimilar(id){ showView('apollo'); }
-function apolloCampaign(id){ alert('Sélectionnez une campagne Apollo pour ce prospect.'); }
+function apolloCampaign(id){ comingSoon(event.target); }
 
 function setApoMode(mode, el){
   document.querySelectorAll('.apo-tog-btn').forEach(b=>b.classList.remove('active'));
@@ -1941,11 +1975,11 @@ function toggleApoResult(i, el){
   document.getElementById('bulk-count').textContent = `${selectedApoResults.size} sélectionné${selectedApoResults.size>1?'s':''}`;
 }
 
-function enrichResult(co){ alert(`Enrichissement Apollo pour ${co}…`); }
-function addToPipeline(co){ alert(`${co} ajouté au pipeline Ghost Tax.`); }
-function bulkEnrich(){ alert(`Enrichissement Apollo en cours pour ${selectedApoResults.size} sociétés…`); }
-function bulkCampaign(){ alert(`Ajout à la campagne pour ${selectedApoResults.size} contacts…`); }
-function bulkPipeline(){ alert(`${selectedApoResults.size} sociétés ajoutées au pipeline.`); }
+function enrichResult(co){ comingSoon(event.target); }
+function addToPipeline(co){ comingSoon(event.target); }
+function bulkEnrich(){ comingSoon(event.target); }
+function bulkCampaign(){ comingSoon(event.target); }
+function bulkPipeline(){ comingSoon(event.target); }
 
 function selectSeq(id){
   activeSeqId = id;
@@ -2352,10 +2386,10 @@ function copyLinkedInPost() {
   }
 }
 
-// Toggle brief visibility
+// Toggle brief visibility — now a standalone view
 function toggleBrief() {
-  const panel = document.getElementById('brief-panel');
-  panel.classList.toggle('visible');
+  if(currentView === 'brief') { showView('cockpit'); }
+  else { showView('brief'); }
 }
 
 // ════════════════════════════════════════
@@ -2368,44 +2402,34 @@ function setMode(mode) {
   localStorage.setItem('gt-mode', mode);
   const assistedBtn = document.getElementById('mode-assisted');
   const autoBtn = document.getElementById('mode-auto');
-  const banner = document.getElementById('auto-banner');
+  const badge = document.getElementById('auto-badge');
   const syncDot = document.getElementById('sync-dot');
   const syncText = document.getElementById('sync-text');
   const btnProspecter = document.getElementById('btn-prospecter');
 
   if (mode === 'autonomous') {
-    // Auto button → cyan glow
     autoBtn.className = 'mode-btn active-auto';
     assistedBtn.className = 'mode-btn';
-    // Banner visible
-    banner.classList.add('visible');
-    // Sync dot → cyan pulse
+    badge.classList.add('visible');
     syncDot.style.background = '#00CFC4';
     syncText.innerHTML = '⚡ Bot actif · dernière action il y a 2m';
-    // Prospecter → Bot actif
     btnProspecter.innerHTML = '🤖 Bot actif';
     btnProspecter.onclick = null;
     btnProspecter.style.cursor = 'default';
     btnProspecter.style.borderColor = 'var(--cyan)';
     btnProspecter.style.color = 'var(--cyan)';
-    // Update brief for autonomous mode
     updateBriefForMode();
   } else {
-    // Assisted button → gold
     assistedBtn.className = 'mode-btn active-assisted';
     autoBtn.className = 'mode-btn';
-    // Banner hidden
-    banner.classList.remove('visible');
-    // Sync dot → green
+    badge.classList.remove('visible');
     syncDot.style.background = 'var(--grn)';
     syncText.innerHTML = 'Sync Apollo · il y a 4 min';
-    // Prospecter → normal
     btnProspecter.innerHTML = '+ Prospecter';
     btnProspecter.onclick = function(){ showView('apollo'); };
     btnProspecter.style.cursor = 'pointer';
     btnProspecter.style.borderColor = 'var(--cyan)';
     btnProspecter.style.color = 'var(--cyan)';
-    // Update brief for assisted mode
     updateBriefForMode();
   }
 }
@@ -2465,6 +2489,7 @@ function updateBriefForMode() {
 renderLeads();
 selectLead(1);
 renderBrief();
+showView('cockpit');
 // Restore mode from localStorage
 if (currentMode === 'autonomous') setMode('autonomous');
 </script>
