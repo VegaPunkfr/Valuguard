@@ -3,7 +3,7 @@
  *
  * POST /api/command/send-approved
  *
- * Called when Edith clicks "Approuver" on an email in the cockpit.
+ * Called when Jean-Étienne clicks "Approuver" on an email in the cockpit.
  * Sends the email via Resend and marks the prospect as contacted.
  */
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: `${fromName || 'Edith'} <audits@ghost-tax.com>`,
+        from: `${fromName || 'Jean-Étienne'} <audits@ghost-tax.com>`,
         to: [to],
         reply_to: 'audits@ghost-tax.com',
         subject,

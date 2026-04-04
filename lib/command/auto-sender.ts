@@ -51,7 +51,7 @@ export async function sendOutreachEmail(params: {
     to,
     subject,
     body,
-    fromName = 'Edith',
+    fromName = 'Jean-Étienne',
     replyTo = 'audits@ghost-tax.com',
     domain,
     prospectId,

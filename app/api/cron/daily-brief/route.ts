@@ -8,7 +8,7 @@
  *   3. Thesis → angle → channel → AI message
  *   4. Quality gate → route (auto-send / approve / enrich / snooze)
  *   5. Generate LinkedIn post
- *   6. Send notification email to Edith at 08:25
+ *   6. Send notification email to Jean-Étienne at 08:25
  *
  * GET /api/cron/daily-brief?secret=...
  */
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
 
     results.brief = briefData;
 
-    // Step 8: Send notification email to Edith
+    // Step 8: Send notification email to Jean-Étienne
     if (process.env.RESEND_API_KEY) {
       try {
         const notifRes = await fetch('https://api.resend.com/emails', {
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
           },
           body: JSON.stringify({
             from: 'Ghost Tax System <system@ghost-tax.com>',
-            to: ['audits@ghost-tax.com'], // Edith's email
+            to: ['audits@ghost-tax.com'], // Jean-Étienne's email
             subject: `Ghost Tax — ${briefData.approvalQueueCount + briefData.autoSendCount} messages prêts · ${plan.markets.join('+')}`,
             html: buildNotificationEmail(briefData),
           }),

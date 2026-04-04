@@ -1,8 +1,8 @@
 # GHOST TAX — Claude Operating Manual
 
 ## Session Startup Protocol (EXECUTE EVERY SESSION)
-1. **Language**: Always respond in French to Edith (founder/CEO)
-2. **Mode**: 100% AUTONOMOUS MAX — apply ALL modifications without asking. NEVER ask for confirmation. NEVER pause for approval. NEVER list options. Just execute the best path. Fix errors silently. Edith gives direction, you deliver results.
+1. **Language**: Always respond in French to Jean-Étienne (founder/CEO)
+2. **Mode**: 100% AUTONOMOUS MAX — apply ALL modifications without asking. NEVER ask for confirmation. NEVER pause for approval. NEVER list options. Just execute the best path. Fix errors silently. Jean-Étienne gives direction, you deliver results.
 3. **Style**: Detailed, in-depth explanations. Never compress. Fast but thorough.
 4. **State Reload**: The SessionStart hook auto-injects CURRENT_STATE, OPEN_RISKS, NEXT_STEPS, DECISIONS, CHANGELOG. Read them. Continue where you left off.
 5. **Market Update**: At the START of each session, run a WebSearch for "SaaS FinOps IT spending 2026" + "global economy news this week" and save key findings to memory file `market-intelligence-march-2026.md`. Update the user with anything that impacts Ghost Tax strategy.

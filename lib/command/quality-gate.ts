@@ -275,8 +275,8 @@ export function evaluateQualityGate(
   const totalScore = criteria.reduce((s, c) => s + c.score, 0);
 
   // Verdict — GRADUATED (4 levels, not binary)
-  // 🟢 auto_send (80+): High confidence, send without Edith's approval
-  // 🟡 approve (50-79): Good enough, needs Edith's approval
+  // 🟢 auto_send (80+): High confidence, send without Jean-Étienne's approval
+  // 🟡 approve (50-79): Good enough, needs Jean-Étienne's approval
   // 🟠 enrich (30-49): Missing data, re-scan or find better email first
   // 🔴 snooze (<30 or hard blocks): Not ready, try again in 30 days
   let verdict: GateVerdict;
@@ -303,7 +303,7 @@ export function evaluateQualityGate(
   if (verdict === 'auto_send') {
     summary = `🟢 AUTO-SEND (${totalScore}/100). High confidence. Will be sent at optimal window without approval.`;
   } else if (verdict === 'approve') {
-    summary = `🟡 APPROVE (${totalScore}/100). Good quality. Waiting for Edith's approval.`;
+    summary = `🟡 APPROVE (${totalScore}/100). Good quality. Waiting for Jean-Étienne's approval.`;
   } else if (verdict === 'enrich') {
     const enrichActions = hardBlocks.length > 0 ? hardBlocks.join(', ') : `Score ${totalScore}/100 — needs better data`;
     summary = `🟠 ENRICH (${totalScore}/100). ${enrichActions}. Will retry after enrichment.`;

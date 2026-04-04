@@ -42,7 +42,7 @@ const PROFILES: Record<string, CulturalProfile> = {
       "'innovative' or 'cutting-edge' or 'game-changing'",
     ],
     persuasionStyle: "Germans trust NUMBERS and METHODOLOGY. Show the exact process (21 phases), the confidence interval, the data sources. They buy when they understand HOW you know, not just WHAT you found.",
-    signatureStyle: "Edith\nGhost Tax · ghost-tax.com",
+    signatureStyle: "Jean-Étienne\nGhost Tax · ghost-tax.com",
     maxWords: { linkedin: 130, email: 200 },
   },
 
@@ -65,7 +65,7 @@ const PROFILES: Record<string, CulturalProfile> = {
       "'solution' or 'Lösung'",
     ],
     persuasionStyle: "Startup CFOs value SPEED and ROI. '590€ vs 630€/day lost' is the argument. They buy on impulse if the data is convincing enough.",
-    signatureStyle: "Edith",
+    signatureStyle: "Jean-Étienne",
     maxWords: { linkedin: 110, email: 170 },
   },
 
@@ -91,7 +91,7 @@ const PROFILES: Record<string, CulturalProfile> = {
       "more than 3 sentences before the point",
     ],
     persuasionStyle: "The Dutch buy when they see PRACTICAL VALUE with MINIMAL EFFORT. '€490, 48h, zero integration' is perfect for Dutch pragmatism.",
-    signatureStyle: "Edith",
+    signatureStyle: "Jean-Étienne",
     maxWords: { linkedin: 90, email: 140 },
   },
 
@@ -115,7 +115,7 @@ const PROFILES: Record<string, CulturalProfile> = {
       "fake familiarity",
     ],
     persuasionStyle: "The British value UNDERSTATEMENT and COMPETENCE. Show you did your homework without boasting. They buy when they feel the vendor is quietly excellent, not loudly promotional.",
-    signatureStyle: "Edith\nGhost Tax",
+    signatureStyle: "Jean-Étienne\nGhost Tax",
     maxWords: { linkedin: 120, email: 180 },
   },
 
@@ -137,7 +137,7 @@ const PROFILES: Record<string, CulturalProfile> = {
       "not mentioning the ROI explicitly",
     ],
     persuasionStyle: "Americans buy OUTCOMES. 'This pays for itself in 18 hours' is more powerful than 'we detected 320k EUR exposure'. They want to know what they GET, not just what's wrong.",
-    signatureStyle: "Edith\nFounder, Ghost Tax",
+    signatureStyle: "Jean-Étienne\nFounder, Ghost Tax",
     maxWords: { linkedin: 120, email: 180 },
   },
 };

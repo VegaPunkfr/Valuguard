@@ -3,7 +3,7 @@
 /**
  * GHOST TAX — MISSION CONTROL V10
  * Auto-pipeline: Apollo search → enrich → AI messages → cockpit.
- * Edith ouvre le cockpit, il se remplit tout seul.
+ * Jean-Étienne ouvre le cockpit, il se remplit tout seul.
  */
 
 import { useState, useEffect, useCallback } from 'react';

@@ -1167,7 +1167,7 @@ const TEMPLATE_COPY = {
         return `I don't usually do this, but ${d.company}'s scan caught my attention. The exposure pattern — ${exposure} — is one I've seen lead to serious budget surprises at similar companies. I've seen CFOs wish they had this data 90 days earlier. The full Decision Pack breaks down exactly where the exposure is, vendor by vendor, with ready-to-use negotiation scripts.`;
       },
       cta: "Get the Full Picture",
-      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Founder, Ghost Tax</span>",
+      signoff: "Jean-Étienne<br><span style='color:#64748B;font-size:12px'>Founder, Ghost Tax</span>",
     },
     fr: {
       subject: (c: string) => `J'ai examine le scan de ${c} personnellement`,
@@ -1181,7 +1181,7 @@ const TEMPLATE_COPY = {
         return `Je ne fais pas ca d'habitude, mais le scan de ${d.company} a attire mon attention. Le pattern d'exposition — ${exposure} — est un que j'ai vu mener a de serieuses surprises budgetaires chez des entreprises similaires. J'ai vu des CFO regretter de ne pas avoir eu ces donnees 90 jours plus tot. Le Decision Pack complet detaille exactement ou se trouve l'exposition, fournisseur par fournisseur, avec des scripts de negociation prets a l'emploi.`;
       },
       cta: "Obtenir la Vue Complete",
-      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Fondatrice, Ghost Tax</span>",
+      signoff: "Jean-Étienne<br><span style='color:#64748B;font-size:12px'>Fondateur, Ghost Tax</span>",
     },
     de: {
       subject: (c: string) => `Ich habe den Scan von ${c} personlich gepruft`,
@@ -1195,7 +1195,7 @@ const TEMPLATE_COPY = {
         return `Normalerweise mache ich das nicht, aber der Scan von ${d.company} hat meine Aufmerksamkeit erregt. Das Expositionsmuster — ${exposure} — habe ich bei ahnlichen Unternehmen zu ernsthaften Budgetuberraschungen fuhren sehen. Ich habe CFOs gesehen, die sich wunschten, diese Daten 90 Tage fruher gehabt zu haben. Das vollstandige Decision Pack schlusselt genau auf, wo die Exposition liegt, Anbieter fur Anbieter.`;
       },
       cta: "Das Volle Bild Erhalten",
-      signoff: "Edith<br><span style='color:#64748B;font-size:12px'>Grunderin, Ghost Tax</span>",
+      signoff: "Jean-Étienne<br><span style='color:#64748B;font-size:12px'>Gründer, Ghost Tax</span>",
     },
   },
 

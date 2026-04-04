@@ -595,7 +595,7 @@ export function rewriteMessage(
   if (!critique.hasReasonToReply && !body.includes('?')) {
     body = body.replace(/\n\n— Hélène/, '\n\nWould a quick diagnostic be useful?\n\n— Hélène');
     if (!body.includes('?')) {
-      body = body.replace(/\n\n— Edith/, '\n\nWould a quick diagnostic be useful?\n\n— Edith');
+      body = body.replace(/\n\n— Jean-Étienne/, '\n\nWould a quick diagnostic be useful?\n\n— Jean-Étienne');
     }
     changes.push('Added closing question.');
   }

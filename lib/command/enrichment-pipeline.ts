@@ -263,7 +263,7 @@ export async function runEnrichmentPipelineV2(
       nextSteps.push('🟢 High confidence — will be auto-sent at optimal window');
     } else {
       status = 'ready_for_review';
-      nextSteps.push('🟡 Awaiting Edith approval in cockpit');
+      nextSteps.push('🟡 Awaiting Jean-Étienne approval in cockpit');
     }
   }
 

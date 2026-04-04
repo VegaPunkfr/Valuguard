@@ -12,7 +12,7 @@
  * - Le cockpit au chargement (si la queue est vide)
  * - Le cron daily-brief à 06:00
  *
- * Edith ne fait RIEN. Ce pipeline tourne tout seul.
+ * Jean-Étienne ne fait RIEN. Ce pipeline tourne tout seul.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
           const exposure = Math.round(150000 + Math.random() * 200000);
           const dailyLoss = Math.round(exposure / 365);
 
-          const prompt = `You are Edith, founder of Ghost Tax. Write a personal outreach message to a prospect.
+          const prompt = `You are Jean-Étienne, founder of Ghost Tax. Write a personal outreach message to a prospect.
 
 PROSPECT: ${firstName} ${lastName}, ${person.title || 'CFO'} at ${org.name || 'their company'} (${domain})
 Country: Germany · Industry: ${org.industry || 'Technology'} · ~${org.estimated_num_employees || 150} employees
@@ -164,7 +164,7 @@ Start with "Betreff:" (subject line with domain and a number).
 Lead with a specific observation about their company.
 Mention estimated exposure: ~${exposure.toLocaleString()} EUR/year (~${dailyLoss} EUR/day).
 End with: ghost-tax.com/intel?domain=${domain}
-Sign off as just "Edith"
+Sign off as just "Jean-Étienne"
 
 NEVER: "I hope this finds you well", "Our platform", "Book a call", generic openings.
 Every sentence must be specific to THIS company.`;

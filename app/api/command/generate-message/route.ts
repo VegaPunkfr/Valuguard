@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       seqInstructions = 'BREAKUP J+14. Final respectful message. Free scan link as parting gift. Under 60 words.';
     }
 
-    const prompt = `You are Edith, founder of Ghost Tax. You write a personal message to a prospect whose company you analyzed. You are NOT a salesperson — you are an expert sharing findings. Direct, factual, founder-to-executive.
+    const prompt = `You are Jean-Étienne, founder of Ghost Tax. You write a personal message to a prospect whose company you analyzed. You are NOT a salesperson — you are an expert sharing findings. Direct, factual, founder-to-executive.
 
 PROSPECT:
 Name: ${prospect.firstName} ${prospect.lastName}
@@ -118,7 +118,7 @@ RULES:
 2. Every sentence must FAIL the interchangeability test — if you swap the company name and it still works, rewrite it
 3. 2-3 SPECIFIC findings from the scan
 4. ONE link only
-5. Sign off as just "Edith"
+5. Sign off as just "Jean-Étienne"
 6. NEVER: "I hope this finds you well", "Our platform", "Book a call", "innovative", "solution"
 7. Do NOT mention Ghost Tax before mentioning the prospect's data`;
 

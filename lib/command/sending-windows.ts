@@ -4,7 +4,7 @@
  * Determines the optimal time to send outreach messages
  * based on the prospect's country and channel.
  *
- * All times in CET (Edith's timezone).
+ * All times in CET (Jean-Étienne's timezone).
  */
 
 export interface SendingWindow {
@@ -135,7 +135,7 @@ export function getNextWindow(country: string): { start: string; minutesUntil: n
 }
 
 /**
- * Edith notification time: 5 minutes before the first primary window of the day.
+ * Jean-Étienne notification time: 5 minutes before the first primary window of the day.
  * For DE days: 8:25 CET. For NL/UK days: 8:55 CET.
  */
 export function getNotificationTime(): string {

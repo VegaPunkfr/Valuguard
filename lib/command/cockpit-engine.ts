@@ -443,7 +443,7 @@ export async function generateMissingMessages(
  * sur Apollo, générer des messages IA, et les injecter dans le cockpit.
  *
  * Appelé automatiquement au chargement du cockpit si la queue est vide.
- * Edith ne fait RIEN — le cockpit se remplit tout seul.
+ * Jean-Étienne ne fait RIEN — le cockpit se remplit tout seul.
  */
 export async function runAutoPipeline(): Promise<{
   added: number;
@@ -535,5 +535,4 @@ export function fmtDuration(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   if (minutes === 0) return `${seconds}s`;
-  return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
-}
+  return `${minutes}m ${seconds.toString().padStart(2, 
