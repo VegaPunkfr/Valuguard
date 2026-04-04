@@ -492,7 +492,7 @@ export async function runAutoPipeline(): Promise<{
         nextAction: '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      } as Account;
+      } as unknown as Account;
 
       // If prospect came with a draft message, add it
       if (prospect.message) {
