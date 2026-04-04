@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { buildCockpitState, runAutoPipeline, sendApprovedEmail, handleLinkedInApproval, setupKeyboardShortcuts, updateTabTitle, pushActivity, generateMissingMessages, generateAIMessage, fmtEur, fmtDuration } from '@/lib/command/cockpit-engine';
+import { buildCockpitState, sendApprovedEmail, handleLinkedInApproval, setupKeyboardShortcuts, updateTabTitle, pushActivity, generateMissingMessages, generateAIMessage, fmtEur, fmtDuration } from '@/lib/command/cockpit-engine';
 import type { CockpitState, ApprovalItem, CockpitBrief } from '@/lib/command/cockpit-engine';
 import { loadAccounts, saveAccounts } from '@/lib/command/store';
 import { calcHeatScore } from '@/lib/command/hot-queue';
+import { selectTodayStrategy, buildSearchParams, processApolloResults, updateBotMemory, getBotDashboard, scoreProspect, detectTimingFromApollo } from '@/lib/command/apollo-bot';
+import type { ApolloProspect, HuntStrategy } from '@/lib/command/apollo-bot';
 import type { Account } from '@/types/command';
 import { CLAIMS } from '@/lib/claims';
 
@@ -1208,6 +1210,13 @@ export default function CockpitPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const leadsEndRef = useRef<HTMLDivElement>(null);
 
+  // Apollo Bot state
+  const [todayStrategy, setTodayStrategy] = useState<HuntStrategy>(() => selectTodayStrategy());
+  const [todayDescription, setTodayDescription] = useState(() => buildSearchParams(selectTodayStrategy()).description);
+  const [huntLoading, setHuntLoading] = useState(false);
+  const [lastHuntResults, setLastHuntResults] = useState<ApolloProspect[]>([]);
+  const [botDashboard, setBotDashboard] = useState(() => getBotDashboard());
+
   const handleApproveRef = useRef(() => {});
   const handleSkipRef = useRef(() => {});
   const handleCloseApprovalRef = useRef(() => {});
@@ -1287,6 +1296,55 @@ export default function CockpitPage() {
       approvalQueueIndex: -1,
     }));
   }, []);
+
+  // Apollo Bot — Prospecter button handler
+  const handleProspecter = useCallback(async () => {
+    if (huntLoading) return;
+    setHuntLoading(true);
+    pushActivity('🔍', `Chasse Apollo : ${todayStrategy.replace(/_/g, ' ')}`);
+
+    try {
+      const strategy = todayStrategy;
+      const { apolloParams } = buildSearchParams(strategy);
+
+      const res = await fetch(`/api/command/auto-pipeline?strategy=${strategy}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apolloParams),
+      });
+
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+
+      const data = await res.json();
+      const people = data.people || data.results || [];
+
+      const memory = getBotDashboard();
+      const prospects = processApolloResults(people, strategy, {
+        totalHunts: memory.totalHunts,
+        totalProspectsFound: memory.totalProspectsFound,
+        creditsUsedThisMonth: memory.creditsUsedThisMonth,
+        creditsResetDate: '',
+        strategyStats: {} as any,
+        domainsAlreadyHunted: [],
+        lastHuntByStrategy: {},
+      });
+
+      updateBotMemory(strategy, prospects, people.length);
+      setLastHuntResults(prospects);
+      setBotDashboard(getBotDashboard());
+
+      pushActivity('✓', `${prospects.length} prospects trouvés (score ≥50)`);
+
+      // Switch to Apollo view to show results
+      if (prospects.length > 0) {
+        setState((s) => ({ ...s, view: 'apollo' }));
+      }
+    } catch (err) {
+      pushActivity('✗', `Erreur chasse : ${(err as Error).message}`);
+    } finally {
+      setHuntLoading(false);
+    }
+  }, [huntLoading, todayStrategy]);
 
   // Keep refs in sync for keyboard shortcuts (avoids stale closures)
   useEffect(() => {
@@ -1523,6 +1581,33 @@ export default function CockpitPage() {
               </div>
             </div>
 
+            {/* POURQUOI CE PROSPECT — Apollo Bot Intelligence */}
+            {(() => {
+              const botProspect = lastHuntResults.find((p) => p.domain === selectedAccount.domain);
+              if (!botProspect) return null;
+              return (
+                <div className="cockpit-detail-section" style={{ background: 'rgba(0,207,196,0.06)', border: '1px solid rgba(0,207,196,0.2)', borderRadius: '6px', padding: '12px' }}>
+                  <div className="cockpit-detail-title" style={{ color: 'var(--cyan)' }}>POURQUOI CE PROSPECT</div>
+                  <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--t1)', lineHeight: '1.7', marginTop: '6px' }}>
+                    {botProspect.whyThisProspect}
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--cyan)' }}>
+                      Score: {botProspect.score}/100
+                    </span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--vio)' }}>
+                      {botProspect.strategy.replace(/_/g, ' ')}
+                    </span>
+                    {botProspect.timingUrgency === 'critical' && (
+                      <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--red)' }}>
+                        URGENT
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="cockpit-detail-section">
               <div className="cockpit-detail-title">Apollo Enrichment</div>
               <div className="cockpit-apollo-grid">
@@ -1675,9 +1760,18 @@ export default function CockpitPage() {
     </div>
   );
 
-  const renderApolloView = () => (
+  const renderApolloView = () => {
+    const strategyInfo = buildSearchParams(todayStrategy);
+    return (
     <div className="cockpit-apollo-view">
       <div className="cockpit-apollo-filters">
+        <div style={{ padding: '10px', background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)', borderRadius: '6px', marginBottom: '8px' }}>
+          <div style={{ fontSize: '10px', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Stratégie active</div>
+          <div style={{ fontSize: '13px', color: '#a78bfa', fontWeight: 600, marginTop: '4px' }}>{todayStrategy.replace(/_/g, ' ')}</div>
+          <div style={{ fontSize: '11px', color: 'var(--t3)', marginTop: '4px', lineHeight: '1.5' }}>{strategyInfo.description}</div>
+          <div style={{ fontSize: '10px', color: 'var(--t3)', marginTop: '6px' }}>Marchés : {strategyInfo.markets.join(', ')}</div>
+        </div>
+
         <div className="cockpit-filter-group">
           <label className="cockpit-filter-label">Search</label>
           <input
@@ -1690,33 +1784,80 @@ export default function CockpitPage() {
         </div>
         <div className="cockpit-filter-group">
           <label className="cockpit-filter-label">Country</label>
-          <input type="text" className="cockpit-filter-input" placeholder="DE, NL, UK..." />
+          <input type="text" className="cockpit-filter-input" placeholder={strategyInfo.markets.join(', ')} readOnly style={{ opacity: 0.6 }} />
         </div>
-        <div className="cockpit-filter-group">
-          <label className="cockpit-filter-label">Industry</label>
-          <input type="text" className="cockpit-filter-input" placeholder="SaaS, Tech..." />
-        </div>
-        <button className="cockpit-btn-primary" style={{ width: '100%' }}>
-          Search
+
+        <button className="cockpit-btn-primary" style={{ width: '100%' }} onClick={handleProspecter} disabled={huntLoading}>
+          {huntLoading ? '⏳ Chasse en cours...' : `Lancer ${todayStrategy.replace(/_/g, ' ')}`}
         </button>
+
+        {lastHuntResults.length > 0 && (
+          <div style={{ fontSize: '11px', color: 'var(--grn)', textAlign: 'center' }}>
+            {lastHuntResults.length} prospects trouvés (score ≥ 50)
+          </div>
+        )}
       </div>
 
       <div className="cockpit-apollo-results">
-        {state.accounts.slice(0, 20).map((account) => (
-          <div key={account.id} className="cockpit-apollo-card">
-            <div className="cockpit-apollo-card-company">{account.company}</div>
-            <div className="cockpit-apollo-card-info">
-              {account.industry} • {account.country}
+        {lastHuntResults.length > 0 ? (
+          lastHuntResults.map((prospect, idx) => (
+            <div key={`${prospect.domain}-${idx}`} className="cockpit-apollo-card" style={{ borderLeft: `3px solid ${prospect.score >= 80 ? 'var(--red)' : prospect.score >= 60 ? 'var(--gold)' : 'var(--cyan)'}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="cockpit-apollo-card-company">
+                  {countryFlags[prospect.country] || '🌍'} {prospect.company}
+                </div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: '14px', fontWeight: 700, color: prospect.score >= 80 ? 'var(--red)' : prospect.score >= 60 ? 'var(--gold)' : 'var(--cyan)' }}>
+                  {prospect.score}
+                </div>
+              </div>
+              <div className="cockpit-apollo-card-info" style={{ marginTop: '4px' }}>
+                {prospect.firstName} {prospect.lastName} — {prospect.title}
+              </div>
+              <div className="cockpit-apollo-card-info">
+                {prospect.industry} • {prospect.headcount} emp • {prospect.domain}
+              </div>
+              {prospect.email && (
+                <div style={{ fontSize: '11px', fontFamily: 'var(--mono)', color: prospect.emailStatus === 'verified' ? 'var(--grn)' : 'var(--gold)', marginTop: '4px' }}>
+                  {prospect.email} {prospect.emailStatus === 'verified' ? '✓' : '?'}
+                </div>
+              )}
+              {/* whyThisProspect */}
+              <div style={{ marginTop: '8px', padding: '8px', background: 'rgba(0,207,196,0.06)', border: '1px solid rgba(0,207,196,0.15)', borderRadius: '4px', fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--t2)', lineHeight: '1.6' }}>
+                {prospect.whyThisProspect}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <span style={{ fontSize: '10px', padding: '2px 6px', background: 'rgba(139,92,246,0.15)', borderRadius: '3px', color: '#a78bfa' }}>
+                  {prospect.strategy.replace(/_/g, ' ')}
+                </span>
+                <span style={{ fontSize: '10px', padding: '2px 6px', background: prospect.timingUrgency === 'critical' ? 'rgba(229,53,74,0.15)' : prospect.timingUrgency === 'high' ? 'rgba(240,165,0,0.15)' : 'rgba(0,207,196,0.1)', borderRadius: '3px', color: prospect.timingUrgency === 'critical' ? 'var(--red)' : prospect.timingUrgency === 'high' ? 'var(--gold)' : 'var(--t3)' }}>
+                  {prospect.timingSignal.replace(/_/g, ' ')}
+                </span>
+              </div>
             </div>
-            <div className="cockpit-apollo-card-info">📊 {account.headcount} employees</div>
+          ))
+        ) : state.accounts.length > 0 ? (
+          state.accounts.slice(0, 20).map((account) => (
+            <div key={account.id} className="cockpit-apollo-card">
+              <div className="cockpit-apollo-card-company">{countryFlags[account.country] || '🌍'} {account.company}</div>
+              <div className="cockpit-apollo-card-info">
+                {account.industry} • {account.country}
+              </div>
+              <div className="cockpit-apollo-card-info">{account.headcount} employees</div>
+            </div>
+          ))
+        ) : (
+          <div className="cockpit-empty-state" style={{ flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '28px' }}>🔍</div>
+            <div>Aucun résultat</div>
+            <div style={{ fontSize: '11px', color: 'var(--t3)' }}>
+              Cliquez &quot;Lancer {todayStrategy.replace(/_/g, ' ')}&quot; pour démarrer la chasse
+            </div>
           </div>
-        ))}
-        {state.accounts.length === 0 && (
-          <div className="cockpit-empty-state">No results yet</div>
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   const renderSequencesView = () => (
     <div className="cockpit-sequences-view">
@@ -1763,24 +1904,27 @@ export default function CockpitPage() {
     <div className="cockpit-linkedin-view">
       <div className="cockpit-linkedin-calendar">
         <div className="cockpit-detail-title" style={{ marginBottom: '12px' }}>
-          Posting Calendar
+          Calendrier de publication
         </div>
         <p style={{ fontSize: '12px', color: 'var(--t3)', lineHeight: '1.8' }}>
-          Monday: Recruitment
+          Lundi : Recrutement & RH
           <br />
-          Wednesday: Insights
+          Mercredi : Insights IT/SaaS
           <br />
-          Friday: Case Studies
+          Vendredi : Études de cas
         </p>
+        <div style={{ marginTop: '12px', padding: '8px', background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '4px', fontSize: '10px', color: '#a78bfa' }}>
+          Langue : Français (FR)
+        </div>
       </div>
 
       <div className="cockpit-linkedin-editor">
         <textarea
           className="cockpit-linkedin-textarea"
-          placeholder="Compose your LinkedIn post..."
+          placeholder="Rédigez votre post LinkedIn en français..."
           defaultValue={state.cockpitState?.linkedinPost?.body || ''}
         />
-        <button className="cockpit-btn-primary">Publish Post</button>
+        <button className="cockpit-btn-primary">Publier le post</button>
       </div>
 
       <div className="cockpit-linkedin-intelligence">
@@ -1788,8 +1932,12 @@ export default function CockpitPage() {
           Intelligence
         </div>
         <div className="cockpit-detail-section">
-          <div className="cockpit-action-label">Pillar</div>
+          <div className="cockpit-action-label">Pilier</div>
           <div className="cockpit-action-value">{state.cockpitState?.linkedinPost?.pillar || 'Thought Leadership'}</div>
+        </div>
+        <div className="cockpit-detail-section" style={{ marginTop: '12px' }}>
+          <div className="cockpit-action-label">Stratégie du jour</div>
+          <div className="cockpit-action-value" style={{ color: '#a78bfa' }}>{todayStrategy.replace(/_/g, ' ')}</div>
         </div>
       </div>
     </div>
@@ -1846,6 +1994,85 @@ export default function CockpitPage() {
             ● Healthy
           </span>
         </div>
+      </div>
+
+      {/* Apollo Bot Dashboard */}
+      <div className="cockpit-settings-section" style={{ maxWidth: '700px' }}>
+        <h2 className="cockpit-settings-title" style={{ color: 'var(--cyan)' }}>Apollo Bot Intelligence</h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+          <div className="cockpit-settings-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+            <span className="cockpit-settings-label" style={{ fontSize: '10px', color: 'var(--t3)' }}>Total Hunts</span>
+            <span className="cockpit-settings-value" style={{ fontSize: '18px', color: 'var(--t1)' }}>{botDashboard.totalHunts}</span>
+          </div>
+          <div className="cockpit-settings-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+            <span className="cockpit-settings-label" style={{ fontSize: '10px', color: 'var(--t3)' }}>Prospects Found</span>
+            <span className="cockpit-settings-value" style={{ fontSize: '18px', color: 'var(--t1)' }}>{botDashboard.totalProspectsFound}</span>
+          </div>
+          <div className="cockpit-settings-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+            <span className="cockpit-settings-label" style={{ fontSize: '10px', color: 'var(--t3)' }}>Domains Hunted</span>
+            <span className="cockpit-settings-value" style={{ fontSize: '18px', color: 'var(--t1)' }}>{botDashboard.domainsHunted}</span>
+          </div>
+        </div>
+
+        {/* Credits bar */}
+        <div className="cockpit-settings-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span className="cockpit-settings-label">Credits Apollo (mois)</span>
+            <span className="cockpit-settings-value">{botDashboard.creditsUsedThisMonth} / 416</span>
+          </div>
+          <div style={{ height: '6px', background: 'var(--s3)', borderRadius: '3px', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%',
+              width: `${Math.min((botDashboard.creditsUsedThisMonth / 416) * 100, 100)}%`,
+              background: botDashboard.creditsUsedThisMonth > 350 ? 'var(--red)' : botDashboard.creditsUsedThisMonth > 250 ? 'var(--gold)' : 'var(--cyan)',
+              borderRadius: '3px',
+              transition: 'width 0.3s',
+            }} />
+          </div>
+        </div>
+
+        {/* Today's strategy */}
+        <div className="cockpit-settings-item" style={{ marginTop: '8px' }}>
+          <span className="cockpit-settings-label">Stratégie du jour</span>
+          <span className="cockpit-settings-value" style={{ color: 'var(--vio)' }}>
+            {botDashboard.todayStrategy.replace(/_/g, ' ').toUpperCase()}
+          </span>
+        </div>
+        <div style={{ fontSize: '11px', color: 'var(--t3)', padding: '0 12px', marginTop: '-4px' }}>
+          {botDashboard.todayDescription}
+        </div>
+
+        {/* Strategy ranking by reply rate */}
+        {botDashboard.strategyBreakdown.length > 0 && (
+          <div style={{ marginTop: '16px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, marginBottom: '8px' }}>
+              Performance par stratégie
+            </div>
+            {botDashboard.strategyBreakdown.map((s) => (
+              <div key={s.name} className="cockpit-settings-item" style={{ marginBottom: '4px' }}>
+                <span className="cockpit-settings-label" style={{ fontSize: '12px' }}>
+                  {s.name.replace(/_/g, ' ')}
+                </span>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <span className="cockpit-settings-value" style={{ fontSize: '11px' }}>{s.found} found</span>
+                  <span className="cockpit-settings-value" style={{ fontSize: '11px', color: s.replyRate > 20 ? 'var(--grn)' : s.replyRate > 10 ? 'var(--gold)' : 'var(--t3)' }}>
+                    {s.replyRate}% reply
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {botDashboard.bestStrategy && (
+          <div className="cockpit-settings-item" style={{ marginTop: '8px', borderColor: 'rgba(0,207,196,0.3)' }}>
+            <span className="cockpit-settings-label">Meilleure stratégie</span>
+            <span className="cockpit-settings-value" style={{ color: 'var(--grn)' }}>
+              {botDashboard.bestStrategy.name.replace(/_/g, ' ')} ({botDashboard.bestStrategy.replyRate}% reply)
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1904,8 +2131,14 @@ export default function CockpitPage() {
           Synced
         </div>
 
+        <div style={{ padding: '4px 10px', background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: '4px', fontSize: '11px', color: '#a78bfa', fontFamily: 'var(--mono)', whiteSpace: 'nowrap' }}>
+          {todayStrategy.replace(/_/g, ' ').toUpperCase()}
+        </div>
+
         <div className="cockpit-topbar-right">
-          <button className="cockpit-btn-primary">+ Prospecter</button>
+          <button className="cockpit-btn-primary" onClick={handleProspecter} disabled={huntLoading} style={{ opacity: huntLoading ? 0.6 : 1 }}>
+            {huntLoading ? '⏳ Chasse...' : '+ Prospecter'}
+          </button>
           <button
             className={`cockpit-mode-toggle ${state.mode === 'autonome' ? 'active' : ''}`}
             onClick={() =>

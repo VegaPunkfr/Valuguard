@@ -25,6 +25,26 @@ function getTodayMarkets(): string[] {
   return [];
 }
 
+// ── Markets par stratégie du bot ────────────────────────────
+
+function getMarketsForStrategy(strategy: string): string[] {
+  switch (strategy) {
+    case 'icp_hunter':
+    case 'signal_hunter':
+    case 'event_hunter':
+    case 'lookalike_hunter':
+    case 'committee_mapper':
+      return ['Germany'];
+    case 'tech_stack_hunter':
+      return ['Netherlands', 'United Kingdom'];
+    case 'competitor_hunter':
+    case 're_engagement':
+      return ['Germany', 'Netherlands', 'United Kingdom'];
+    default:
+      return ['Germany'];
+  }
+}
+
 // ── Score un prospect Apollo (0-100) ────────────────────────
 
 function scoreProspect(person: any): number {
@@ -112,15 +132,16 @@ function detectTiming(person: any): { signal: string; urgency: string } {
 
 export async function GET(req: NextRequest) {
   const apolloKey = process.env.APOLLO_API_KEY;
-  const anthropicKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
 
   if (!apolloKey) {
     return NextResponse.json({ error: 'APOLLO_API_KEY not configured' }, { status: 500 });
   }
 
-  try {
-    const markets = getTodayMarkets();
+  // Strategy param support from Apollo Bot
+  const strategy = req.nextUrl.searchParams.get('strategy') || '';
+  const markets = strategy ? getMarketsForStrategy(strategy) : getTodayMarkets();
 
+  try {
     // ── STEP 1: Recherche Apollo INTELLIGENTE ──────────────
 
     const searchRes = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
@@ -128,7 +149,7 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json', 'x-api-key': apolloKey },
       body: JSON.stringify({
         page: 1,
-        per_page: 15,  // On cherche 15 pour n'en garder que 5 HOT
+        per_page: 15,
         person_titles: [
           'CFO', 'Chief Financial Officer',
           'CIO', 'Chief Information Officer',
@@ -138,9 +159,6 @@ export async function GET(req: NextRequest) {
         ],
         organization_num_employees_ranges: ['51,200', '201,500', '501,1000'],
         person_locations: markets.length > 0 ? markets : ['Germany'],
-        // Filtre tech stack : priorité aux gros consommateurs SaaS
-        organization_latest_funding_stage: null, // Accepte tout
-        revenue_range: { min: 1000000, max: null }, // Min 1M€ revenue
       }),
     });
 
@@ -157,10 +175,9 @@ export async function GET(req: NextRequest) {
       .map((p: any) => ({ person: p, score: scoreProspect(p), timing: detectTiming(p) }))
       .sort((a: any, b: any) => b.score - a.score);
 
-    // Ne garder que les 5 meilleurs avec score > 50
     const topProspects = scored.filter((s: any) => s.score >= 50).slice(0, 5);
 
-    // ── STEP 3: Enrichir les emails (crédits Apollo) ──────
+    // ── STEP 3: Enrichir les emails ──────────────────────
 
     const results: any[] = [];
 
@@ -169,10 +186,11 @@ export async function GET(req: NextRequest) {
       const domain = org.primary_domain || '';
       const firstName = person.first_name || '';
       const lastName = person.last_name || '';
-      const country = markets.includes('Germany') ? 'DE' : markets.includes('Netherlands') ? 'NL' : 'UK';
-      const price = country === 'DE' ? 590 : 490;
+      const country = (person.country || '').includes('Germany') ? 'DE'
+        : (person.country || '').includes('Netherlands') ? 'NL'
+        : (person.country || '').includes('United Kingdom') ? 'UK' : 'DE';
+      const price = ['DE', 'AT', 'CH'].includes(country) ? 590 : 490;
 
-      // Enrichir l'email si pas déjà disponible et score > 70
       let email = person.email || '';
       let emailStatus = person.email_status || '';
 
@@ -206,142 +224,75 @@ export async function GET(req: NextRequest) {
       );
       const dailyLoss = Math.round(exposure / 365);
 
-      const prospect: any = {
+      results.push({
         company: org.name || domain,
         domain: domain || `${(org.name || 'unknown').toLowerCase().replace(/[^a-z0-9]/g, '')}.de`,
         country,
         industry: org.industry || 'Technology',
-        headcount: org.estimated_num_employees || 150,
-        revenueEstimate: exposure,
-        score,
-        timingSignal: timing.signal,
-        timingUrgency: timing.urgency,
-        techStack,
-        fundingRound: org.latest_funding_stage || null,
-        fundingDate: org.latest_funding_round_date || null,
+        headcount: org.estimated_num_employees || 0,
+        employeeRange: `${org.estimated_num_employees || 0}`,
         financeLead: {
           name: `${firstName} ${lastName}`.trim(),
-          title: person.title || 'CFO',
+          title: person.title || '',
           email: email || undefined,
-          emailStatus: emailStatus || 'missing',
-          linkedIn: person.linkedin_url || undefined,
+          emailStatus,
+          linkedinUrl: person.linkedin_url || undefined,
         },
-        signals: [
-          timing.signal !== 'general_fit' ? { type: timing.signal, detail: timing.signal.replace(/_/g, ' '), source: 'apollo', strength: timing.urgency === 'critical' ? 5 : 3 } : null,
-          techStack.length >= 10 ? { type: 'high_saas_density', detail: `${techStack.length} SaaS tools detected`, source: 'apollo', strength: 4 } : null,
-          org.estimated_num_employees_growth_6m > 10 ? { type: 'rapid_growth', detail: `+${org.estimated_num_employees_growth_6m}% headcount 6m`, source: 'apollo', strength: 3 } : null,
-        ].filter(Boolean),
-      };
-
-      // ── STEP 5: Générer le message IA (6 couches) ───────
-
-      if (anthropicKey && (email || person.linkedin_url)) {
-        try {
-          const language = country === 'DE' ? 'German' : 'English';
-          const culturalTone = country === 'DE'
-            ? 'Formal Sie, data-first, precise numbers, no fluff. Germans trust METHODOLOGY.'
-            : country === 'NL'
-            ? 'Ultra-direct, zero fluff, get to the point in the first sentence.'
-            : 'Polite but factual, British understatement, "might be worth a look".';
-
-          const roleAngle = /cfo|chief financial|finance/i.test(person.title || '')
-            ? 'FINANCIAL VISIBILITY: the CFO needs to KNOW the numbers. Lead with EUR exposure and daily loss.'
-            : /cio|chief information|cto|tech/i.test(person.title || '')
-            ? 'TECHNICAL CONTROL: the CIO needs to GOVERN the stack. Lead with tool count and shadow IT.'
-            : 'ACTIONABLE CUTS: lead with quick wins and low-disruption savings.';
-
-          const timingNarrative = timing.signal === 'new_executive'
-            ? `New in role — wants quick win for board credibility. A ${price}€ report is the perfect first move.`
-            : timing.signal === 'post_funding'
-            ? `Post-funding: budget available but burn rate pressure. Tool proliferation without consolidation.`
-            : timing.signal === 'active_research'
-            ? `Actively researching IT cost solutions. They're ALREADY looking for this.`
-            : timing.signal === 'rapid_growth'
-            ? `Growing fast: +${org.estimated_num_employees_growth_6m || 15}% headcount means tool sprawl without governance.`
-            : `Mid-market company where IT spend grows faster than IT governance.`;
-
-          const techContext = techStack.length > 0
-            ? `Tech stack detected: ${techStack.slice(0, 5).join(', ')}${techStack.length > 5 ? ` (+${techStack.length - 5} more)` : ''}.`
-            : '';
-
-          const prompt = `You are Jean-Étienne, founder of Ghost Tax. Write a personal outreach message.
-
-PROSPECT: ${firstName} ${lastName}, ${person.title || 'CFO'} at ${org.name || 'company'} (${domain})
-Country: ${country} · Headcount: ~${org.estimated_num_employees || 150} · Industry: ${org.industry || 'Technology'}
-${techContext}
-
-TIMING: ${timingNarrative}
-
-ROLE ANGLE: ${roleAngle}
-
-CULTURAL TONE: ${language}. ${culturalTone}
-
-EXPOSURE ESTIMATE: ~${exposure.toLocaleString()} EUR/year (~${dailyLoss} EUR/day)
-
-CHANNEL: Email (max 180 words)
-PRICE: ${price} EUR
-LINK: ghost-tax.com/intel?domain=${domain}
-
-Start with "${language === 'German' ? 'Betreff' : 'Subject'}:" line containing the domain and a number.
-Lead with a SPECIFIC observation about THIS company (timing signal, tech stack, or growth pattern).
-Include 2-3 concrete data points.
-End with the link and price.
-Sign off as "Jean-Étienne"
-
-ANTI-PATTERNS (NEVER do these):
-- "I hope this finds you well" or any generic greeting
-- "Our platform/solution" before mentioning their data
-- "Book a call" (this is self-serve, no calls)
-- Any sentence that works for ANY company (interchangeability = failure)
-- Fake urgency or superlatives`;
-
-          const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': anthropicKey,
-              'anthropic-version': '2023-06-01',
-            },
-            body: JSON.stringify({
-              model: 'claude-haiku-4-5-20251001',
-              max_tokens: 400,
-              messages: [{ role: 'user', content: prompt }],
-            }),
-          });
-
-          if (aiRes.ok) {
-            const aiData = await aiRes.json();
-            const rawMsg = aiData.content?.[0]?.text || '';
-            const subjectMatch = rawMsg.match(/^(?:Subject|Betreff)\s*:\s*(.+)\n/i);
-
-            prospect.message = {
-              channel: email ? 'email' : 'linkedin',
-              subject: subjectMatch ? subjectMatch[1].trim() : `${domain} — Ghost Tax`,
-              body: subjectMatch ? rawMsg.replace(subjectMatch[0], '').trim() : rawMsg.trim(),
-              language: language.toLowerCase(),
-              price,
-            };
-          }
-        } catch {}
-      }
-
-      results.push(prospect);
+        score,
+        timing,
+        techStack,
+        exposure,
+        dailyLoss,
+        price,
+        strategy: strategy || 'default',
+      });
     }
 
     return NextResponse.json({
-      prospects: results,
-      count: results.length,
+      people,
+      results,
+      strategy: strategy || 'default',
       markets,
-      withMessages: results.filter((r: any) => r.message).length,
-      totalSearched: people.length,
-      avgScore: Math.round(topProspects.reduce((s: number, p: any) => s + p.score, 0) / (topProspects.length || 1)),
-      creditsUsed: results.filter((r: any) => r.financeLead?.emailStatus !== 'missing' && !r.financeLead?.email?.includes('@')).length,
-      timestamp: new Date().toISOString(),
+      count: results.length,
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Unknown error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+  }
+}
+
+// POST handler — accepts apolloParams from the cockpit bot
+export async function POST(req: NextRequest) {
+  const apolloKey = process.env.APOLLO_API_KEY;
+
+  if (!apolloKey) {
+    return NextResponse.json({ error: 'APOLLO_API_KEY not configured' }, { status: 500 });
+  }
+
+  const strategy = req.nextUrl.searchParams.get('strategy') || '';
+
+  try {
+    const body = await req.json();
+
+    const searchRes = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apolloKey },
+      body: JSON.stringify({
+        page: 1,
+        per_page: body.per_page || 15,
+        ...body,
+      }),
+    });
+
+    if (!searchRes.ok) {
+      return NextResponse.json({ error: 'Apollo search failed' }, { status: 502 });
+    }
+
+    const searchData = await searchRes.json();
+    return NextResponse.json({
+      people: searchData.people || [],
+      strategy,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }
