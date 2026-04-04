@@ -212,7 +212,7 @@ export function buildCockpitState(): CockpitState {
 
   let linkedinPost: { body: string; pillar: string } | null = null;
   try {
-    const post = selectNextPost(undefined, 'en');
+    const post = selectNextPost(undefined, 'fr');
     if (post) {
       linkedinPost = {
         body: formatForLinkedIn(post),
@@ -535,4 +535,5 @@ export function fmtDuration(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   if (minutes === 0) return `${seconds}s`;
-  return `${minutes}m ${seconds.toString().padStart(2, 
+  return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+}
