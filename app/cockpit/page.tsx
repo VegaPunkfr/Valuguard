@@ -218,9 +218,11 @@ body {
 }
 
 .cockpit-view-cockpit {
+  flex: 1;
   display: flex;
   gap: 1px;
   background: var(--bg);
+  width: 100%;
 }
 
 .cockpit-source-panel {
