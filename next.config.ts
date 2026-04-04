@@ -61,7 +61,7 @@ const nextConfig: NextConfig = {
         {
           key: "Content-Security-Policy",
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.stripe.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://client.crisp.chat; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://*.stripe.network https://api.exa.ai https://eu.i.posthog.com https://eu.posthog.com https://client.crisp.chat wss://client.relay.crisp.chat; frame-src https://js.stripe.com https://*.stripe.com https://*.stripe.network https://game.crisp.chat; font-src 'self' data: https://client.crisp.chat https://*.stripe.com; base-uri 'self'; form-action 'self' https://*.stripe.com; object-src 'none';",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.stripe.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://client.crisp.chat; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com https://*.stripe.network https://api.exa.ai https://eu.i.posthog.com https://eu.posthog.com https://client.crisp.chat wss://client.relay.crisp.chat; frame-src https://js.stripe.com https://*.stripe.com https://*.stripe.network https://game.crisp.chat; font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat https://*.stripe.com; base-uri 'self'; form-action 'self' https://*.stripe.com; object-src 'none';",
         },
       ],
     },
