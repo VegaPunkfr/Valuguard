@@ -12,8 +12,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Hide navbar on command center — it has its own navigation
-  if (pathname?.startsWith("/command")) return null;
+  // Hide navbar on command center & cockpit — they have their own navigation
+  if (pathname?.startsWith("/command") || pathname?.startsWith("/cockpit")) return null;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);

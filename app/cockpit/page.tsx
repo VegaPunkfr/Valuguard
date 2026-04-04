@@ -1592,12 +1592,18 @@ export default function CockpitPage() {
             )}
           </>
         ) : (
-          <div className="cockpit-empty-state">Select a lead to view details</div>
+          <div className="cockpit-empty-state" style={{ flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '28px' }}>📋</div>
+            <div>Sélectionnez un prospect</div>
+            <div style={{ fontSize: '11px', color: 'var(--t3)' }}>
+              Détails du lead, pipeline, signaux et contact
+            </div>
+          </div>
         )}
       </div>
 
       <div className="cockpit-action-panel">
-        {selectedAccount && (
+        {selectedAccount ? (
           <>
             <div className="cockpit-detail-section">
               <div className="cockpit-action-label">Language</div>
@@ -1654,6 +1660,14 @@ export default function CockpitPage() {
               </div>
             </div>
           </>
+        ) : (
+          <div className="cockpit-empty-state" style={{ flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '28px' }}>🎯</div>
+            <div>Sélectionnez un prospect</div>
+            <div style={{ fontSize: '11px', color: 'var(--t3)' }}>
+              Cliquez sur un lead pour voir les actions disponibles
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -1842,6 +1856,20 @@ export default function CockpitPage() {
 
       {/* Topbar */}
       <div className="cockpit-topbar">
+        <div
+          style={{
+            fontFamily: 'var(--disp)',
+            fontSize: '18px',
+            letterSpacing: '1px',
+            color: 'var(--cyan)',
+            marginRight: '24px',
+            cursor: 'default',
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          GHOST TAX
+        </div>
         <div className="cockpit-kpis">
           <div className="cockpit-kpi">
             <div className="cockpit-kpi-label">Pipeline</div>
