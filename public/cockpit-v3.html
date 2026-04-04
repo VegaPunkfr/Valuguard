@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Tax · Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+
+:root{
+  --bg:#05060E; --s1:#07081A; --s2:#090A1E; --s3:#0C0E24;
+  --bd:rgba(255,255,255,0.07); --bds:rgba(255,255,255,0.13); --bdh:rgba(255,255,255,0.18);
+  --t1:rgba(255,255,255,0.94); --t2:rgba(255,255,255,0.55); --t3:rgba(255,255,255,0.28); --t4:rgba(255,255,255,0.10);
+  --red:#E5354A; --cyan:#00CFC4; --gold:#F0A500; --grn:#00C98D; --vio:#8B5CF6; --blue:#3B82F6; --teal:#14B8A6;
+  --disp:'Bebas Neue',sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --nav:56px; --src:260px; --act:300px;
+}
+
+body{font-family:var(--body);background:var(--bg);color:var(--t1);display:flex;flex-direction:column}
+
+/* grain */
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.025;mix-blend-mode:overlay}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;background:var(--s1);border-bottom:1px solid var(--bd);z-index:100;position:relative}
+.tb-logo{width:var(--nav);height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--bd)}
+.tb-stats{display:flex;align-items:stretch;flex:1;overflow:hidden}
+.tb-stat{display:flex;align-items:baseline;gap:5px;padding:0 18px;border-right:1px solid var(--bd);cursor:default}
+.tb-stat:hover{background:rgba(255,255,255,.02)}
+.ts-val{font-family:var(--disp);font-size:20px;letter-spacing:.03em;line-height:1}
+.ts-lbl{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;margin-left:auto;border-left:1px solid var(--bd)}
+.tb-sync{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:5px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse-grn 2s infinite}
+@keyframes pulse-grn{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,201,141,.4)}50%{opacity:.8;box-shadow:0 0 0 4px rgba(0,201,141,0)}}
+.tb-btn{padding:5px 12px;border-radius:5px;border:1px solid var(--bd);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);background:transparent;cursor:pointer;transition:all 140ms}
+.tb-btn:hover{border-color:var(--bds);color:var(--t1)}
+.tb-btn.primary{border-color:var(--cyan);color:var(--cyan)}
+.tb-btn.primary:hover{background:rgba(0,207,196,.08)}
+
+/* ── BODY ── */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--nav);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px}
+.nav-item{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 140ms;color:var(--t3);border:1px solid transparent;position:relative}
+.nav-item:hover{color:var(--t2);background:rgba(255,255,255,.04)}
+.nav-item.active{color:var(--cyan);background:rgba(0,207,196,.08);border-color:rgba(0,207,196,.15)}
+.nav-item svg{width:18px;height:18px}
+.nav-sep{width:24px;height:1px;background:var(--bd);margin:6px 0}
+.nav-badge{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--s1)}
+
+/* ── MAIN ── */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* ── SOURCE PANEL ── */
+.src-panel{width:var(--src);flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s1)}
+.src-head{padding:14px 14px 10px;border-bottom:1px solid var(--bd)}
+.src-search{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:7px;padding:0 10px;height:32px}
+.src-search input{background:none;border:none;outline:none;font-family:var(--body);font-size:12px;color:var(--t1);width:100%;caret-color:var(--cyan)}
+.src-search input::placeholder{color:var(--t3)}
+.src-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px 8px;border-bottom:1px solid var(--bd)}
+.src-tab{padding:3px 9px;border-radius:20px;border:1px solid var(--bd);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all 140ms;white-space:nowrap}
+.src-tab:hover{border-color:var(--bds);color:var(--t2)}
+.src-tab.active{border-color:currentColor;color:var(--cyan)}
+.src-tab[data-src="scan"].active{color:var(--cyan)}
+.src-tab[data-src="stripe"].active{color:var(--grn)}
+.src-tab[data-src="apollo"].active{color:var(--vio)}
+.src-tab[data-src="gmail"].active{color:var(--gold)}
+.src-tab[data-src="linkedin"].active{color:var(--blue)}
+.src-tab[data-src="calendly"].active{color:var(--teal)}
+.src-sort{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--bd)}
+.src-sort-lbl{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.src-count{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--t3)}
+.lead-list{flex:1;overflow-y:auto;padding:4px}
+.lead-list::-webkit-scrollbar{width:3px}
+.lead-list::-webkit-scrollbar-track{background:transparent}
+.lead-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.lead-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background 120ms;border:1px solid transparent;margin-bottom:2px}
+.lead-row:hover{background:rgba(255,255,255,.03)}
+.lead-row.active{background:rgba(0,207,196,.05);border-color:rgba(0,207,196,.12)}
+.heat-ring{width:32px;height:32px;flex-shrink:0;position:relative}
+.heat-ring svg{width:32px;height:32px;transform:rotate(-90deg)}
+.heat-ring .ring-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:2.5}
+.heat-ring .ring-fg{fill:none;stroke-width:2.5;stroke-linecap:round;transition:stroke-dashoffset .4s ease}
+.heat-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700}
+.lead-info{flex:1;min-width:0}
+.lead-co{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.lead-meta{display:flex;align-items:center;gap:5px}
+.src-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.lead-stage{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-exp{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t2);text-align:right;flex-shrink:0}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{flex:1;overflow-y:auto;border-right:1px solid var(--bd);display:flex;flex-direction:column}
+.detail-panel::-webkit-scrollbar{width:3px}
+.detail-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--t3)}
+.detail-empty svg{width:40px;height:40px;opacity:.3}
+.detail-empty p{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.4}
+
+/* detail header */
+.dh{padding:20px 24px 16px;border-bottom:1px solid var(--bd);background:var(--s1)}
+.dh-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.dh-icon{width:44px;height:44px;border-radius:10px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:18px;font-weight:400;letter-spacing:.05em;flex-shrink:0;background:rgba(255,255,255,.03)}
+.dh-info{flex:1}
+.dh-name{font-family:var(--disp);font-size:22px;letter-spacing:.04em;line-height:1;margin-bottom:4px}
+.dh-sub{font-size:12px;color:var(--t2);display:flex;align-items:center;gap:8px}
+.dh-pill{padding:2px 8px;border-radius:20px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid;display:inline-flex;align-items:center;gap:4px}
+.dh-actions{display:flex;align-items:center;gap:6px}
+.dh-act-btn{padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:1px solid var(--bd);color:var(--t2);background:transparent}
+.dh-act-btn:hover{border-color:var(--bds);color:var(--t1)}
+.dh-act-btn.cta{background:rgba(0,207,196,.1);border-color:rgba(0,207,196,.3);color:var(--cyan)}
+.dh-act-btn.cta:hover{background:rgba(0,207,196,.15);border-color:var(--cyan)}
+
+/* pipeline progress */
+.pipe-prog{display:flex;align-items:center;gap:0;padding:12px 24px;border-bottom:1px solid var(--bd);background:var(--bg)}
+.pp-step{display:flex;align-items:center;gap:0;flex:1}
+.pp-node{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--t3);flex-shrink:0;transition:all 200ms;position:relative}
+.pp-node.done{border-color:var(--cyan);background:rgba(0,207,196,.1);color:var(--cyan)}
+.pp-node.active{border-color:var(--cyan);background:var(--cyan);color:var(--bg)}
+.pp-line{flex:1;height:1px;background:var(--bd)}
+.pp-line.done{background:rgba(0,207,196,.3)}
+.pp-label{position:absolute;top:28px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;color:var(--t3)}
+.pp-label.active{color:var(--cyan)}
+.pipe-prog-wrap{position:relative;padding-bottom:20px;flex:1;display:flex}
+
+/* sections */
+.d-section{padding:18px 24px;border-bottom:1px solid var(--bd)}
+.d-sec-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.d-sec-badge{padding:2px 7px;border-radius:4px;font-size:14px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);color:var(--vio)}
+
+/* apollo enrichment grid */
+.enrich-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.eg-card{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:8px;padding:10px 12px}
+.eg-lbl{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.eg-val{font-size:12px;font-weight:600;color:var(--t1)}
+.eg-val.cyan{color:var(--cyan)}
+.eg-val.grn{color:var(--grn)}
+
+/* tech stack */
+.tech-list{display:flex;flex-wrap:wrap;gap:5px}
+.tech-tag{padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid var(--bd);font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t2)}
+
+/* job postings */
+.job-list{display:flex;flex-direction:column;gap:6px}
+.job-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;background:rgba(240,165,0,.04);border:1px solid rgba(240,165,0,.1)}
+.job-title{font-size:12px;font-weight:500;color:var(--t1)}
+.job-dept{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.job-hint{font-family:var(--mono);font-size:14px;color:var(--t3)}
+
+/* BANT */
+.bant-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bant-item{display:flex;flex-direction:column;gap:5px}
+.bant-lbl{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);display:flex;justify-content:space-between}
+.bant-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.bant-fill{height:100%;border-radius:2px;transition:width .5s ease}
+
+/* contact card */
+.contact-card{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:8px}
+.cc-avatar{width:38px;height:38px;border-radius:50%;background:rgba(0,207,196,.1);border:1.5px solid rgba(0,207,196,.2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:12px;font-weight:400;color:var(--cyan);flex-shrink:0}
+.cc-info{flex:1}
+.cc-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.cc-title{font-size:14px;color:var(--t2)}
+.cc-contact{display:flex;flex-direction:column;gap:3px;margin-top:7px}
+.cc-line{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--t2)}
+.cc-line svg{width:12px;height:12px;opacity:.5;flex-shrink:0}
+.cc-line a{color:var(--cyan);text-decoration:none;font-family:var(--mono);font-size:13px}
+
+/* timeline */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px;padding:8px 0;position:relative}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:26px;bottom:-4px;width:1px;background:var(--bd)}
+.tl-icon{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--bd);background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1}
+.tl-icon svg{width:10px;height:10px}
+.tl-body{flex:1;padding-top:2px}
+.tl-event{font-size:12px;font-weight:500;color:var(--t1)}
+.tl-time{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--t3);margin-top:2px}
+
+/* ── ACTION PANEL ── */
+.act-panel{width:var(--act);flex-shrink:0;background:var(--s1);display:flex;flex-direction:column;overflow-y:auto}
+.act-panel::-webkit-scrollbar{width:3px}
+.act-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.act-head{padding:14px 16px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.act-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2)}
+.act-section{padding:14px 16px;border-bottom:1px solid var(--bd)}
+.act-sec-title{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.act-sec-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* next action */
+.next-action{background:rgba(0,207,196,.05);border:1px solid rgba(0,207,196,.15);border-radius:8px;padding:12px;margin-bottom:8px}
+.na-label{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);opacity:.7;margin-bottom:6px}
+.na-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:4px}
+.na-time{font-family:var(--mono);font-size:13px;color:var(--t3)}
+.na-exec{width:100%;margin-top:10px;padding:8px;border-radius:6px;background:var(--cyan);border:none;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);cursor:pointer;transition:opacity 150ms}
+.na-exec:hover{opacity:.85}
+
+/* channel selector */
+.channel-sel{display:flex;gap:5px;margin-bottom:10px}
+.chan-btn{flex:1;padding:6px 8px;border-radius:6px;border:1px solid var(--bd);background:transparent;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all 140ms;display:flex;align-items:center;justify-content:center;gap:4px}
+.chan-btn:hover{border-color:var(--bds);color:var(--t2)}
+.chan-btn.active{border-color:rgba(0,207,196,.3);background:rgba(0,207,196,.07);color:var(--cyan)}
+.chan-btn svg{width:11px;height:11px}
+
+/* message preview */
+.msg-preview{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:7px;padding:12px;font-size:14px;line-height:1.6;color:var(--t2);margin-bottom:8px;min-height:100px;position:relative}
+.msg-token{color:var(--cyan);font-family:var(--mono);font-size:13px}
+.msg-actions{display:flex;gap:6px}
+.msg-btn{flex:1;padding:7px;border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:1px solid var(--bd);color:var(--t2);background:transparent}
+.msg-btn:hover{border-color:var(--bds);color:var(--t1)}
+.msg-btn.send{background:rgba(0,207,196,.1);border-color:rgba(0,207,196,.25);color:var(--cyan)}
+.msg-btn.send:hover{background:rgba(0,207,196,.18)}
+
+/* sequence steps */
+.seq-steps{display:flex;flex-direction:column;gap:6px}
+.seq-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;border:1px solid var(--bd);transition:all 140ms}
+.seq-step.done{opacity:.5;border-color:transparent}
+.seq-step.current{border-color:rgba(0,207,196,.2);background:rgba(0,207,196,.03)}
+.seq-step.pending{border-color:transparent}
+.ss-day{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);width:22px;flex-shrink:0}
+.ss-name{font-size:14px;font-weight:500;flex:1;color:var(--t2)}
+.ss-status{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ss-status.done{background:rgba(0,201,141,.15);border-color:rgba(0,201,141,.3)}
+.ss-status.current{background:rgba(0,207,196,.15);border-color:rgba(0,207,196,.3);animation:pulse-c 2s infinite}
+@keyframes pulse-c{0%,100%{box-shadow:0 0 0 0 rgba(0,207,196,.3)}50%{box-shadow:0 0 0 4px rgba(0,207,196,0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.ss-status svg{width:8px;height:8px}
+
+/* apollo actions */
+.apo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.apo-btn{padding:8px 10px;border-radius:7px;border:1px solid rgba(139,92,246,.2);background:rgba(139,92,246,.05);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--vio);cursor:pointer;transition:all 140ms;text-align:center}
+.apo-btn:hover{border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.1)}
+.apo-btn.full{grid-column:1/-1}
+.apo-campaign{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1px solid rgba(139,92,246,.15);background:rgba(139,92,246,.04);margin-top:6px}
+.apo-camp-name{flex:1;font-size:14px;font-weight:500;color:var(--t2)}
+.apo-camp-badge{padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);color:var(--vio)}
+
+/* ── APOLLO VIEW ── */
+.apollo-view{display:none;flex:1;overflow:hidden}
+.apollo-view.visible{display:flex}
+.apo-search-panel{width:280px;flex-shrink:0;border-right:1px solid var(--bd);padding:16px;overflow-y:auto;background:var(--s1)}
+.apo-results-panel{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.apo-results-panel::-webkit-scrollbar{width:3px}
+.apo-results-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+.apo-toggle{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:7px;padding:3px;gap:2px;margin-bottom:14px}
+.apo-tog-btn{flex:1;padding:5px;border-radius:5px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);border:none;background:transparent;cursor:pointer;transition:all 140ms}
+.apo-tog-btn.active{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.25);color:var(--vio)}
+
+.filter-group{margin-bottom:14px}
+.filter-label{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.filter-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-family:var(--body);font-size:14px;color:var(--t1);outline:none;caret-color:var(--vio);transition:border-color 140ms}
+.filter-input:focus{border-color:rgba(139,92,246,.3)}
+.filter-input::placeholder{color:var(--t3)}
+.filter-tags{display:flex;flex-wrap:wrap;gap:4px}
+.filter-tag{padding:3px 8px;border-radius:4px;border:1px solid var(--bd);font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;transition:all 120ms}
+.filter-tag:hover{border-color:var(--bds);color:var(--t2)}
+.filter-tag.sel{border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.08);color:var(--vio)}
+.apo-search-btn{width:100%;margin-top:10px;padding:9px;border-radius:7px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vio);cursor:pointer;transition:all 140ms}
+.apo-search-btn:hover{background:rgba(139,92,246,.2)}
+
+/* result cards */
+.result-card{background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:9px;padding:14px;transition:border-color 140ms;cursor:pointer}
+.result-card:hover{border-color:rgba(139,92,246,.2)}
+.rc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.rc-icon{width:36px;height:36px;border-radius:8px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.15);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:14px;color:var(--vio);flex-shrink:0}
+.rc-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.rc-sub{font-size:14px;color:var(--t2)}
+.rc-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.rc-pill{padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:12px;font-weight:600;border:1px solid var(--bd);color:var(--t3)}
+.rc-actions{display:flex;gap:6px}
+.rc-act{flex:1;padding:6px;border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:1px solid rgba(139,92,246,.2);color:var(--vio);background:rgba(139,92,246,.05);text-align:center}
+.rc-act:hover{background:rgba(139,92,246,.12)}
+.rc-act.primary{background:rgba(0,207,196,.08);border-color:rgba(0,207,196,.2);color:var(--cyan)}
+.rc-act.primary:hover{background:rgba(0,207,196,.14)}
+
+/* bulk bar */
+.bulk-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:8px;margin-bottom:10px}
+.bulk-count{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--vio);flex:1}
+.bulk-btn{padding:5px 12px;border-radius:5px;border:1px solid rgba(139,92,246,.2);background:rgba(139,92,246,.08);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--vio);cursor:pointer;transition:all 140ms}
+.bulk-btn:hover{background:rgba(139,92,246,.16)}
+.bulk-btn.cta{background:var(--vio);color:#fff;border-color:var(--vio)}
+.bulk-btn.cta:hover{opacity:.85}
+
+/* ── SEQUENCES VIEW ── */
+.seq-view{display:none;flex:1;overflow:hidden}
+.seq-view.visible{display:flex}
+.seq-list-panel{width:300px;flex-shrink:0;border-right:1px solid var(--bd);overflow-y:auto;background:var(--s1);padding:12px}
+.seq-detail-panel{flex:1;overflow-y:auto;padding:20px 24px}
+.seq-card{padding:12px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;transition:all 140ms;margin-bottom:6px}
+.seq-card:hover{border-color:var(--bds)}
+.seq-card.active{border-color:rgba(0,207,196,.2);background:rgba(0,207,196,.03)}
+.sc-name{font-size:13px;font-weight:600;margin-bottom:6px}
+.sc-stats{display:flex;gap:10px}
+.sc-stat{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.07em;color:var(--t3)}
+.sc-stat span{color:var(--t1)}
+.sc-bar{height:2px;border-radius:1px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden}
+.sc-bar-fill{height:100%;border-radius:1px;background:var(--cyan)}
+
+/* pending queue */
+.queue-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;border:1px solid var(--bd);margin-bottom:6px;transition:all 140ms}
+.queue-item:hover{border-color:var(--bds)}
+.qi-src{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.qi-info{flex:1}
+.qi-co{font-size:12px;font-weight:600}
+.qi-step{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t3)}
+.qi-time{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t3)}
+.qi-btn{padding:4px 10px;border-radius:5px;border:1px solid rgba(0,207,196,.2);background:rgba(0,207,196,.06);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);cursor:pointer;transition:all 140ms;flex-shrink:0}
+.qi-btn:hover{background:rgba(0,207,196,.12)}
+
+/* analytics mini */
+.analytics-strip{display:flex;gap:10px;margin-bottom:16px}
+.an-card{flex:1;padding:12px;background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:8px;text-align:center}
+.an-val{font-family:var(--disp);font-size:22px;letter-spacing:.04em;margin-bottom:3px}
+.an-lbl{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+
+/* cockpit view */
+.cockpit-view{display:flex;flex:1;overflow:hidden}
+.cockpit-view.hidden{display:none}
+
+/* view panel visibility */
+.view-panel{display:none;flex:1;overflow:hidden}
+.view-panel.visible{display:flex}
+
+/* animations */
+@keyframes fade-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.lead-row{animation:fade-in .2s ease both}
+
+/* scrollbar for apo */
+.apo-search-panel::-webkit-scrollbar,.apo-results-panel::-webkit-scrollbar,.seq-list-panel::-webkit-scrollbar,.seq-detail-panel::-webkit-scrollbar{width:3px}
+.apo-search-panel::-webkit-scrollbar-thumb,.apo-results-panel::-webkit-scrollbar-thumb,.seq-list-panel::-webkit-scrollbar-thumb,.seq-detail-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* source header label */
+.src-panel-head{padding:10px 14px 8px;border-bottom:1px solid var(--bd)}
+.src-panel-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;justify-content:space-between}
+
+/* ── LINKEDIN CM VIEW ── */
+.li-view{display:flex;flex:1;overflow:hidden}
+.li-col{display:flex;flex-direction:column;overflow-y:auto}
+.li-col::-webkit-scrollbar{width:3px}
+.li-col::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.li-col-left{width:260px;flex-shrink:0;border-right:1px solid var(--bd);background:var(--s1)}
+.li-col-center{flex:1;background:var(--bg)}
+.li-col-right{width:270px;flex-shrink:0;border-left:1px solid var(--bd);background:var(--s1)}
+
+.li-head{padding:14px 16px 10px;border-bottom:1px solid var(--bd)}
+.li-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:0}
+
+/* calendar entries */
+.cal-week{padding:8px 12px 4px;font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.cal-entry{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;border-left:2px solid transparent;transition:all 120ms}
+.cal-entry:hover{background:rgba(255,255,255,.03)}
+.cal-entry.active{background:rgba(59,130,246,.05);border-left-color:var(--blue)}
+.cal-entry.status-scheduled .ce-status{color:var(--grn)}
+.cal-entry.status-draft .ce-status{color:var(--gold)}
+.cal-entry.status-idea .ce-status{color:var(--t3)}
+.cal-entry.status-published .ce-status{color:var(--cyan)}
+.ce-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ce-body{flex:1;min-width:0}
+.ce-day{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--t2);display:flex;align-items:center;gap:5px}
+.ce-time{font-size:12px;color:var(--t3);margin-top:1px}
+.ce-snippet{font-size:13px;color:var(--t1);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.7}
+.ce-status{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-left:auto;flex-shrink:0}
+
+/* format pills */
+.fmt-bar{display:flex;gap:6px;padding:14px 16px 10px;border-bottom:1px solid var(--bd)}
+.fmt-pill{flex:1;padding:6px 8px;border-radius:7px;border:1px solid var(--bd);cursor:pointer;transition:all 140ms;text-align:center}
+.fmt-pill:hover{border-color:var(--bds)}
+.fmt-pill.active{border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.07)}
+.fmt-pill .fp-icon{font-size:14px;margin-bottom:3px}
+.fmt-pill .fp-label{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2)}
+
+/* post editor */
+.post-editor{padding:16px}
+.pe-hook-label{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.pe-hook{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;font-family:var(--body);font-size:13px;font-weight:600;color:var(--t1);resize:none;outline:none;line-height:1.5;transition:border-color 140ms}
+.pe-hook:focus{border-color:rgba(59,130,246,.3)}
+.pe-body{width:100%;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;font-family:var(--body);font-size:12px;color:var(--t1);resize:none;outline:none;line-height:1.8;transition:border-color 140ms;margin-top:8px;min-height:220px}
+.pe-body:focus{border-color:rgba(59,130,246,.3)}
+.pe-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.pe-chars{font-family:var(--mono);font-size:12px;color:var(--t3)}
+.pe-chars.warn{color:var(--gold)}
+.pe-chars.over{color:var(--red)}
+.pe-actions{display:flex;gap:6px}
+.pe-btn{padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:1px solid var(--bd);color:var(--t2);background:transparent}
+.pe-btn:hover{border-color:var(--bds);color:var(--t1)}
+.pe-btn.publish{border-color:rgba(59,130,246,.3);color:var(--blue);background:rgba(59,130,246,.07)}
+.pe-btn.publish:hover{background:rgba(59,130,246,.12)}
+
+/* tip box */
+.li-tip{margin:0 16px 12px;padding:10px 12px;border-radius:7px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.12)}
+.li-tip-title{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;opacity:.8}
+.li-tip-body{font-size:14px;color:var(--t2);line-height:1.55}
+
+/* InMail credits */
+.inmail-bar{padding:14px 16px 12px;border-bottom:1px solid var(--bd)}
+.im-ring{width:64px;height:64px;position:relative;margin:0 auto 8px}
+.im-ring svg{width:64px;height:64px;transform:rotate(-90deg)}
+.im-ring .ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:5}
+.im-ring .ring-fg{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round}
+.im-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.im-val{font-family:var(--disp);font-size:18px;letter-spacing:.03em;color:var(--blue);line-height:1}
+.im-sub{font-family:var(--mono);font-size:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.im-stats{display:flex;justify-content:space-around;margin-top:8px}
+.im-stat{text-align:center}
+.im-stat-val{font-family:var(--disp);font-size:13px;color:var(--t1)}
+.im-stat-lbl{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+
+/* visitors */
+.visitor-list{padding:4px 8px}
+.visitor-item{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:7px;cursor:pointer;transition:background 120ms}
+.visitor-item:hover{background:rgba(255,255,255,.03)}
+.vi-avatar{width:32px;height:32px;border-radius:50%;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:12px;color:var(--blue);flex-shrink:0}
+.vi-info{flex:1;min-width:0}
+.vi-name{font-size:14px;font-weight:600;color:var(--t1)}
+.vi-role{font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vi-heat{font-family:var(--mono);font-size:13px;font-weight:700;flex-shrink:0}
+.vi-time{font-family:var(--mono);font-size:14px;color:var(--t3);flex-shrink:0}
+
+/* routine checklist */
+.routine-list{padding:8px 12px 16px}
+.routine-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.routine-item:last-child{border-bottom:none}
+.ri-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--bd);flex-shrink:0;margin-top:1px;cursor:pointer;transition:all 140ms;display:flex;align-items:center;justify-content:center}
+.ri-check.done{background:rgba(0,201,141,.15);border-color:rgba(0,201,141,.4)}
+.ri-body{flex:1}
+.ri-task{font-size:14px;color:var(--t1);line-height:1.4}
+.ri-time{font-family:var(--mono);font-size:12px;color:var(--t3);margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="rgba(0,207,196,0.08)" stroke="rgba(0,207,196,0.2)" stroke-width="1"/>
+      <rect x="6" y="17" width="3" height="6" rx="1" fill="rgba(0,207,196,0.4)"/>
+      <rect x="11" y="12" width="3" height="11" rx="1" fill="rgba(0,207,196,0.6)"/>
+      <rect x="16" y="8" width="3" height="15" rx="1" fill="#00CFC4"/>
+      <rect x="21" y="5" width="3" height="18" rx="1" fill="#00CFC4"/>
+    </svg>
+  </div>
+  <div class="tb-stats">
+    <div class="tb-stat"><span class="ts-val" style="color:var(--cyan)">€2.14M</span><span class="ts-lbl">Pipeline</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--red)">23</span><span class="ts-lbl">Hot leads</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--grn)">€18.4K</span><span class="ts-lbl">MRR</span></div>
+    <div class="tb-stat"><span class="ts-val">35</span><span class="ts-lbl">Prospects</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--gold)">12</span><span class="ts-lbl">À contacter</span></div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-sync"><div class="sync-dot"></div>Sync Apollo · il y a 4 min</div>
+    <button class="tb-btn primary" onclick="showView('apollo')">+ Prospecter</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-item active" data-view="cockpit" onclick="showView('cockpit')" title="Cockpit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </div>
+    <div class="nav-item" data-view="apollo" onclick="showView('apollo')" title="Apollo Prospection">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6" stroke-linecap="round"/></svg>
+    </div>
+    <div class="nav-item" data-view="sequences" onclick="showView('sequences')" title="Séquences">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h12M4 18h8" stroke-linecap="round"/></svg>
+      <div class="nav-badge"></div>
+    </div>
+    <div class="nav-item" data-view="linkedin" onclick="showView('linkedin')" title="LinkedIn CM">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-item" title="Paramètres">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </div>
+  </nav>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+
+    <!-- ══════════════════════════════════════════
+         VIEW 1: COCKPIT (3 panels)
+    ══════════════════════════════════════════ -->
+    <div class="view-panel visible" id="view-cockpit">
+
+      <!-- SOURCE PANEL -->
+      <div class="src-panel">
+        <div class="src-head">
+          <div class="src-search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Rechercher un prospect…" id="search-input" oninput="filterLeads(this.value)">
+          </div>
+        </div>
+        <div class="src-tabs">
+          <div class="src-tab active" data-src="all" onclick="filterBySource('all',this)">Tout</div>
+          <div class="src-tab" data-src="scan" onclick="filterBySource('scan',this)">Scan</div>
+          <div class="src-tab" data-src="stripe" onclick="filterBySource('stripe',this)">Stripe</div>
+          <div class="src-tab" data-src="apollo" onclick="filterBySource('apollo',this)">Apollo</div>
+          <div class="src-tab" data-src="gmail" onclick="filterBySource('gmail',this)">Gmail</div>
+          <div class="src-tab" data-src="linkedin" onclick="filterBySource('linkedin',this)">LinkedIn</div>
+          <div class="src-tab" data-src="calendly" onclick="filterBySource('calendly',this)">Calendly</div>
+        </div>
+        <div class="src-sort">
+          <span class="src-sort-lbl">Par chaleur</span>
+          <span class="src-count" id="lead-count">87 prospects</span>
+        </div>
+        <div class="lead-list" id="lead-list"></div>
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <div class="detail-panel" id="detail-panel">
+        <div class="detail-empty" id="detail-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <p>Sélectionnez un prospect</p>
+        </div>
+        <div id="detail-content" style="display:none;flex-direction:column;flex:1"></div>
+      </div>
+
+      <!-- ACTION PANEL -->
+      <div class="act-panel" id="action-panel">
+        <div class="act-head">
+          <span class="act-title" id="act-panel-title">Centre d'action</span>
+        </div>
+        <div id="action-content">
+          <div style="padding:24px 16px;text-align:center;color:var(--t3)">
+            <p style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.5">Sélectionnez un prospect</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         VIEW 2: APOLLO PROSPECTION
+    ══════════════════════════════════════════ -->
+    <div class="view-panel" id="view-apollo">
+      <div class="apo-search-panel">
+        <div class="apo-toggle">
+          <button class="apo-tog-btn active" onclick="setApoMode('companies',this)">Sociétés</button>
+          <button class="apo-tog-btn" onclick="setApoMode('people',this)">Personnes</button>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Secteur</div>
+          <div class="filter-tags">
+            <div class="filter-tag sel" onclick="toggleTag(this)">SaaS B2B</div>
+            <div class="filter-tag sel" onclick="toggleTag(this)">Fintech</div>
+            <div class="filter-tag" onclick="toggleTag(this)">RH Tech</div>
+            <div class="filter-tag" onclick="toggleTag(this)">LegalTech</div>
+            <div class="filter-tag" onclick="toggleTag(this)">Marketplace</div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Effectif</div>
+          <div class="filter-tags">
+            <div class="filter-tag" onclick="toggleTag(this)">1–50</div>
+            <div class="filter-tag sel" onclick="toggleTag(this)">50–200</div>
+            <div class="filter-tag sel" onclick="toggleTag(this)">200–1000</div>
+            <div class="filter-tag" onclick="toggleTag(this)">1000+</div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Revenus estimés</div>
+          <div class="filter-tags">
+            <div class="filter-tag" onclick="toggleTag(this)">&lt; €1M</div>
+            <div class="filter-tag sel" onclick="toggleTag(this)">€1M–10M</div>
+            <div class="filter-tag sel" onclick="toggleTag(this)">€10M–50M</div>
+            <div class="filter-tag" onclick="toggleTag(this)">&gt; €50M</div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Pays</div>
+          <div class="filter-tags">
+            <div class="filter-tag sel" onclick="toggleTag(this)">France</div>
+            <div class="filter-tag" onclick="toggleTag(this)">Belgique</div>
+            <div class="filter-tag" onclick="toggleTag(this)">Suisse</div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Stack tech (signal SaaS)</div>
+          <input type="text" class="filter-input" placeholder="ex: Salesforce, HubSpot…">
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Signaux d'intention</div>
+          <div class="filter-tags">
+            <div class="filter-tag sel" onclick="toggleTag(this)">Recrutement actif</div>
+            <div class="filter-tag" onclick="toggleTag(this)">Levée récente</div>
+            <div class="filter-tag" onclick="toggleTag(this)">Nouveau CTO</div>
+          </div>
+        </div>
+        <button class="apo-search-btn" onclick="runApolloSearch()">⟳ Lancer la recherche Apollo</button>
+      </div>
+
+      <div class="apo-results-panel" id="apo-results">
+        <div id="bulk-bar" style="display:none">
+          <div class="bulk-bar">
+            <span class="bulk-count" id="bulk-count">0 sélectionnés</span>
+            <button class="bulk-btn" onclick="bulkEnrich()">Enrichir</button>
+            <button class="bulk-btn" onclick="bulkCampaign()">+ Campagne</button>
+            <button class="bulk-btn cta" onclick="bulkPipeline()">+ Pipeline</button>
+          </div>
+        </div>
+        <div id="apo-result-list"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         VIEW 3: SÉQUENCES
+    ══════════════════════════════════════════ -->
+    <div class="view-panel" id="view-sequences">
+      <div class="seq-list-panel">
+        <div style="margin-bottom:10px">
+          <div class="src-panel-title" style="margin-bottom:8px">Séquences actives</div>
+        </div>
+        <div id="seq-list"></div>
+      </div>
+      <div class="seq-detail-panel">
+        <div class="analytics-strip" id="seq-analytics"></div>
+        <div style="margin-bottom:14px">
+          <div class="d-sec-title">File d'attente · Aujourd'hui <span style="color:var(--red);font-family:var(--mono);font-size:13px;margin-left:6px">12 actions</span></div>
+        </div>
+        <div id="seq-queue"></div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         VIEW 4: LINKEDIN CM
+    ══════════════════════════════════════════ -->
+    <div class="view-panel" id="view-linkedin">
+      <div class="li-view">
+
+        <!-- ── COL LEFT : Calendrier éditorial ── -->
+        <div class="li-col li-col-left">
+          <div class="li-head" style="display:flex;align-items:center;justify-content:space-between">
+            <span class="li-title">Calendrier éditorial</span>
+            <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue);letter-spacing:.08em">3×/SEM</span>
+          </div>
+
+          <!-- Stats bande -->
+          <div style="display:flex;border-bottom:1px solid var(--bd)">
+            <div style="flex:1;padding:10px 12px;border-right:1px solid var(--bd);text-align:center">
+              <div style="font-family:var(--disp);font-size:18px;color:var(--blue)" id="li-followers">1 240</div>
+              <div style="font-family:var(--mono);font-size:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)">Abonnés</div>
+            </div>
+            <div style="flex:1;padding:10px 12px;border-right:1px solid var(--bd);text-align:center">
+              <div style="font-family:var(--disp);font-size:18px;color:var(--grn)">+18%</div>
+              <div style="font-family:var(--mono);font-size:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)">30j</div>
+            </div>
+            <div style="flex:1;padding:10px 12px;text-align:center">
+              <div style="font-family:var(--disp);font-size:18px;color:var(--gold)" id="li-posts-done">4</div>
+              <div style="font-family:var(--mono);font-size:4px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)">Posts</div>
+            </div>
+          </div>
+
+          <!-- Loading state -->
+          <div id="li-loading" style="display:none;align-items:center;justify-content:center;gap:8px;padding:20px;font-family:var(--mono);font-size:12px;color:var(--t3)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            Chargement signaux Supabase…
+          </div>
+          <div id="li-calendar"></div>
+        </div>
+
+        <!-- ── COL CENTER : Générateur de posts ── -->
+        <div class="li-col li-col-center">
+          <div style="padding:14px 16px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2)">Générateur de Post</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-family:var(--mono);font-size:14px;color:var(--t3)" id="li-post-day">Lun 31 Mar · 8h00</span>
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--blue);opacity:.7"></div>
+            </div>
+          </div>
+
+          <!-- Format pills -->
+          <div class="fmt-bar" id="li-fmt-bar">
+            <div class="fmt-pill active" onclick="setLiFormat('chiffre_choc',this)">
+              <div class="fp-icon">📊</div>
+              <div class="fp-label">Chiffre Choc</div>
+            </div>
+            <div class="fmt-pill" onclick="setLiFormat('histoire_client',this)">
+              <div class="fp-icon">📖</div>
+              <div class="fp-label">Histoire</div>
+            </div>
+            <div class="fmt-pill" onclick="setLiFormat('prise_de_position',this)">
+              <div class="fp-icon">🎯</div>
+              <div class="fp-label">Opinion</div>
+            </div>
+          </div>
+
+          <!-- Source badge — données réelles -->
+          <div id="li-source-badge" style="margin:0 16px 0;padding:5px 10px;background:rgba(0,207,196,.06);border:1px solid rgba(0,207,196,.2);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--cyan);min-height:24px"></div>
+
+          <!-- Tip contextuel -->
+          <div id="li-tip-box"></div>
+
+          <!-- Éditeur -->
+          <div class="post-editor">
+            <div class="pe-hook-label">
+              <span>🪝 Accroche (première ligne)</span>
+              <span style="color:var(--blue);cursor:pointer" onclick="genHook()">↺ Régénérer</span>
+            </div>
+            <textarea class="pe-hook" id="li-hook" rows="2" oninput="updateCharCount()" placeholder="Votre accroche — c'est 80% de la performance…"></textarea>
+            <div class="pe-hook-label" style="margin-top:12px">
+              <span>✍️ Corps du post</span>
+              <span style="color:var(--blue);cursor:pointer" onclick="genBody()">↺ Régénérer</span>
+            </div>
+            <textarea class="pe-body" id="li-body" oninput="updateCharCount()" placeholder="Développez votre idée…"></textarea>
+            <div class="pe-footer">
+              <span class="pe-chars" id="li-chars">0 / 3 000 caractères</span>
+              <div class="pe-actions">
+                <button class="pe-btn" onclick="saveDraft()">Sauvegarder brouillon</button>
+                <button class="pe-btn publish" onclick="schedulePost()">Planifier →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hashtags suggérés -->
+          <div style="padding:0 16px 16px">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Hashtags recommandés</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px" id="li-hashtags"></div>
+          </div>
+
+          <!-- Meilleure heure -->
+          <div style="margin:0 16px 16px;padding:10px 12px;border-radius:7px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.1)">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;opacity:.8">⏰ Meilleure heure de publication</div>
+            <div style="display:flex;gap:8px">
+              <div style="flex:1;text-align:center;padding:7px;background:rgba(59,130,246,.06);border-radius:6px;border:1px solid rgba(59,130,246,.15)">
+                <div style="font-family:var(--disp);font-size:14px;color:var(--blue)">8h00</div>
+                <div style="font-family:var(--mono);font-size:14px;color:var(--t3)">Lundi</div>
+              </div>
+              <div style="flex:1;text-align:center;padding:7px;background:rgba(59,130,246,.06);border-radius:6px;border:1px solid rgba(59,130,246,.15)">
+                <div style="font-family:var(--disp);font-size:14px;color:var(--blue)">7h30</div>
+                <div style="font-family:var(--mono);font-size:14px;color:var(--t3)">Mercredi</div>
+              </div>
+              <div style="flex:1;text-align:center;padding:7px;background:rgba(59,130,246,.06);border-radius:6px;border:1px solid rgba(59,130,246,.15)">
+                <div style="font-family:var(--disp);font-size:14px;color:var(--blue)">8h30</div>
+                <div style="font-family:var(--mono);font-size:14px;color:var(--t3)">Vendredi</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── COL RIGHT : Premium Intelligence ── -->
+        <div class="li-col li-col-right">
+
+          <!-- InMail credits -->
+          <div class="inmail-bar">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">InMail Premium · Avril 2026</div>
+            <div class="im-ring">
+              <svg viewBox="0 0 64 64">
+                <circle class="ring-bg" cx="32" cy="32" r="28"/>
+                <circle class="ring-fg" cx="32" cy="32" r="28" id="li-inmail-ring"
+                  stroke-dasharray="175.9" stroke-dashoffset="41"/>
+              </svg>
+              <div class="im-center">
+                <div class="im-val" id="li-inmail-left">23</div>
+                <div class="im-sub">restants</div>
+              </div>
+            </div>
+            <div class="im-stats">
+              <div class="im-stat"><div class="im-stat-val">7</div><div class="im-stat-lbl">Envoyés</div></div>
+              <div class="im-stat"><div class="im-stat-val" style="color:var(--grn)">3</div><div class="im-stat-lbl">Réponses</div></div>
+              <div class="im-stat"><div class="im-stat-val" style="color:var(--gold)">43%</div><div class="im-stat-lbl">Taux</div></div>
+            </div>
+          </div>
+
+          <!-- Visiteurs profil -->
+          <div>
+            <div class="li-head" style="display:flex;align-items:center;justify-content:space-between">
+              <span class="li-title">Visiteurs profil · 7j</span>
+              <span style="font-family:var(--mono);font-size:14px;color:var(--blue);font-weight:700">Premium ✦</span>
+            </div>
+            <div class="visitor-list" id="li-visitors"></div>
+          </div>
+
+          <!-- Routine hebdo -->
+          <div style="border-top:1px solid var(--bd)">
+            <div class="li-head" style="display:flex;align-items:center;justify-content:space-between">
+              <span class="li-title">Routine hebdo · 45 min</span>
+              <span style="font-family:var(--mono);font-size:14px;color:var(--t3);font-weight:700" id="li-routine-done">0/5</span>
+            </div>
+            <div class="routine-list" id="li-routine"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-body -->
+
+<script>
+// ════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════
+const SRC_COLORS = {
+  scan:'#00CFC4', stripe:'#00C98D', apollo:'#8B5CF6',
+  gmail:'#F0A500', linkedin:'#3B82F6', calendly:'#14B8A6'
+};
+const SRC_LABELS = {
+  scan:'Scan Direct', stripe:'Stripe', apollo:'Apollo',
+  gmail:'Gmail', linkedin:'LinkedIn', calendly:'Calendly'
+};
+const STAGES = ['scan','exposure','tension','payment','monitoring'];
+const STAGE_LABELS = ['Scan','Exposition','Tension','Paiement','Monitoring'];
+
+// ── Multi-language message templates ──
+const MSG = {
+  fr:{
+    d0:`Bonjour <span class="msg-token">{{prénom}}</span>,<br><br>J'ai analysé le stack de <span class="msg-token">{{société}}</span> — exposition estimée <span class="msg-token">{{exposition}}</span> en abonnements sous-utilisés ou fantômes.<br><br>Ghost Tax récupère en moyenne <strong>23% du budget SaaS</strong> en 3 semaines. Échange de 20 min cette semaine ?`,
+    d2:`Bonjour <span class="msg-token">{{prénom}}</span>,<br><br>Suite à mon message — Pennylane vient de récupérer €140K en 3 semaines.<br><br>Votre exposition chez <span class="msg-token">{{société}}</span> est <span class="msg-token">{{exposition}}</span>. Je vous envoie le rapport complet ?`,
+    d7:`Bonjour <span class="msg-token">{{prénom}}</span>,<br><br>Dernier message de ma part — je comprends que vous êtes sollicité.<br><br>Si la rationalisation du budget SaaS de <span class="msg-token">{{société}}</span> est un sujet pour 2025, je reste disponible.`,
+    upsell:`Bonjour <span class="msg-token">{{prénom}}</span>,<br><br>Depuis votre audit Rail A, Ghost Tax Monitor a détecté 14 nouvelles alertes sur votre stack.<br><br>Je souhaite vous présenter les opportunités de récupération continue. Démo 30 min ?`
+  },
+  en:{
+    d0:`Hi <span class="msg-token">{{first_name}}</span>,<br><br>I analysed <span class="msg-token">{{company}}</span>'s SaaS stack — estimated exposure of <span class="msg-token">{{exposure}}</span> in unused or ghost subscriptions.<br><br>Ghost Tax recovers an average of <strong>23% of SaaS spend</strong> within 3 weeks. 20-min call this week?`,
+    d2:`Hi <span class="msg-token">{{first_name}}</span>,<br><br>Following up — Revolut just recovered £180K in 3 weeks using Ghost Tax.<br><br><span class="msg-token">{{company}}</span>'s estimated exposure is <span class="msg-token">{{exposure}}</span>. Want me to send the full report?`,
+    d7:`Hi <span class="msg-token">{{first_name}}</span>,<br><br>Last message from me — I know you're busy.<br><br>If optimising <span class="msg-token">{{company}}</span>'s SaaS budget is on the agenda for 2025, I'm here when the timing is right.`,
+    upsell:`Hi <span class="msg-token">{{first_name}}</span>,<br><br>Since your Rail A audit, Ghost Tax Monitor has flagged 11 new alerts on your stack.<br><br>I'd love to walk you through the ongoing recovery opportunities. 30-min demo?`
+  },
+  de:{
+    d0:`Hallo <span class="msg-token">{{vorname}}</span>,<br><br>Ich habe den SaaS-Stack von <span class="msg-token">{{unternehmen}}</span> analysiert — geschätztes Einsparpotenzial: <span class="msg-token">{{exposition}}</span> durch ungenutzte oder vergessene Abonnements.<br><br>Ghost Tax reduziert SaaS-Ausgaben im Schnitt um <strong>23% in 3 Wochen</strong>. 20-Minuten-Call diese Woche?`,
+    d2:`Hallo <span class="msg-token">{{vorname}}</span>,<br><br>Kurzes Follow-up — Personio hat kürzlich €160K mit Ghost Tax eingespart.<br><br>Das Einsparpotenzial bei <span class="msg-token">{{unternehmen}}</span> liegt bei <span class="msg-token">{{exposition}}</span>. Soll ich Ihnen den vollständigen Bericht schicken?`,
+    d7:`Hallo <span class="msg-token">{{vorname}}</span>,<br><br>Letzte Nachricht von mir — ich weiß, Sie sind beschäftigt.<br><br>Falls die SaaS-Kostenoptimierung bei <span class="msg-token">{{unternehmen}}</span> ein Thema für 2025 ist, stehe ich gerne zur Verfügung.`,
+    upsell:`Hallo <span class="msg-token">{{vorname}}</span>,<br><br>Seit Ihrem Rail A Audit hat Ghost Tax Monitor 9 neue Warnmeldungen in Ihrem Stack erkannt.<br><br>Ich würde Ihnen gerne die laufenden Einsparmöglichkeiten vorstellen. 30-minütige Demo?`
+  },
+  es:{
+    d0:`Hola <span class="msg-token">{{nombre}}</span>,<br><br>He analizado el stack SaaS de <span class="msg-token">{{empresa}}</span> — exposición estimada de <span class="msg-token">{{exposición}}</span> en suscripciones no utilizadas o fantasma.<br><br>Ghost Tax recupera de media el <strong>23% del presupuesto SaaS</strong> en 3 semanas. ¿Llamada de 20 min esta semana?`,
+    d2:`Hola <span class="msg-token">{{nombre}}</span>,<br><br>Siguiendo mi mensaje anterior — Glovo acaba de recuperar €120K en 3 semanas con Ghost Tax.<br><br>La exposición estimada de <span class="msg-token">{{empresa}}</span> es <span class="msg-token">{{exposición}}</span>. ¿Te envío el informe completo?`,
+    d7:`Hola <span class="msg-token">{{nombre}}</span>,<br><br>Último mensaje de mi parte — entiendo que estás ocupado/a.<br><br>Si optimizar el presupuesto SaaS de <span class="msg-token">{{empresa}}</span> es un objetivo para 2025, aquí estaré.`,
+    upsell:`Hola <span class="msg-token">{{nombre}}</span>,<br><br>Desde tu auditoría Rail A, Ghost Tax Monitor ha detectado 8 nuevas alertas en tu stack.<br><br>Me gustaría mostrarte las oportunidades de recuperación continua. ¿Demo de 30 min?`
+  },
+  it:{
+    d0:`Ciao <span class="msg-token">{{nome}}</span>,<br><br>Ho analizzato lo stack SaaS di <span class="msg-token">{{azienda}}</span> — esposizione stimata di <span class="msg-token">{{esposizione}}</span> in abbonamenti inutilizzati o fantasma.<br><br>Ghost Tax recupera in media il <strong>23% del budget SaaS</strong> in 3 settimane. Una chiamata di 20 min questa settimana?`,
+    d2:`Ciao <span class="msg-token">{{nome}}</span>,<br><br>Seguito al mio messaggio — Satispay ha appena recuperato €90K in 3 settimane con Ghost Tax.<br><br>L'esposizione stimata di <span class="msg-token">{{azienda}}</span> è <span class="msg-token">{{esposizione}}</span>. Ti mando il report completo?`,
+    d7:`Ciao <span class="msg-token">{{nome}}</span>,<br><br>Ultimo messaggio da parte mia — capisco che sei impegnato/a.<br><br>Se ottimizzare il budget SaaS di <span class="msg-token">{{azienda}}</span> è un obiettivo per il 2025, sono qui.`,
+    upsell:`Ciao <span class="msg-token">{{nome}}</span>,<br><br>Dall'audit Rail A, Ghost Tax Monitor ha rilevato 7 nuovi avvisi nel tuo stack.<br><br>Vorrei mostrarti le opportunità di recupero continuo. Demo di 30 min?`
+  },
+  nl:{
+    d0:`Hallo <span class="msg-token">{{voornaam}}</span>,<br><br>Ik heb de SaaS-stack van <span class="msg-token">{{bedrijf}}</span> geanalyseerd — geschatte blootstelling van <span class="msg-token">{{blootstelling}}</span> aan ongebruikte of vergeten abonnementen.<br><br>Ghost Tax bespaart gemiddeld <strong>23% op SaaS-uitgaven</strong> binnen 3 weken. 20 minuten bellen deze week?`,
+    d2:`Hallo <span class="msg-token">{{voornaam}}</span>,<br><br>Ter opvolging — Mollie bespaarde onlangs €200K in 3 weken met Ghost Tax.<br><br>De geschatte blootstelling bij <span class="msg-token">{{bedrijf}}</span> is <span class="msg-token">{{blootstelling}}</span>. Stuur ik het volledige rapport?`,
+    d7:`Hallo <span class="msg-token">{{voornaam}}</span>,<br><br>Laatste bericht van mij — ik begrijp dat u het druk heeft.<br><br>Als SaaS-kostenoptimalisatie bij <span class="msg-token">{{bedrijf}}</span> een onderwerp is voor 2025, hoor ik graag van u.`,
+    upsell:`Hallo <span class="msg-token">{{voornaam}}</span>,<br><br>Sinds uw Rail A audit heeft Ghost Tax Monitor 10 nieuwe waarschuwingen in uw stack gedetecteerd.<br><br>Ik zou u graag de doorlopende besparingsmogelijkheden laten zien. 30 minuten demo?`
+  }
+};
+
+const FLAG = {fr:'🇫🇷',en:'🇬🇧',de:'🇩🇪',es:'🇪🇸',it:'🇮🇹',nl:'🇳🇱',be:'🇧🇪',ch:'🇨🇭'};
+
+const prospects = [
+  // ── FRANCE ──
+  {id:1,co:'Pennylane',icon:'PE',src:'scan',heat:94,exp:'€340K–1.2M',lang:'fr',flag:'🇫🇷',stage:2,industry:'Fintech · Comptabilité',size:'120 sal.',revenue:'€12M ARR',contact:{name:'Axel Bernard',title:'CTO',email:'a.bernard@pennylane.fr',phone:'+33 6 12 34 56 78',li:'in/axelbernard'},tech:['Stripe','Intercom','Notion','AWS','Datadog'],jobs:[{title:'VP Engineering',dept:'Tech',hint:'Signal: croissance tech rapide'},{title:'Head of Finance Ops',dept:'Finance',hint:'Signal: budget logiciel'}],bant:{budget:22,authority:18,need:20,timing:13},timeline:[{icon:'scan',color:'var(--cyan)',event:'Scan Ghost Tax · 847 apps détectées',time:'il y a 2h'},{icon:'mail',color:'var(--gold)',event:'Email D0 ouvert · 2 fois',time:'il y a 4h'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Onboarding Rail A Q1'},
+  {id:2,co:'Spendesk',icon:'SP',src:'apollo',heat:91,exp:'€890K–2.1M',lang:'fr',flag:'🇫🇷',stage:1,industry:'Fintech · Dépenses',size:'380 sal.',revenue:'€28M ARR',contact:{name:'Claire Monceau',title:'VP Finance',email:'c.monceau@spendesk.com',phone:'+33 6 23 45 67 89',li:'in/clairemonceau'},tech:['Salesforce','HubSpot','Mixpanel','GCP','Segment'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signal: rationalisation achats'},{title:'FP&A Analyst',dept:'Finance',hint:'Signal: contrôle des coûts'}],bant:{budget:20,authority:16,need:18,timing:14},timeline:[{icon:'api',color:'var(--vio)',event:'Prospection Apollo · Décideur identifié',time:'aujourd\'hui'},{icon:'link',color:'var(--blue)',event:'Connexion LinkedIn acceptée',time:'il y a 3j'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B Outbound Q1'},
+  {id:3,co:'Alan',icon:'AL',src:'stripe',heat:88,exp:'€210K–780K',lang:'fr',flag:'🇫🇷',stage:3,industry:'InsurTech · Santé',size:'450 sal.',revenue:'€35M ARR',contact:{name:'Jean-Charles Samuelian',title:'CEO',email:'jcs@alan.eu',phone:'+33 6 34 56 78 90',li:'in/jcsamuelian'},tech:['AWS','Datadog','PagerDuty','Figma','Linear'],jobs:[{title:'Infrastructure Engineer',dept:'Tech',hint:'Signal: scaling infra'}],bant:{budget:18,authority:20,need:15,timing:14},timeline:[{icon:'stripe',color:'var(--grn)',event:'Rail A payé · €490',time:'il y a 5j'},{icon:'mail',color:'var(--gold)',event:'Reply "très intéressant"',time:'il y a 2j'}],seq:'Upsell Rail B',seqStep:2,campaign:'Upsell Rail B - Clients actifs'},
+  {id:4,co:'Qonto',icon:'QO',src:'linkedin',heat:85,exp:'€1.2M–3.4M',lang:'fr',flag:'🇫🇷',stage:0,industry:'Neobank · PME',size:'700 sal.',revenue:'€55M ARR',contact:{name:'Steve Anavi',title:'Co-CEO',email:'s.anavi@qonto.com',phone:'+33 6 45 67 89 01',li:'in/steveanavi'},tech:['AWS','Snowflake','Fivetran','dbt','Looker'],jobs:[{title:'CFO',dept:'Finance',hint:'Signal: recrutement direction financière'},{title:'Head of Compliance',dept:'Legal',hint:'Signal: enjeux réglementaires'}],bant:{budget:24,authority:15,need:17,timing:9},timeline:[{icon:'link',color:'var(--blue)',event:'Message LinkedIn envoyé',time:'aujourd\'hui'},{icon:'api',color:'var(--vio)',event:'Enrichissement Apollo · 3 contacts',time:'il y a 1j'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B Outbound Q1'},
+  {id:5,co:'PayFit',icon:'PF',src:'gmail',heat:83,exp:'€430K–1.1M',lang:'fr',flag:'🇫🇷',stage:2,industry:'RH Tech · Paie',size:'550 sal.',revenue:'€42M ARR',contact:{name:'Ghislain de Fontenay',title:'CFO',email:'g.defontenay@payfit.com',phone:'+33 6 56 78 90 12',li:'in/ghislaindf'},tech:['HubSpot','Intercom','Zendesk','Sentry','AWS'],jobs:[{title:'Head of IT',dept:'Tech',hint:'Signal: restructuration IT'}],bant:{budget:19,authority:17,need:19,timing:12},timeline:[{icon:'mail',color:'var(--gold)',event:'Reply "envoyez-moi plus d\'infos"',time:'il y a 3h'},{icon:'scan',color:'var(--cyan)',event:'Mini-scan · 612 apps',time:'il y a 4j'}],seq:'Ghost Tax Rail A',seqStep:2,campaign:'Onboarding Rail A Q1'},
+  // ── UK ──
+  {id:6,co:'Revolut',icon:'RV',src:'apollo',heat:97,exp:'£1.8M–4.2M',lang:'en',flag:'🇬🇧',stage:1,industry:'Fintech · Neobank',size:'8,000 emp.',revenue:'$2.2B ARR',contact:{name:'James Gibson',title:'VP Finance',email:'j.gibson@revolut.com',phone:'+44 7700 900123',li:'in/jamesgibson'},tech:['AWS','GCP','Datadog','PagerDuty','Snowflake','Looker'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signal: active SaaS rationalisation'},{title:'IT Asset Manager',dept:'Tech',hint:'Signal: tooling consolidation'}],bant:{budget:25,authority:16,need:20,timing:14},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo enrichment · 5 decision-makers found',time:'today'},{icon:'mail',color:'var(--gold)',event:'D0 email sent · opened 3x',time:'2h ago'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B UK Outbound'},
+  {id:7,co:'Monzo',icon:'MZ',src:'scan',heat:93,exp:'£920K–2.6M',lang:'en',flag:'🇬🇧',stage:2,industry:'Neobank · Consumer',size:'3,200 emp.',revenue:'£880M ARR',contact:{name:'Sarah Oakes',title:'CTO',email:'s.oakes@monzo.com',phone:'+44 7700 900456',li:'in/sarahoakes'},tech:['AWS','Kubernetes','Datadog','Linear','Notion'],jobs:[{title:'Senior SRE',dept:'Tech',hint:'Signal: infra scaling'},{title:'VP Finance',dept:'Finance',hint:'Signal: cost control hire'}],bant:{budget:23,authority:19,need:18,timing:13},timeline:[{icon:'scan',color:'var(--cyan)',event:'Ghost Tax scan · 1,142 apps detected',time:'1h ago'},{icon:'link',color:'var(--blue)',event:'LinkedIn connection accepted',time:'yesterday'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Rail A UK Outbound'},
+  {id:8,co:'Checkout.com',icon:'CK',src:'apollo',heat:89,exp:'£1.1M–3.1M',lang:'en',flag:'🇬🇧',stage:1,industry:'Payments · B2B',size:'1,900 emp.',revenue:'$2B ARR',contact:{name:'Oliver Stone',title:'CFO',email:'o.stone@checkout.com',phone:'+44 7700 900789',li:'in/oliverstone'},tech:['Salesforce','Workday','AWS','Snowflake','Amplitude'],jobs:[{title:'Head of IT Operations',dept:'Tech',hint:'Signal: tooling review'}],bant:{budget:22,authority:18,need:17,timing:12},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo enriched · revenue confirmed $2B',time:'today'},{icon:'mail',color:'var(--gold)',event:'D0 email scheduled · 9am tomorrow',time:'3h ago'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B UK Outbound'},
+  {id:9,co:'Curve',icon:'CV',src:'linkedin',heat:84,exp:'£340K–980K',lang:'en',flag:'🇬🇧',stage:1,industry:'Fintech · Cards',size:'280 emp.',revenue:'£45M ARR',contact:{name:'Shachar Bialick',title:'CEO',email:'shachar@curve.com',phone:'+44 7700 900321',li:'in/shabialick'},tech:['Stripe','Intercom','Mixpanel','AWS','Sentry'],jobs:[{title:'VP Engineering',dept:'Tech',hint:'Signal: product expansion'}],bant:{budget:17,authority:20,need:16,timing:11},timeline:[{icon:'link',color:'var(--blue)',event:'LinkedIn message sent',time:'today'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A UK Outbound'},
+  {id:10,co:'Paddle',icon:'PD',src:'gmail',heat:81,exp:'£280K–760K',lang:'en',flag:'🇬🇧',stage:2,industry:'SaaS · Payments',size:'220 emp.',revenue:'£35M ARR',contact:{name:'Harrison Rose',title:'CEO',email:'harrison@paddle.com',phone:'+44 7700 900654',li:'in/harrisonrose'},tech:['HubSpot','AWS','Stripe','Figma','Notion'],jobs:[],bant:{budget:16,authority:18,need:15,timing:13},timeline:[{icon:'mail',color:'var(--gold)',event:'Reply "interesting, send me more"',time:'1h ago'},{icon:'mail',color:'var(--gold)',event:'D2 email opened 3x',time:'yesterday'}],seq:'Ghost Tax Rail A',seqStep:2,campaign:'Rail A UK Outbound'},
+  // ── GERMANY ──
+  {id:11,co:'Personio',icon:'PS',src:'apollo',heat:96,exp:'€780K–2.2M',lang:'de',flag:'🇩🇪',stage:1,industry:'HRTech · HR-Software',size:'1,800 Mitarb.',revenue:'€200M ARR',contact:{name:'Hanno Renner',title:'CEO',email:'h.renner@personio.de',phone:'+49 89 1234 5678',li:'in/hannorenner'},tech:['Salesforce','Workday','AWS','Snowflake','Datadog'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signal: SaaS-Konsolidierung'},{title:'VP IT',dept:'Tech',hint:'Signal: Tooling-Review'}],bant:{budget:24,authority:20,need:19,timing:14},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo Anreicherung · 4 Entscheider gefunden',time:'heute'},{icon:'mail',color:'var(--gold)',event:'D0 E-Mail gesendet · 3x geöffnet',time:'vor 2h'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B DACH Outbound'},
+  {id:12,co:'Celonis',icon:'CE',src:'scan',heat:92,exp:'€1.4M–3.8M',lang:'de',flag:'🇩🇪',stage:2,industry:'Process Mining · SaaS',size:'3,000 Mitarb.',revenue:'€300M ARR',contact:{name:'Alexander Rinke',title:'Co-CEO',email:'a.rinke@celonis.com',phone:'+49 89 2345 6789',li:'in/alexanderrinke'},tech:['AWS','Snowflake','Segment','Salesforce','Amplitude'],jobs:[{title:'VP Finance Operations',dept:'Finance',hint:'Signal: Kostenoptimierung'},{title:'IT Asset Manager',dept:'Tech',hint:'Signal: Lizenz-Konsolidierung'}],bant:{budget:25,authority:18,need:20,timing:13},timeline:[{icon:'scan',color:'var(--cyan)',event:'Ghost Tax Scan · 1.380 Apps erkannt',time:'vor 3h'},{icon:'api',color:'var(--vio)',event:'Apollo Anreicherung abgeschlossen',time:'vor 1j'}],seq:'Ghost Tax Rail B',seqStep:1,campaign:'Rail B DACH Outbound'},
+  {id:13,co:'GetYourGuide',icon:'GG',src:'apollo',heat:87,exp:'€560K–1.6M',lang:'de',flag:'🇩🇪',stage:1,industry:'Travel · Marketplace',size:'800 Mitarb.',revenue:'€180M ARR',contact:{name:'Johannes Reck',title:'CEO',email:'j.reck@getyourguide.com',phone:'+49 30 1234 5678',li:'in/johannesreck'},tech:['AWS','Intercom','Amplitude','Looker','PagerDuty'],jobs:[{title:'Head of Finance Tech',dept:'Finance',hint:'Signal: Fintech-Stack Optimierung'}],bant:{budget:20,authority:17,need:18,timing:11},timeline:[{icon:'api',color:'var(--vio)',event:'Prospection Apollo · Entscheider identifiziert',time:'heute'},{icon:'mail',color:'var(--gold)',event:'D0 E-Mail geplant · morgen 9h',time:'vor 4h'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A DACH Outbound'},
+  {id:14,co:'SumUp',icon:'SU',src:'linkedin',heat:84,exp:'€420K–1.1M',lang:'de',flag:'🇩🇪',stage:0,industry:'Fintech · POS',size:'3,000 Mitarb.',revenue:'€800M ARR',contact:{name:'Marc-Alexander Christ',title:'Co-Founder',email:'m.christ@sumup.com',phone:'+49 30 2345 6789',li:'in/marcchrist'},tech:['AWS','Stripe','Salesforce','HubSpot','Mixpanel'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signal: Einkaufsstrategie'}],bant:{budget:19,authority:16,need:17,timing:9},timeline:[{icon:'link',color:'var(--blue)',event:'LinkedIn-Vernetzung angenommen',time:'gestern'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A DACH Outbound'},
+  // ── SPAIN ──
+  {id:15,co:'Glovo',icon:'GL',src:'apollo',heat:90,exp:'€680K–1.9M',lang:'es',flag:'🇪🇸',stage:1,industry:'Delivery · Marketplace',size:'2,400 emp.',revenue:'€500M ARR',contact:{name:'Oscar Pierre',title:'CEO',email:'oscar@glovoapp.com',phone:'+34 93 123 45 67',li:'in/oscarpierre'},tech:['AWS','Snowflake','Segment','Amplitude','PagerDuty'],jobs:[{title:'Head of IT',dept:'Tech',hint:'Señal: reestructuración tecnológica'},{title:'VP Finance',dept:'Finance',hint:'Señal: control de costes SaaS'}],bant:{budget:21,authority:19,need:18,timing:12},timeline:[{icon:'api',color:'var(--vio)',event:'Prospección Apollo · decisor identificado',time:'hoy'},{icon:'mail',color:'var(--gold)',event:'Email D0 enviado · abierto 2x',time:'hace 2h'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B Spain Outbound'},
+  {id:16,co:'Typeform',icon:'TF',src:'scan',heat:86,exp:'€290K–820K',lang:'es',flag:'🇪🇸',stage:2,industry:'SaaS · Formularios',size:'400 emp.',revenue:'€60M ARR',contact:{name:'Joaquim Lechà',title:'CEO',email:'j.lecha@typeform.com',phone:'+34 93 234 56 78',li:'in/jlechà'},tech:['HubSpot','Intercom','Amplitude','AWS','Stripe'],jobs:[{title:'Head of Engineering',dept:'Tech',hint:'Señal: crecimiento tecnológico'}],bant:{budget:18,authority:17,need:19,timing:11},timeline:[{icon:'scan',color:'var(--cyan)',event:'Ghost Tax scan · 634 apps detectadas',time:'hace 1h'},{icon:'link',color:'var(--blue)',event:'LinkedIn perfil consultado',time:'ayer'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Rail A Spain Outbound'},
+  {id:17,co:'Factorial',icon:'FA',src:'apollo',heat:82,exp:'€180K–540K',lang:'es',flag:'🇪🇸',stage:1,industry:'HRTech · RRHH',size:'300 emp.',revenue:'€25M ARR',contact:{name:'Jordi Romero',title:'CEO',email:'j.romero@factorialhr.com',phone:'+34 93 345 67 89',li:'in/jordiromero'},tech:['AWS','HubSpot','Intercom','Notion','Stripe'],jobs:[{title:'Head of Finance',dept:'Finance',hint:'Señal: ronda de financiación reciente'}],bant:{budget:15,authority:18,need:16,timing:10},timeline:[{icon:'api',color:'var(--vio)',event:'Enriquecimiento Apollo completado',time:'hoy'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A Spain Outbound'},
+  // ── NETHERLANDS ──
+  {id:18,co:'Mollie',icon:'MO',src:'apollo',heat:95,exp:'€640K–1.8M',lang:'nl',flag:'🇳🇱',stage:1,industry:'Payments · SaaS',size:'900 emp.',revenue:'€250M ARR',contact:{name:'Adriaan Mol',title:'Founder',email:'a.mol@mollie.com',phone:'+31 20 123 4567',li:'in/adriaanmol'},tech:['AWS','Stripe','Salesforce','Datadog','Segment'],jobs:[{title:'Head of IT',dept:'Tech',hint:'Signaal: technologieconsolidatie'},{title:'VP Finance',dept:'Finance',hint:'Signaal: kostenbeheersing'}],bant:{budget:22,authority:19,need:19,timing:13},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo verrijking · 3 beslissers gevonden',time:'vandaag'},{icon:'mail',color:'var(--gold)',event:'D0 email verstuurd · 2x geopend',time:'1u geleden'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B NL Outbound'},
+  {id:19,co:'Adyen',icon:'AD',src:'linkedin',heat:88,exp:'€2.1M–5.4M',lang:'nl',flag:'🇳🇱',stage:0,industry:'Payments · Enterprise',size:'4,000 emp.',revenue:'€1.7B ARR',contact:{name:'Pieter van der Does',title:'CEO',email:'p.vanderdoes@adyen.com',phone:'+31 20 234 5678',li:'in/pietervanderdoes'},tech:['AWS','Snowflake','Datadog','Segment','Workday'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signaal: SaaS-rationalisatie groot'},{title:'VP IT',dept:'Tech',hint:'Signaal: infrastructuuroptimalisatie'}],bant:{budget:25,authority:17,need:20,timing:8},timeline:[{icon:'link',color:'var(--blue)',event:'LinkedIn connectie aangevraagd',time:'vandaag'},{icon:'api',color:'var(--vio)',event:'Apollo verrijking · omzet bevestigd',time:'gisteren'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B NL Outbound'},
+  {id:20,co:'Sendcloud',icon:'SC',src:'scan',heat:80,exp:'€220K–640K',lang:'nl',flag:'🇳🇱',stage:2,industry:'SaaS · Logistiek',size:'300 emp.',revenue:'€45M ARR',contact:{name:'Rob van den Heuvel',title:'CEO',email:'r.heuvel@sendcloud.com',phone:'+31 40 123 4567',li:'in/robvandenheuvel'},tech:['HubSpot','Intercom','AWS','Notion','Datadog'],jobs:[{title:'Head of Operations',dept:'Ops',hint:'Signaal: procesoptimalisatie'}],bant:{budget:16,authority:17,need:18,timing:11},timeline:[{icon:'scan',color:'var(--cyan)',event:'Ghost Tax scan · 487 apps gedetecteerd',time:'3u geleden'},{icon:'mail',color:'var(--gold)',event:'D0 email geopend · 4x',time:'gisteren'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Rail A NL Outbound'},
+  // ── BELGIUM ──
+  {id:21,co:'Collibra',icon:'CO',src:'apollo',heat:87,exp:'€980K–2.6M',lang:'en',flag:'🇧🇪',stage:1,industry:'Data Intelligence · SaaS',size:'1,000 emp.',revenue:'$300M ARR',contact:{name:'Felix Van de Maele',title:'CEO',email:'f.vandemaele@collibra.com',phone:'+32 2 123 4567',li:'in/felixvandemaele'},tech:['AWS','Snowflake','Salesforce','Gainsight','Amplitude'],jobs:[{title:'Head of IT',dept:'Tech',hint:'Signal: infrastructure review'}],bant:{budget:23,authority:18,need:17,timing:12},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo enrichment · 3 contacts found',time:'today'},{icon:'mail',color:'var(--gold)',event:'D0 email sent',time:'2h ago'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B Benelux Outbound'},
+  {id:22,co:'Odoo',icon:'OD',src:'linkedin',heat:83,exp:'€540K–1.4M',lang:'fr',flag:'🇧🇪',stage:0,industry:'ERP · SaaS',size:'3,000 sal.',revenue:'€350M ARR',contact:{name:'Fabien Pinckaers',title:'CEO',email:'fp@odoo.com',phone:'+32 81 23 45 67',li:'in/fabienpinckaers'},tech:['AWS','PostgreSQL','Nginx','Redis','Elasticsearch'],jobs:[{title:'Head of Cloud Ops',dept:'Tech',hint:'Signal: migration cloud accélérée'}],bant:{budget:20,authority:20,need:16,timing:9},timeline:[{icon:'link',color:'var(--blue)',event:'Message LinkedIn envoyé',time:'aujourd\'hui'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B Benelux Outbound'},
+  // ── SWITZERLAND ──
+  {id:23,co:'Yokoy',icon:'YK',src:'apollo',heat:86,exp:'€380K–1.0M',lang:'de',flag:'🇨🇭',stage:1,industry:'FinTech · Spend Management',size:'250 Mitarb.',revenue:'€40M ARR',contact:{name:'Lars Mangelsdorf',title:'CEO',email:'l.mangelsdorf@yokoy.com',phone:'+41 44 123 45 67',li:'in/larsmangelsdorf'},tech:['Stripe','SAP','AWS','HubSpot','Datadog'],jobs:[{title:'Head of Product',dept:'Tech',hint:'Signal: Produktexpansion Europa'}],bant:{budget:18,authority:19,need:18,timing:12},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo Anreicherung · Entscheider gefunden',time:'heute'},{icon:'mail',color:'var(--gold)',event:'D0 E-Mail geplant',time:'vor 5h'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A DACH Outbound'},
+  {id:24,co:'Beekeeper',icon:'BK',src:'scan',heat:81,exp:'€260K–720K',lang:'de',flag:'🇨🇭',stage:2,industry:'SaaS · Frontline Workers',size:'200 Mitarb.',revenue:'€30M ARR',contact:{name:'Cristian Grossmann',title:'CEO',email:'c.grossmann@beekeeper.io',phone:'+41 44 234 56 78',li:'in/cristiangrossmann'},tech:['AWS','Intercom','HubSpot','Mixpanel','Stripe'],jobs:[],bant:{budget:15,authority:17,need:17,timing:11},timeline:[{icon:'scan',color:'var(--cyan)',event:'Ghost Tax Scan · 312 Apps erkannt',time:'vor 2h'},{icon:'link',color:'var(--blue)',event:'LinkedIn Profil besucht',time:'gestern'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Rail A DACH Outbound'},
+  // ── ITALY ──
+  {id:25,co:'Satispay',icon:'SA',src:'apollo',heat:83,exp:'€310K–890K',lang:'it',flag:'🇮🇹',stage:1,industry:'Fintech · Pagamenti',size:'400 dip.',revenue:'€60M ARR',contact:{name:'Alberto Dalmasso',title:'CEO',email:'a.dalmasso@satispay.com',phone:'+39 02 1234 5678',li:'in/albertodalmasso'},tech:['AWS','Stripe','Salesforce','Mixpanel','Intercom'],jobs:[{title:'Head of Engineering',dept:'Tech',hint:'Segnale: espansione tecnologica'},{title:'CFO',dept:'Finance',hint:'Segnale: controllo costi SaaS'}],bant:{budget:17,authority:18,need:17,timing:11},timeline:[{icon:'api',color:'var(--vio)',event:'Arricchimento Apollo · 2 decisori trovati',time:'oggi'},{icon:'mail',color:'var(--gold)',event:'Email D0 inviata',time:'2h fa'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A Italy Outbound'},
+  {id:26,co:'Scalapay',icon:'SK',src:'linkedin',heat:80,exp:'€180K–520K',lang:'it',flag:'🇮🇹',stage:0,industry:'Fintech · BNPL',size:'250 dip.',revenue:'€35M ARR',contact:{name:'Simone Mancini',title:'CEO',email:'s.mancini@scalapay.com',phone:'+39 02 2345 6789',li:'in/simonemancini'},tech:['AWS','Stripe','HubSpot','Notion','Datadog'],jobs:[{title:'Head of Finance',dept:'Finance',hint:'Segnale: assunzione VP Finance'}],bant:{budget:15,authority:17,need:16,timing:9},timeline:[{icon:'link',color:'var(--blue)',event:'Connessione LinkedIn inviata',time:'oggi'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A Italy Outbound'},
+  // ── FRANCE (suite) ──
+  {id:27,co:'Aircall',icon:'AC',src:'apollo',heat:79,exp:'€280K–820K',lang:'fr',flag:'🇫🇷',stage:1,industry:'SaaS · Téléphonie',size:'320 sal.',revenue:'€22M ARR',contact:{name:'Pierre-Baptiste Béchu',title:'VP Operations',email:'pb@aircall.io',phone:'+33 6 67 89 01 23',li:'in/pbbchu'},tech:['Salesforce','Intercom','Segment','Heroku','Datadog'],jobs:[{title:'Operations Manager',dept:'Ops',hint:'Signal: rationalisation opérationnelle'}],bant:{budget:16,authority:14,need:17,timing:10},timeline:[{icon:'api',color:'var(--vio)',event:'Ajouté à la campagne Rail A',time:'il y a 6h'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Onboarding Rail A Q1'},
+  {id:28,co:'Contentsquare',icon:'CS',src:'calendly',heat:76,exp:'€760K–2.3M',lang:'fr',flag:'🇫🇷',stage:2,industry:'Analytics · UX',size:'800 sal.',revenue:'€70M ARR',contact:{name:'Jonathan Cherki',title:'CEO',email:'j.cherki@contentsquare.com',phone:'+33 6 78 90 12 34',li:'in/jonathancherki'},tech:['AWS','BigQuery','dbt','Fivetran','Amplitude'],jobs:[{title:'Head of Finance',dept:'Finance',hint:'Signal: contrôle dépenses SaaS'}],bant:{budget:23,authority:19,need:16,timing:8},timeline:[{icon:'calendly',color:'var(--teal)',event:'Call booké · demain 14h',time:'il y a 1h'},{icon:'scan',color:'var(--cyan)',event:'Scan Ghost Tax · 1,240 apps',time:'il y a 8j'}],seq:'Ghost Tax Rail B',seqStep:2,campaign:'Rail B Outbound Q1'},
+  {id:29,co:'Swile',icon:'SW',src:'linkedin',heat:65,exp:'€190K–560K',lang:'fr',flag:'🇫🇷',stage:0,industry:'RH Tech · Avantages',size:'400 sal.',revenue:'€30M ARR',contact:{name:'Loïc Soubeyrand',title:'CEO',email:'l.soubeyrand@swile.co',phone:'+33 6 89 01 23 45',li:'in/loicsoubeyrand'},tech:['HubSpot','Notion','Segment','AWS','Stripe'],jobs:[],bant:{budget:14,authority:18,need:13,timing:7},timeline:[{icon:'link',color:'var(--blue)',event:'Connexion LinkedIn · en attente',time:'il y a 2j'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Onboarding Rail A Q1'},
+  {id:30,co:'Agicap',icon:'AG',src:'scan',heat:58,exp:'€250K–720K',lang:'fr',flag:'🇫🇷',stage:0,industry:'Fintech · Trésorerie',size:'180 sal.',revenue:'€15M ARR',contact:{name:'Sebastien Beyet',title:'CEO',email:'s.beyet@agicap.com',phone:'+33 6 90 12 34 56',li:'in/sebastienbeyet'},tech:['Salesforce','HubSpot','Pennylane','AWS'],jobs:[{title:'Head of Customer Success',dept:'CS',hint:'Signal: rétention clients'}],bant:{budget:13,authority:16,need:15,timing:6},timeline:[{icon:'scan',color:'var(--cyan)',event:'Scan Ghost Tax · 423 apps détectées',time:'il y a 3j'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Onboarding Rail A Q1'},
+  {id:31,co:'Kyriba',icon:'KY',src:'stripe',heat:38,exp:'€580K–1.7M',lang:'fr',flag:'🇫🇷',stage:3,industry:'Fintech · Trésorerie',size:'600 sal.',revenue:'€50M ARR',contact:{name:'Marie Dupont',title:'VP IT',email:'m.dupont@kyriba.com',phone:'+33 6 01 23 45 67',li:'in/mariedupont'},tech:['SAP','Oracle','AWS','Workday','Tableau'],jobs:[],bant:{budget:20,authority:13,need:18,timing:5},timeline:[{icon:'stripe',color:'var(--grn)',event:'Rail A payé · €490',time:'il y a 12j'}],seq:'Upsell Rail B',seqStep:1,campaign:'Upsell Rail B - Clients actifs'},
+  // ── EXTENDED POOL (chargement infini) ──
+  {id:32,co:'Onfido',icon:'ON',src:'apollo',heat:78,exp:'£380K–940K',lang:'en',flag:'🇬🇧',stage:1,industry:'Identity · SaaS',size:'450 emp.',revenue:'$120M ARR',contact:{name:'Mike Tuchen',title:'CEO',email:'m.tuchen@onfido.com',phone:'+44 7700 900987',li:'in/miketuchen'},tech:['AWS','Stripe','Salesforce','Segment','Datadog'],jobs:[{title:'Head of Engineering',dept:'Tech',hint:'Signal: platform expansion'}],bant:{budget:17,authority:17,need:16,timing:10},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo enrichment completed',time:'today'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A UK Outbound'},
+  {id:33,co:'N26',icon:'N2',src:'linkedin',heat:85,exp:'€920K–2.4M',lang:'de',flag:'🇩🇪',stage:0,industry:'Neobank · Retail',size:'1,500 Mitarb.',revenue:'€300M ARR',contact:{name:'Valentin Stalf',title:'CEO',email:'v.stalf@n26.com',phone:'+49 30 3456 7890',li:'in/valentinstalf'},tech:['AWS','Snowflake','Datadog','Segment','Mixpanel'],jobs:[{title:'Head of Procurement',dept:'Finance',hint:'Signal: Kostenoptimierung 2025'}],bant:{budget:22,authority:19,need:18,timing:10},timeline:[{icon:'link',color:'var(--blue)',event:'LinkedIn-Anfrage akzeptiert',time:'heute'}],seq:'Ghost Tax Rail B',seqStep:0,campaign:'Rail B DACH Outbound'},
+  {id:34,co:'Lunchr',icon:'LU',src:'gmail',heat:61,exp:'€120K–380K',lang:'fr',flag:'🇫🇷',stage:1,industry:'RH Tech · Restauration',size:'150 sal.',revenue:'€10M ARR',contact:{name:'Thomas Jeanne',title:'CFO',email:'t.jeanne@lunchr.co',phone:'+33 6 11 22 33 44',li:'in/thomasjeanne'},tech:['Stripe','HubSpot','Notion','AWS'],jobs:[],bant:{budget:12,authority:15,need:14,timing:8},timeline:[{icon:'mail',color:'var(--gold)',event:'Réponse positive reçue',time:'il y a 5h'}],seq:'Ghost Tax Rail A',seqStep:1,campaign:'Onboarding Rail A Q1'},
+  {id:35,co:'Bynder',icon:'BY',src:'apollo',heat:74,exp:'€290K–760K',lang:'nl',flag:'🇳🇱',stage:1,industry:'DAM · SaaS',size:'350 emp.',revenue:'€65M ARR',contact:{name:'Chris Hall',title:'CEO',email:'c.hall@bynder.com',phone:'+31 20 345 6789',li:'in/chrishall'},tech:['AWS','Salesforce','HubSpot','Segment','Intercom'],jobs:[{title:'Head of IT',dept:'Tech',hint:'Signaal: tooling review'}],bant:{budget:16,authority:15,need:17,timing:9},timeline:[{icon:'api',color:'var(--vio)',event:'Apollo verrijking · beslisser gevonden',time:'vandaag'}],seq:'Ghost Tax Rail A',seqStep:0,campaign:'Rail A NL Outbound'},
+];
+
+const sequences = [
+  {id:'s1',name:'Ghost Tax Rail A – Outbound',enrolled:34,sent:34,opened:26,replied:9,open_rate:76,reply_rate:26,color:'#00CFC4',steps:['D0 · Email découverte','D2 · Email social proof','D7 · Follow-up vidéo','D14 · Breakup email']},
+  {id:'s2',name:'Rail B – Upsell Clients Rail A',enrolled:8,sent:8,opened:7,replied:5,open_rate:87,reply_rate:62,color:'#00C98D',steps:['D0 · Email ROI personnalisé','D3 · Case study','D7 · Proposition démo','D14 · Offre limitée']},
+  {id:'s3',name:'Rail B – Outbound Grands Comptes',enrolled:18,sent:14,opened:11,replied:3,open_rate:78,reply_rate:21,color:'#8B5CF6',steps:['D0 · Email dirigeant','D2 · LinkedIn + email','D5 · Appel téléphonique','D10 · Email vidéo','D20 · Breakup']},
+];
+
+const queue = [
+  {co:'Pennylane',src:'scan',step:'D2 · Email social proof',time:'Aujourd\'hui 10h00',urgent:true},
+  {co:'Contentsquare',src:'calendly',step:'Call prep · Brief CEO',time:'Aujourd\'hui 14h00',urgent:true},
+  {co:'Spendesk',src:'apollo',step:'D0 · Email découverte',time:'Aujourd\'hui 11h30',urgent:false},
+  {co:'Alan',src:'stripe',step:'Upsell D5 · Proposition démo',time:'Aujourd\'hui 15h00',urgent:false},
+  {co:'Aircall',src:'apollo',step:'D0 · Planifier envoi',time:'Demain 09h00',urgent:false},
+  {co:'PayFit',src:'gmail',step:'Réponse · Envoyer documentation',time:'Aujourd\'hui 16h00',urgent:true},
+  {co:'Qonto',src:'linkedin',step:'LinkedIn Message · Suivi connexion',time:'Demain 09h30',urgent:false},
+];
+
+const apolloResults = [
+  {co:'Pennylane',icon:'PE',industry:'Fintech · Comptabilité',size:'120 sal.',revenue:'€12M',contact:'Axel Bernard · CTO',signal:'3 offres d\'emploi Finance & Tech',score:91},
+  {co:'Spendesk',icon:'SP',industry:'Fintech · Dépenses',size:'380 sal.',revenue:'€28M',contact:'Claire Monceau · VP Finance',signal:'Levée de fonds récente · €100M',score:88},
+  {co:'Payfit',icon:'PF',industry:'RH Tech · Paie',size:'550 sal.',revenue:'€42M',contact:'Ghislain de Fontenay · CFO',signal:'Nouveau Head of IT recruté',score:84},
+  {co:'Eurazeo',icon:'EU',industry:'Private Equity',size:'200 sal.',revenue:'€180M',contact:'Sophie Martin · COO',signal:'Portfolio SaaS en croissance rapide',score:79},
+  {co:'Lunchr',icon:'LU',industry:'RH Tech · Restauration',size:'150 sal.',revenue:'€10M',contact:'Thomas Jeanne · CFO',signal:'Fusion récente · rationalisaton IT',score:74},
+  {co:'Partoo',icon:'PA',industry:'SaaS · Présence digitale',size:'180 sal.',revenue:'€18M',contact:'Thibault Renouf · CEO',signal:'Ouverture bureaux Europe',score:68},
+];
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let activeLeadId = null;
+let currentFilter = 'all';
+let currentSearch = '';
+let activeSeqId = 's1';
+let selectedApoResults = new Set();
+let currentView = 'cockpit';
+let activeChan = 'email';
+let displayedCount = 18;
+const PAGE_SIZE = 8;
+
+// ── Infinite scroll sentinel ──
+function initInfiniteScroll(){
+  const list = document.getElementById('lead-list');
+  const sentinel = document.createElement('div');
+  sentinel.id = 'scroll-sentinel';
+  sentinel.style.cssText = 'height:1px;margin-top:8px';
+  list.appendChild(sentinel);
+  const obs = new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      const filtered = getFilteredLeads(true);
+      if(displayedCount < filtered.length){
+        displayedCount += PAGE_SIZE;
+        renderLeads();
+      }
+    }
+  },{threshold:0.1,root:list});
+  obs.observe(sentinel);
+}
+
+// ── Get translated message ──
+function getMsg(p, step){
+  const t = MSG[p.lang] || MSG.en;
+  const key = (step||'').includes('Upsell') || (step||'').includes('Rail B') ? 'upsell'
+            : (step||'').includes('D2') ? 'd2'
+            : (step||'').includes('D7') ? 'd7'
+            : 'd0';
+  return (t[key]||t.d0)
+    .replace(/\{\{prénom\}\}|{{first_name}}|{{vorname}}|{{nombre}}|{{nome}}|{{voornaam}}/g, p.contact.name.split(' ')[0])
+    .replace(/\{\{société\}\}|{{company}}|{{unternehmen}}|{{empresa}}|{{azienda}}|{{bedrijf}}/g, p.co)
+    .replace(/\{\{exposition\}\}|{{exposure}}|{{exposición}}|{{esposizione}}|{{blootstelling}}/g, p.exp);
+}
+
+// ════════════════════════════════════════
+// HEAT RING
+// ════════════════════════════════════════
+function heatColor(h){
+  if(h>=80) return '#E5354A';
+  if(h>=60) return '#F0A500';
+  return '#00CFC4';
+}
+function heatRing(h){
+  const r=13; const c=2*Math.PI*r;
+  const fill=c*(h/100);
+  const col=heatColor(h);
+  return `<svg width="32" height="32" viewBox="0 0 32 32">
+    <circle class="ring-bg" cx="16" cy="16" r="${r}"/>
+    <circle class="ring-fg" cx="16" cy="16" r="${r}" stroke="${col}"
+      stroke-dasharray="${fill} ${c}" stroke-dashoffset="0"
+      style="transform-origin:center;transform:rotate(-90deg)"/>
+  </svg>
+  <div class="heat-num" style="color:${col}">${h}</div>`;
+}
+
+// ════════════════════════════════════════
+// RENDER LEADS
+// ════════════════════════════════════════
+function getFilteredLeads(all){
+  const sorted = prospects.filter(p=>{
+    const srcMatch = currentFilter==='all' || p.src===currentFilter;
+    const searchMatch = !currentSearch || p.co.toLowerCase().includes(currentSearch.toLowerCase());
+    return srcMatch && searchMatch;
+  }).sort((a,b)=>b.heat-a.heat);
+  return all ? sorted : sorted.slice(0, displayedCount);
+}
+
+function renderLeads(){
+  const all = getFilteredLeads(true);
+  const visible = getFilteredLeads(false);
+  const el = document.getElementById('lead-list');
+  document.getElementById('lead-count').textContent = `${all.length} prospect${all.length>1?'s':''}`;
+  el.innerHTML = visible.map((p,i)=>`
+    <div class="lead-row${p.id===activeLeadId?' active':''}"
+         onclick="selectLead(${p.id})"
+         style="animation-delay:${Math.min(i,12)*25}ms">
+      <div class="heat-ring">${heatRing(p.heat)}</div>
+      <div class="lead-info">
+        <div class="lead-co">${p.flag} ${p.co}</div>
+        <div class="lead-meta">
+          <div class="src-dot" style="background:${SRC_COLORS[p.src]}"></div>
+          <span class="lead-stage">${STAGE_LABELS[p.stage]}</span>
+        </div>
+      </div>
+      <div class="lead-exp" style="color:${heatColor(p.heat)}">${p.exp.split('–')[0]}</div>
+    </div>
+  `).join('') + (visible.length < all.length ? `<div id="scroll-sentinel" style="height:1px;margin:8px 0;opacity:0">·</div>` : `<div style="padding:10px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--t3)">— ${all.length} prospects chargés —</div>`);
+  // re-attach observer if sentinel exists
+  const s = document.getElementById('scroll-sentinel');
+  if(s){
+    const obs = new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){ displayedCount += PAGE_SIZE; renderLeads(); }
+    },{threshold:0.1, root: el});
+    obs.observe(s);
+  }
+}
+
+// ════════════════════════════════════════
+// SELECT LEAD
+// ════════════════════════════════════════
+function selectLead(id){
+  activeLeadId = id;
+  renderLeads();
+  const p = prospects.find(x=>x.id===id);
+  if(!p) return;
+  renderDetail(p);
+  renderActionPanel(p);
+}
+
+function renderDetail(p){
+  document.getElementById('detail-empty').style.display='none';
+  const dc = document.getElementById('detail-content');
+  dc.style.display='flex';
+  dc.innerHTML = `
+    <!-- HEADER -->
+    <div class="dh">
+      <div class="dh-top">
+        <div class="dh-icon" style="border-color:rgba(0,207,196,.2);color:var(--cyan)">${p.icon}</div>
+        <div class="dh-info">
+          <div class="dh-name">${p.co}</div>
+          <div class="dh-sub">
+            <span>${p.industry}</span>
+            <span style="opacity:.3">·</span>
+            <span>${p.size}</span>
+            <span style="opacity:.3">·</span>
+            <div class="dh-pill" style="border-color:${SRC_COLORS[p.src]}22;color:${SRC_COLORS[p.src]}">
+              <div style="width:5px;height:5px;border-radius:50%;background:${SRC_COLORS[p.src]}"></div>
+              ${SRC_LABELS[p.src]}
+            </div>
+          </div>
+        </div>
+        <div class="dh-actions">
+          <button class="dh-act-btn">LinkedIn</button>
+          <button class="dh-act-btn">Enrichir</button>
+          <button class="dh-act-btn cta">Contacter →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE PROGRESS -->
+    <div style="padding:16px 24px 24px;border-bottom:1px solid var(--bd);background:var(--bg)">
+      <div style="font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:16px">Progression pipeline</div>
+      <div style="display:flex;align-items:center;position:relative">
+        ${STAGES.map((s,i)=>`
+          <div style="display:flex;align-items:center;flex:1;position:relative">
+            <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid ${i<p.stage?'rgba(0,207,196,.4)':i===p.stage?'var(--cyan)':'rgba(255,255,255,.1)'};
+                        background:${i<p.stage?'rgba(0,207,196,.1)':i===p.stage?'var(--cyan)':'transparent'};
+                        display:flex;align-items:center;justify-content:center;
+                        flex-shrink:0;position:relative;z-index:1">
+              ${i<p.stage?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round"><path d="m5 13 4 4L19 7"/></svg>':
+                i===p.stage?`<div style="width:8px;height:8px;border-radius:50%;background:var(--bg)"></div>`:
+                `<div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15)"></div>`}
+              <div style="position:absolute;top:30px;left:50%;transform:translateX(-50%);
+                          font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.07em;
+                          text-transform:uppercase;white-space:nowrap;
+                          color:${i===p.stage?'var(--cyan)':'rgba(255,255,255,.25)'}">
+                ${STAGE_LABELS[i]}
+              </div>
+            </div>
+            ${i<STAGES.length-1?`<div style="flex:1;height:1px;background:${i<p.stage?'rgba(0,207,196,.3)':'rgba(255,255,255,.07)'}"></div>`:''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- APOLLO ENRICHMENT -->
+    <div class="d-section">
+      <div class="d-sec-title">
+        Enrichissement Apollo
+        <span class="d-sec-badge">Apollo Data</span>
+      </div>
+      <div class="enrich-grid">
+        <div class="eg-card"><div class="eg-lbl">Revenus estimés</div><div class="eg-val cyan">${p.revenue}</div></div>
+        <div class="eg-card"><div class="eg-lbl">Effectif</div><div class="eg-val">${p.size}</div></div>
+        <div class="eg-card"><div class="eg-lbl">Secteur</div><div class="eg-val">${p.industry.split('·')[0].trim()}</div></div>
+        <div class="eg-card"><div class="eg-lbl">Exposition estimée</div><div class="eg-val grn">${p.exp}</div></div>
+      </div>
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="d-section">
+      <div class="d-sec-title">Stack technologique (${p.tech.length} outils détectés)</div>
+      <div class="tech-list">${p.tech.map(t=>`<div class="tech-tag">${t}</div>`).join('')}</div>
+    </div>
+
+    <!-- JOB POSTINGS -->
+    ${p.jobs.length?`
+    <div class="d-section">
+      <div class="d-sec-title">Offres d'emploi · Signaux d'intention</div>
+      <div class="job-list">
+        ${p.jobs.map(j=>`
+          <div class="job-item">
+            <div>
+              <div class="job-title">${j.title}</div>
+              <div class="job-hint" style="margin-top:2px">${j.hint}</div>
+            </div>
+            <div class="job-dept">${j.dept}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`:''}
+
+    <!-- CONTACT -->
+    <div class="d-section">
+      <div class="d-sec-title">Décideur principal</div>
+      <div class="contact-card">
+        <div class="cc-avatar">${p.contact.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+        <div class="cc-info">
+          <div class="cc-name">${p.contact.name}</div>
+          <div class="cc-title">${p.contact.title} · ${p.co}</div>
+          <div class="cc-contact">
+            <div class="cc-line">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <a href="mailto:${p.contact.email}">${p.contact.email}</a>
+            </div>
+            <div class="cc-line">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3-8.59 2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 17z"/></svg>
+              <span style="font-family:var(--mono);font-size:13px;color:var(--t2)">${p.contact.phone}</span>
+            </div>
+            <div class="cc-line">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              <a href="https://linkedin.com/${p.contact.li}" target="_blank">${p.contact.li}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANT SCORE -->
+    <div class="d-section">
+      <div class="d-sec-title">Score BANT+
+        <span style="font-family:var(--mono);font-size:14px;color:var(--cyan)">${p.bant.budget+p.bant.authority+p.bant.need+p.bant.timing}/100</span>
+      </div>
+      <div class="bant-grid">
+        ${[['Budget',p.bant.budget,25,'var(--grn)'],['Autorité',p.bant.authority,20,'var(--cyan)'],['Besoin',p.bant.need,20,'var(--gold)'],['Timing',p.bant.timing,15,'var(--vio)']].map(([l,v,m,c])=>`
+          <div class="bant-item">
+            <div class="bant-lbl">${l}<span style="color:${c}">${v}/${m}</span></div>
+            <div class="bant-bar"><div class="bant-fill" style="width:${(v/m*100)}%;background:${c}"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="d-section" style="border-bottom:none">
+      <div class="d-sec-title">Historique des signaux</div>
+      <div class="timeline">
+        ${p.timeline.map(t=>`
+          <div class="tl-item">
+            <div class="tl-icon" style="border-color:${t.color}22;background:${t.color}0D">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="${t.color}" stroke-width="2.5">
+                <circle cx="12" cy="12" r="4"/>
+              </svg>
+            </div>
+            <div class="tl-body">
+              <div class="tl-event">${t.event}</div>
+              <div class="tl-time">${t.time}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════
+// ACTION PANEL
+// ════════════════════════════════════════
+const TEMPLATES = {
+  email: {
+    'D0 · Email découverte':`Bonjour <span class="msg-token">{{prenom}}</span>,<br><br>
+J'ai analysé le stack de <span class="msg-token">{{société}}</span> — vous utilisez ${'<span class="msg-token">{{nb_outils}}</span>'} outils SaaS pour un coût estimé entre <span class="msg-token">{{exposition}}</span>.<br><br>
+Ghost Tax identifie les abonnements fantômes, doublons et contrats sous-utilisés. Nos clients récupèrent en moyenne <strong>23% de leur budget SaaS</strong>.<br><br>
+Échange de 20 minutes cette semaine ?`,
+    'D2 · Email social proof':`Bonjour <span class="msg-token">{{prenom}}</span>,<br><br>
+Suite à mon message — Pennylane vient de récupérer €140K en 3 semaines avec Ghost Tax.<br><br>
+Votre exposition estimée chez <span class="msg-token">{{société}}</span> est <span class="msg-token">{{exposition}}</span>. Voulez-vous voir le rapport complet ?`,
+    'Upsell D5 · Proposition démo':`Bonjour <span class="msg-token">{{prenom}}</span>,<br><br>
+Depuis votre audit Rail A, Ghost Tax Monitor surveille en continu votre stack. Je souhaite vous présenter les alertes des 30 derniers jours.<br><br>
+Démo cette semaine — 30 minutes ?`,
+    'default':`Bonjour <span class="msg-token">{{prenom}}</span>,<br><br>
+Message personnalisé pour <span class="msg-token">{{société}}</span>.<br><br>
+Prochaine étape de la séquence <span class="msg-token">{{séquence}}</span>.`
+  },
+  linkedin:`Bonjour <span class="msg-token">{{prenom}}</span>, j'ai analysé le stack SaaS de <span class="msg-token">{{société}}</span> — exposition estimée <span class="msg-token">{{exposition}}</span>. Ghost Tax aide à récupérer ce budget. Échange rapide ?`,
+  phone:`Script d'appel :<br><br>
+"Bonjour, je cherche à joindre <span class="msg-token">{{prenom}}</span>. C'est Jean-Étienne de Ghost Tax. J'ai analysé le stack SaaS de <span class="msg-token">{{société}}</span> et identifié <span class="msg-token">{{exposition}}</span> de budget potentiellement récupérable. Avez-vous 5 minutes ?"`
+};
+
+function renderActionPanel(p){
+  const seqObj = sequences.find(s=>s.name===p.seq)||sequences[0];
+  const stepName = seqObj ? seqObj.steps[p.seqStep] : 'Démarrer séquence';
+  // Auto-translated message based on prospect's language
+  const tmpl = activeChan==='email' ? getMsg(p, stepName)
+             : activeChan==='linkedin' ? (MSG[p.lang]||MSG.en).d0.replace(/<br><br>.*/s,'') + ' 👋'
+             : `[${p.flag} ${p.lang.toUpperCase()}] Script téléphonique · "${p.contact.name.split(' ')[0]}, Ghost Tax — exposition ${p.exp} détectée…"`;
+
+  // Update panel title with language indicator
+  const langLabel = {fr:'Français',en:'English',de:'Deutsch',es:'Español',it:'Italiano',nl:'Nederlands'};
+  document.getElementById('act-panel-title').innerHTML =
+    `Contact <span style="margin-left:6px;font-size:13px">${p.flag}</span> <span style="opacity:.5;font-weight:400;letter-spacing:.06em;font-size:14px">${(langLabel[p.lang]||p.lang).toUpperCase()}</span>`;
+
+  document.getElementById('action-content').innerHTML = `
+    <!-- NEXT ACTION -->
+    <div class="act-section">
+      <div class="act-sec-title">Prochaine action</div>
+      <div class="next-action">
+        <div class="na-label">Action requise</div>
+        <div class="na-title">${stepName}</div>
+        <div class="na-time">Recommandé : aujourd'hui avant 17h</div>
+        <button class="na-exec" onclick="execAction(${p.id})">→ Exécuter maintenant</button>
+      </div>
+    </div>
+
+    <!-- CONTACT CHANNEL -->
+    <div class="act-section">
+      <div class="act-sec-title">Comment contacter</div>
+      <div class="channel-sel">
+        <button class="chan-btn${activeChan==='email'?' active':''}" onclick="setChan('email',${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email
+        </button>
+        <button class="chan-btn${activeChan==='linkedin'?' active':''}" onclick="setChan('linkedin',${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </button>
+        <button class="chan-btn${activeChan==='phone'?' active':''}" onclick="setChan('phone',${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.7 3.41 2 2 0 0 1 3.69 1.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17z"/></svg>
+          Tel
+        </button>
+      </div>
+      <div class="msg-preview" id="msg-preview">
+        ${tmpl}
+      </div>
+      <div class="msg-actions">
+        <button class="msg-btn" onclick="editMsg()">Éditer</button>
+        <button class="msg-btn" onclick="schedMsg(${p.id})">Planifier</button>
+        <button class="msg-btn send" onclick="sendMsg(${p.id})">→ Envoyer</button>
+      </div>
+    </div>
+
+    <!-- SEQUENCE STATUS -->
+    <div class="act-section">
+      <div class="act-sec-title">Séquence · ${p.seq||'Aucune'}</div>
+      <div class="seq-steps">
+        ${(seqObj?seqObj.steps:[]).map((s,i)=>`
+          <div class="seq-step${i<p.seqStep?' done':i===p.seqStep?' current':' pending'}">
+            <div class="ss-day" style="color:${i===p.seqStep?'var(--cyan)':i<p.seqStep?'var(--grn)':'var(--t3)'}">
+              D${i===0?'0':i===1?'2':i===2?'7':'14'}
+            </div>
+            <div class="ss-name" style="color:${i===p.seqStep?'var(--t1)':''}">
+              ${s.replace(/D\d+ · /,'')}
+            </div>
+            <div class="ss-status${i<p.seqStep?' done':i===p.seqStep?' current':''}">
+              ${i<p.seqStep?'<svg viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="3" stroke-linecap="round"><path d="m5 13 4 4L19 7"/></svg>':
+                i===p.seqStep?'<div style="width:6px;height:6px;border-radius:50%;background:var(--cyan)"></div>':''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- APOLLO ACTIONS -->
+    <div class="act-section" style="border-bottom:none">
+      <div class="act-sec-title">Actions Apollo</div>
+      <div class="apo-grid">
+        <button class="apo-btn" onclick="apolloEnrich(${p.id})">⟳ Enrichir</button>
+        <button class="apo-btn" onclick="apolloContacts(${p.id})">👥 Contacts</button>
+        <button class="apo-btn" onclick="apolloJobs(${p.id})">📋 Offres emploi</button>
+        <button class="apo-btn" onclick="apolloSimilar(${p.id})">🔍 Similaires</button>
+        <button class="apo-btn full" onclick="apolloCampaign(${p.id})">+ Ajouter à une campagne Apollo</button>
+      </div>
+      <div class="apo-campaign">
+        <div>
+          <div class="apo-camp-name">${p.campaign||'Ghost Tax Rail A'}</div>
+          <div style="font-family:var(--mono);font-size:14px;color:var(--t3);margin-top:2px">Campagne actuelle</div>
+        </div>
+        <div class="apo-camp-badge">Actif</div>
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════
+// APOLLO VIEW
+// ════════════════════════════════════════
+function renderApolloResults(){
+  document.getElementById('apo-result-list').innerHTML = apolloResults.map((r,i)=>`
+    <div class="result-card" onclick="toggleApoResult(${i},this)" style="margin-bottom:8px">
+      <div class="rc-head">
+        <div style="display:flex;align-items:flex-start;gap:10px;flex:1">
+          <div class="rc-icon">${r.icon}</div>
+          <div style="flex:1">
+            <div class="rc-name">${r.co}</div>
+            <div class="rc-sub">${r.industry} · ${r.size}</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${heatColor(r.score)}">${r.score}</div>
+      </div>
+      <div class="rc-pills">
+        <div class="rc-pill">${r.contact}</div>
+        <div class="rc-pill" style="border-color:rgba(240,165,0,.2);color:var(--gold)">⚡ ${r.signal}</div>
+      </div>
+      <div class="rc-actions">
+        <button class="rc-act" onclick="event.stopPropagation();enrichResult('${r.co}')">Enrichir</button>
+        <button class="rc-act primary" onclick="event.stopPropagation();addToPipeline('${r.co}')">+ Pipeline</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+// SEQUENCES VIEW
+// ════════════════════════════════════════
+function renderSequences(){
+  document.getElementById('seq-list').innerHTML = sequences.map(s=>`
+    <div class="seq-card${s.id===activeSeqId?' active':''}" onclick="selectSeq('${s.id}')">
+      <div class="sc-name">${s.name}</div>
+      <div class="sc-stats">
+        <div class="sc-stat"><span>${s.enrolled}</span> inscrits</div>
+        <div class="sc-stat"><span>${s.reply_rate}%</span> replies</div>
+        <div class="sc-stat"><span>${s.open_rate}%</span> opens</div>
+      </div>
+      <div class="sc-bar"><div class="sc-bar-fill" style="width:${s.open_rate}%;background:${s.color}"></div></div>
+    </div>
+  `).join('');
+
+  document.getElementById('seq-analytics').innerHTML = [
+    {val:'34',lbl:'Séquences actives',color:'var(--cyan)'},
+    {val:'76%',lbl:'Taux ouverture',color:'var(--gold)'},
+    {val:'28%',lbl:'Taux de réponse',color:'var(--grn)'},
+    {val:'12',lbl:'Actions auj.',color:'var(--red)'},
+  ].map(a=>`
+    <div class="an-card">
+      <div class="an-val" style="color:${a.color}">${a.val}</div>
+      <div class="an-lbl">${a.lbl}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('seq-queue').innerHTML = queue.map(q=>`
+    <div class="queue-item">
+      <div class="qi-src" style="background:${SRC_COLORS[q.src]}"></div>
+      <div class="qi-info">
+        <div class="qi-co">${q.co}</div>
+        <div class="qi-step">${q.step}</div>
+      </div>
+      <div class="qi-time">${q.time}</div>
+      <button class="qi-btn">→</button>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════
+// LINKEDIN ACQUISITION ENGINE v2 — Supabase Live
+// ════════════════════════════════════════
+const LI_SB_URL = 'https://cuvxhrzrwzuysnfnoqje.supabase.co';
+const LI_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1dnhocnpyd3p1eXNuZm5vcWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MzI1NTAsImV4cCI6MjA4ODQwODU1MH0.S9AhyGSGbUMQhCW6QZPrIFxyvUdXSAFStw_znQUcIvw';
+
+let liWins    = [];  // vault_sessions — cas réels Ghost Tax
+let liSignals = [];  // osint_prospects — signaux Apollo chauds
+let liCalendar = [];
+let liVisitors = [];
+let liRoutineState = [];
+let liCurrentFormat = 'chiffre_choc';
+let liActiveCalEntry = 0;
+let liLoaded = false;
+
+const LI_STATUS_LABEL = {scheduled:'Planifié',draft:'Brouillon',idea:'Idée',published:'Publié'};
+const LI_TYPE_DOT = {chiffre_choc:'var(--cyan)',histoire_client:'var(--vio)',prise_de_position:'var(--gold)'};
+
+async function initLinkedIn(){
+  if(liLoaded){ renderLinkedIn(); return; }
+  const loadEl = document.getElementById('li-loading');
+  if(loadEl) loadEl.style.display='flex';
+  try{
+    const [wRes, sRes] = await Promise.all([
+      fetch(`${LI_SB_URL}/rest/v1/vault_sessions?select=company_name,ghost_tax_annual,headcount,industry,country&order=created_at.desc&limit=8`,
+        {headers:{'apikey':LI_SB_KEY,'Authorization':`Bearer ${LI_SB_KEY}`}}),
+      fetch(`${LI_SB_URL}/rest/v1/osint_prospects?select=company_name,industry,headcount,exposure_low_eur,exposure_high_eur,geo_market,intent_score&order=intent_score.desc&limit=10`,
+        {headers:{'apikey':LI_SB_KEY,'Authorization':`Bearer ${LI_SB_KEY}`}})
+    ]);
+    if(wRes.ok){ const d=await wRes.json(); if(Array.isArray(d)&&d.length) liWins=d; }
+    if(sRes.ok){ const d=await sRes.json(); if(Array.isArray(d)&&d.length) liSignals=d; }
+  }catch(e){ console.warn('LinkedIn engine: Supabase unreachable',e); }
+
+  // Fallback demo si Supabase vide
+  if(!liWins.length) liWins=[
+    {company_name:'Scale-up Fintech',ghost_tax_annual:127000,headcount:150,industry:'Fintech',country:'France'},
+    {company_name:'SaaS RH Leader',ghost_tax_annual:89000,headcount:320,industry:'RH Tech',country:'France'},
+    {company_name:'E-commerce Mid',ghost_tax_annual:54000,headcount:210,industry:'E-commerce',country:'Belgique'},
+    {company_name:'InsurTech Series B',ghost_tax_annual:71000,headcount:180,industry:'Assurance',country:'France'},
+  ];
+  if(!liSignals.length) liSignals=[
+    {company_name:'Pennylane',industry:'Fintech',headcount:320,exposure_low_eur:180000,exposure_high_eur:520000,geo_market:'FR',intent_score:94},
+    {company_name:'Mollie',industry:'Payments',headcount:750,exposure_low_eur:390000,exposure_high_eur:1100000,geo_market:'NL',intent_score:88},
+    {company_name:'Spendesk',industry:'FinOps',headcount:540,exposure_low_eur:280000,exposure_high_eur:800000,geo_market:'FR',intent_score:82},
+    {company_name:'Payfit',industry:'Paie SaaS',headcount:680,exposure_low_eur:350000,exposure_high_eur:950000,geo_market:'FR',intent_score:78},
+    {company_name:'Agicap',industry:'Trésorerie',headcount:290,exposure_low_eur:150000,exposure_high_eur:430000,geo_market:'FR',intent_score:74},
+  ];
+
+  liCalendar     = _buildCalendar();
+  liVisitors     = _buildVisitors();
+  liRoutineState = _buildRoutine();
+  liLoaded = true;
+  if(loadEl) loadEl.style.display='none';
+  renderLinkedIn();
+}
+
+/* ── Génération du calendrier 3 semaines ── */
+function _buildCalendar(){
+  const slots=[], today=new Date();
+  const formats=['chiffre_choc','histoire_client','prise_de_position'];
+  const times=[['8h00','8h30'],['7h30','7h45'],['8h30','9h00']]; // [Mon, Wed, Fri]
+  const dowMap={1:0,3:1,5:2};
+  let d=new Date(today);
+  // Remonter au lundi si besoin
+  while(d.getDay()!==1) d.setDate(d.getDate()-1);
+  while(slots.length<9){
+    const dow=d.getDay();
+    if(dow in dowMap){
+      const col=dowMap[dow];
+      const fmt=formats[slots.length%3];
+      const win=liWins[slots.length%liWins.length];
+      const sig=liSignals[slots.length%liSignals.length];
+      const isPast=d<today&&d.toDateString()!==today.toDateString();
+      const isToday=d.toDateString()===today.toDateString();
+      slots.push({
+        day:_fmtDate(d), time:times[col][0], type:fmt,
+        status:isPast?'published':(isToday||slots.length<1?'scheduled':'idea'),
+        title:_genTitle(fmt,win,sig),
+        win, sig, date:new Date(d)
+      });
+    }
+    d.setDate(d.getDate()+1);
+    if(slots.length>30) break;
+  }
+  return slots;
+}
+
+function _fmtDate(d){
+  const D=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const M=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  return `${D[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`;
+}
+
+function _genTitle(fmt,win,sig){
+  if(fmt==='chiffre_choc'&&win){
+    const k=Math.round((win.ghost_tax_annual||0)/1000);
+    return `€${k}k récupérés · ${win.industry} · ${win.headcount} pers.`;
+  }
+  if(fmt==='histoire_client'&&win)
+    return `${win.industry} ${win.country} · ${win.headcount} pers. — cas concret`;
+  if(fmt==='prise_de_position'&&sig)
+    return `CFO 2026 : le vrai problème c'est la Ghost Tax — ${sig.industry}`;
+  return 'À définir';
+}
+
+/* ── Génération du contenu post avec données réelles ── */
+function _genContent(fmt, win, sig){
+  const icons={chiffre_choc:'📊',histoire_client:'📖',prise_de_position:'🎯'};
+  const labels={chiffre_choc:'Chiffre Choc',histoire_client:'Histoire Client',prise_de_position:'Prise de Position'};
+  const tips={
+    chiffre_choc:'Format le plus partagé en privé. L\'accroche DOIT être un chiffre Ghost Tax réel. Zéro générique.',
+    histoire_client:'Format qui génère le plus de nouveaux abonnés. Données réelles anonymisées = crédibilité maximale.',
+    prise_de_position:'Format qui génère le plus de commentaires. Ça divise — c\'est fait pour ça. Finir par une question.'
+  };
+  let hook='', body='', hashtags=[];
+
+  if(fmt==='chiffre_choc'&&win){
+    const k=Math.round((win.ghost_tax_annual||0)/1000);
+    const a=Math.round((win.ghost_tax_annual||0)*0.35/1000);
+    const b2=Math.round((win.ghost_tax_annual||0)*0.40/1000);
+    const c=Math.round((win.ghost_tax_annual||0)*0.25/1000);
+    hook=`€${k}k. C'est ce qu'on a récupéré pour une entreprise de ${win.headcount} personnes en ${win.country}.`;
+    body=`${win.industry}, ${win.headcount} salariés.\n\nVoici ce qu'on a trouvé :\n→ €${a}k en comptes d'anciens employés jamais coupés\n→ €${b2}k en outils identiques payés par 2 équipes différentes\n→ €${c}k en contrats auto-renouvelés depuis 3 ans pour 0 usage\n\nTotal récupéré : €${k}k/an. En 3 semaines. Sans couper un seul outil actif.\n\nLe pire ? Leur CFO pensait avoir déjà « optimisé les coûts ».\n${sig?`\nCette semaine j'ai vu que ${sig.company_name} recrute un Finance Manager — même profil, même situation.`:''}\n\nTu veux savoir combien tu perds en ce moment ?`;
+    hashtags=['#SaaS','#FinOps','#CFO','#GestionBudget','#GhostTax'];
+  } else if(fmt==='histoire_client'&&win){
+    const k=Math.round((win.ghost_tax_annual||0)/1000);
+    const a=Math.round((win.ghost_tax_annual||0)*0.38/1000);
+    const b2=Math.round((win.ghost_tax_annual||0)*0.42/1000);
+    const c2=Math.round((win.ghost_tax_annual||0)*0.20/1000);
+    hook=`${win.industry} · ${win.headcount} personnes · ${win.country}. Ce qu'on a trouvé ensuite m'a surpris.`;
+    body=`Contexte : ${win.industry}, ${win.headcount} salariés, croissance rapide.\n\nLe problème détecté :\nLeur stack SaaS avait explosé en 18 mois. Personne n'avait fait le ménage.\n\nCe qu'on a trouvé :\n→ €${a}k/an en abonnements sans utilisateur actif\n→ €${b2}k/an en doublons inter-équipes (3 outils de PM différents)\n→ €${c2}k/an en contrats fantômes hérités d'acquisitions\n\nCe qu'on a fait : audit complet en 3 semaines, zéro interruption de service.\n\nRésultat : €${k}k récupérés par an.\n\nLa leçon : la Ghost Tax frappe les boîtes qui grandissent vite.\nPlus tu recrutes, plus tu perds — jusqu'à ce que quelqu'un regarde.\n\n👉 Ce genre de situation, c'est plus fréquent qu'on ne le pense.`;
+    hashtags=['#CaseStudy','#SaaS','#Finance','#StartUp','#GhostTax'];
+  } else if(fmt==='prise_de_position'){
+    const s=sig||liSignals[0]||{company_name:'une boîte que j\'ai analysée',industry:'Tech',headcount:200};
+    hook=`Votre DSI ne sait pas ce qu'il dépense en SaaS. Ce n'est pas de sa faute.`;
+    body=`C'est structurel. Voici pourquoi :\n\n1/ Le SaaS s'achète maintenant sans DSI.\nCarte bleue, 3 clics, c'est parti. Les équipes métier dépensent hors radar.\n\n2/ La croissance masque le problème.\nQuand tu passes de 50 à 300 personnes en 18 mois, personne ne fait le ménage.\n\n3/ Les outils de spend management ne règlent pas le vrai problème.\nIls montrent la dépense future. Pas l'argent déjà perdu en silence.\n\n${s.company_name} (${s.headcount} pers., ${s.industry}) recrute un Finance Manager cette semaine.\nJe parie que c'est exactement leur situation.\n\nLe vrai problème du CFO en 2026 n'est pas l'inflation.\nC'est la Ghost Tax.\n\nVous êtes d'accord ou pas ?`;
+    hashtags=['#Opinion','#CFO','#Tech','#Management','#GhostTax'];
+  }
+  return {icon:icons[fmt], label:labels[fmt], tip:tips[fmt], hook, body, hashtags};
+}
+
+function _buildVisitors(){
+  const roles=['CFO','VP Finance','Head of IT','CTO','Finance Manager','Head of Procurement'];
+  const times=['il y a 2h','il y a 5h','hier','il y a 2j','il y a 4j'];
+  return liSignals.slice(0,5).map((s,i)=>({
+    title:roles[i%roles.length], company:s.company_name, time:times[i],
+    heat:s.intent_score||70, signal:s
+  }));
+}
+
+function _buildRoutine(){
+  const topSig=liSignals[0]||{company_name:'boîtes chaudes'};
+  return [
+    {task:`Ouvrir "Qui a vu ton profil" → CFO/VP Finance · enrichir via Apollo`,time:'Lundi 8h · 15 min',done:false},
+    {task:`Business Insights sur ${topSig.company_name} et les 2 autres top signaux`,time:'Lundi 8h15 · 10 min',done:false},
+    {task:'Publier le post du mercredi (Histoire Client)',time:'Mercredi 7h30 · 5 min',done:false},
+    {task:'5 InMails ciblés sur les prospects ≥ 80 Heat Score',time:'Vendredi 8h · 10 min',done:false},
+    {task:'Répondre à TOUS les commentaires de la semaine',time:'Vendredi 8h30 · 5 min',done:false},
+  ];
+}
+
+// ════════════════════════════════════════
+// LINKEDIN RENDER
+// ════════════════════════════════════════
+function renderLinkedIn(){
+  renderLiCalendar();
+  renderLiEditor();
+  renderLiVisitors();
+  renderLiRoutine();
+}
+
+function renderLiCalendar(){
+  if(!liCalendar.length) return;
+  let html='';
+  for(let w=0;w<3;w++){
+    const entries=liCalendar.slice(w*3,w*3+3);
+    if(!entries.length) break;
+    html+=`<div class="cal-week">Semaine du ${entries[0].day.replace(/^\w+ /,'')}</div>`;
+    entries.forEach((e,j)=>{
+      const i=w*3+j;
+      const typeIcon={chiffre_choc:'📊',histoire_client:'📖',prise_de_position:'🎯'}[e.type];
+      const typeLabel={chiffre_choc:'Chiffre Choc',histoire_client:'Histoire',prise_de_position:'Opinion'}[e.type];
+      html+=`<div class="cal-entry status-${e.status} ${liActiveCalEntry===i?'active':''}" onclick="selectCalEntry(${i})">
+        <div class="ce-dot" style="background:${LI_TYPE_DOT[e.type]}"></div>
+        <div class="ce-body">
+          <div class="ce-day"><span>${typeIcon}</span><span>${e.day}</span></div>
+          <div class="ce-time">${e.time} · ${typeLabel}</div>
+          <div class="ce-snippet">${e.title}</div>
+        </div>
+        <div class="ce-status">${LI_STATUS_LABEL[e.status]}</div>
+      </div>`;
+    });
+  }
+  document.getElementById('li-calendar').innerHTML=html;
+}
+
+function selectCalEntry(i){
+  liActiveCalEntry=i;
+  const e=liCalendar[i];
+  liCurrentFormat=e.type;
+  document.querySelectorAll('.fmt-pill').forEach((p,idx)=>{
+    const types=['chiffre_choc','histoire_client','prise_de_position'];
+    p.classList.toggle('active',types[idx]===e.type);
+  });
+  document.getElementById('li-post-day').textContent=`${e.day} · ${e.time}`;
+  _loadEntry(e);
+  renderLiCalendar();
+}
+
+function setLiFormat(fmt,el){
+  liCurrentFormat=fmt;
+  document.querySelectorAll('.fmt-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  if(liCalendar[liActiveCalEntry]) liCalendar[liActiveCalEntry].type=fmt;
+  _loadEntry(liCalendar[liActiveCalEntry]||{type:fmt,win:liWins[0],sig:liSignals[0]});
+  renderLiCalendar();
+}
+
+function _loadEntry(e){
+  const content=_genContent(e.type,e.win,e.sig);
+  // Badge source
+  const badge=document.getElementById('li-source-badge');
+  if(badge){
+    if(e.win) badge.innerHTML=`🏆 Cas réel · €${Math.round((e.win.ghost_tax_annual||0)/1000)}k récupérés · ${e.win.company_name}`;
+    else if(e.sig) badge.innerHTML=`📡 Signal Apollo · ${e.sig.company_name} · Score ${e.sig.intent_score||'?'}`;
+    else badge.innerHTML='';
+  }
+  // Tip
+  document.getElementById('li-tip-box').innerHTML=`<div class="li-tip"><div class="li-tip-title">${content.icon} Pourquoi ce format ?</div><div class="li-tip-body">${content.tip}</div></div>`;
+  document.getElementById('li-hook').value=content.hook||'';
+  document.getElementById('li-body').value=content.body||'';
+  document.getElementById('li-hashtags').innerHTML=
+    (content.hashtags||[]).map(h=>`<span style="padding:3px 8px;border-radius:4px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);font-family:var(--mono);font-size:12px;font-weight:600;color:var(--blue);cursor:pointer">${h}</span>`).join('');
+  updateCharCount();
+}
+
+function genHook(){
+  const e=liCalendar[liActiveCalEntry];
+  if(!e) return;
+  // Rotation sur les wins disponibles
+  const nextWin=liWins[(liWins.indexOf(e.win)+1)%liWins.length];
+  const newContent=_genContent(e.type,nextWin,e.sig);
+  document.getElementById('li-hook').value=newContent.hook;
+  updateCharCount();
+}
+
+function genBody(){
+  const e=liCalendar[liActiveCalEntry];
+  if(!e) return;
+  const content=_genContent(e.type,e.win,e.sig);
+  document.getElementById('li-body').value=content.body;
+  updateCharCount();
+}
+
+function updateCharCount(){
+  const h=document.getElementById('li-hook').value.length;
+  const b=document.getElementById('li-body').value.length;
+  const total=h+b+2;
+  const el=document.getElementById('li-chars');
+  el.textContent=`${total} / 3 000 caractères`;
+  el.className='pe-chars'+(total>2800?' warn':'')+(total>3000?' over':'');
+}
+
+function renderLiEditor(){
+  if(!liCalendar.length) return;
+  _loadEntry(liCalendar[liActiveCalEntry]);
+}
+
+function renderLiVisitors(){
+  const heat=s=>s>=80?`<span style="color:var(--red)">${s}🔥</span>`:s>=60?`<span style="color:var(--gold)">${s}🔥</span>`:`<span style="color:var(--t3)">${s}</span>`;
+  document.getElementById('li-visitors').innerHTML=liVisitors.map((v,i)=>`
+    <div class="visitor-item" onclick="enrichLiVisitor(${i})">
+      <div class="vi-avatar">${(v.company||'XX').slice(0,2).toUpperCase()}</div>
+      <div class="vi-info">
+        <div class="vi-name">${v.title} · ${v.company}</div>
+        <div class="vi-role">${v.signal?.industry||'—'} · ${v.signal?.headcount||'?'} pers.</div>
+        <div class="vi-time">${v.time}</div>
+      </div>
+      <div class="vi-heat">${heat(v.heat)}</div>
+    </div>`).join('');
+}
+
+function renderLiRoutine(){
+  const done=liRoutineState.filter(r=>r.done).length;
+  document.getElementById('li-routine-done').textContent=`${done}/5`;
+  document.getElementById('li-routine').innerHTML=liRoutineState.map((r,i)=>`
+    <div class="routine-item">
+      <div class="ri-check ${r.done?'done':''}" onclick="toggleRoutine(${i})">
+        ${r.done?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="3" stroke-linecap="round"><path d="m5 13 4 4L19 7"/></svg>':''}
+      </div>
+      <div class="ri-body">
+        <div class="ri-task" style="${r.done?'opacity:.4;text-decoration:line-through':''}">  ${r.task}</div>
+        <div class="ri-time">${r.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleRoutine(i){
+  liRoutineState[i].done=!liRoutineState[i].done;
+  renderLiRoutine();
+}
+
+function enrichLiVisitor(i){
+  const v=liVisitors[i];
+  if(!v) return;
+  const s=v.signal||{};
+  const exp=s.exposure_low_eur?`€${Math.round(s.exposure_low_eur/1000)}k–€${Math.round(s.exposure_high_eur/1000)}k`:'N/A';
+  alert(`🎯 Signal Apollo — ${v.title} @ ${v.company}\n\nSecteur: ${s.industry||'—'}\nTaille: ${s.headcount||'?'} personnes\nMarché: ${s.geo_market||'—'}\nExposition Ghost Tax: ${exp}\nHeat Score: ${v.heat}/100\n\nAction: ${v.heat>=80?'→ InMail cette semaine + inscrire en campagne Apollo':'→ Surveiller — enrichir via Apollo'}`);
+}
+
+function saveDraft(){
+  const btn=event.target;
+  btn.textContent='✓ Sauvegardé';
+  btn.style.color='var(--grn)';
+  btn.style.borderColor='rgba(0,201,141,.3)';
+  const e=liCalendar[liActiveCalEntry];
+  if(e&&e.status==='idea'){
+    e.status='draft';
+    e.title=document.getElementById('li-hook').value.slice(0,50)+'…';
+    renderLiCalendar();
+  }
+  setTimeout(()=>{btn.textContent='Sauvegarder brouillon';btn.style.color='';btn.style.borderColor=''},2000);
+}
+
+function schedulePost(){
+  const btn=event.target;
+  btn.textContent='✓ Planifié';
+  btn.style.background='rgba(0,201,141,.1)';
+  btn.style.borderColor='rgba(0,201,141,.3)';
+  btn.style.color='var(--grn)';
+  const e=liCalendar[liActiveCalEntry];
+  if(e){
+    e.status='scheduled';
+    e.title=document.getElementById('li-hook').value.slice(0,50)+'…';
+    renderLiCalendar();
+  }
+  setTimeout(()=>{btn.textContent='Planifier →';btn.style.background='';btn.style.borderColor='rgba(59,130,246,.3)';btn.style.color='var(--blue)'},2000);
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+function showView(view){
+  currentView = view;
+  document.querySelectorAll('.view-panel').forEach(el=>el.classList.remove('visible'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('visible');
+  const ni = document.querySelector(`[data-view="${view}"]`);
+  if(ni) ni.classList.add('active');
+  if(view==='apollo') renderApolloResults();
+  if(view==='sequences') renderSequences();
+  if(view==='linkedin') initLinkedIn();
+}
+
+// ════════════════════════════════════════
+// INTERACTIONS
+// ════════════════════════════════════════
+function filterBySource(src, el){
+  currentFilter = src;
+  document.querySelectorAll('.src-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeads();
+}
+
+function filterLeads(q){
+  currentSearch = q;
+  renderLeads();
+}
+
+function setChan(chan, id){
+  activeChan = chan;
+  const p = prospects.find(x=>x.id===id);
+  if(p) renderActionPanel(p);
+}
+
+function execAction(id){
+  const p = prospects.find(x=>x.id===id);
+  if(!p) return;
+  const btn = event.target;
+  btn.textContent = '✓ Envoyé';
+  btn.style.background = 'rgba(0,201,141,0.15)';
+  btn.style.borderColor = 'rgba(0,201,141,0.3)';
+  btn.style.color = 'var(--grn)';
+  p.seqStep = Math.min(p.seqStep+1, 3);
+  setTimeout(()=>renderActionPanel(p), 800);
+}
+
+function sendMsg(id){
+  const p = prospects.find(x=>x.id===id);
+  if(!p) return;
+  const btn = event.target;
+  btn.textContent = '✓ Envoyé';
+  btn.style.background = 'rgba(0,201,141,0.15)';
+  btn.style.borderColor = 'rgba(0,201,141,0.3)';
+  btn.style.color = 'var(--grn)';
+}
+
+function schedMsg(id){
+  const btn = event.target;
+  btn.textContent = '✓ Planifié';
+  btn.style.borderColor = 'rgba(0,207,196,.2)';
+  btn.style.color = 'var(--cyan)';
+}
+
+function editMsg(){
+  const preview = document.getElementById('msg-preview');
+  preview.contentEditable = 'true';
+  preview.focus();
+  preview.style.borderColor = 'rgba(0,207,196,.3)';
+}
+
+function apolloEnrich(id){
+  const btn = event.target;
+  btn.textContent = '✓ Enrichi';
+  btn.style.background = 'rgba(0,201,141,0.08)';
+  btn.style.borderColor = 'rgba(0,201,141,0.2)';
+  btn.style.color = 'var(--grn)';
+}
+
+function apolloContacts(id){ alert('Ouverture du panneau contacts Apollo…'); }
+function apolloJobs(id){ alert('Chargement des offres d\'emploi Apollo…'); }
+function apolloSimilar(id){ showView('apollo'); }
+function apolloCampaign(id){ alert('Sélectionnez une campagne Apollo pour ce prospect.'); }
+
+function setApoMode(mode, el){
+  document.querySelectorAll('.apo-tog-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleTag(el){
+  el.classList.toggle('sel');
+}
+
+function runApolloSearch(){
+  const btn = event.target;
+  btn.textContent = '⟳ Recherche en cours…';
+  btn.style.opacity = '.6';
+  setTimeout(()=>{
+    btn.textContent = '✓ 142 résultats · Filtrés';
+    btn.style.opacity = '1';
+    btn.style.background = 'rgba(0,207,196,.08)';
+    btn.style.borderColor = 'rgba(0,207,196,.2)';
+    btn.style.color = 'var(--cyan)';
+    renderApolloResults();
+  }, 1200);
+}
+
+function toggleApoResult(i, el){
+  if(selectedApoResults.has(i)) selectedApoResults.delete(i);
+  else selectedApoResults.add(i);
+  el.style.borderColor = selectedApoResults.has(i) ? 'rgba(139,92,246,.3)' : '';
+  el.style.background = selectedApoResults.has(i) ? 'rgba(139,92,246,.04)' : '';
+  const bulk = document.getElementById('bulk-bar');
+  bulk.style.display = selectedApoResults.size>0 ? 'block' : 'none';
+  document.getElementById('bulk-count').textContent = `${selectedApoResults.size} sélectionné${selectedApoResults.size>1?'s':''}`;
+}
+
+function enrichResult(co){ alert(`Enrichissement Apollo pour ${co}…`); }
+function addToPipeline(co){ alert(`${co} ajouté au pipeline Ghost Tax.`); }
+function bulkEnrich(){ alert(`Enrichissement Apollo en cours pour ${selectedApoResults.size} sociétés…`); }
+function bulkCampaign(){ alert(`Ajout à la campagne pour ${selectedApoResults.size} contacts…`); }
+function bulkPipeline(){ alert(`${selectedApoResults.size} sociétés ajoutées au pipeline.`); }
+
+function selectSeq(id){
+  activeSeqId = id;
+  renderSequences();
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderLeads();
+selectLead(1);
+</script>
+</body>
+</html>
