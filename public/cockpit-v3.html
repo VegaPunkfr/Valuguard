@@ -431,6 +431,70 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .ri-body{flex:1}
 .ri-task{font-size:14px;color:var(--t1);line-height:1.4}
 .ri-time{font-family:var(--mono);font-size:12px;color:var(--t3);margin-top:2px}
+
+/* ── MORNING BRIEF ── */
+.brief-panel{width:100%;background:var(--s1);border-bottom:1px solid var(--bd);padding:20px 24px;overflow-y:auto;max-height:55vh;display:none;flex-direction:column;gap:16px;animation:fade-in .3s ease}
+.brief-panel.visible{display:flex}
+.brief-header{display:flex;align-items:center;justify-content:space-between}
+.brief-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t2);display:flex;align-items:center;gap:8px}
+.brief-time{font-family:var(--mono);font-size:12px;color:var(--t3)}
+.brief-summary{font-size:13px;color:var(--t2);line-height:1.6}
+.brief-actions{display:flex;flex-direction:column;gap:12px}
+.brief-card{padding:16px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;cursor:pointer;transition:all 180ms;position:relative;overflow:hidden}
+.brief-card:hover{border-color:var(--bds);background:var(--s3)}
+.brief-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.brief-card.urgency-fire::before{background:var(--red)}
+.brief-card.urgency-bolt::before{background:var(--gold)}
+.brief-card.urgency-money::before{background:var(--grn)}
+.bc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bc-urgency{font-size:18px;flex-shrink:0}
+.bc-who{font-size:13px;font-weight:600;color:var(--t1)}
+.bc-score{font-family:var(--mono);font-size:12px;font-weight:700;margin-left:auto;padding:2px 8px;border-radius:4px;border:1px solid}
+.bc-reason{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:10px}
+.bc-exposure{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:10px}
+.bc-btns{display:flex;gap:6px}
+.bc-btn{padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:1px solid}
+.bc-btn.approve{background:rgba(0,207,196,.1);border-color:rgba(0,207,196,.25);color:var(--cyan)}
+.bc-btn.approve:hover{background:rgba(0,207,196,.2)}
+.bc-btn.view{background:transparent;border-color:var(--bd);color:var(--t2)}
+.bc-btn.view:hover{border-color:var(--bds);color:var(--t1)}
+.brief-linkedin{padding:14px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.12);border-radius:8px}
+.bl-title{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;opacity:.8}
+.bl-text{font-size:12px;color:var(--t2);line-height:1.6;white-space:pre-line;max-height:80px;overflow:hidden}
+.bl-copy{margin-top:8px;padding:5px 12px;border-radius:5px;border:1px solid rgba(59,130,246,.2);background:rgba(59,130,246,.06);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 140ms}
+.bl-copy:hover{background:rgba(59,130,246,.12)}
+.brief-next{font-family:var(--mono);font-size:12px;color:var(--t3);text-align:center;padding-top:8px;border-top:1px solid var(--bd)}
+.brief-done{text-align:center;padding:24px;animation:fade-in .3s ease}
+.brief-done-icon{font-size:32px;margin-bottom:10px}
+.brief-done-title{font-family:var(--disp);font-size:28px;letter-spacing:.04em;color:var(--cyan);margin-bottom:6px}
+.brief-done-stats{font-family:var(--mono);font-size:12px;color:var(--t2);margin-bottom:12px}
+.brief-done-next{font-family:var(--mono);font-size:12px;color:var(--t3)}
+
+/* Approval overlay */
+.approval-overlay{position:fixed;inset:0;z-index:1000;background:rgba(5,6,14,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;animation:fade-in .2s ease}
+.approval-overlay.visible{display:flex}
+.approval-card{width:520px;max-height:80vh;background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.ap-header{padding:20px 24px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:14px}
+.ap-heat{flex-shrink:0}
+.ap-info{flex:1}
+.ap-company{font-family:var(--disp);font-size:22px;letter-spacing:.04em;line-height:1}
+.ap-domain{font-size:12px;color:var(--t3);margin-top:4px;font-family:var(--mono)}
+.ap-body{padding:20px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+.ap-section-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.ap-reason{font-size:13px;color:var(--t1);line-height:1.6;padding:12px;background:rgba(0,207,196,.04);border:1px solid rgba(0,207,196,.1);border-radius:8px}
+.ap-message{font-size:13px;color:var(--t2);line-height:1.7;padding:14px;background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:8px;white-space:pre-line}
+.ap-quality{display:flex;gap:12px}
+.ap-quality-item{flex:1;text-align:center;padding:8px;background:rgba(255,255,255,.025);border:1px solid var(--bd);border-radius:6px}
+.ap-quality-val{font-family:var(--disp);font-size:18px;letter-spacing:.03em}
+.ap-quality-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.ap-footer{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:8px}
+.ap-btn{flex:1;padding:10px;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all 140ms;border:none;text-align:center}
+.ap-btn.approve{background:var(--cyan);color:var(--bg)}
+.ap-btn.approve:hover{opacity:.85}
+.ap-btn.skip{background:transparent;border:1px solid var(--bd);color:var(--t2)}
+.ap-btn.skip:hover{border-color:var(--bds);color:var(--t1)}
+.ap-btn:disabled{opacity:.5;cursor:not-allowed}
+.ap-shortcut{text-align:center;font-family:var(--mono);font-size:11px;color:var(--t3);padding:8px 24px 16px}
 </style>
 </head>
 <body>
@@ -455,6 +519,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   </div>
   <div class="tb-right">
     <div class="tb-sync"><div class="sync-dot"></div>Sync Apollo · il y a 4 min</div>
+    <button class="tb-btn" onclick="toggleBrief()" style="margin-right:4px">📋 Brief</button>
     <button class="tb-btn primary" onclick="showView('apollo')">+ Prospecter</button>
   </div>
 </div>
@@ -489,7 +554,13 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <!-- ══════════════════════════════════════════
          VIEW 1: COCKPIT (3 panels)
     ══════════════════════════════════════════ -->
-    <div class="view-panel visible" id="view-cockpit">
+    <div class="view-panel visible" id="view-cockpit" style="flex-direction:column">
+
+      <!-- MORNING BRIEF -->
+      <div class="brief-panel" id="brief-panel"></div>
+
+      <!-- TRIPLE PANEL (source + detail + action) -->
+      <div style="display:flex;flex:1;overflow:hidden" id="triple-panel">
 
       <!-- SOURCE PANEL -->
       <div class="src-panel">
@@ -535,6 +606,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
           </div>
         </div>
       </div>
+      </div><!-- /triple-panel -->
     </div>
 
     <!-- ══════════════════════════════════════════
@@ -1857,10 +1929,420 @@ function selectSeq(id){
 }
 
 // ════════════════════════════════════════
+// MORNING BRIEF — THE BRAIN
+// ════════════════════════════════════════
+let briefActions = [];
+let briefSessionStart = null;
+let briefApproved = 0;
+let briefSwitched = 0;
+let briefViewed = 0;
+
+function buildMorningBrief() {
+  const actions = [];
+
+  // 1. Prospects with draft messages ready (highest heat first)
+  const draftsReady = prospects
+    .filter(p => p.seqStep === 0 && p.heat >= 60)
+    .sort((a,b) => b.heat - a.heat);
+
+  for (const p of draftsReady) {
+    const dailyLoss = Math.round(parseInt(p.exp.replace(/[^0-9]/g,'')) / 365);
+    actions.push({
+      type: 'approve',
+      urgency: p.heat >= 85 ? 'fire' : 'bolt',
+      icon: p.heat >= 85 ? '🔥' : '⚡',
+      lead: p,
+      who: `${p.contact.name} · ${p.contact.title} · ${p.co}`,
+      flag: p.flag,
+      score: p.heat,
+      reason: buildBriefReason(p),
+      exposure: `Exposition: ${p.exp} · ~${dailyLoss}€/jour perdus`,
+      actionLabel: 'Approuver l\'envoi',
+      price: p.lang === 'de' || p.lang === 'ch' ? '590€' : '490€',
+    });
+  }
+
+  // 2. Prospects contacted who opened but didn't reply (channel switch)
+  const openedNoReply = prospects
+    .filter(p => p.seqStep >= 1 && p.timeline.some(t => t.event.includes('ouvert') || t.event.includes('opened') || t.event.includes('geöffnet') || t.event.includes('geopend')))
+    .filter(p => !p.timeline.some(t => t.event.toLowerCase().includes('reply') || t.event.toLowerCase().includes('réponse') || t.event.toLowerCase().includes('antwort')))
+    .sort((a,b) => b.heat - a.heat);
+
+  for (const p of openedNoReply) {
+    const openCount = p.timeline.filter(t => t.event.includes('ouvert') || t.event.includes('opened') || t.event.includes('geöffnet') || t.event.includes('geopend')).length;
+    actions.push({
+      type: 'switch',
+      urgency: 'bolt',
+      icon: '⚡',
+      lead: p,
+      who: `${p.contact.name} · ${p.contact.title} · ${p.co}`,
+      flag: p.flag,
+      score: p.heat,
+      reason: `Email ouvert ${openCount > 1 ? openCount + 'x' : ''} sans clic → recommandation: switch LinkedIn avec angle peer benchmark`,
+      exposure: `Exposition: ${p.exp}`,
+      actionLabel: 'Approuver le switch',
+      price: null,
+    });
+  }
+
+  // 3. Prospects who scanned (HOT — checkout recovery)
+  const scanned = prospects
+    .filter(p => p.src === 'scan' && p.stage >= 2)
+    .sort((a,b) => b.heat - a.heat);
+
+  for (const p of scanned) {
+    actions.push({
+      type: 'hot',
+      urgency: 'money',
+      icon: '💰',
+      lead: p,
+      who: `${p.contact.name} · ${p.contact.title} · ${p.co}`,
+      flag: p.flag,
+      score: p.heat,
+      reason: `A scanné ${p.co.toLowerCase()}.io ! Checkout recovery actif. Prochain follow-up automatique.`,
+      exposure: `Exposition: ${p.exp}`,
+      actionLabel: 'Voir',
+      price: null,
+    });
+  }
+
+  // 4. Prospects with positive replies (urgent handling)
+  const replied = prospects
+    .filter(p => p.timeline.some(t => t.event.toLowerCase().includes('reply') || t.event.toLowerCase().includes('réponse') || t.event.toLowerCase().includes('antwort')))
+    .sort((a,b) => b.heat - a.heat);
+
+  for (const p of replied) {
+    if (!actions.find(a => a.lead.id === p.id)) {
+      actions.push({
+        type: 'reply',
+        urgency: 'fire',
+        icon: '🔥',
+        lead: p,
+        who: `${p.contact.name} · ${p.contact.title} · ${p.co}`,
+        flag: p.flag,
+        score: p.heat,
+        reason: `Réponse positive reçue ! Préparer un call ASAP.`,
+        exposure: `Exposition: ${p.exp}`,
+        actionLabel: 'Voir la réponse',
+        price: null,
+      });
+    }
+  }
+
+  // Sort by priority: fire > money > bolt
+  const urgencyOrder = { fire: 0, money: 1, bolt: 2 };
+  actions.sort((a,b) => (urgencyOrder[a.urgency] || 9) - (urgencyOrder[b.urgency] || 9) || b.score - a.score);
+
+  // Limit to 5
+  return actions.slice(0, 5);
+}
+
+function buildBriefReason(p) {
+  const parts = [];
+
+  // Timing signals
+  if (p.jobs && p.jobs.length > 0) {
+    parts.push(p.jobs.map(j => j.hint.replace(/Signal: |Señal: |Segnale: |Signaal: /g, '')).join(' + '));
+  }
+
+  // Industry context
+  parts.push(`${p.industry} · ${p.size}`);
+
+  // Tech stack signal
+  if (p.tech && p.tech.length >= 5) {
+    parts.push(`${p.tech.length} outils SaaS dans la stack`);
+  }
+
+  return parts.join('. ') + '.';
+}
+
+function renderBrief() {
+  const panel = document.getElementById('brief-panel');
+  briefActions = buildMorningBrief();
+
+  if (briefActions.length === 0) {
+    panel.innerHTML = `
+      <div class="brief-done">
+        <div class="brief-done-icon">✅</div>
+        <div class="brief-done-title">Tout est envoyé</div>
+        <div class="brief-done-stats">Le système veille. Prochain brief : ${getNextBriefTime()}</div>
+      </div>`;
+    panel.classList.add('visible');
+    return;
+  }
+
+  briefSessionStart = Date.now();
+
+  const now = new Date();
+  const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  // LinkedIn post for today
+  const liPost = generateLinkedInSnippet();
+
+  let html = `
+    <div class="brief-header">
+      <div class="brief-title">
+        <span>📋</span> Brief — ${dateStr}
+      </div>
+      <div class="brief-time">~${Math.max(15, briefActions.length * 15)}s estimées</div>
+    </div>
+    <div class="brief-summary">
+      Le système a préparé <strong>${briefActions.length} action${briefActions.length > 1 ? 's' : ''} prioritaire${briefActions.length > 1 ? 's' : ''}</strong>.
+    </div>
+    <div class="brief-actions" id="brief-actions">`;
+
+  briefActions.forEach((action, i) => {
+    const scoreColor = action.score >= 85 ? 'var(--red)' : action.score >= 65 ? 'var(--gold)' : 'var(--cyan)';
+    html += `
+      <div class="brief-card urgency-${action.urgency}" id="brief-card-${i}" data-idx="${i}">
+        <div class="bc-top">
+          <span class="bc-urgency">${action.icon}</span>
+          <span class="bc-who">${action.who} · ${action.flag}</span>
+          <span class="bc-score" style="color:${scoreColor};border-color:${scoreColor}">Score ${action.score}</span>
+        </div>
+        <div class="bc-reason">${action.reason}</div>
+        <div class="bc-exposure">${action.exposure}${action.price ? ' · Message prêt · ' + action.price : ''}</div>
+        <div class="bc-btns">
+          <button class="bc-btn approve" onclick="briefApproveAction(${i})">${action.actionLabel.toUpperCase()}</button>
+          <button class="bc-btn view" onclick="briefViewMessage(${i})">VOIR LE MESSAGE</button>
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  // LinkedIn post
+  html += `
+    <div class="brief-linkedin">
+      <div class="bl-title">📝 Post LinkedIn du jour</div>
+      <div class="bl-text" id="brief-li-text">${liPost}</div>
+      <button class="bl-copy" onclick="copyLinkedInPost()">📋 Copier le post</button>
+    </div>`;
+
+  html += `<div class="brief-next">Prochain brief : ${getNextBriefTime()}</div>`;
+
+  panel.innerHTML = html;
+  panel.classList.add('visible');
+}
+
+function generateLinkedInSnippet() {
+  const posts = [
+    `Votre stack SaaS cache 15-25% de dépenses fantômes.\n\nJ'ai analysé 200+ entreprises tech en Europe.\nRésultat ? AUCUNE n'avait zéro exposition.\n\nLe problème n'est pas la négligence.\nC'est que personne n'a la visibilité complète.\n\n→ Le CFO voit les factures\n→ L'IT voit les outils\n→ Le Procurement voit les contrats\n→ Personne ne voit l'intersection\n\nGhost Tax connecte ces 3 vues en 48h.\nPas en 6 mois comme les Big 4.\n\n#SaaS #CostOptimization #CFO #GhostTax`,
+    `630€ par jour.\n\nC'est ce que perd en moyenne une scale-up de 300 personnes en abonnements SaaS sous-utilisés.\n\nPas des outils inutiles.\nDes licences en trop.\nDes doublons que personne ne voit.\nDes renouvellements automatiques sans benchmark.\n\nEn 3 semaines, on récupère 15-23% du budget.\nSans couper un seul outil utile.\n\n→ Scan gratuit en 48h\n→ Rapport actionnable\n→ ROI dès le premier mois\n\n#ITCostLeak #SaaSManagement #Finance`,
+    `"On dépense combien en SaaS exactement ?"\n\nQuand un CFO pose cette question, 3 choses se passent :\n\n1. L'IT dit un chiffre\n2. La Finance dit un autre\n3. La réalité est 35% plus élevée\n\nPourquoi ? Parce que les achats shadow IT, les licences héritées et les contrats auto-renouvelés n'apparaissent nulle part.\n\nChez Ghost Tax, on appelle ça l'exposition fantôme.\nEt elle coûte en moyenne 180k-340k EUR/an.\n\n#GhostTax #SaaS #FinOps`,
+  ];
+  return posts[new Date().getDay() % posts.length];
+}
+
+function getNextBriefTime() {
+  const now = new Date();
+  const dow = now.getDay();
+  let nextDay;
+  if (dow === 5) nextDay = 'lundi';
+  else if (dow === 6) nextDay = 'lundi';
+  else if (dow === 0) nextDay = 'lundi';
+  else {
+    const days = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+    nextDay = days[(dow + 1) % 7];
+  }
+  return `${nextDay} 8:25`;
+}
+
+function briefApproveAction(idx) {
+  const action = briefActions[idx];
+  if (!action) return;
+
+  // Show approval overlay
+  showApprovalOverlay(action, idx);
+}
+
+function briefViewMessage(idx) {
+  const action = briefActions[idx];
+  if (!action) return;
+
+  // Select this lead in the main view and scroll to it
+  selectLead(action.lead.id);
+
+  // Show approval overlay with message
+  showApprovalOverlay(action, idx);
+}
+
+function showApprovalOverlay(action, idx) {
+  const overlay = document.getElementById('approval-overlay');
+  const p = action.lead;
+  const msg = getMsg(p, p.seq);
+  const hc = heatColor(p.heat);
+
+  overlay.innerHTML = `
+    <div class="approval-card">
+      <div class="ap-header">
+        <div class="ap-heat">${heatRing(p.heat)}</div>
+        <div class="ap-info">
+          <div class="ap-company">${p.co}</div>
+          <div class="ap-domain">${p.contact.email?.split('@')[1] || p.co.toLowerCase() + '.com'} · ${p.flag} · ${p.industry}</div>
+        </div>
+      </div>
+      <div class="ap-body">
+        <div>
+          <div class="ap-section-title">Pourquoi ce prospect</div>
+          <div class="ap-reason">${action.reason}<br><br><strong>${action.exposure}</strong></div>
+        </div>
+        <div>
+          <div class="ap-section-title">${action.type === 'switch' ? 'Nouveau message LinkedIn' : 'Message préparé'}</div>
+          <div class="ap-message">${msg}</div>
+        </div>
+        <div>
+          <div class="ap-section-title">Quality Gate</div>
+          <div class="ap-quality">
+            <div class="ap-quality-item">
+              <div class="ap-quality-val" style="color:${hc}">${p.heat}</div>
+              <div class="ap-quality-lbl">Heat Score</div>
+            </div>
+            <div class="ap-quality-item">
+              <div class="ap-quality-val" style="color:${p.contact.email ? 'var(--grn)' : 'var(--gold)'}">${p.contact.email ? '✓' : '?'}</div>
+              <div class="ap-quality-lbl">Contact</div>
+            </div>
+            <div class="ap-quality-item">
+              <div class="ap-quality-val" style="color:var(--cyan)">${p.bant ? Math.round((p.bant.budget + p.bant.authority + p.bant.need + p.bant.timing) / 4 * 4) + '%' : '—'}</div>
+              <div class="ap-quality-lbl">BANT</div>
+            </div>
+            <div class="ap-quality-item">
+              <div class="ap-quality-val" style="color:var(--grn)">✓</div>
+              <div class="ap-quality-lbl">Timing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ap-footer">
+        <button class="ap-btn approve" id="ap-approve-btn" onclick="confirmApproval(${idx})">
+          ${action.type === 'switch' ? '✓ APPROUVER LE SWITCH' : action.type === 'hot' ? '✓ VU' : '✓ APPROUVER & ENVOYER'}
+        </button>
+        <button class="ap-btn skip" onclick="skipApproval(${idx})">Passer</button>
+      </div>
+      <div class="ap-shortcut">Espace pour approuver · Échap pour passer</div>
+    </div>`;
+
+  overlay.classList.add('visible');
+
+  // Keyboard shortcuts
+  document.onkeydown = function(e) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      confirmApproval(idx);
+    } else if (e.key === 'Escape') {
+      skipApproval(idx);
+    }
+  };
+}
+
+function confirmApproval(idx) {
+  const action = briefActions[idx];
+  if (!action) return;
+
+  const btn = document.getElementById('ap-approve-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours…';
+  }
+
+  // Simulate API call
+  setTimeout(() => {
+    // Track
+    if (action.type === 'approve' || action.type === 'reply') briefApproved++;
+    else if (action.type === 'switch') briefSwitched++;
+    else briefViewed++;
+
+    // Close overlay
+    closeApprovalOverlay();
+
+    // Show feedback on the card
+    const card = document.getElementById('brief-card-' + idx);
+    if (card) {
+      card.style.opacity = '0.4';
+      card.style.pointerEvents = 'none';
+      card.innerHTML = `<div style="display:flex;align-items:center;gap:8px;color:var(--grn);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em">
+        <span>✓</span> ${action.type === 'approve' ? 'Envoyé à ' + action.lead.contact.email : action.type === 'switch' ? 'Switch LinkedIn programmé' : 'Vu'}
+      </div>`;
+    }
+
+    // Check if all done
+    const remaining = briefActions.filter((_, i) => {
+      const c = document.getElementById('brief-card-' + i);
+      return c && c.style.opacity !== '0.4';
+    });
+
+    if (remaining.length === 0) {
+      showBriefDone();
+    }
+  }, 600);
+}
+
+function skipApproval(idx) {
+  closeApprovalOverlay();
+}
+
+function closeApprovalOverlay() {
+  const overlay = document.getElementById('approval-overlay');
+  overlay.classList.remove('visible');
+  document.onkeydown = null;
+}
+
+function showBriefDone() {
+  const elapsed = briefSessionStart ? Math.round((Date.now() - briefSessionStart) / 1000) : 0;
+  const panel = document.getElementById('brief-panel');
+
+  // Copy LinkedIn post to clipboard
+  const liText = document.getElementById('brief-li-text');
+  if (liText) {
+    navigator.clipboard.writeText(liText.textContent).catch(() => {});
+  }
+
+  panel.innerHTML = `
+    <div class="brief-done">
+      <div class="brief-done-icon">🎯</div>
+      <div class="brief-done-title">Session terminée</div>
+      <div class="brief-done-stats">
+        ${elapsed} secondes · ${briefApproved} approuvé${briefApproved > 1 ? 's' : ''} · ${briefSwitched} switch${briefSwitched > 1 ? 'es' : ''} LinkedIn${briefViewed > 0 ? ' · ' + briefViewed + ' vu' + (briefViewed > 1 ? 's' : '') : ''}
+      </div>
+      <div class="brief-done-stats" style="color:var(--grn);margin-top:6px">📋 Post LinkedIn copié dans le presse-papier</div>
+      <div class="brief-done-next">${getNextBriefTime()}</div>
+    </div>`;
+}
+
+function copyLinkedInPost() {
+  const text = document.getElementById('brief-li-text');
+  if (text) {
+    navigator.clipboard.writeText(text.textContent).then(() => {
+      const btn = event.target;
+      btn.textContent = '✓ COPIÉ !';
+      btn.style.color = 'var(--grn)';
+      btn.style.borderColor = 'var(--grn)';
+      setTimeout(() => {
+        btn.textContent = '📋 COPIER LE POST';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 2000);
+    }).catch(() => {});
+  }
+}
+
+// Toggle brief visibility
+function toggleBrief() {
+  const panel = document.getElementById('brief-panel');
+  panel.classList.toggle('visible');
+}
+
+// ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
 renderLeads();
 selectLead(1);
+renderBrief();
 </script>
+
+<div class="approval-overlay" id="approval-overlay"></div>
+
 </body>
 </html>
