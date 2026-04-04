@@ -495,6 +495,19 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 .ap-btn.skip:hover{border-color:var(--bds);color:var(--t1)}
 .ap-btn:disabled{opacity:.5;cursor:not-allowed}
 .ap-shortcut{text-align:center;font-family:var(--mono);font-size:11px;color:var(--t3);padding:8px 24px 16px}
+
+/* ── MODE TOGGLE ── */
+@keyframes pulse-cyan{0%,100%{box-shadow:0 0 0 0 rgba(0,207,196,.3)}50%{box-shadow:0 0 20px 4px rgba(0,207,196,.1)}}
+.mode-toggle{display:flex;align-items:center;gap:4px;padding:3px;background:var(--s2);border:1px solid var(--bd);border-radius:8px}
+.mode-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--t3);transition:all .15s}
+.mode-btn.active-assisted{background:rgba(240,165,0,.15);border-color:rgba(240,165,0,.3);color:#F0A500}
+.mode-btn.active-auto{background:rgba(0,207,196,.15);border-color:rgba(0,207,196,.4);color:#00CFC4;animation:pulse-cyan 2s infinite}
+.auto-banner{position:fixed;top:52px;left:0;right:0;z-index:99;padding:10px 20px;display:none;align-items:center;gap:10px;background:rgba(0,207,196,.04);border-bottom:1px solid rgba(0,207,196,.15);animation:fade-in .3s ease}
+.auto-banner.visible{display:flex}
+.auto-banner-dot{width:8px;height:8px;border-radius:50%;background:#00CFC4;animation:pulse-grn 1.5s infinite;flex-shrink:0}
+.auto-banner-text{font-family:var(--mono);font-size:11px;color:#00CFC4;flex:1}
+.auto-banner-pause{padding:4px 10px;border-radius:4px;border:1px solid rgba(229,53,74,.3);background:rgba(229,53,74,.08);color:var(--red);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all 140ms}
+.auto-banner-pause:hover{background:rgba(229,53,74,.15)}
 </style>
 </head>
 <body>
@@ -518,10 +531,21 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="tb-stat"><span class="ts-val" style="color:var(--gold)">12</span><span class="ts-lbl">À contacter</span></div>
   </div>
   <div class="tb-right">
-    <div class="tb-sync"><div class="sync-dot"></div>Sync Apollo · il y a 4 min</div>
+    <div class="tb-sync" id="tb-sync"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Sync Apollo · il y a 4 min</span></div>
     <button class="tb-btn" onclick="toggleBrief()" style="margin-right:4px">📋 Brief</button>
-    <button class="tb-btn primary" onclick="showView('apollo')">+ Prospecter</button>
+    <button class="tb-btn primary" id="btn-prospecter" onclick="showView('apollo')">+ Prospecter</button>
+    <div class="mode-toggle">
+      <button class="mode-btn active-assisted" id="mode-assisted" onclick="setMode('assisted')">🟡 ASSISTÉ</button>
+      <button class="mode-btn" id="mode-auto" onclick="setMode('autonomous')">⚡ AUTONOME</button>
+    </div>
   </div>
+</div>
+
+<!-- AUTONOMOUS BANNER -->
+<div class="auto-banner" id="auto-banner">
+  <div class="auto-banner-dot"></div>
+  <span class="auto-banner-text">⚡ MODE AUTONOME — 8 stratégies de chasse · Messages IA 6 couches · Max 10/jour · Cooldown 72h · Le bot travaille pour vous 24/7</span>
+  <button class="auto-banner-pause" onclick="setMode('assisted')">PAUSE</button>
 </div>
 
 <!-- APP BODY -->
@@ -2335,11 +2359,114 @@ function toggleBrief() {
 }
 
 // ════════════════════════════════════════
+// MODE TOGGLE — ASSISTÉ / AUTONOME
+// ════════════════════════════════════════
+let currentMode = localStorage.getItem('gt-mode') || 'assisted';
+
+function setMode(mode) {
+  currentMode = mode;
+  localStorage.setItem('gt-mode', mode);
+  const assistedBtn = document.getElementById('mode-assisted');
+  const autoBtn = document.getElementById('mode-auto');
+  const banner = document.getElementById('auto-banner');
+  const syncDot = document.getElementById('sync-dot');
+  const syncText = document.getElementById('sync-text');
+  const btnProspecter = document.getElementById('btn-prospecter');
+
+  if (mode === 'autonomous') {
+    // Auto button → cyan glow
+    autoBtn.className = 'mode-btn active-auto';
+    assistedBtn.className = 'mode-btn';
+    // Banner visible
+    banner.classList.add('visible');
+    // Sync dot → cyan pulse
+    syncDot.style.background = '#00CFC4';
+    syncText.innerHTML = '⚡ Bot actif · dernière action il y a 2m';
+    // Prospecter → Bot actif
+    btnProspecter.innerHTML = '🤖 Bot actif';
+    btnProspecter.onclick = null;
+    btnProspecter.style.cursor = 'default';
+    btnProspecter.style.borderColor = 'var(--cyan)';
+    btnProspecter.style.color = 'var(--cyan)';
+    // Update brief for autonomous mode
+    updateBriefForMode();
+  } else {
+    // Assisted button → gold
+    assistedBtn.className = 'mode-btn active-assisted';
+    autoBtn.className = 'mode-btn';
+    // Banner hidden
+    banner.classList.remove('visible');
+    // Sync dot → green
+    syncDot.style.background = 'var(--grn)';
+    syncText.innerHTML = 'Sync Apollo · il y a 4 min';
+    // Prospecter → normal
+    btnProspecter.innerHTML = '+ Prospecter';
+    btnProspecter.onclick = function(){ showView('apollo'); };
+    btnProspecter.style.cursor = 'pointer';
+    btnProspecter.style.borderColor = 'var(--cyan)';
+    btnProspecter.style.color = 'var(--cyan)';
+    // Update brief for assisted mode
+    updateBriefForMode();
+  }
+}
+
+function updateBriefForMode() {
+  const panel = document.getElementById('brief-panel');
+  if (!panel || !panel.classList.contains('visible')) return;
+
+  if (currentMode === 'autonomous') {
+    // In autonomous mode, show bot activity summary
+    const autoSent = prospects.filter(p => p.heat >= 80 && p.seqStep === 0).slice(0, 3);
+    const followUps = prospects.filter(p => p.seqStep >= 1 && p.seqStep <= 2).length;
+    const newProspects = prospects.filter(p => p.src === 'apollo' && p.heat >= 60).length;
+
+    // Add autonomous header at top of brief
+    let autoHeader = document.getElementById('brief-auto-header');
+    if (!autoHeader) {
+      autoHeader = document.createElement('div');
+      autoHeader.id = 'brief-auto-header';
+      autoHeader.style.cssText = 'padding:14px;background:rgba(0,207,196,.04);border:1px solid rgba(0,207,196,.12);border-radius:8px;margin-bottom:4px';
+      const briefActions = panel.querySelector('.brief-actions');
+      if (briefActions) briefActions.before(autoHeader);
+      else panel.prepend(autoHeader);
+    }
+
+    let autoLines = `<div style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px">⚡ MODE AUTONOME</div>`;
+    autoLines += `<div style="font-size:12px;color:var(--t2);line-height:1.8">`;
+    autoLines += `Le bot a envoyé <strong style="color:var(--cyan)">${autoSent.length}</strong> emails ce matin. `;
+    autoLines += `<strong style="color:var(--gold)">${followUps}</strong> follow-ups programmés. `;
+    autoLines += `<strong style="color:var(--grn)">${newProspects}</strong> nouveaux prospects trouvés.<br>`;
+    autoLines += `Aucune intervention requise.</div>`;
+
+    if (autoSent.length > 0) {
+      autoLines += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">`;
+      const hour = 8;
+      autoSent.forEach((p, i) => {
+        autoLines += `<div style="font-family:var(--mono);font-size:11px;color:var(--grn);display:flex;align-items:center;gap:6px">
+          <span>✅</span>
+          <span style="color:var(--t3)">0${hour}:${31+i}</span>
+          Auto-envoyé → ${p.contact.name.split(' ')[0].charAt(0)}.${p.contact.name.split(' ').pop()} (${p.co}) · Score ${p.heat}
+        </div>`;
+      });
+      autoLines += `</div>`;
+    }
+
+    autoHeader.innerHTML = autoLines;
+  } else {
+    // Remove autonomous header
+    const autoHeader = document.getElementById('brief-auto-header');
+    if (autoHeader) autoHeader.remove();
+  }
+}
+
+// ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
 renderLeads();
 selectLead(1);
 renderBrief();
+// Restore mode from localStorage
+if (currentMode === 'autonomous') setMode('autonomous');
 </script>
 
 <div class="approval-overlay" id="approval-overlay"></div>
