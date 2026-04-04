@@ -530,6 +530,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="tb-stat"><span class="ts-val" style="color:var(--gold)">12</span><span class="ts-lbl">À contacter</span></div>
   </div>
   <div class="tb-right">
+    <div id="live-clock" style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.06em;margin-right:8px;min-width:170px"></div>
     <div class="tb-sync" id="tb-sync"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Sync Apollo · il y a 4 min</span></div>
     <button class="tb-btn" onclick="toggleBrief()" style="margin-right:4px">📋 Brief</button>
     <button class="tb-btn primary" id="btn-prospecter" onclick="showView('apollo')">+ Prospecter</button>
@@ -2482,6 +2483,86 @@ function updateBriefForMode() {
     if (autoHeader) autoHeader.remove();
   }
 }
+
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+// HORLOGE TEMPS RÉEL + INTELLIGENCE TEMPORELLE
+// ════════════════════════════════════════
+
+const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function updateLiveClock() {
+  const now = new Date();
+  const dow = now.getDay();
+  const jour = JOURS[dow];
+  const date = now.getDate();
+  const mois = MOIS[now.getMonth()];
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  const isWeekend = dow === 0 || dow === 6;
+  const isFriday = dow === 5;
+
+  // Fenêtre d'envoi
+  const hour = now.getHours();
+  const inWindow = !isWeekend && ((hour >= 8 && hour < 10) || (hour >= 14 && hour < 15));
+  const windowLabel = inWindow
+    ? '🟢 Fenêtre active'
+    : isWeekend
+    ? '🔴 Week-end'
+    : hour < 8
+    ? '⏳ Fenêtre à 08:30'
+    : hour >= 15
+    ? '🔴 Fenêtre fermée'
+    : '🟡 Prochaine : 14:00';
+
+  const el = document.getElementById('live-clock');
+  if (el) {
+    el.innerHTML = `${jour} ${date} ${mois} · <span style="color:var(--cyan)">${h}:${m}:${s}</span> · <span style="font-size:9px;${isWeekend?'color:var(--red)':inWindow?'color:var(--grn)':'color:var(--gold)'}">${windowLabel}</span>`;
+  }
+}
+
+// Mettre à jour chaque seconde
+updateLiveClock();
+setInterval(updateLiveClock, 1000);
+
+// Corriger les dates de la queue selon le vrai jour
+function fixQueueDates() {
+  const now = new Date();
+  const dow = now.getDay();
+  const isWeekend = dow === 0 || dow === 6;
+  const isFriday = dow === 5;
+
+  // Trouver le prochain jour ouvré
+  function nextBusinessDay(fromDate) {
+    const d = new Date(fromDate);
+    d.setDate(d.getDate() + 1);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  const today = new Date();
+  const nextBiz = nextBusinessDay(today);
+  const nextBizLabel = `${JOURS[nextBiz.getDay()]} ${nextBiz.getDate()} ${MOIS[nextBiz.getMonth()]}`;
+
+  // Mettre à jour les items de la queue
+  if (typeof queue !== 'undefined') {
+    for (const q of queue) {
+      if (isWeekend) {
+        // Pas d'actions le week-end — tout reporté à lundi
+        q.time = `${nextBizLabel} · 09h00`;
+        q.urgent = false;
+      } else if (q.time.includes('Demain') && isFriday) {
+        // Si c'est vendredi et "demain" = samedi → reporter à lundi
+        q.time = `Lundi ${nextBiz.getDate()} ${MOIS[nextBiz.getMonth()]} · 09h00`;
+        q.urgent = false;
+      }
+    }
+  }
+}
+
+fixQueueDates();
 
 // ════════════════════════════════════════
 // INIT
