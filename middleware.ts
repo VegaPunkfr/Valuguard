@@ -167,7 +167,18 @@ export function middleware(request: NextRequest) {
   }
 
   // ── 8. Protect command endpoints ────────────────────────────
-  if (pathname.startsWith("/api/command/")) {
+  // Routes cockpit accessibles sans auth (appelées depuis cockpit-v3.html)
+  const cockpitOpenRoutes = [
+    "/api/command/auto-pipeline",
+    "/api/command/generate-message",
+    "/api/command/send-approved",
+    "/api/command/apollo-sync",
+    "/api/command/apollo-enrich",
+    "/api/command/notify",
+  ];
+  const isCockpitRoute = cockpitOpenRoutes.some(r => pathname.startsWith(r));
+
+  if (pathname.startsWith("/api/command/") && !isCockpitRoute) {
     const secret = process.env.COMMAND_SECRET;
     if (!secret) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
