@@ -1614,8 +1614,8 @@ function renderActionPanel(p){
         ${tmpl}
       </div>
       <div class="msg-actions">
+        <button class="msg-btn" onclick="generateAIMsg(${p.id})" style="border-color:rgba(139,92,246,.2);color:var(--vio)">🤖 IA</button>
         <button class="msg-btn" onclick="editMsg()">Éditer</button>
-        <button class="msg-btn" onclick="schedMsg(${p.id})">Planifier</button>
         <button class="msg-btn send" onclick="sendMsg(${p.id})">→ Envoyer</button>
       </div>
     </div>
@@ -2139,14 +2139,63 @@ function execAction(id){
   setTimeout(()=>renderActionPanel(p), 800);
 }
 
-function sendMsg(id){
+async function sendMsg(id){
   const p = prospects.find(x=>x.id===id);
   if(!p) return;
   const btn = event.target;
-  btn.textContent = '✓ Envoyé';
-  btn.style.background = 'rgba(0,201,141,0.15)';
-  btn.style.borderColor = 'rgba(0,201,141,0.3)';
-  btn.style.color = 'var(--grn)';
+  const msgEl = document.getElementById('msg-preview');
+  const body = msgEl?.innerText || msgEl?.textContent || '';
+
+  if (activeChan === 'email' && p.contact.email) {
+    // ENVOI RÉEL via Resend
+    btn.textContent = '⏳ Envoi...';
+    btn.style.opacity = '0.6';
+    try {
+      const res = await fetch('/api/command/send-approved', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: p.contact.email,
+          subject: (msgEl?.dataset?.subject) || (p.domain + ' — Ghost Tax'),
+          textBody: body,
+          domain: p.domain,
+          prospectId: String(id),
+        }),
+      });
+      if (res.ok) {
+        btn.textContent = '✓ Envoyé à ' + p.contact.email;
+        btn.style.background = 'rgba(0,201,141,0.15)';
+        btn.style.borderColor = 'rgba(0,201,141,0.3)';
+        btn.style.color = 'var(--grn)';
+      } else {
+        btn.textContent = '✗ Erreur envoi';
+        btn.style.color = 'var(--red)';
+      }
+    } catch(e) {
+      btn.textContent = '✗ Erreur réseau';
+      btn.style.color = 'var(--red)';
+    }
+    btn.style.opacity = '1';
+    setTimeout(() => { btn.textContent = '→ Envoyer'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }, 4000);
+
+  } else if (activeChan === 'linkedin' && p.contact.li) {
+    // LINKEDIN : copier + ouvrir profil
+    try { await navigator.clipboard.writeText(body); } catch {
+      const ta = document.createElement('textarea');
+      ta.value = body; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    window.open('https://linkedin.com/' + p.contact.li, '_blank');
+    btn.textContent = '📋 Copié ! Collez sur LinkedIn';
+    btn.style.background = 'rgba(59,130,246,0.15)';
+    btn.style.color = 'var(--blue)';
+    setTimeout(() => { btn.textContent = '→ Envoyer'; btn.style.background = ''; btn.style.color = ''; }, 4000);
+
+  } else {
+    btn.textContent = '⚠️ Pas d\'email/LinkedIn';
+    btn.style.color = 'var(--gold)';
+    setTimeout(() => { btn.textContent = '→ Envoyer'; btn.style.color = ''; }, 3000);
+  }
 }
 
 function schedMsg(id){
@@ -2154,6 +2203,53 @@ function schedMsg(id){
   btn.textContent = '✓ Planifié';
   btn.style.borderColor = 'rgba(0,207,196,.2)';
   btn.style.color = 'var(--cyan)';
+}
+
+async function generateAIMsg(id){
+  const p = prospects.find(x=>x.id===id);
+  if(!p) return;
+  const preview = document.getElementById('msg-preview');
+
+  // Skeleton loader
+  preview.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px">' +
+    [80,60,70,50,65].map(w => `<div style="height:11px;width:${w}%;background:rgba(139,92,246,.08);border-radius:3px;animation:gt-shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,rgba(139,92,246,.04) 0%,rgba(139,92,246,.12) 50%,rgba(139,92,246,.04) 100%)"></div>`).join('') +
+    '<div style="font-family:var(--mono);font-size:10px;color:var(--vio);margin-top:4px;animation:pulse-c 1.5s infinite">🤖 Génération du message IA...</div></div>';
+
+  try {
+    const country = p.flag === '🇩🇪' ? 'DE' : p.flag === '🇳🇱' ? 'NL' : p.flag === '🇬🇧' ? 'UK' : p.flag === '🇺🇸' ? 'US' : 'DE';
+    const res = await fetch('/api/command/generate-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prospect: {
+          firstName: p.contact.name.split(' ')[0] || '',
+          lastName: p.contact.name.split(' ').slice(1).join(' ') || '',
+          title: p.contact.title || 'CFO',
+          company: p.co,
+          domain: p.domain || '',
+          country: country,
+          headcount: parseInt(p.size) || 200,
+          industry: p.industry?.split('·')[0]?.trim() || 'Technology',
+        },
+        channel: activeChan === 'linkedin' ? 'linkedin_dm' : 'email',
+        sequenceStep: 'M1',
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      preview.innerHTML = data.body || 'Erreur de génération';
+      preview.contentEditable = 'true';
+      preview.dataset.subject = data.subject || '';
+      preview.dataset.price = data.price || '490';
+      preview.style.borderColor = 'rgba(139,92,246,.2)';
+    } else {
+      preview.innerHTML = '<span style="color:var(--red)">Erreur API — message non généré</span>';
+    }
+  } catch(e) {
+    preview.innerHTML = '<span style="color:var(--red)">Erreur réseau — vérifiez la connexion</span>';
+    console.error('AI message error:', e);
+  }
 }
 
 function editMsg(){
@@ -2185,18 +2281,100 @@ function toggleTag(el){
   el.classList.toggle('sel');
 }
 
-function runApolloSearch(){
+async function runApolloSearch(){
   const btn = event.target;
-  btn.textContent = '⟳ Recherche en cours…';
+  btn.textContent = '⟳ Recherche Apollo en cours…';
   btn.style.opacity = '.6';
-  setTimeout(()=>{
-    btn.textContent = '✓ 142 résultats · Filtrés';
-    btn.style.opacity = '1';
-    btn.style.background = 'rgba(0,207,196,.08)';
-    btn.style.borderColor = 'rgba(0,207,196,.2)';
-    btn.style.color = 'var(--cyan)';
-    renderApolloResults();
-  }, 1200);
+
+  try {
+    // Appel RÉEL à l'API Apollo via auto-pipeline
+    const strategies = ['icp_hunter','signal_hunter','event_hunter','tech_stack_hunter'];
+    const dow = new Date().getDay();
+    const strategy = dow >= 1 && dow <= 3 ? 'icp_hunter' : dow === 4 ? 'tech_stack_hunter' : 'signal_hunter';
+
+    const res = await fetch('/api/command/auto-pipeline?strategy=' + strategy);
+
+    if (res.ok) {
+      const data = await res.json();
+      const results = data.results || [];
+
+      if (results.length > 0) {
+        // Convertir les résultats Apollo en format cockpit
+        apolloResults = results.map((r, i) => ({
+          co: r.company || r.domain,
+          icon: (r.company || 'XX').substring(0, 2).toUpperCase(),
+          industry: r.industry || 'Technology',
+          size: (r.headcount || '?') + ' sal.',
+          revenue: r.exposure ? '€' + Math.round(r.exposure/1000) + 'K exp.' : '—',
+          contact: (r.financeLead?.name || '—') + ' · ' + (r.financeLead?.title || 'CFO'),
+          signal: r.timing?.signal?.replace(/_/g, ' ') || 'ICP match',
+          score: r.score || 65,
+          domain: r.domain,
+          email: r.financeLead?.email,
+          linkedin: r.financeLead?.linkedinUrl,
+        }));
+
+        btn.textContent = '✓ ' + results.length + ' prospects trouvés · ' + strategy.replace(/_/g, ' ');
+        btn.style.background = 'rgba(0,207,196,.08)';
+        btn.style.borderColor = 'rgba(0,207,196,.2)';
+        btn.style.color = 'var(--cyan)';
+
+        // Aussi ajouter au pipeline principal
+        for (const r of results) {
+          if (!prospects.find(p => p.domain === r.domain)) {
+            const newId = prospects.length + 1;
+            prospects.push({
+              id: newId,
+              co: r.company || r.domain,
+              domain: r.domain || '',
+              flag: r.country === 'DE' ? '🇩🇪' : r.country === 'NL' ? '🇳🇱' : r.country === 'UK' ? '🇬🇧' : '🌍',
+              heat: r.score || 65,
+              src: 'apollo',
+              stage: 'New · Apollo',
+              exp: r.exposure ? '€' + Math.round(r.exposure/1000) + 'K' : '—',
+              industry: r.industry || 'Technology · SaaS',
+              size: (r.headcount || '?') + ' sal.',
+              revenue: '—',
+              tech: [],
+              jobs: [],
+              contact: {
+                name: r.financeLead?.name || '—',
+                title: r.financeLead?.title || 'CFO',
+                email: r.financeLead?.email || '',
+                phone: '',
+                li: r.financeLead?.linkedinUrl?.replace('https://linkedin.com/','') || '',
+              },
+              bant: { budget: 15, authority: 12, need: 14, timing: 10 },
+              timeline: [{ event: 'Trouvé par Apollo Bot · ' + strategy.replace(/_/g,' '), time: 'Maintenant', color: 'var(--vio)' }],
+              lang: r.country === 'DE' ? 'de' : r.country === 'NL' ? 'nl' : 'en',
+              seqStep: 0,
+              seq: 'Ghost Tax Rail A – Outbound',
+              campaign: 'Ghost Tax Rail A',
+              revenueEstimate: r.exposure || 200000,
+            });
+          }
+        }
+        renderLeads();
+      } else {
+        btn.textContent = '⚠️ 0 résultats — essayez un autre filtre';
+        btn.style.color = 'var(--gold)';
+      }
+    } else {
+      btn.textContent = '✗ Erreur API Apollo';
+      btn.style.color = 'var(--red)';
+    }
+  } catch(e) {
+    btn.textContent = '✗ Erreur réseau';
+    btn.style.color = 'var(--red)';
+    console.error('Apollo search error:', e);
+  }
+
+  btn.style.opacity = '1';
+  renderApolloResults();
+  setTimeout(() => {
+    btn.textContent = '⟳ Lancer la recherche Apollo';
+    btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+  }, 5000);
 }
 
 function toggleApoResult(i, el){
@@ -2209,7 +2387,32 @@ function toggleApoResult(i, el){
   document.getElementById('bulk-count').textContent = `${selectedApoResults.size} sélectionné${selectedApoResults.size>1?'s':''}`;
 }
 
-function enrichResult(co){ comingSoon(event.target); }
+async function enrichResult(co){
+  const btn = event.target;
+  btn.textContent = '⟳ Enrichissement...';
+  btn.style.opacity = '.6';
+  try {
+    // Appel réel Apollo enrich
+    const res = await fetch('/api/command/apollo-enrich', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: co.toLowerCase().replace(/[^a-z0-9]/g,'') + '.com' }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      btn.textContent = '✓ ' + (data.committee_size || 0) + ' contacts';
+      btn.style.color = 'var(--grn)';
+    } else {
+      btn.textContent = '✗ Erreur';
+      btn.style.color = 'var(--red)';
+    }
+  } catch {
+    btn.textContent = '✗ Réseau';
+    btn.style.color = 'var(--red)';
+  }
+  btn.style.opacity = '1';
+  setTimeout(() => { btn.textContent = 'Enrichir'; btn.style.color = ''; }, 4000);
+}
 function addToPipeline(co){ comingSoon(event.target); }
 function bulkEnrich(){ comingSoon(event.target); }
 function bulkCampaign(){ comingSoon(event.target); }
