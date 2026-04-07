@@ -52,6 +52,7 @@
  */
 
 import { createAdminSupabase } from "@/lib/supabase";
+import { isInSendWindow, describeSendWindow } from "@/lib/send-window";
 import { scoreLeadFromVaultSession } from "@/lib/lead-scoring";
 import { generateReferralCode } from "@/lib/referral";
 
@@ -747,7 +748,24 @@ function emptyResult(stage: string, start: number): EngineResult {
   return { stage, processed: 0, sent: 0, skipped: 0, errors: 0, details: [], durationMs: Date.now() - start };
 }
 
-async function sendEmail(to: string, opts: { subject: string; html: string; tags: Array<{ name: string; value: string }> }): Promise<{ ok: boolean; error?: string }> {
+async function sendEmail(to: string, opts: {
+  subject: string;
+  html: string;
+  tags: Array<{ name: string; value: string }>;
+  geoMarket?: string | null;
+  locale?: string | null;
+  domain?: string | null;
+}): Promise<{ ok: boolean; error?: string }> {
+  // ── Timezone-aware send window guard ──
+  // Skip if recipient is NOT in Tue-Thu 9:30-11:30 local time
+  // Exception: payment_recovery emails bypass the window (urgent)
+  const isRecovery = opts.tags?.some(t => t.value === "payment_recovery");
+  if (!isRecovery && !isInSendWindow(opts.geoMarket, opts.locale, opts.domain)) {
+    const windowInfo = describeSendWindow(opts.geoMarket, opts.locale, opts.domain);
+    console.log(`[Flywheel] Blocked send to ${to} — outside send window (${windowInfo})`);
+    return { ok: false, error: `Outside send window: ${windowInfo}` };
+  }
+
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

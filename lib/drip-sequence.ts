@@ -33,6 +33,11 @@ import {
   type PricingLocale,
 } from "@/lib/pricing";
 import { generateViralEmailBlock } from "@/lib/viral-loop";
+import {
+  isInSendWindow,
+  snapToNextSendWindow,
+  describeSendWindow,
+} from "@/lib/send-window";
 import * as crypto from "crypto";
 
 // ── Types ─────────────────────────────────────────────
@@ -186,6 +191,33 @@ export async function runDripSequence(): Promise<DripResult> {
       continue;
     }
 
+    // ── Timezone-aware send window check ──
+    // Only send if recipient is in Tue-Thu 9:30-11:30 local time
+    const geoMarket = (lead as any).geo_market ?? null;
+    if (!isInSendWindow(geoMarket, lead.locale, lead.domain)) {
+      // Not in window — reschedule to next valid window, don't send now
+      const nextWindow = snapToNextSendWindow(
+        new Date(),
+        geoMarket,
+        lead.locale,
+        lead.domain,
+      );
+      await (db as any)
+        .from("outreach_leads")
+        .update({ next_send_at: nextWindow.toISOString(), updated_at: now })
+        .eq("id", lead.id);
+
+      result.skipped++;
+      result.details.push({
+        email: lead.email,
+        company: lead.company || lead.domain || "Unknown",
+        touch: nextTouch,
+        action: "skipped_not_due" as const,
+      });
+      console.log(`[Drip] Skipped ${lead.email} — outside send window (${describeSendWindow(geoMarket, lead.locale, lead.domain)}). Rescheduled to ${nextWindow.toISOString()}`);
+      continue;
+    }
+
     const company = lead.company || lead.domain || "your company";
     const locale = detectLocale(lead);
     const price = getRailAPrice(lead.headcount ?? undefined, locale);
@@ -237,9 +269,15 @@ export async function runDripSequence(): Promise<DripResult> {
         console.log(`[Drip Sequence] [DRY RUN] Would send touch ${nextTouch} to ${lead.email}`);
       }
 
-      // Update lead: advance drip_step, set next_send_at
+      // Update lead: advance drip_step, set next_send_at (timezone-aware)
       const nextStep = nextTouch;
-      const { nextSendAt } = calculateDripSchedule(lead.created_at, nextStep);
+      const { nextSendAt } = calculateDripSchedule(
+        lead.created_at,
+        nextStep,
+        (lead as any).geo_market,
+        lead.locale,
+        lead.domain,
+      );
 
       await (db as any)
         .from("outreach_leads")
@@ -279,7 +317,10 @@ export async function runDripSequence(): Promise<DripResult> {
 
 export function calculateDripSchedule(
   createdAt: string,
-  currentStep: number
+  currentStep: number,
+  geoMarket?: string | null,
+  locale?: string | null,
+  domain?: string | null,
 ): { nextSendAt: string; nextTouch: number | null } {
   const nextTouch = currentStep + 1;
   if (nextTouch > 5) {
@@ -297,8 +338,16 @@ export function calculateDripSchedule(
   // If computed time is in the past, send next run
   const effectiveMs = Math.max(nextSendMs, Date.now());
 
+  // Snap to next valid send window (Tue/Wed/Thu, 10:00 local time)
+  const snapped = snapToNextSendWindow(
+    new Date(effectiveMs),
+    geoMarket,
+    locale,
+    domain,
+  );
+
   return {
-    nextSendAt: new Date(effectiveMs).toISOString(),
+    nextSendAt: snapped.toISOString(),
     nextTouch,
   };
 }
