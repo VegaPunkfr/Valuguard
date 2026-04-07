@@ -125,7 +125,7 @@ export async function runDripSequence(): Promise<DripResult> {
     .select("*")
     .eq("unsubscribed", false)
     .eq("converted", false)
-    .eq("status", "active")
+    .in("status", ["active", "new"])
     .lt("drip_step", 5)
     .lte("next_send_at", now)
     .order("next_send_at", { ascending: true })
