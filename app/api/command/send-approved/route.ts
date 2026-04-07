@@ -11,11 +11,42 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+// ── Rate limiting: 50/hour per IP, 200/day total ──
+const emailRateMap = new Map<string, { count: number; reset: number }>();
+let dailyTotal = 0;
+let dailyReset = Date.now() + 86_400_000;
+
+function checkEmailRateLimit(ip: string): { allowed: boolean; reason?: string } {
+  const now = Date.now();
+  if (now > dailyReset) { dailyTotal = 0; dailyReset = now + 86_400_000; }
+  if (dailyTotal >= 200) return { allowed: false, reason: 'Daily email limit reached (200)' };
+  const entry = emailRateMap.get(ip);
+  if (!entry || now > entry.reset) {
+    emailRateMap.set(ip, { count: 1, reset: now + 3_600_000 });
+    dailyTotal++;
+    return { allowed: true };
+  }
+  if (entry.count >= 50) return { allowed: false, reason: 'Hourly email limit reached (50/ip)' };
+  entry.count++;
+  dailyTotal++;
+  return { allowed: true };
+}
+
 export async function POST(req: NextRequest) {
-  const key = req.headers.get('x-command-key') || '';
-  const secret = process.env.CRON_SECRET || process.env.COMMAND_KEY || '';
-  // If a secret is configured, require it. If not, allow cockpit access.
-  if (secret && key !== secret) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const rl = checkEmailRateLimit(ip);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: rl.reason }, { status: 429, headers: { 'Retry-After': '3600' } });
+  }
+
+  const key = req.headers.get('x-command-key') || req.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const commandSecret = process.env.COMMAND_SECRET || '';
+  const cronSecret = process.env.CRON_SECRET || '';
+  // SECURITY FIX 2026-04-06: Refuse by default if no secret configured
+  if (!commandSecret && !cronSecret) {
+    return NextResponse.json({ error: 'COMMAND_SECRET not configured — email sending disabled' }, { status: 503 });
+  }
+  if (key !== commandSecret && key !== cronSecret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

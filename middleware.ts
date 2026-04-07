@@ -167,18 +167,10 @@ export function middleware(request: NextRequest) {
   }
 
   // ── 8. Protect command endpoints ────────────────────────────
-  // Routes cockpit accessibles sans auth (appelées depuis cockpit-v3.html)
-  const cockpitOpenRoutes = [
-    "/api/command/auto-pipeline",
-    "/api/command/generate-message",
-    "/api/command/send-approved",
-    "/api/command/apollo-sync",
-    "/api/command/apollo-enrich",
-    "/api/command/notify",
-  ];
-  const isCockpitRoute = cockpitOpenRoutes.some(r => pathname.startsWith(r));
+  // SECURITY FIX 2026-04-06: ALL command routes now require auth.
+  // cockpit-v3.html must send x-command-key header or COMMAND_SECRET.
 
-  if (pathname.startsWith("/api/command/") && !isCockpitRoute) {
+  if (pathname.startsWith("/api/command/")) {
     const secret = process.env.COMMAND_SECRET;
     if (!secret) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -186,15 +178,25 @@ export function middleware(request: NextRequest) {
 
     const authHeader = request.headers.get("authorization");
     const bearerToken = authHeader?.replace("Bearer ", "");
+    const commandKey = request.headers.get("x-command-key");
     const queryKey = request.nextUrl.searchParams.get("key");
     const cookieKey = request.cookies.get("gt-command-key")?.value;
 
     const hasValidBearer = bearerToken ? timingSafeEqual(bearerToken, secret) : false;
+    const hasValidCommand = commandKey ? timingSafeEqual(commandKey, secret) : false;
     const hasValidQuery = queryKey ? timingSafeEqual(queryKey, secret) : false;
     const hasValidCookie = cookieKey ? timingSafeEqual(cookieKey, secret) : false;
 
-    if (!hasValidBearer && !hasValidQuery && !hasValidCookie) {
+    if (!hasValidBearer && !hasValidCommand && !hasValidQuery && !hasValidCookie) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
+  // ── 8b. Protect cockpit HTML — require session cookie ──────────
+  if (pathname === "/cockpit-v4.html") {
+    const sessionCookie = request.cookies.get("gt-session")?.value;
+    if (sessionCookie !== "1") {
+      return NextResponse.redirect(new URL("/cockpit", request.url));
     }
   }
 

@@ -27,14 +27,15 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   opacity:.025;mix-blend-mode:overlay}
 
 /* ── TOPBAR ── */
-.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;background:var(--s1);border-bottom:1px solid var(--bd);z-index:100;position:relative}
+.topbar{height:52px;flex-shrink:0;display:flex;align-items:center;background:var(--s1);border-bottom:1px solid var(--bd);z-index:100;position:relative;overflow:hidden}
 .tb-logo{width:var(--nav);height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--bd)}
-.tb-stats{display:flex;align-items:stretch;flex:1;overflow:hidden}
-.tb-stat{display:flex;align-items:baseline;gap:5px;padding:0 18px;border-right:1px solid var(--bd);cursor:default}
+.tb-stats{display:flex;align-items:center;gap:0;flex-shrink:1;min-width:0}
+.tb-stat{display:flex;flex-direction:column;align-items:center;padding:4px 14px;border-right:1px solid var(--bd);cursor:default;white-space:nowrap}
+.tb-stat:last-child{border-right:none}
 .tb-stat:hover{background:rgba(255,255,255,.02)}
-.ts-val{font-family:var(--disp);font-size:20px;letter-spacing:.03em;line-height:1}
-.ts-lbl{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
-.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;margin-left:auto;border-left:1px solid var(--bd)}
+.ts-val{font-family:var(--disp);font-size:15px;letter-spacing:.03em;line-height:1.2}
+.ts-lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.tb-right{display:flex;align-items:center;gap:6px;padding:0 10px;margin-left:auto;flex-shrink:0;border-left:1px solid var(--bd)}
 .tb-sync{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:5px}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse-grn 2s infinite}
 @keyframes pulse-grn{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,201,141,.4)}50%{opacity:.8;box-shadow:0 0 0 4px rgba(0,201,141,0)}}
@@ -638,25 +639,25 @@ input[type=range].tr-slider::-webkit-slider-thumb:hover{box-shadow:0 0 16px rgba
       <rect x="21" y="5" width="3" height="18" rx="1" fill="#00CFC4"/>
     </svg>
   </div>
-  <div class="tb-stats">
-    <div class="tb-stat"><span class="ts-val" style="color:var(--cyan)">€2.14M</span><span class="ts-lbl">Pipeline</span></div>
-    <div class="tb-stat"><span class="ts-val" style="color:var(--red)">23</span><span class="ts-lbl">Hot leads</span></div>
-    <div class="tb-stat"><span class="ts-val" style="color:var(--grn)">€18.4K</span><span class="ts-lbl">MRR</span></div>
-    <div class="tb-stat"><span class="ts-val">35</span><span class="ts-lbl">Prospects</span></div>
-    <div class="tb-stat"><span class="ts-val" style="color:var(--gold)">12</span><span class="ts-lbl">À contacter</span></div>
+  <div class="tb-stats" id="tb-stats">
+    <div class="tb-stat"><span class="ts-val" style="color:var(--cyan)" id="tb-exposure">—</span><span class="ts-lbl">Exposition totale</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--red)" id="tb-hot">—</span><span class="ts-lbl">Hot (≥80)</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--grn)" id="tb-reply-rate">—</span><span class="ts-lbl">Taux réponse</span></div>
+    <div class="tb-stat"><span class="ts-val" id="tb-total">—</span><span class="ts-lbl">Prospects</span></div>
+    <div class="tb-stat"><span class="ts-val" style="color:var(--gold)" id="tb-queue">—</span><span class="ts-lbl">En queue</span></div>
   </div>
   <div class="tb-right">
-    <div id="live-clock" style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.06em;margin-right:8px;min-width:170px"></div>
-    <div class="tb-sync" id="tb-sync"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Sync Apollo · il y a 4 min</span></div>
-    <button class="tb-btn" onclick="toggleBrief()" style="margin-right:4px">📋 Brief</button>
+    <div id="live-clock" style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.04em;white-space:nowrap"></div>
+    <div class="tb-sync" id="tb-sync" style="display:flex;align-items:center;gap:4px"><div class="sync-dot" id="sync-dot"></div><span id="sync-text" style="font-size:10px;white-space:nowrap">Sync Apollo · il y a 4 min</span></div>
+    <button class="tb-btn" onclick="toggleBrief()" title="Morning Brief">📋</button>
     <button class="tb-btn primary" id="btn-prospecter" onclick="showView('apollo')">+ Prospecter</button>
     <div class="auto-badge" id="auto-badge" onclick="setMode('assisted')" title="Cliquer pour désactiver le mode autonome">
       <div class="auto-badge-dot"></div>
-      <span class="auto-badge-text">⚡ Bot actif</span>
+      <span class="auto-badge-text">⚡</span>
     </div>
-    <div class="mode-toggle">
-      <button class="mode-btn active-assisted" id="mode-assisted" onclick="setMode('assisted')">🟡 ASSISTÉ</button>
-      <button class="mode-btn" id="mode-auto" onclick="setMode('autonomous')">⚡ AUTONOME</button>
+    <div class="mode-toggle" style="display:flex;gap:2px">
+      <button class="mode-btn active-assisted" id="mode-assisted" onclick="setMode('assisted')" style="padding:4px 8px;font-size:10px">ASSISTÉ</button>
+      <button class="mode-btn" id="mode-auto" onclick="setMode('autonomous')" style="padding:4px 8px;font-size:10px">AUTO</button>
     </div>
   </div>
 </div>
@@ -685,7 +686,7 @@ input[type=range].tr-slider::-webkit-slider-thumb:hover{box-shadow:0 0 16px rgba
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18" stroke-linecap="round"/><path d="M7 16l4-8 4 4 5-9" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="nav-sep"></div>
-    <div class="nav-item" title="Paramètres" onclick="comingSoon(this)">
+    <div class="nav-item" data-view="settings" onclick="showView('settings')" title="Paramètres">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
     </div>
   </nav>
@@ -932,7 +933,7 @@ input[type=range].tr-slider::-webkit-slider-thumb:hover{box-shadow:0 0 16px rgba
             <div class="pe-footer">
               <span class="pe-chars" id="li-chars">0 / 3 000 caractères</span>
               <div class="pe-actions">
-                <button class="pe-btn" onclick="saveDraft()">Sauvegarder brouillon</button>
+                <button class="pe-btn" onclick="copyLiPost(this)">📋 Copier le post</button>
                 <button class="pe-btn publish" onclick="schedulePost()">Planifier →</button>
               </div>
             </div>
@@ -967,43 +968,21 @@ input[type=range].tr-slider::-webkit-slider-thumb:hover{box-shadow:0 0 16px rgba
         <!-- ── COL RIGHT : Premium Intelligence ── -->
         <div class="li-col li-col-right">
 
-          <!-- InMail credits -->
-          <div class="inmail-bar">
-            <div style="font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">InMail Premium · Avril 2026</div>
-            <div class="im-ring">
-              <svg viewBox="0 0 64 64">
-                <circle class="ring-bg" cx="32" cy="32" r="28"/>
-                <circle class="ring-fg" cx="32" cy="32" r="28" id="li-inmail-ring"
-                  stroke-dasharray="175.9" stroke-dashoffset="41"/>
-              </svg>
-              <div class="im-center">
-                <div class="im-val" id="li-inmail-left">23</div>
-                <div class="im-sub">restants</div>
-              </div>
-            </div>
-            <div class="im-stats">
-              <div class="im-stat"><div class="im-stat-val">7</div><div class="im-stat-lbl">Envoyés</div></div>
-              <div class="im-stat"><div class="im-stat-val" style="color:var(--grn)">3</div><div class="im-stat-lbl">Réponses</div></div>
-              <div class="im-stat"><div class="im-stat-val" style="color:var(--gold)">43%</div><div class="im-stat-lbl">Taux</div></div>
-            </div>
-          </div>
-
-          <!-- Visiteurs profil -->
-          <div>
-            <div class="li-head" style="display:flex;align-items:center;justify-content:space-between">
-              <span class="li-title">Visiteurs profil · 7j</span>
-              <span style="font-family:var(--mono);font-size:14px;color:var(--blue);font-weight:700">Premium ✦</span>
-            </div>
-            <div class="visitor-list" id="li-visitors"></div>
-          </div>
-
           <!-- Routine hebdo -->
-          <div style="border-top:1px solid var(--bd)">
+          <div>
             <div class="li-head" style="display:flex;align-items:center;justify-content:space-between">
               <span class="li-title">Routine hebdo · 45 min</span>
               <span style="font-family:var(--mono);font-size:14px;color:var(--t3);font-weight:700" id="li-routine-done">0/5</span>
             </div>
             <div class="routine-list" id="li-routine"></div>
+          </div>
+
+          <!-- Signaux prospects chauds -->
+          <div style="border-top:1px solid var(--bd)">
+            <div class="li-head">
+              <span class="li-title">Signaux prospects · Top 5</span>
+            </div>
+            <div id="li-visitors" class="visitor-list"></div>
           </div>
         </div>
 
@@ -1118,6 +1097,69 @@ input[type=range].tr-slider::-webkit-slider-thumb:hover{box-shadow:0 0 16px rgba
               <span class="arb-sum-val" id="arb-sum-val">$0.00</span>
             </div>
             <div class="arb-profit" id="arb-profit"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         VIEW 6: SETTINGS
+    ══════════════════════════════════════════ -->
+    <div class="view-panel" id="view-settings" style="display:none;flex-direction:column;overflow-y:auto;padding:32px;gap:24px;max-width:700px;margin:0 auto">
+      <div style="font-family:var(--disp);font-size:28px;letter-spacing:.04em;color:var(--t1)">PARAMÈTRES</div>
+
+      <!-- Mode Toggle -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Mode opérationnel</div>
+        <div style="display:flex;gap:10px">
+          <button class="mode-btn" id="set-mode-assisted" onclick="setMode('assisted');renderSettings()" style="flex:1;padding:14px;border-radius:8px;border:1px solid var(--bd);background:transparent;cursor:pointer;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t2);transition:all 140ms">🖐️ ASSISTÉ</button>
+          <button class="mode-btn" id="set-mode-auto" onclick="setMode('autonomous');renderSettings()" style="flex:1;padding:14px;border-radius:8px;border:1px solid var(--bd);background:transparent;cursor:pointer;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t2);transition:all 140ms">🤖 AUTONOME</button>
+        </div>
+        <div style="font-size:12px;color:var(--t3);margin-top:10px" id="set-mode-desc">Le mode assisté prépare tout, vous validez chaque action.</div>
+      </div>
+
+      <!-- Budget Apollo -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Budget Apollo</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--cyan)" id="set-apo-used">47</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Crédits utilisés</div>
+          </div>
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--grn)" id="set-apo-remain">953</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Crédits restants</div>
+          </div>
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--gold)" id="set-apo-pct">4.7%</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Utilisé ce mois</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Systèmes actifs -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Systèmes actifs</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="set-systems">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Pipeline Stats -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:20px">
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Pipeline</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--cyan)" id="set-total-leads">35</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Prospects totaux</div>
+          </div>
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--red)" id="set-hot-leads">12</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Score ≥ 80</div>
+          </div>
+          <div style="flex:1;min-width:120px;background:var(--s3);border-radius:8px;padding:14px">
+            <div style="font-family:var(--disp);font-size:22px;color:var(--grn)">6</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px">Marchés couverts</div>
           </div>
         </div>
       </div>
@@ -1255,6 +1297,24 @@ const apolloResults = [
   {co:'Lunchr',icon:'LU',industry:'RH Tech · Restauration',size:'150 sal.',revenue:'€10M',contact:'Thomas Jeanne · CFO',signal:'Fusion récente · rationalisaton IT',score:74},
   {co:'Partoo',icon:'PA',industry:'SaaS · Présence digitale',size:'180 sal.',revenue:'€18M',contact:'Thibault Renouf · CEO',signal:'Ouverture bureaux Europe',score:68},
 ];
+
+// ════════════════════════════════════════
+// AUTH — Command key for API calls
+// ════════════════════════════════════════
+function getCommandKey(){
+  let key = localStorage.getItem('gt-command-key');
+  if(!key){
+    key = prompt('Clé API cockpit (COMMAND_SECRET) :');
+    if(key) localStorage.setItem('gt-command-key', key);
+  }
+  return key || '';
+}
+function apiHeaders(){
+  return {
+    'Content-Type': 'application/json',
+    'x-command-key': getCommandKey(),
+  };
+}
 
 // ════════════════════════════════════════
 // STATE
@@ -1718,15 +1778,16 @@ function renderSequences(){
     </div>
   `).join('');
 
-  document.getElementById('seq-queue').innerHTML = queue.map(q=>`
-    <div class="queue-item">
+  const smartQ = typeof getSmartQueue==='function' ? getSmartQueue() : queue.map(q=>({...q,deferred:false}));
+  document.getElementById('seq-queue').innerHTML = smartQ.map(q=>`
+    <div class="queue-item" style="${q.deferred?'opacity:.5;':''}">
       <div class="qi-src" style="background:${SRC_COLORS[q.src]}"></div>
       <div class="qi-info">
-        <div class="qi-co">${q.co}</div>
+        <div class="qi-co">${q.co}${q.deferred?` <span style="font-size:10px;color:var(--gold)">⏸ ${q.reason||'reporté'}</span>`:''}</div>
         <div class="qi-step">${q.step}</div>
       </div>
       <div class="qi-time">${q.time}</div>
-      <button class="qi-btn">→</button>
+      <button class="qi-btn" onclick="queueSelect('${q.co}')" ${q.deferred?'disabled style="opacity:.3;cursor:default"':''}>→</button>
     </div>
   `).join('');
 }
@@ -1734,8 +1795,9 @@ function renderSequences(){
 // ════════════════════════════════════════
 // LINKEDIN ACQUISITION ENGINE v2 — Supabase Live
 // ════════════════════════════════════════
-const LI_SB_URL = 'https://cuvxhrzrwzuysnfnoqje.supabase.co';
-const LI_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1dnhocnpyd3p1eXNuZm5vcWplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MzI1NTAsImV4cCI6MjA4ODQwODU1MH0.S9AhyGSGbUMQhCW6QZPrIFxyvUdXSAFStw_znQUcIvw';
+// Supabase keys removed — use /api/command/supabase-data
+const LI_SB_URL = '';
+const LI_SB_KEY = '';
 
 let liWins    = [];  // vault_sessions — cas réels Ghost Tax
 let liSignals = [];  // osint_prospects — signaux Apollo chauds
@@ -2038,7 +2100,39 @@ function enrichLiVisitor(i){
   if(!v) return;
   const s=v.signal||{};
   const exp=s.exposure_low_eur?`€${Math.round(s.exposure_low_eur/1000)}k–€${Math.round(s.exposure_high_eur/1000)}k`:'N/A';
-  alert(`🎯 Signal Apollo — ${v.title} @ ${v.company}\n\nSecteur: ${s.industry||'—'}\nTaille: ${s.headcount||'?'} personnes\nMarché: ${s.geo_market||'—'}\nExposition Ghost Tax: ${exp}\nHeat Score: ${v.heat}/100\n\nAction: ${v.heat>=80?'→ InMail cette semaine + inscrire en campagne Apollo':'→ Surveiller — enrichir via Apollo'}`);
+  // Expand details inline instead of alert
+  const items=document.querySelectorAll('.visitor-item');
+  const el=items[i];
+  if(!el) return;
+  const existing=el.querySelector('.vi-detail');
+  if(existing){ existing.remove(); return; }
+  // Close others
+  document.querySelectorAll('.vi-detail').forEach(d=>d.remove());
+  const detail=document.createElement('div');
+  detail.className='vi-detail';
+  detail.style.cssText='margin-top:8px;padding:8px 10px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.1);border-radius:6px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--t2)';
+  detail.innerHTML=`<div style="color:var(--blue);font-weight:700;margin-bottom:4px">Signal — ${v.company}</div>
+    Secteur: ${s.industry||'—'} · ${s.headcount||'?'} pers. · ${s.geo_market||'—'}<br>
+    Exposition: <strong style="color:var(--cyan)">${exp}</strong><br>
+    Heat: <strong>${v.heat}/100</strong> — ${v.heat>=80?'Prospect chaud':'A surveiller'}`;
+  el.appendChild(detail);
+}
+
+function copyLiPost(btn){
+  const hook = document.getElementById('li-hook')?.value || '';
+  const body = document.getElementById('li-body')?.value || '';
+  const hashtags = document.getElementById('li-hashtags')?.textContent || '';
+  const full = hook + '\n\n' + body + '\n\n' + hashtags;
+  navigator.clipboard.writeText(full).then(()=>{
+    btn.textContent = '✓ Copié !';
+    btn.style.color = 'var(--grn)';
+    btn.style.borderColor = 'rgba(0,201,141,.3)';
+    setTimeout(()=>{btn.textContent='📋 Copier';btn.style.color='';btn.style.borderColor=''},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=full;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='✓ Copié !';btn.style.color='var(--grn)';
+    setTimeout(()=>{btn.textContent='📋 Copier';btn.style.color=''},2000);
+  });
 }
 
 function saveDraft(){
@@ -2092,6 +2186,7 @@ function showView(view){
   if(view==='sequences') renderSequences();
   if(view==='linkedin') initLinkedIn();
   if(view==='trading'){ animatePipeline(); initArbitrage(); if(!window._clockInterval){ updateClock(); window._clockInterval=setInterval(updateClock,1000); } }
+  if(view==='settings') renderSettings();
 }
 
 // ════════════════════════════════════════
@@ -2153,7 +2248,7 @@ async function sendMsg(id){
     try {
       const res = await fetch('/api/command/send-approved', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: apiHeaders(),
         body: JSON.stringify({
           to: p.contact.email,
           subject: (msgEl?.dataset?.subject) || (p.domain + ' — Ghost Tax'),
@@ -2219,7 +2314,7 @@ async function generateAIMsg(id){
     const country = p.flag === '🇩🇪' ? 'DE' : p.flag === '🇳🇱' ? 'NL' : p.flag === '🇬🇧' ? 'UK' : p.flag === '🇺🇸' ? 'US' : 'DE';
     const res = await fetch('/api/command/generate-message', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({
         prospect: {
           firstName: p.contact.name.split(' ')[0] || '',
@@ -2292,7 +2387,7 @@ async function runApolloSearch(){
     const dow = new Date().getDay();
     const strategy = dow >= 1 && dow <= 3 ? 'icp_hunter' : dow === 4 ? 'tech_stack_hunter' : 'signal_hunter';
 
-    const res = await fetch('/api/command/auto-pipeline?strategy=' + strategy);
+    const res = await fetch('/api/command/auto-pipeline?strategy=' + strategy, {headers:apiHeaders()});
 
     if (res.ok) {
       const data = await res.json();
@@ -2395,7 +2490,7 @@ async function enrichResult(co){
     // Appel réel Apollo enrich
     const res = await fetch('/api/command/apollo-enrich', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({ domain: co.toLowerCase().replace(/[^a-z0-9]/g,'') + '.com' }),
     });
     if (res.ok) {
@@ -2421,6 +2516,14 @@ function bulkPipeline(){ comingSoon(event.target); }
 function selectSeq(id){
   activeSeqId = id;
   renderSequences();
+}
+
+function queueSelect(co){
+  const p = prospects.find(x => x.co === co);
+  if(p){
+    showView('cockpit');
+    selectLead(p.id);
+  }
 }
 
 // ════════════════════════════════════════
@@ -2584,7 +2687,10 @@ function renderBrief() {
       <div class="brief-time">~${Math.max(15, briefActions.length * 15)}s estimées</div>
     </div>
     <div class="brief-summary">
-      Le système a préparé <strong>${briefActions.length} action${briefActions.length > 1 ? 's' : ''} prioritaire${briefActions.length > 1 ? 's' : ''}</strong>.
+      ${isWeekend()
+        ? `☀️ <strong>Mode week-end</strong> — ${briefActions.length} action${briefActions.length>1?'s':''} préparée${briefActions.length>1?'s':''}, exécution <strong>lundi ${getNextMonday().getDate()}/${getNextMonday().getMonth()+1} à 09h00</strong>.`
+        : `Le système a préparé <strong>${briefActions.length} action${briefActions.length > 1 ? 's' : ''} prioritaire${briefActions.length > 1 ? 's' : ''}</strong>.`
+      }
     </div>
     <div class="brief-actions" id="brief-actions">`;
 
@@ -2600,7 +2706,10 @@ function renderBrief() {
         <div class="bc-reason">${action.reason}</div>
         <div class="bc-exposure">${action.exposure}${action.price ? ' · Message prêt · ' + action.price : ''}</div>
         <div class="bc-btns">
-          <button class="bc-btn approve" onclick="briefApproveAction(${i})">${action.actionLabel.toUpperCase()}</button>
+          ${isWeekend()
+            ? `<button class="bc-btn approve" style="opacity:.4;cursor:default" disabled>⏸ PLANIFIÉ LUNDI</button>`
+            : `<button class="bc-btn approve" onclick="briefApproveAction(${i})">${action.actionLabel.toUpperCase()}</button>`
+          }
           <button class="bc-btn view" onclick="briefViewMessage(${i})">VOIR LE MESSAGE</button>
         </div>
       </div>`;
@@ -2752,7 +2861,7 @@ function confirmApproval(idx) {
         const body = msgEl?.innerText || 'Ghost Tax analysis for ' + p.co;
         await fetch('/api/command/send-approved', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: apiHeaders(),
           body: JSON.stringify({
             to: p.contact.email,
             subject: p.domain + ' — Ghost Tax',
@@ -3165,7 +3274,7 @@ async function runAutonomousPipeline() {
   try {
     // 1. Chercher des prospects
     const strategy = ['icp_hunter','signal_hunter','event_hunter'][new Date().getDay() % 3];
-    const res = await fetch('/api/command/auto-pipeline?strategy=' + strategy);
+    const res = await fetch('/api/command/auto-pipeline?strategy=' + strategy, {headers:apiHeaders()});
 
     if (res.ok) {
       const data = await res.json();
@@ -3205,13 +3314,42 @@ async function runAutonomousPipeline() {
           };
           prospects.push(p);
 
-          // AUTO-SEND si score >= 80 ET email disponible
-          if (r.score >= 80 && r.financeLead?.email) {
+          // SCAN-THEN-SEND: score >= 80, email dispo, jour ouvré chez le prospect
+          const prospectCountry = r.country === 'DE' ? 'DE' : r.country === 'UK' ? 'UK' : r.country === 'NL' ? 'NL' : r.country === 'US' ? 'US' : r.country === 'CH' ? 'CH' : r.country === 'IT' ? 'IT' : 'US';
+          if (r.score >= 80 && r.financeLead?.email && !isNonWorkDay(prospectCountry)) {
             try {
-              // Générer le message IA
-              const msgRes = await fetch('/api/command/generate-message', {
+              // ÉTAPE 1: Lancer un VRAI scan sur le domaine
+              const scanRes = await fetch('/api/intel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  domain: r.domain,
+                  email: r.financeLead.email,
+                  headcount: r.headcount,
+                  monthlySpend: r.exposure ? Math.round(r.exposure / 12) : undefined,
+                  industry: r.industry,
+                }),
+              });
+
+              let scanData = null;
+              if (scanRes.ok) {
+                // Parse NDJSON stream — récupérer la dernière phase (complete)
+                const text = await scanRes.text();
+                const lines = text.trim().split('\n').filter(l => l.startsWith('{'));
+                for (const line of lines) {
+                  try {
+                    const parsed = JSON.parse(line);
+                    if (parsed.phase === 'complete' || parsed.exposureLow) {
+                      scanData = parsed;
+                    }
+                  } catch {}
+                }
+              }
+
+              // ÉTAPE 2: Générer le message avec les VRAIES données du scan
+              const msgRes = await fetch('/api/command/generate-message', {
+                method: 'POST',
+                headers: apiHeaders(),
                 body: JSON.stringify({
                   prospect: {
                     firstName: (r.financeLead?.name || '').split(' ')[0],
@@ -3221,6 +3359,13 @@ async function runAutonomousPipeline() {
                     country: r.country, headcount: r.headcount,
                     industry: r.industry,
                   },
+                  scan: scanData ? {
+                    exposureLow: scanData.exposureLow,
+                    exposureHigh: scanData.exposureHigh,
+                    dailyLoss: scanData.dailyLoss || Math.round((scanData.exposureLow || 0) / 365),
+                    confidence: scanData.overallConfidence || scanData.confidence,
+                    signals: scanData.signals || scanData.topSignals || [],
+                  } : undefined,
                   channel: 'email', sequenceStep: 'M1',
                 }),
               });
@@ -3228,31 +3373,26 @@ async function runAutonomousPipeline() {
               if (msgRes.ok) {
                 const msg = await msgRes.json();
 
-                // Envoyer via Resend
-                await fetch('/api/command/send-approved', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    to: r.financeLead.email,
-                    subject: msg.subject || r.domain + ' — Ghost Tax',
-                    textBody: msg.body,
-                    domain: r.domain,
-                    prospectId: String(newId),
-                  }),
-                });
-
+                // ÉTAPE 3: Ne PAS envoyer directement — mettre en queue d'approbation
+                p.seqStep = 0;
+                p.stage = '📋 Message prêt';
+                p._pendingEmail = {
+                  to: r.financeLead.email,
+                  subject: msg.subject || r.domain + ' — Ghost Tax',
+                  body: msg.body,
+                  scanConfidence: scanData?.overallConfidence || 0,
+                  generatedAt: new Date().toISOString(),
+                };
                 autoSent++;
-                p.seqStep = 1;
-                p.stage = '✅ Auto-envoyé';
               }
-            } catch(e) { console.error('Auto-send error:', e); }
+            } catch(e) { console.error('Scan-then-send error:', e); }
           }
         }
       }
 
       renderLeads();
       if (syncText) {
-        syncText.innerHTML = `⚡ Bot actif · ${results.length} trouvés · ${autoSent} auto-envoyés`;
+        syncText.innerHTML = `⚡ Bot actif · ${results.length} trouvés · ${autoSent} messages prêts`;
       }
     }
   } catch(e) {
@@ -3290,7 +3430,223 @@ async function fetchPolymarketData() {
   return [];
 }
 
-// [duplicate showView removed — correct version is above with trading init]
+// ════════════════════════════════════════
+// SETTINGS VIEW
+// ════════════════════════════════════════
+function renderSettings(){
+  // Mode toggle highlight
+  const aBtn = document.getElementById('set-mode-assisted');
+  const bBtn = document.getElementById('set-mode-auto');
+  const desc = document.getElementById('set-mode-desc');
+  if(aBtn && bBtn){
+    if(currentMode==='autonomous'){
+      bBtn.style.borderColor='var(--cyan)'; bBtn.style.color='var(--cyan)'; bBtn.style.background='rgba(0,207,196,.06)';
+      aBtn.style.borderColor='var(--bd)'; aBtn.style.color='var(--t3)'; aBtn.style.background='transparent';
+      if(desc) desc.textContent='Le mode autonome envoie automatiquement les messages pour les prospects ≥ 80.';
+    } else {
+      aBtn.style.borderColor='var(--grn)'; aBtn.style.color='var(--grn)'; aBtn.style.background='rgba(0,201,141,.06)';
+      bBtn.style.borderColor='var(--bd)'; bBtn.style.color='var(--t3)'; bBtn.style.background='transparent';
+      if(desc) desc.textContent='Le mode assisté prépare tout, vous validez chaque action.';
+    }
+  }
+
+  // Apollo budget from localStorage
+  const apoUsed = parseInt(localStorage.getItem('gt-apollo-credits')||'47');
+  const apoTotal = 1000;
+  const el1=document.getElementById('set-apo-used'); if(el1) el1.textContent=apoUsed;
+  const el2=document.getElementById('set-apo-remain'); if(el2) el2.textContent=apoTotal-apoUsed;
+  const el3=document.getElementById('set-apo-pct'); if(el3) el3.textContent=(apoUsed/apoTotal*100).toFixed(1)+'%';
+
+  // Systems
+  const systems = [
+    {name:'Apollo Prospection',status:'Connecté',color:'var(--grn)',icon:'🟢'},
+    {name:'Supabase Pipeline',status:'Connecté',color:'var(--grn)',icon:'🟢'},
+    {name:'Resend Email',status:'Connecté',color:'var(--grn)',icon:'🟢'},
+    {name:'LinkedIn Engine',status:'Actif',color:'var(--grn)',icon:'🟢'},
+    {name:'Trading Bot v4',status:'Actif',color:'var(--grn)',icon:'🟢'},
+    {name:'Make Nervous System',status:'En cours',color:'var(--gold)',icon:'🟡'},
+    {name:'Stripe Payments',status:'Connecté',color:'var(--grn)',icon:'🟢'},
+    {name:'Telegram Bot',status:'À configurer',color:'var(--t3)',icon:'⚪'},
+  ];
+  const sysEl = document.getElementById('set-systems');
+  if(sysEl) sysEl.innerHTML = systems.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s3);border-radius:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span>${s.icon}</span>
+        <span style="font-size:13px;font-weight:500">${s.name}</span>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${s.color}">${s.status}</span>
+    </div>`).join('');
+
+  // Pipeline stats
+  const el4=document.getElementById('set-total-leads'); if(el4) el4.textContent=prospects.length;
+  const el5=document.getElementById('set-hot-leads'); if(el5) el5.textContent=prospects.filter(p=>p.heat>=80).length;
+}
+
+// ════════════════════════════════════════
+// SMART DATE — week-end awareness
+// ════════════════════════════════════════
+function isWeekend(){ const d=new Date().getDay(); return d===0||d===6; }
+function isBusinessHours(){ const h=new Date().getHours(); return h>=8 && h<=19; }
+
+// Jours fériés par pays — marchés cibles Ghost Tax
+const PUBLIC_HOLIDAYS = {
+  DE: [ // Allemagne (fédéraux)
+    '01-01','04-18','04-21','05-01','05-29','06-09','10-03','12-25','12-26',
+  ],
+  US: [ // États-Unis
+    '01-01','01-19','02-17','05-26','06-19','07-04','09-01','10-13','11-11','11-27','12-25',
+  ],
+  UK: [ // Royaume-Uni
+    '01-01','04-18','04-21','05-05','05-26','08-25','12-25','12-26',
+  ],
+  NL: [ // Pays-Bas
+    '01-01','04-18','04-21','04-27','05-05','05-29','06-09','12-25','12-26',
+  ],
+  FR: [ // France (pour nous)
+    '01-01','04-21','05-01','05-08','05-29','06-09','07-14','08-15','11-01','11-11','12-25',
+  ],
+  CH: [ // Suisse
+    '01-01','01-02','04-18','04-21','05-01','05-29','06-09','08-01','12-25','12-26',
+  ],
+  IT: [ // Italie
+    '01-01','01-06','04-21','04-25','05-01','06-02','08-15','11-01','12-08','12-25','12-26',
+  ],
+};
+
+function isHoliday(country){
+  const d = new Date();
+  const key = String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const holidays = PUBLIC_HOLIDAYS[country] || [];
+  return holidays.includes(key);
+}
+
+// Vérifie si AUJOURD'HUI est un jour non-ouvré pour un pays donné
+function isNonWorkDay(country){
+  return isWeekend() || isHoliday(country || 'FR');
+}
+
+// Vérifie si on peut envoyer à un prospect selon son pays
+function canSendToProspect(prospect){
+  const country = (prospect.flag === '🇩🇪' || prospect.flag === '🇦🇹') ? 'DE'
+    : prospect.flag === '🇬🇧' ? 'UK'
+    : prospect.flag === '🇳🇱' ? 'NL'
+    : prospect.flag === '🇺🇸' ? 'US'
+    : prospect.flag === '🇨🇭' ? 'CH'
+    : prospect.flag === '🇮🇹' ? 'IT'
+    : prospect.flag === '🇫🇷' ? 'FR'
+    : 'US';
+  return !isNonWorkDay(country);
+}
+function getNextMonday(){
+  const d=new Date(); const day=d.getDay();
+  const diff = day===0 ? 1 : (8-day);
+  d.setDate(d.getDate()+diff); d.setHours(9,0,0,0);
+  return d;
+}
+function getDayLabel(){
+  const days=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const d=new Date();
+  return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+}
+
+function getSmartQueue(){
+  return queue.map(q=>{
+    // Trouver le prospect correspondant pour connaître son pays
+    const p = prospects.find(p=>p.co===q.co);
+    const blocked = p ? !canSendToProspect(p) : isWeekend();
+    if(!blocked) return {...q, deferred:false};
+    const mon = getNextMonday();
+    const monLabel = `Lundi ${mon.getDate()}/${mon.getMonth()+1} à`;
+    if(q.time.startsWith("Aujourd'hui") || q.time.startsWith('Demain')){
+      const hour = q.time.match(/\d{2}h\d{2}/)?.[0] || '09h00';
+      const reason = isWeekend() ? 'week-end' : 'jour férié';
+      return {...q, time:`${monLabel} ${hour}`, deferred:true, urgent:false, reason};
+    }
+    return {...q, deferred:false};
+  });
+}
+
+// ════════════════════════════════════════
+// TOPBAR STATS — calculated from real data
+// ════════════════════════════════════════
+function updateTopbarStats(){
+  const hot = prospects.filter(p=>p.heat>=80);
+  const smartQ = getSmartQueue();
+  const activeQ = smartQ.filter(q=>!q.deferred).length;
+
+  // Exposure totale = somme des minimums d'exposition (en K€)
+  let totalExp = 0;
+  prospects.forEach(p=>{
+    const m = p.exp.match(/([\d.,]+)\s*(K|M)/);
+    if(m){
+      let v = parseFloat(m[1].replace(',',''));
+      if(m[2]==='M') v *= 1000; // convert M to K
+      totalExp += v;
+    }
+  });
+
+  // Taux de réponse moyen des séquences
+  const avgReply = sequences.length ? Math.round(sequences.reduce((s,seq)=>s+seq.reply_rate,0)/sequences.length) : 0;
+
+  const el1=document.getElementById('tb-exposure'); if(el1) el1.textContent = totalExp>=1000 ? `€${(totalExp/1000).toFixed(1)}M` : `€${Math.round(totalExp)}K`;
+  const el2=document.getElementById('tb-hot'); if(el2) el2.textContent = hot.length;
+  const el3=document.getElementById('tb-reply-rate'); if(el3) el3.textContent = avgReply+'%';
+  const el4=document.getElementById('tb-total'); if(el4) el4.textContent = prospects.length;
+  const el5=document.getElementById('tb-queue');
+  if(el5){
+    if(isWeekend()){
+      el5.textContent = '⏸ ' + smartQ.length;
+      el5.title = 'Week-end — actions reportées à lundi';
+    } else {
+      el5.textContent = activeQ;
+    }
+  }
+}
+
+// ════════════════════════════════════════
+// INIT — EVERYTHING STARTS HERE
+// ════════════════════════════════════════
+(function init(){
+  // Render leads in source panel
+  renderLeads();
+
+  // Topbar stats from real data
+  updateTopbarStats();
+
+  // Set mode from localStorage
+  setMode(currentMode);
+
+  // Start clock
+  updateClock();
+  if(!window._clockInterval) window._clockInterval = setInterval(updateClock, 1000);
+
+  // Render morning brief
+  renderBrief();
+
+  // Weekend: update sync text instead of adding a banner
+  if(isWeekend()){
+    const syncText = document.getElementById('sync-text');
+    if(syncText) syncText.innerHTML = `☀️ Week-end · ${getSmartQueue().length} actions → lundi`;
+  }
+
+  // Initialize LinkedIn copy button in post editor
+  const liCopyBtn = document.getElementById('li-copy-btn');
+  if(liCopyBtn){
+    liCopyBtn.onclick = function(){
+      const hook = document.getElementById('li-hook')?.value || '';
+      const body = document.getElementById('li-body')?.value || '';
+      const hashtags = document.getElementById('li-hashtags')?.textContent || '';
+      const full = hook + '\n\n' + body + '\n\n' + hashtags;
+      navigator.clipboard.writeText(full).then(()=>{
+        liCopyBtn.textContent = '✓ COPIÉ !';
+        liCopyBtn.style.color = 'var(--grn)';
+        liCopyBtn.style.borderColor = 'var(--grn)';
+        setTimeout(()=>{ liCopyBtn.textContent = '📋 COPIER LE POST'; liCopyBtn.style.color=''; liCopyBtn.style.borderColor=''; }, 2000);
+      }).catch(()=>{});
+    };
+  }
+})();
 </script>
 </body>
 </html>
