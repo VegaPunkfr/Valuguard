@@ -170,7 +170,7 @@ export function middleware(request: NextRequest) {
   // SECURITY FIX 2026-04-06: ALL command routes now require auth.
   // cockpit-v3.html must send x-command-key header or COMMAND_SECRET.
 
-  if (pathname.startsWith("/api/command/")) {
+  if (pathname.startsWith("/api/command/") && pathname !== "/api/command/cockpit-auth") {
     const secret = process.env.COMMAND_SECRET;
     if (!secret) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
