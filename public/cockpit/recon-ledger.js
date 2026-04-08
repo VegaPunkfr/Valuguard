@@ -25,6 +25,9 @@ let _searchTimer = null;
 let S = {
   tab: 'tape',
   sessions: [], people: [], companies: [],
+  thesis: [],
+  triggers: [],
+  benchmarks: [],
   ops: {},
   selectedId: null,
   expanded: new Set(),
@@ -98,6 +101,10 @@ function renderShell() {
       <button class="rl-tab" onclick="window.recon.switchTab('entities')" data-tab="entities" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Entities</button>
       <button class="rl-tab" onclick="window.recon.switchTab('queue')" data-tab="queue" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Queue</button>
       <button class="rl-tab" onclick="window.recon.switchTab('patterns')" data-tab="patterns" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Patterns</button>
+      <button class="rl-tab" onclick="window.recon.switchTab('thesis')" data-tab="thesis" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Thesis</button>
+      <button class="rl-tab" onclick="window.recon.switchTab('committee')" data-tab="committee" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Committee</button>
+      <button class="rl-tab" onclick="window.recon.switchTab('allocator')" data-tab="allocator" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Allocator</button>
+      <button class="rl-tab" onclick="window.recon.switchTab('benchmarks')" data-tab="benchmarks" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);font:600 12px var(--body);cursor:pointer;text-transform:uppercase;letter-spacing:.5px">Benchmarks</button>
     </div>
     <div id="rl-toolbar" style="display:flex;gap:8px;padding:8px 16px;align-items:center;border-bottom:1px solid var(--bd);flex-wrap:wrap">
       <input id="rl-search" type="text" placeholder="Rechercher..." oninput="window.recon.search(this.value)" style="flex:1;min-width:180px;padding:5px 10px;background:var(--graphite);border:1px solid var(--bd);border-radius:4px;color:var(--t1);font:400 12px var(--body);outline:none">
@@ -175,6 +182,10 @@ function renderCurrentTab() {
     case 'entities': renderEntities(); break;
     case 'queue': renderQueue(); break;
     case 'patterns': renderPatterns(); break;
+    case 'thesis': renderThesisBoard(); break;
+    case 'committee': renderCommitteeBuilder(); break;
+    case 'allocator': renderTriggerAllocator(); break;
+    case 'benchmarks': renderBenchmarkDashboard(); break;
   }
 }
 
@@ -268,6 +279,161 @@ function renderPatterns() {
   list.innerHTML = '<div style="padding:8px 16px">' +
     sessData.map(d => ui.renderPatternCard(d)).join('') +
     '</div>';
+}
+
+// ── THESIS BOARD ────────────────────────────────────────────────
+function renderThesisBoard() {
+  const list = el('rl-list');
+  if (!list) return;
+  const thesis = S.thesis || [];
+  if (!thesis.length) { list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font:400 13px var(--body)">Aucune thesis. Les thesis se créent automatiquement quand une company est vue 2+ fois.</div>'; return; }
+
+  // Sort: actionable first, then composite desc
+  const sorted = [...thesis].sort((a,b) => {
+    const aAct = ['draft','validated','active'].includes(a.thesis_status) ? 1 : 0;
+    const bAct = ['draft','validated','active'].includes(b.thesis_status) ? 1 : 0;
+    if (aAct !== bAct) return bAct - aAct;
+    return (b.composite_score||0) - (a.composite_score||0);
+  });
+
+  const s = v => window.sanitize(v ?? '');
+  list.innerHTML = `
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 50px 50px 50px 50px 80px 1.8fr 80px;gap:0;padding:4px 8px;font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--bd)">
+      <span>Company</span><span>Signal</span><span>P</span><span>C</span><span>A</span><span>Σ</span><span>Committee</span><span>Next Move</span><span>Status</span>
+    </div>
+    ${sorted.map(t => {
+      const pCol = (t.account_pressure_score||0) > 50 ? 'var(--red)' : (t.account_pressure_score||0) > 25 ? 'var(--gold)' : 'var(--t3)';
+      const cCol = (t.committee_completeness_score||0) > 50 ? 'var(--green)' : (t.committee_completeness_score||0) > 25 ? 'var(--gold)' : 'var(--t3)';
+      const aCol = (t.activation_readiness_score||0) > 50 ? 'var(--cyan)' : (t.activation_readiness_score||0) > 25 ? 'var(--gold)' : 'var(--t3)';
+      const sCol = (t.composite_score||0) > 70 ? 'var(--green)' : (t.composite_score||0) > 40 ? 'var(--gold)' : 'var(--t3)';
+      const covBadge = t.committee_coverage === 'complete' ? '🟢' : t.committee_coverage === 'partial' ? '🟡' : '🔴';
+      const statusCol = t.thesis_status === 'active' ? 'var(--green)' : t.thesis_status === 'validated' ? 'var(--cyan)' : 'var(--t3)';
+      return `<div style="display:grid;grid-template-columns:1.5fr 1fr 50px 50px 50px 50px 80px 1.8fr 80px;gap:0;padding:8px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center;cursor:pointer" onclick="window.recon.selectThesis('${s(t.company_domain)}')">
+        <div>
+          <div style="font:600 12px var(--body);color:var(--t1)">${s(t.company_domain)}</div>
+          <div style="font:400 9px var(--mono);color:var(--t4)">${t.contact_count||0} contacts · ${t.enriched_contact_count||0} enrichis</div>
+        </div>
+        <div style="font:400 10px var(--mono);color:var(--t2)">${s(t.primary_signal||'—')}</div>
+        <div style="font:700 12px var(--mono);color:${pCol}">${t.account_pressure_score||0}</div>
+        <div style="font:700 12px var(--mono);color:${cCol}">${t.committee_completeness_score||0}</div>
+        <div style="font:700 12px var(--mono);color:${aCol}">${t.activation_readiness_score||0}</div>
+        <div style="font:800 12px var(--mono);color:${sCol}">${t.composite_score||0}</div>
+        <div style="font:400 10px var(--mono)">${covBadge} ${s(t.committee_coverage||'none')}</div>
+        <div style="font:400 10px var(--body);color:var(--t2)">${s(t.recommended_next_move||'—')}</div>
+        <div style="font:700 9px var(--mono);color:${statusCol};letter-spacing:.06em;text-transform:uppercase">${s(t.thesis_status||'draft')}</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── COMMITTEE BUILDER ───────────────────────────────────────────
+function renderCommitteeBuilder() {
+  const list = el('rl-list');
+  if (!list) return;
+  const thesis = S.thesis || [];
+  if (!thesis.length) { list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font:400 13px var(--body)">Aucune company avec thesis.</div>'; return; }
+
+  const s = v => window.sanitize(v ?? '');
+  list.innerHTML = `
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 60px 60px 80px;gap:0;padding:4px 8px;font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--bd)">
+      <span>Company</span><span>CFO</span><span>CIO/CTO</span><span>Procurement</span><span>Total</span><span>Enriched</span><span>Coverage</span>
+    </div>
+    ${thesis.map(t => {
+      const committee = t.target_committee || [];
+      const findRole = (pattern) => committee.find(c => pattern.test(c.title || ''));
+      const cfo = findRole(/cfo|chief financial|vp finance|finance director|head of finance/i);
+      const cio = findRole(/cio|cto|chief technology|chief information|vp it|vp engineering|head of it/i);
+      const proc = findRole(/procurement|purchasing|sourcing|vendor/i);
+      const roleCell = (person) => {
+        if (!person) return '<span style="color:var(--red);font:400 10px var(--mono)">— manquant</span>';
+        const dot = person.enriched ? '<span style="color:var(--green)">●</span>' : '<span style="color:var(--t4)">○</span>';
+        return `<span style="font:400 10px var(--mono);color:var(--t1)">${dot} ${s(person.name||'?')}</span>`;
+      };
+      const covBadge = t.committee_coverage === 'complete' ? '🟢 complete' : t.committee_coverage === 'partial' ? '🟡 partial' : '🔴 none';
+      return `<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 60px 60px 80px;gap:0;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center">
+        <div style="font:600 12px var(--body);color:var(--t1)">${s(t.company_domain)}</div>
+        ${roleCell(cfo)}
+        ${roleCell(cio)}
+        ${roleCell(proc)}
+        <div style="font:700 12px var(--mono);color:var(--t1);text-align:center">${t.contact_count||0}</div>
+        <div style="font:700 12px var(--mono);color:${(t.enriched_contact_count||0)>0?'var(--green)':'var(--t4)'};text-align:center">${t.enriched_contact_count||0}</div>
+        <div style="font:400 10px var(--mono)">${covBadge}</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── TRIGGER ALLOCATOR ───────────────────────────────────────────
+function renderTriggerAllocator() {
+  const list = el('rl-list');
+  if (!list) return;
+  const triggers = S.triggers || [];
+  if (!triggers.length) { list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font:400 13px var(--body)">Aucun trigger en attente. Les triggers se créent quand un prospect atteint les seuils de warmth.</div>'; return; }
+
+  const sorted = [...triggers].sort((a,b) => (b.expected_value||0) - (a.expected_value||0));
+  const topEV = sorted[0]?.expected_value || 0;
+  const s = v => window.sanitize(v ?? '');
+
+  list.innerHTML = `
+    <div style="padding:8px 12px;font:400 11px var(--body);color:var(--t3);border-bottom:1px solid var(--bd)">
+      ${triggers.length} trigger${triggers.length>1?'s':''} en attente · Crédits estimés: ${triggers.reduce((a,t)=>a+(t.estimated_credits||1),0)}
+    </div>
+    ${sorted.map((t,i) => {
+      const isTop = (t.expected_value||0) >= topEV * 0.8;
+      const evColor = isTop ? 'var(--green)' : (t.expected_value||0) > 30 ? 'var(--gold)' : 'var(--t3)';
+      const betterExists = i > 0 && sorted[0].expected_value > t.expected_value * 1.5;
+      return `<div style="padding:12px;margin:4px 8px;background:var(--graphite);border:1px solid ${isTop?'hsla(155,100%,39%,.15)':'var(--bd)'};border-radius:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <span style="font:700 12px var(--body);color:var(--t1)">${s(t.trigger_reason)}</span>
+            <span style="font:400 10px var(--mono);color:var(--t3);margin-left:8px">${s(t.trigger_type)}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font:800 14px var(--mono);color:${evColor}">EV ${Math.round(t.expected_value||0)}</span>
+            <span style="font:400 9px var(--mono);color:var(--t4)">${t.estimated_credits||1} cr.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;font:400 10px var(--mono);color:var(--t2);margin-bottom:8px">
+          <span>P:<b style="color:var(--t1)">${t.account_pressure||0}</b></span>
+          <span>C:<b style="color:var(--t1)">${t.committee_completeness||0}</b></span>
+          <span>A:<b style="color:var(--t1)">${t.activation_readiness||0}</b></span>
+          <span>Σ:<b style="color:var(--t1)">${t.composite_score||0}</b></span>
+        </div>
+        ${betterExists ? '<div style="font:400 9px var(--mono);color:var(--gold);margin-bottom:6px">⚠ Meilleur usage possible — trigger #1 a un EV '+Math.round(sorted[0].expected_value)+' vs '+Math.round(t.expected_value)+'</div>' : ''}
+        <div style="display:flex;gap:6px">
+          <button onclick="window.recon.approveTrigger('${t.id}')" style="padding:4px 12px;background:hsla(155,100%,39%,.1);border:1px solid hsla(155,100%,39%,.2);border-radius:4px;color:var(--green);font:700 10px var(--mono);cursor:pointer">Approuver</button>
+          <button onclick="window.recon.rejectTrigger('${t.id}')" style="padding:4px 12px;background:transparent;border:1px solid var(--bd);border-radius:4px;color:var(--t3);font:400 10px var(--mono);cursor:pointer">Rejeter</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── BENCHMARK DASHBOARD ─────────────────────────────────────────
+function renderBenchmarkDashboard() {
+  const list = el('rl-list');
+  if (!list) return;
+  const benchmarks = S.benchmarks || [];
+  if (!benchmarks.length) { list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font:400 13px var(--body)">Aucun benchmark calculé. Les benchmarks se construisent au fil des recherches Apollo (min 3 companies par segment).</div>'; return; }
+
+  const s = v => window.sanitize(v ?? '');
+  const confColor = c => c === 'publishable' ? 'var(--green)' : c === 'defensible' ? 'var(--cyan)' : c === 'indicative' ? 'var(--gold)' : 'var(--t4)';
+
+  list.innerHTML = `
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 60px 80px 60px 60px 60px 100px;gap:0;padding:4px 8px;font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--bd)">
+      <span>Segment</span><span>Metric</span><span>N</span><span>Confidence</span><span>P25</span><span>Median</span><span>P75</span><span>Usage</span>
+    </div>
+    ${benchmarks.map(b => {
+      const cc = confColor(b.confidence_level);
+      const usable = b.confidence_level === 'defensible' || b.confidence_level === 'publishable';
+      return `<div style="display:grid;grid-template-columns:1.2fr 1fr 60px 80px 60px 60px 60px 100px;gap:0;padding:8px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center">
+        <div style="font:500 11px var(--body);color:var(--t1)">${s(b.segment_key)}</div>
+        <div style="font:400 10px var(--mono);color:var(--t2)">${s(b.metric_name)}</div>
+        <div style="font:700 12px var(--mono);color:var(--t1);text-align:center">${b.sample_size}</div>
+        <div style="font:700 9px var(--mono);color:${cc};letter-spacing:.06em;text-transform:uppercase">${s(b.confidence_level)}</div>
+        <div style="font:400 11px var(--mono);color:var(--t2);text-align:center">${b.p25_val ?? '—'}</div>
+        <div style="font:700 11px var(--mono);color:var(--t1);text-align:center">${b.median_val ?? '—'}</div>
+        <div style="font:400 11px var(--mono);color:var(--t2);text-align:center">${b.p75_val ?? '—'}</div>
+        <div style="font:400 9px var(--mono);color:${usable?'var(--green)':'var(--t4)'}">${usable?'✓ Client-ready':'⊘ Interne seul'}</div>
+      </div>`;
+    }).join('')}`;
 }
 
 // ── Load more button ─────────────────────────────────────────────
@@ -382,6 +548,26 @@ async function loadTabData(tab) {
         S.sessions = res.data || [];
         if (!Array.isArray(S.sessions)) S.sessions = [];
       }
+      break;
+    }
+    case 'thesis': {
+      const res = await api.fetchThesis ? await api.fetchThesis() : await fetch('/api/command/recon-ledger?type=thesis&limit=50', { headers: window.apiHeaders() }).then(r=>r.json());
+      S.thesis = res.data || [];
+      break;
+    }
+    case 'committee': {
+      const res = await fetch('/api/command/recon-ledger?type=thesis&limit=50', { headers: window.apiHeaders() }).then(r=>r.json());
+      S.thesis = res.data || [];
+      break;
+    }
+    case 'allocator': {
+      const res = await fetch('/api/command/recon-ledger?type=triggers&pending=true&limit=50', { headers: window.apiHeaders() }).then(r=>r.json());
+      S.triggers = res.data || [];
+      break;
+    }
+    case 'benchmarks': {
+      const res = await fetch('/api/command/recon-ledger?type=benchmarks&limit=50', { headers: window.apiHeaders() }).then(r=>r.json());
+      S.benchmarks = res.data || [];
       break;
     }
   }
@@ -573,6 +759,32 @@ function bindHandlers() {
       S.page.more = true;
       S.expanded.clear();
       loadTabData(S.tab);
+    },
+
+    selectThesis(domain) {
+      // For now, just log — future: open thesis detail panel
+      console.log('Thesis selected:', domain);
+    },
+    approveTrigger(triggerId) {
+      fetch('/api/command/recon-ledger', {
+        method: 'POST',
+        headers: window.apiHeaders(),
+        body: JSON.stringify({ action: 'approve_trigger', trigger_id: triggerId })
+      }).then(r => r.json()).then(res => {
+        if (res.error) { alert('Gate: ' + res.error); return; }
+        alert('Trigger approuvé');
+        loadTabData('allocator').then(() => { setLoading(false); renderCurrentTab(); });
+      });
+    },
+    rejectTrigger(triggerId) {
+      const reason = prompt('Raison du rejet (optionnel):') || 'Operator decision';
+      fetch('/api/command/recon-ledger', {
+        method: 'POST',
+        headers: window.apiHeaders(),
+        body: JSON.stringify({ action: 'reject_trigger', trigger_id: triggerId, reason })
+      }).then(r => r.json()).then(() => {
+        loadTabData('allocator').then(() => { setLoading(false); renderCurrentTab(); });
+      });
     }
   };
 }
