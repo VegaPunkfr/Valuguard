@@ -64,6 +64,81 @@ function companyDedupeKey(d: { domain?: string; name?: string }): string {
   return `name:${(d.name || '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 }
 
+// ── LEGACY TOOLS DETECTION ──
+const LEGACY_TOOLS = new Set(['dotnetnuke','phusion_passenger','act','homestead','html5_maker','siemens_simatic_s7','cedexis_radar','omniture_adobe']);
+
+function detectLegacy(techStack: unknown[]): boolean {
+  if (!Array.isArray(techStack)) return false;
+  return techStack.some(t => {
+    const name = (typeof t === 'string' ? t : (t as {uid?:string})?.uid || '').toLowerCase().replace(/[^a-z0-9_]/g,'');
+    return LEGACY_TOOLS.has(name);
+  });
+}
+
+function countClouds(techStack: unknown[]): boolean {
+  if (!Array.isArray(techStack)) return false;
+  const clouds = new Set<string>();
+  const cloudMap: Record<string,string> = {'amazon_aws':'aws','amazon aws':'aws','aws':'aws','microsoft_azure':'azure','microsoft azure':'azure','azure':'azure','google_cloud':'gcp','gcp':'gcp','google cloud':'gcp'};
+  techStack.forEach(t => {
+    const name = (typeof t === 'string' ? t : (t as {name?:string})?.name || '').toLowerCase();
+    if (cloudMap[name]) clouds.add(cloudMap[name]);
+  });
+  return clouds.size >= 2;
+}
+
+// ── SCORING FUNCTIONS ──
+function calcPressure(company: Record<string,unknown>, people: Record<string,unknown>[]): number {
+  let s = 0;
+  if ((company.headcount_growth_12m as number) < -0.1) s += 20;
+  const hasCfo = people.some((p:any) => /cfo|chief financial/i.test(p.canonical_title||''));
+  if (hasCfo) s += 15; // presence of CFO in our radar = we can reach decision maker
+  if ((company.tool_count as number || 0) > 40) s += 15;
+  if (company.has_legacy_tools) s += 10;
+  if (company.multi_cloud) s += 10;
+  const funding = company.latest_funding_stage as string || '';
+  if (/series [bc]/i.test(funding)) s += 10;
+  return Math.min(s, 100);
+}
+
+function calcCommittee(people: Record<string,unknown>[]): { score: number; coverage: string; gaps: string[] } {
+  let s = 0;
+  const gaps: string[] = [];
+  const hasCfo = people.some((p:any) => /cfo|chief financial|vp finance|finance director|head of finance/i.test(p.canonical_title||''));
+  const hasCio = people.some((p:any) => /cio|cto|chief technology|chief information|vp it|it director|head of it|vp engineering/i.test(p.canonical_title||''));
+  const hasProc = people.some((p:any) => /procurement|purchasing|vendor|sourcing/i.test(p.canonical_title||''));
+  if (hasCfo) s += 30; else gaps.push('cfo');
+  if (hasCio) s += 25; else gaps.push('cio');
+  if (hasProc) s += 20; else gaps.push('procurement');
+  const enriched = people.filter((p:any) => p.canonical_email).length;
+  if (enriched > 0) s += 10;
+  const coverage = (hasCfo && hasCio) ? (hasProc ? 'complete' : 'partial') : 'none';
+  return { score: Math.min(s, 100), coverage, gaps };
+}
+
+function calcActivation(thesis: Record<string,unknown>, hasVerifiedEmail: boolean, signalAge: number): number {
+  let s = 0;
+  if (thesis.snapshot_written) s += 25;
+  if (thesis.email_drafted) s += 20;
+  if (hasVerifiedEmail) s += 25;
+  if (signalAge < 30) s += 15;
+  else if (signalAge < 60) s += 5;
+  return Math.min(s, 100);
+}
+
+function calcExpectedValue(composite: number, hasOutreach: boolean, committeeCoverage: string, signalAge: number): number {
+  const outreachFactor = hasOutreach ? 1.0 : 0.3;
+  const committeeFactor = committeeCoverage !== 'none' ? 1.0 : 0.5;
+  const freshFactor = signalAge < 14 ? 1.0 : signalAge < 30 ? 0.7 : 0.4;
+  return Math.round(composite * outreachFactor * committeeFactor * freshFactor);
+}
+
+function benchmarkConfidence(sampleSize: number): string {
+  if (sampleSize >= 50) return 'publishable';
+  if (sampleSize >= 30) return 'defensible';
+  if (sampleSize >= 10) return 'indicative';
+  return 'internal';
+}
+
 // ── GET ──
 export async function GET(req: NextRequest) {
   const type = req.nextUrl.searchParams.get('type') || 'sessions';
@@ -139,6 +214,47 @@ export async function GET(req: NextRequest) {
     case 'patterns': {
       const sessions = await q(`recon_sessions?select=*&order=created_at.desc&limit=100`);
       return NextResponse.json({ data: sessions || [] });
+    }
+    case 'thesis': {
+      let path = `recon_account_thesis?select=*&order=composite_score.desc&limit=${limit}&offset=${offset}`;
+      if (status) path += `&thesis_status=eq.${encodeURIComponent(status)}`;
+      if (search) path += `&company_domain=ilike.*${encodeURIComponent(search)}*`;
+      const data = await q(path);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'thesis_detail': {
+      const companyId = req.nextUrl.searchParams.get('company_id');
+      if (!companyId) return NextResponse.json({ thesis: null });
+      const data = await q(`recon_account_thesis?company_id=eq.${companyId}&limit=1`);
+      return NextResponse.json({ thesis: data?.[0] || null });
+    }
+    case 'watchlists': {
+      const data = await q(`recon_watchlists?select=*&order=created_at.desc&limit=${limit}`);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'triggers': {
+      const pending = req.nextUrl.searchParams.get('pending');
+      let path = `recon_trigger_queue?select=*&order=expected_value.desc&limit=${limit}`;
+      if (pending === 'true') path += '&approved=eq.false&executed=eq.false&rejected=eq.false';
+      const data = await q(path);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'enrichment_log': {
+      const data = await q(`recon_enrichment_log?select=*&order=created_at.desc&limit=${limit}`);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'benchmarks': {
+      const segment = req.nextUrl.searchParams.get('segment') || '';
+      let path = `recon_benchmarks?select=*&order=segment_key.asc`;
+      if (segment) path += `&segment_key=eq.${encodeURIComponent(segment)}`;
+      const data = await q(path);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'committee': {
+      const companyId = req.nextUrl.searchParams.get('company_id');
+      if (!companyId) return NextResponse.json({ data: [] });
+      const data = await q(`recon_person_company?company_id=eq.${companyId}&order=is_current.desc,last_observed_at.desc`);
+      return NextResponse.json({ data: data || [] });
     }
     default:
       return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
@@ -345,6 +461,103 @@ export async function POST(req: NextRequest) {
         headers: { Prefer: 'count=exact' } as Record<string, string>,
       });
 
+      // ── POST-INGEST: Update company metadata ──
+      for (const r of results) {
+        if (r.domain || r.company) {
+          const cdk = companyDedupeKey({ domain: r.domain, name: r.company });
+          const comp = await q(`recon_companies?dedupe_key=eq.${encodeURIComponent(cdk)}&limit=1`);
+          if (comp?.length) {
+            const c = comp[0];
+            const stack = c.tech_stack || [];
+            const tc = Array.isArray(stack) ? stack.length : 0;
+            const legacy = detectLegacy(stack);
+            const mc = countClouds(stack);
+            if (tc !== c.tool_count || legacy !== c.has_legacy_tools || mc !== c.multi_cloud) {
+              await q(`recon_companies?id=eq.${c.id}`, { method: 'PATCH', body: JSON.stringify({ tool_count: tc, has_legacy_tools: legacy, multi_cloud: mc }) });
+            }
+
+            // Auto-create thesis if company seen >= 2
+            if ((c.appearance_count || 0) >= 2) {
+              const existingThesis = await q(`recon_account_thesis?company_id=eq.${c.id}&limit=1`);
+              const companyPeople = await q(`recon_person_company?company_id=eq.${c.id}&is_current=eq.true&select=person_id`);
+              const peopleIds = (companyPeople || []).map((pc:any) => pc.person_id);
+              let peopleData: Record<string,unknown>[] = [];
+              if (peopleIds.length) {
+                peopleData = await q(`recon_people?id=in.(${peopleIds.join(',')})&limit=20`) || [];
+              }
+
+              const pressure = calcPressure(c, peopleData);
+              const { score: commScore, coverage, gaps } = calcCommittee(peopleData);
+              const hasVerified = peopleData.some((p:any) => p.canonical_email && p.email_status === 'verified');
+              const primarySignal = session.strategic_intent || 'discovery';
+
+              const thesisData = {
+                account_pressure_score: pressure,
+                committee_completeness_score: commScore,
+                committee_coverage: coverage,
+                committee_gaps: gaps,
+                target_committee: peopleData.map((p:any) => ({ person_id: p.id, name: p.canonical_name, title: p.canonical_title, enriched: !!p.canonical_email })),
+                contact_count: peopleData.length,
+                enriched_contact_count: peopleData.filter((p:any) => p.canonical_email).length,
+                tool_count: tc,
+                has_verified_contact: hasVerified,
+                company_seen_count: c.appearance_count || 0,
+                primary_signal: primarySignal,
+                primary_signal_age_days: 0,
+                benchmark_readiness: false,
+                version: (existingThesis?.[0]?.version || 0) + 1,
+                last_computed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              };
+
+              const activationScore = calcActivation(existingThesis?.[0] || {}, hasVerified, 0);
+              (thesisData as any).activation_readiness_score = activationScore;
+              (thesisData as any).composite_score = Math.round(pressure * 0.4 + commScore * 0.3 + activationScore * 0.3);
+
+              // Recommended next move
+              const comp_score = (thesisData as any).composite_score;
+              (thesisData as any).recommended_next_move = comp_score >= 85 ? 'Activate — send Intelligence Drop' : comp_score >= 70 ? 'Enrich — trigger queue for missing emails' : comp_score >= 50 ? 'Prepare — write snapshot, draft email' : comp_score >= 30 ? 'Review — check committee gaps' : 'Monitor — rescan next week';
+
+              if (existingThesis?.length) {
+                // Preserve editorial fields
+                await q(`recon_account_thesis?company_id=eq.${c.id}`, { method: 'PATCH', body: JSON.stringify(thesisData) });
+              } else {
+                await q('recon_account_thesis', { method: 'POST', body: JSON.stringify({ ...thesisData, company_id: c.id, company_domain: c.canonical_domain || '' }) });
+              }
+            }
+          }
+        }
+      }
+
+      // ── POST-INGEST: Update benchmarks ──
+      const allCompanies = await q('recon_companies?select=canonical_industry,employee_count,tool_count,has_legacy_tools,multi_cloud&tool_count=gt.0&limit=500') || [];
+      if (allCompanies.length >= 3) {
+        // Group by employee range
+        const ranges = [
+          { key: 'emp_100_300', min: 100, max: 300 },
+          { key: 'emp_300_1000', min: 300, max: 1000 },
+          { key: 'emp_all', min: 0, max: 100000 }
+        ];
+        for (const range of ranges) {
+          const segment = allCompanies.filter((c:any) => (c.employee_count||0) >= range.min && (c.employee_count||0) < range.max);
+          if (segment.length < 3) continue;
+          const tools = segment.map((c:any) => c.tool_count).sort((a:number,b:number) => a-b);
+          const conf = benchmarkConfidence(tools.length);
+          const median = tools[Math.floor(tools.length/2)];
+          const p25 = tools[Math.floor(tools.length*0.25)];
+          const p75 = tools[Math.floor(tools.length*0.75)];
+
+          // Upsert benchmark
+          const existing = await q(`recon_benchmarks?segment_key=eq.${range.key}&metric_name=eq.tool_count&limit=1`);
+          const bmData = { segment_key: range.key, metric_name: 'tool_count', sample_size: tools.length, min_val: tools[0], p25_val: p25, median_val: median, p75_val: p75, max_val: tools[tools.length-1], confidence_level: conf, last_computed_at: new Date().toISOString() };
+          if (existing?.length) {
+            await q(`recon_benchmarks?id=eq.${existing[0].id}`, { method: 'PATCH', body: JSON.stringify(bmData) });
+          } else {
+            await q('recon_benchmarks', { method: 'POST', body: JSON.stringify(bmData) });
+          }
+        }
+      }
+
       return NextResponse.json({
         ok: true,
         session_id: sessId,
@@ -409,6 +622,81 @@ export async function POST(req: NextRequest) {
 
       updates.updated_at = new Date().toISOString();
       await q(`recon_ops_state?entity_id=eq.${entity_id}`, { method: 'PATCH', body: JSON.stringify(updates) });
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── UPSERT WATCHLIST ──
+    if (action === 'upsert_watchlist') {
+      const { watchlist } = body;
+      if (!watchlist?.name) return NextResponse.json({ error: 'Missing watchlist name' }, { status: 400 });
+      if (watchlist.id) {
+        await q(`recon_watchlists?id=eq.${watchlist.id}`, { method: 'PATCH', body: JSON.stringify({ ...watchlist, updated_at: new Date().toISOString() }) });
+        return NextResponse.json({ ok: true });
+      }
+      const res = await q('recon_watchlists', { method: 'POST', body: JSON.stringify(watchlist) });
+      return NextResponse.json({ ok: true, id: res?.[0]?.id });
+    }
+
+    // ── APPROVE TRIGGER ──
+    if (action === 'approve_trigger') {
+      const { trigger_id } = body;
+      if (!trigger_id) return NextResponse.json({ error: 'Missing trigger_id' }, { status: 400 });
+
+      // Check gates
+      const trigger = await q(`recon_trigger_queue?id=eq.${trigger_id}&limit=1`);
+      if (!trigger?.length) return NextResponse.json({ error: 'Trigger not found' }, { status: 404 });
+      const t = trigger[0];
+
+      if (t.committee_completeness < 25 && t.trigger_type !== 'job_change_detected') {
+        return NextResponse.json({ error: 'Gate blocked: committee_completeness too low (<25). Find more contacts first.', gate: 'committee' }, { status: 422 });
+      }
+      if (t.activation_readiness < 25 && t.trigger_type === 'outreach_ready') {
+        return NextResponse.json({ error: 'Gate blocked: activation_readiness too low (<25). Prepare snapshot first.', gate: 'activation' }, { status: 422 });
+      }
+
+      await q(`recon_trigger_queue?id=eq.${trigger_id}`, { method: 'PATCH', body: JSON.stringify({ approved: true, approved_at: new Date().toISOString() }) });
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── REJECT TRIGGER ──
+    if (action === 'reject_trigger') {
+      const { trigger_id, reason } = body;
+      if (!trigger_id) return NextResponse.json({ error: 'Missing trigger_id' }, { status: 400 });
+      await q(`recon_trigger_queue?id=eq.${trigger_id}`, { method: 'PATCH', body: JSON.stringify({ rejected: true, rejected_reason: reason || 'Operator decision' }) });
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── LOG ENRICHMENT ──
+    if (action === 'log_enrichment') {
+      const { entity_id, trigger_id, credits, reason, data_before, data_after, value_gained } = body;
+      if (!entity_id || !reason) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+
+      // Check benchmark governance: no client-facing benchmark if confidence < defensible
+
+      await q('recon_enrichment_log', { method: 'POST', body: JSON.stringify({
+        entity_id, entity_type: 'person', trigger_id: trigger_id || null,
+        credits_consumed: credits || 1, reason, data_before: data_before || {},
+        data_after: data_after || {}, value_gained: value_gained || ''
+      }) });
+
+      if (trigger_id) {
+        await q(`recon_trigger_queue?id=eq.${trigger_id}`, { method: 'PATCH', body: JSON.stringify({ executed: true, executed_at: new Date().toISOString() }) });
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── UPDATE THESIS EDITORIAL FIELDS ──
+    if (action === 'update_thesis') {
+      const { company_id, updates } = body;
+      if (!company_id || !updates) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+      // Only allow editorial + workflow fields to be updated manually
+      const allowed = ['why_now','outreach_angle','snapshot_notes','internal_hypothesis','operator_notes','thesis_status','snapshot_written','email_drafted','primary_contact_id'];
+      const clean: Record<string,unknown> = {};
+      for (const k of allowed) { if (updates[k] !== undefined) clean[k] = updates[k]; }
+      clean.last_edited_at = new Date().toISOString();
+      clean.updated_at = new Date().toISOString();
+      await q(`recon_account_thesis?company_id=eq.${company_id}`, { method: 'PATCH', body: JSON.stringify(clean) });
       return NextResponse.json({ ok: true });
     }
 

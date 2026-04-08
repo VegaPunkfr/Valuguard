@@ -34,15 +34,17 @@ export async function GET() {
   }
 
   const tables = ['recon_sessions', 'recon_snapshots', 'recon_people', 'recon_companies',
-    'recon_person_company', 'recon_actions', 'recon_ops_state', 'recon_entity_sessions', 'recon_merge_log'];
+    'recon_person_company', 'recon_actions', 'recon_ops_state', 'recon_entity_sessions', 'recon_merge_log',
+    'recon_account_thesis', 'recon_watchlists', 'recon_trigger_queue', 'recon_enrichment_log', 'recon_benchmarks'];
 
   const tableChecks = await Promise.all(tables.map(t => tableExists(t)));
   const tablesPresent = tables.reduce((acc, t, i) => ({ ...acc, [t]: tableChecks[i] }), {} as Record<string, boolean>);
   const allTablesOk = tableChecks.every(Boolean);
 
-  const [sessions, snapshots, people, companies, relationships, actions, opsStates, entityLinks] = await Promise.all([
+  const [sessions, snapshots, people, companies, relationships, actions, opsStates, entityLinks, thesisCount, watchlistCount, triggerCount, enrichmentLogCount, benchmarkCount] = await Promise.all([
     count('recon_sessions'), count('recon_snapshots'), count('recon_people'), count('recon_companies'),
     count('recon_person_company'), count('recon_actions'), count('recon_ops_state'), count('recon_entity_sessions', 'person_id'),
+    count('recon_account_thesis'), count('recon_watchlists'), count('recon_trigger_queue'), count('recon_enrichment_log'), count('recon_benchmarks'),
   ]);
 
   // Test ingest capability (dry check — can we insert into sessions?)
@@ -76,6 +78,6 @@ export async function GET() {
     ingest_ready: ingestReady,
     transition_enforcement_ready: true,
     pattern_mode: 'computed',
-    counts: { sessions, snapshots, people, companies, relationships, actions, ops_states: opsStates, entity_links: entityLinks },
+    counts: { sessions, snapshots, people, companies, relationships, actions, ops_states: opsStates, entity_links: entityLinks, thesis_count: thesisCount, watchlist_count: watchlistCount, trigger_count: triggerCount, enrichment_log_count: enrichmentLogCount, benchmark_count: benchmarkCount },
   });
 }
