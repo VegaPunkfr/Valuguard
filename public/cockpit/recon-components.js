@@ -98,7 +98,7 @@ export function renderSnapshotRow(snapshot, rank) {
 
 export function renderPersonRow(person, opsState, freshness) {
   const pid = s(person.id);
-  const status = opsState?.status || 'discovered';
+  const status = opsState?.current_status || 'discovered';
   const color = STATUS_COLORS[status] || 'var(--t3)';
   const name = s(person.name || `${person.first_name || ''} ${person.last_name || ''}`.trim());
   const title = s(truncate(person.title || '', 28));
@@ -122,7 +122,7 @@ export function renderPersonRow(person, opsState, freshness) {
 
 export function renderPersonDetail(person, opsState, company, relationships, actions, sessions) {
   const pid = s(person.id);
-  const status = opsState?.status || 'discovered';
+  const status = opsState?.current_status || 'discovered';
   const color = STATUS_COLORS[status] || 'var(--t3)';
   const name = s(person.name || `${person.first_name || ''} ${person.last_name || ''}`.trim());
   const title = s(person.title || '');
@@ -288,7 +288,7 @@ export function renderCompanyRow(company) {
 
 export function renderActionQueueRow(person, opsState) {
   const pid = s(person.id);
-  const status = opsState?.status || 'discovered';
+  const status = opsState?.current_status || 'discovered';
   const color = STATUS_COLORS[status] || 'var(--t3)';
   const name = s(person.name || `${person.first_name || ''} ${person.last_name || ''}`.trim());
   const company = s(person.company_name || person.company_domain || '');

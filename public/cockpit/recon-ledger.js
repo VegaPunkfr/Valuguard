@@ -4,6 +4,21 @@ import * as sm from './recon-state.js';
 import * as ui from './recon-components.js';
 import * as u from './recon-utils.js';
 
+// Normalize Supabase canonical_* fields to short names for components
+function normPerson(p) {
+  if (!p) return p;
+  return { ...p,
+    name: p.canonical_name || p.name || '',
+    email: p.canonical_email || p.email || '',
+    title: p.canonical_title || p.title || '',
+    company: p.canonical_company || p.company || '',
+    country: p.canonical_country || p.country || '',
+    city: p.canonical_city || p.city || '',
+    linkedin: p.canonical_linkedin || p.linkedin || '',
+    email_status: p.email_status || 'unknown',
+  };
+}
+
 let _container = null;
 let _searchTimer = null;
 
@@ -234,11 +249,11 @@ function renderPatterns() {
     const withEmail = people.filter(p => !!p.email).length;
     const contacted = people.filter(p => {
       const ops = S.ops[p.id];
-      return ops && ['contacted','replied','nurturing','qualified','closed'].includes(ops.status);
+      return ops && ['contacted','replied','nurturing','qualified','closed'].includes(ops.current_status);
     }).length;
     const replied = people.filter(p => {
       const ops = S.ops[p.id];
-      return ops && ['replied','nurturing','qualified','closed'].includes(ops.status);
+      return ops && ['replied','nurturing','qualified','closed'].includes(ops.current_status);
     }).length;
     return {
       session: sess,
@@ -280,11 +295,11 @@ async function showDetail(personId) {
     return;
   }
 
-  const person = personRes.person || {};
+  const person = normPerson(personRes.person || {});
   const actions = personRes.actions || [];
   const ops = personRes.ops || S.ops[personId] || {};
   if (ops.entity_id) S.ops[ops.entity_id] = ops;
-  const nextStates = sm.getNextStates(ops.status || 'discovered');
+  const nextStates = sm.getNextStates(ops.current_status || 'discovered');
   const priority = sm.calculatePriority(person, ops, actions);
   const fresh = u.freshness(person.last_seen_at);
 
@@ -316,7 +331,7 @@ async function loadInitial() {
   ]);
 
   S.sessions = sessRes.data || [];
-  S.people = peopleRes.data || [];
+  S.people = (peopleRes.data || []).map(normPerson);
   const opsArr = opsRes.data || [];
   opsArr.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
   if (!Array.isArray(S.sessions)) S.sessions = [];
@@ -346,7 +361,7 @@ async function loadTabData(tab) {
         api.fetchPeople({ limit: S.page.limit, q: S.filters.q || '', status: S.filters.status || '' }),
         api.fetchOpsStates({ limit: 100 })
       ]);
-      S.people = res.data || [];
+      S.people = (res.data || []).map(normPerson);
       if (!Array.isArray(S.people)) S.people = [];
       const opsArr = opsRes.data || [];
       opsArr.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
@@ -391,7 +406,7 @@ async function loadMore() {
     S.page.more = arr.length >= S.page.limit;
   } else if (S.tab === 'entities') {
     const res = await api.fetchPeople({ limit: S.page.limit, offset: S.page.offset, q: S.filters.q || '', status: S.filters.status || '' });
-    const arr = res.data || [];
+    const arr = (res.data || []).map(normPerson);
     S.people = S.people.concat(arr);
     S.page.more = arr.length >= S.page.limit;
   }

@@ -40,12 +40,14 @@ export function calculatePriority(entity, opsState, actions = []) {
   score += Math.min((entity.appearance_count || 1) * 8, 40);
 
   // Data confidence — more data = higher priority
-  const confidence = entity.data_confidence || 0;
-  score += Math.round(confidence * 25);
+  const conf = entity.data_confidence || 'unknown';
+  score += conf === 'high' ? 25 : conf === 'medium' ? 15 : conf === 'low' ? 5 : 0;
 
   // Has verified email = critical for outreach
-  if (entity.email && entity.email_status === 'verified') score += 20;
-  else if (entity.email) score += 10;
+  const email = entity.canonical_email || entity.email;
+  const emailStatus = entity.email_status || 'unknown';
+  if (email && emailStatus === 'verified') score += 20;
+  else if (email) score += 10;
 
   // Recency — last seen recently = boost
   if (entity.last_seen_at) {
@@ -56,7 +58,7 @@ export function calculatePriority(entity, opsState, actions = []) {
   }
 
   // Job changed recently = high intent signal
-  if (entity.job_changed) score += 15;
+  if (entity.job_changed_flag || entity.job_changed) score += 15;
 
   // Seniority bonus
   const seniority = (entity.seniority || '').toLowerCase();
