@@ -273,19 +273,17 @@ async function showDetail(personId) {
   detailEl.style.display = 'block';
   detailEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t3)">Chargement...</div>';
 
-  const [personRes, actionsRes] = await Promise.all([
-    api.fetchPersonDetail(personId),
-    api.fetchActions(personId)
-  ]);
+  const personRes = await api.fetchPersonDetail(personId);
 
   if (personRes.error) {
     detailEl.innerHTML = `<div style="padding:20px;color:var(--red)">Erreur: ${window.sanitize(personRes.error)}</div>`;
     return;
   }
 
-  const person = personRes.person || personRes;
-  const actions = actionsRes.actions || actionsRes || [];
-  const ops = S.ops[personId] || {};
+  const person = personRes.person || {};
+  const actions = personRes.actions || [];
+  const ops = personRes.ops || S.ops[personId] || {};
+  if (ops.entity_id) S.ops[ops.entity_id] = ops;
   const nextStates = sm.getNextStates(ops.status || 'discovered');
   const priority = sm.calculatePriority(person, ops, actions);
   const fresh = u.freshness(person.last_seen_at);
@@ -311,33 +309,23 @@ function hideDetail() {
 
 async function loadInitial() {
   setLoading(true);
-  const [sessRes, peopleRes] = await Promise.all([
+  const [sessRes, peopleRes, opsRes] = await Promise.all([
     api.fetchSessions({ limit: S.page.limit }),
-    api.fetchPeople({ limit: S.page.limit, sortBy: S.sort.field })
+    api.fetchPeople({ limit: S.page.limit }),
+    api.fetchOpsStates({ limit: 100 })
   ]);
 
-  S.sessions = sessRes.sessions || sessRes || [];
-  S.people = peopleRes.people || peopleRes || [];
+  S.sessions = sessRes.data || [];
+  S.people = peopleRes.data || [];
+  const opsArr = opsRes.data || [];
+  opsArr.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
   if (!Array.isArray(S.sessions)) S.sessions = [];
   if (!Array.isArray(S.people)) S.people = [];
   S.page.more = S.people.length >= S.page.limit || S.sessions.length >= S.page.limit;
 
-  // Load ops states for all people in parallel (batched)
-  await loadOpsStates(S.people);
-
   setLoading(false);
   renderStats();
   renderCurrentTab();
-}
-
-async function loadOpsStates(people) {
-  const ids = people.map(p => p.id).filter(Boolean);
-  const results = await Promise.all(ids.map(id => api.fetchOpsState(id)));
-  results.forEach((res, i) => {
-    if (!res.error) {
-      S.ops[ids[i]] = res.ops_state || res || {};
-    }
-  });
 }
 
 async function loadTabData(tab) {
@@ -347,40 +335,36 @@ async function loadTabData(tab) {
 
   switch (tab) {
     case 'tape': {
-      const res = await api.fetchSessions({ limit: S.page.limit, intent: S.filters.q || '' });
-      S.sessions = res.sessions || res || [];
+      const res = await api.fetchSessions({ limit: S.page.limit });
+      S.sessions = res.data || [];
       if (!Array.isArray(S.sessions)) S.sessions = [];
       S.page.more = S.sessions.length >= S.page.limit;
       break;
     }
     case 'entities': {
-      const res = await api.fetchPeople({
-        limit: S.page.limit,
-        q: S.filters.q || '',
-        status: S.filters.status || '',
-        sortBy: S.sort.field
-      });
-      S.people = res.people || res || [];
+      const [res, opsRes] = await Promise.all([
+        api.fetchPeople({ limit: S.page.limit, q: S.filters.q || '', status: S.filters.status || '' }),
+        api.fetchOpsStates({ limit: 100 })
+      ]);
+      S.people = res.data || [];
       if (!Array.isArray(S.people)) S.people = [];
-      await loadOpsStates(S.people);
+      const opsArr = opsRes.data || [];
+      opsArr.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
       S.page.more = S.people.length >= S.page.limit;
       break;
     }
     case 'queue': {
-      const res = await api.fetchActionQueue({ status: S.filters.status, limit: S.page.limit });
-      const queuePeople = res.people || res || [];
-      if (Array.isArray(queuePeople)) {
-        // Merge into S.people without duplicates
-        const existing = new Set(S.people.map(p => p.id));
-        queuePeople.forEach(p => { if (!existing.has(p.id)) S.people.push(p); });
-        await loadOpsStates(queuePeople);
+      const res = await api.fetchActionQueue({ limit: S.page.limit });
+      const queueOps = res.data || [];
+      if (Array.isArray(queueOps)) {
+        queueOps.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
       }
       break;
     }
     case 'patterns': {
       if (S.sessions.length === 0) {
         const res = await api.fetchSessions({ limit: 100 });
-        S.sessions = res.sessions || res || [];
+        S.sessions = res.data || [];
         if (!Array.isArray(S.sessions)) S.sessions = [];
       }
       break;
@@ -401,30 +385,15 @@ async function loadMore() {
   S.loading = true;
 
   if (S.tab === 'tape') {
-    const res = await api.fetchSessions({ limit: S.page.limit, offset: S.page.offset, intent: S.filters.q || '' });
-    const newSessions = res.sessions || res || [];
-    if (Array.isArray(newSessions)) {
-      S.sessions = S.sessions.concat(newSessions);
-      S.page.more = newSessions.length >= S.page.limit;
-    } else {
-      S.page.more = false;
-    }
+    const res = await api.fetchSessions({ limit: S.page.limit, offset: S.page.offset });
+    const arr = res.data || [];
+    S.sessions = S.sessions.concat(arr);
+    S.page.more = arr.length >= S.page.limit;
   } else if (S.tab === 'entities') {
-    const res = await api.fetchPeople({
-      limit: S.page.limit,
-      offset: S.page.offset,
-      q: S.filters.q || '',
-      status: S.filters.status || '',
-      sortBy: S.sort.field
-    });
-    const newPeople = res.people || res || [];
-    if (Array.isArray(newPeople)) {
-      S.people = S.people.concat(newPeople);
-      await loadOpsStates(newPeople);
-      S.page.more = newPeople.length >= S.page.limit;
-    } else {
-      S.page.more = false;
-    }
+    const res = await api.fetchPeople({ limit: S.page.limit, offset: S.page.offset, q: S.filters.q || '', status: S.filters.status || '' });
+    const arr = res.data || [];
+    S.people = S.people.concat(arr);
+    S.page.more = arr.length >= S.page.limit;
   }
 
   S.loading = false;
@@ -437,11 +406,11 @@ async function loadMore() {
 // ── Action handlers ──────────────────────────────────────────────
 
 async function changeStatus(id, newStatus) {
-  const current = S.ops[id]?.status || 'discovered';
+  const current = S.ops[id]?.current_status || 'discovered';
   if (!sm.canTransition(current, newStatus)) return;
-  const res = await sm.transitionEntity(id, newStatus);
+  const res = await api.updateOpsState(id, { current_status: newStatus });
   if (!res.error) {
-    S.ops[id] = { ...S.ops[id], status: newStatus, last_transition_at: new Date().toISOString() };
+    S.ops[id] = { ...S.ops[id], current_status: newStatus, previous_status: current, status_changed_at: new Date().toISOString() };
     renderStats();
     renderCurrentTab();
     if (S.selectedId === id) showDetail(id);
