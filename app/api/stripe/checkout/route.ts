@@ -222,25 +222,24 @@ export async function POST(request: NextRequest) {
       custom_text: {
         submit: {
           message: locale === "fr"
-            ? "Livraison sous 48h · Garantie zéro-exposition = remboursement intégral"
+            ? "Rapport livré sous 48h par email"
             : locale === "de"
-              ? "Lieferung in 48h · Zero-Exposure-Garantie = volle Rückerstattung"
-              : "Delivery within 48h · Zero-exposure guarantee = full refund",
+              ? "Bericht wird innerhalb von 48h per E-Mail geliefert"
+              : "Report delivered within 48h by email",
         },
         after_submit: {
           message: locale === "fr"
-            ? "Vous recevrez votre Decision Pack par email sous 48h."
+            ? "Vous recevrez votre IT Exposure Briefing par email sous 48h."
             : locale === "de"
-              ? "Sie erhalten Ihr Decision Pack innerhalb von 48h per E-Mail."
-              : "You will receive your Decision Pack by email within 48h.",
+              ? "Sie erhalten Ihr IT-Expositions-Briefing innerhalb von 48h per E-Mail."
+              : "You will receive your IT Exposure Briefing by email within 48h.",
         },
       },
       payment_intent_data: checkoutMode === "payment" ? {
         description: `Ghost Tax — ${rail === "A" ? "Financial Exposure Detection" : "Stabilization Protocol 30/60/90"}`,
         statement_descriptor_suffix: "GHOST TAX",
       } : undefined,
-      phone_number_collection: { enabled: true },
-      tax_id_collection: { enabled: true, required: "if_supported" },
+      // phone + tax ID removed — friction kills conversion at €490
     });
 
     return NextResponse.json({ url: session.url });
