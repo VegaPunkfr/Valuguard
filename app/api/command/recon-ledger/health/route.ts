@@ -16,9 +16,9 @@ export async function GET() {
 
   const headers = { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
 
-  async function count(table: string): Promise<number> {
+  async function count(table: string, selectCol = 'id'): Promise<number> {
     try {
-      const res = await fetch(`${url}/rest/v1/${table}?select=id&limit=0`, {
+      const res = await fetch(`${url}/rest/v1/${table}?select=${selectCol}&limit=0`, {
         headers: { ...headers, Prefer: 'count=exact' },
       });
       const total = res.headers.get('content-range');
@@ -42,7 +42,7 @@ export async function GET() {
 
   const [sessions, snapshots, people, companies, relationships, actions, opsStates, entityLinks] = await Promise.all([
     count('recon_sessions'), count('recon_snapshots'), count('recon_people'), count('recon_companies'),
-    count('recon_person_company'), count('recon_actions'), count('recon_ops_state'), count('recon_entity_sessions'),
+    count('recon_person_company'), count('recon_actions'), count('recon_ops_state'), count('recon_entity_sessions', 'person_id'),
   ]);
 
   // Test ingest capability (dry check — can we insert into sessions?)

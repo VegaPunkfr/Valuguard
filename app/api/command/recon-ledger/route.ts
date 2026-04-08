@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
       const sessId = sess?.[0]?.id;
       if (!sessId) return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
 
-      let peopleProcessed = 0, companiesProcessed = 0;
+      let peopleProcessed = 0, companiesProcessed = 0, peopleReappeared = 0, dataImproved = 0, snapshotsCreated = 0;
 
       for (let i = 0; i < results.length; i++) {
         const r = results[i];
@@ -238,12 +238,14 @@ export async function POST(req: NextRequest) {
             updates.canonical_email = r.email;
             updates.contact_improved_flag = true;
             updates.last_enriched_at = new Date().toISOString();
+            dataImproved++;
           }
           if (r.title && r.title !== existingP[0].canonical_title) {
             updates.canonical_title = r.title;
-            if (existingP[0].canonical_title) updates.job_changed_flag = true;
+            if (existingP[0].canonical_title) { updates.job_changed_flag = true; dataImproved++; }
           }
           await q(`recon_people?id=eq.${personId}`, { method: 'PATCH', body: JSON.stringify(updates) });
+          peopleReappeared++;
         } else {
           const ins = await q('recon_people', {
             method: 'POST',
@@ -280,6 +282,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Snapshot
+        snapshotsCreated++;
         await q('recon_snapshots', {
           method: 'POST',
           body: JSON.stringify({
@@ -330,7 +333,30 @@ export async function POST(req: NextRequest) {
         }).catch(() => {}); // ignore duplicate
       }
 
-      return NextResponse.json({ ok: true, session_id: sessId, people_processed: peopleProcessed, companies_processed: companiesProcessed });
+      // Update session quality based on results
+      const quality = peopleProcessed + peopleReappeared > 0 ? (dataImproved > 0 ? 'productive' : 'mixed') : 'empty';
+      await q(`recon_sessions?id=eq.${sessId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ useful_count: peopleProcessed + dataImproved, session_quality: quality }),
+      });
+
+      // Count actionable
+      const actionableRes = await q('recon_ops_state?actionable_now=eq.true&select=entity_id&limit=0', {
+        headers: { Prefer: 'count=exact' } as Record<string, string>,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        session_id: sessId,
+        stats: {
+          snapshots_created: snapshotsCreated,
+          new_people: peopleProcessed,
+          reappeared: peopleReappeared,
+          data_improved: dataImproved,
+          new_companies: companiesProcessed,
+          session_quality: quality,
+        },
+      });
     }
 
     // ── LOG ACTION ──
