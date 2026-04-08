@@ -11,6 +11,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+// ── State Machine: server-enforced transitions ──
+const TRANSITIONS: Record<string, string[]> = {
+  discovered: ['reviewed', 'suppressed'],
+  reviewed: ['shortlisted', 'suppressed', 'deferred'],
+  shortlisted: ['contacted', 'deferred', 'suppressed'],
+  contacted: ['replied', 'deferred', 'suppressed'],
+  replied: ['nurturing', 'qualified', 'suppressed'],
+  nurturing: ['qualified', 'deferred', 'suppressed'],
+  deferred: ['discovered'],
+  qualified: ['closed', 'suppressed'],
+  closed: [],
+  suppressed: [],
+};
+
 function sb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -330,12 +344,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // ── UPDATE OPS STATE ──
+    // ── UPDATE OPS STATE (with server-enforced state machine) ──
     if (action === 'update_ops') {
       const { entity_id, updates } = body;
       if (!entity_id || !updates) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+
+      // If status change requested, enforce transitions
+      if (updates.current_status) {
+        const current = await q(`recon_ops_state?entity_id=eq.${entity_id}&select=current_status&limit=1`);
+        if (!current?.length) return NextResponse.json({ error: 'Entity not found in ops_state' }, { status: 404 });
+
+        const from = current[0].current_status;
+        const to = updates.current_status;
+        const allowed = TRANSITIONS[from] || [];
+
+        if (!allowed.includes(to)) {
+          return NextResponse.json({
+            error: `Transition refused: ${from} → ${to}`,
+            allowed_transitions: allowed,
+            current_status: from,
+          }, { status: 422 });
+        }
+
+        updates.previous_status = from;
+        updates.status_changed_at = new Date().toISOString();
+
+        // Log the transition as an action
+        await q('recon_actions', {
+          method: 'POST',
+          body: JSON.stringify({
+            entity_type: 'person',
+            entity_id,
+            action_type: 'status_changed',
+            action_data: { from, to },
+          }),
+        });
+      }
+
       updates.updated_at = new Date().toISOString();
-      if (updates.current_status) updates.status_changed_at = new Date().toISOString();
       await q(`recon_ops_state?entity_id=eq.${entity_id}`, { method: 'PATCH', body: JSON.stringify(updates) });
       return NextResponse.json({ ok: true });
     }
