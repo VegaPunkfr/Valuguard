@@ -585,6 +585,9 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     <div class="nav-item" data-view="intel" data-key="6" onclick="showView('intel')" title="Renseignement">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
     </div>
+    <div class="nav-item" data-view="sent" data-key="7" onclick="showView('sent')" title="Emails envoyés">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    </div>
     <div style="flex:1"></div>
     <div class="nav-item" data-view="settings" data-key="," onclick="showView('settings')" title="Paramètres">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -727,6 +730,14 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     <!-- VIEW: SETTINGS -->
     <div class="view-panel" id="view-settings" style="overflow-y:auto;background:var(--obsidian)">
       <div class="settings-grid" id="settings-content"></div>
+    </div>
+
+    <div class="view-panel" id="view-sent" style="overflow-y:auto;background:var(--obsidian)">
+      <div style="padding:24px;max-width:900px">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:18px">Emails envoyés</div>
+        <div id="sent-list"></div>
+        <div id="sent-empty" style="display:none;padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email envoyé pour l'instant.<br>Les emails apparaîtront ici après envoi depuis le cockpit.</div>
+      </div>
     </div>
 
   </div>
@@ -1572,7 +1583,11 @@ async function sendMsg(id){
     btn.textContent='⏳ Envoi...';btn.style.opacity='.6';
     try{
       const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:(msgEl?.dataset?.subject)||(p.co+' — Ghost Tax'),textBody:body,domain:p.domain||'',prospectId:String(id)})});
-      if(res.ok){btn.textContent='✓ Envoyé à '+p.contact.email;btn.style.background='hsla(155,100%,39%,.1)';btn.style.color='var(--green)';p.seqStep=Math.min(p.seqStep+1,3)}
+      if(res.ok){
+        const data=await res.json().catch(()=>({}));
+        btn.textContent='✓ Envoyé à '+p.contact.email;btn.style.background='hsla(155,100%,39%,.1)';btn.style.color='var(--green)';p.seqStep=Math.min(p.seqStep+1,3);
+        saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:(msgEl?.dataset?.subject)||(p.co+' — Ghost Tax'),body:body,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:'W1',channel:'email'});
+      }
       else{btn.textContent='✗ Erreur envoi';btn.style.color='var(--red)'}
     }catch(e){btn.textContent='✗ Erreur réseau';btn.style.color='var(--red)'}
     btn.style.opacity='1';
@@ -1617,6 +1632,55 @@ function showView(v){
   if(v==='revenue')renderRevenueView();
   if(v==='intel')renderIntelView();
   if(v==='settings')renderSettings();
+  if(v==='sent')renderSentEmails();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SENT EMAILS LOG — persists in localStorage
+// ══════════════════════════════════════════════════════════════════
+function getSentEmails(){try{return JSON.parse(localStorage.getItem('gt-sent-emails')||'[]')}catch{return[]}}
+function saveSentEmail(entry){const emails=getSentEmails();emails.unshift(entry);localStorage.setItem('gt-sent-emails',JSON.stringify(emails.slice(0,200)))}
+
+function renderSentEmails(){
+  const list=document.getElementById('sent-list');
+  const empty=document.getElementById('sent-empty');
+  const emails=getSentEmails();
+  if(!emails.length){list.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  list.innerHTML=emails.map((e,i)=>{
+    const statusColor=e.status==='replied'?'var(--green)':e.status==='opened'?'var(--gold)':e.status==='bounced'?'var(--red)':'var(--t3)';
+    const statusLabel=e.status==='replied'?'RÉPONDU':e.status==='opened'?'OUVERT':e.status==='bounced'?'BOUNCED':'ENVOYÉ';
+    return `<div style="padding:16px;margin-bottom:8px;background:var(--graphite);border:1px solid var(--bd);border-radius:8px;cursor:pointer" onclick="this.querySelector('.sent-detail').style.display=this.querySelector('.sent-detail').style.display==='none'?'block':'none'">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0"></div>
+          <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(e.company||'—')}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(e.to||'—')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <span style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:${statusColor}">${statusLabel}</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--t3)">${e.date||'—'}</span>
+          <button onclick="event.stopPropagation();updateSentStatus(${i})" style="font-family:var(--mono);font-size:8px;padding:3px 8px;background:transparent;border:1px solid var(--bd);border-radius:4px;color:var(--t3);cursor:pointer">Statut ▾</button>
+        </div>
+      </div>
+      <div class="sent-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:4px">OBJET</div>
+        <div style="font-family:var(--body);font-size:12px;color:var(--t2);margin-bottom:12px">${sanitize(e.subject||'—')}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:4px">MESSAGE</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--t2);white-space:pre-wrap;line-height:1.6;max-height:300px;overflow-y:auto">${sanitize(e.body||'—')}</div>
+        ${e.messageId?`<div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px">ID: ${sanitize(e.messageId)}</div>`:''}
+      </div>
+    </div>`}).join('');
+}
+
+function updateSentStatus(index){
+  const emails=getSentEmails();
+  if(!emails[index])return;
+  const statuses=['sent','opened','replied','bounced'];
+  const current=statuses.indexOf(emails[index].status);
+  emails[index].status=statuses[(current+1)%statuses.length];
+  localStorage.setItem('gt-sent-emails',JSON.stringify(emails));
+  renderSentEmails();
 }
 
 // ══════════════════════════════════════════════════════════════════
