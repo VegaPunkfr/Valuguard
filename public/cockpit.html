@@ -1633,6 +1633,7 @@ function showView(v){
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
   const target=document.getElementById('view-'+v);
   if(target){target.classList.add('visible','view-enter');target.style.display='flex'}
+  if(v==='cockpit')loadReconSendReady();
   if(v==='apollo')renderApolloSearch();
   if(v==='sequences'){renderSequences();renderDripAnalytics()}
   if(v==='linkedin')initLinkedIn();
@@ -1641,6 +1642,63 @@ function showView(v){
   if(v==='settings')renderSettings();
   if(v==='sent')renderSentEmails();
   if(v==='tape')initReconLedger();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RECON LEDGER → PROSPECTS SYNC (source of truth unification)
+// ══════════════════════════════════════════════════════════════════
+let reconSyncDone=false;
+async function loadReconSendReady(){
+  if(reconSyncDone)return;
+  try{
+    const res=await fetch('/api/command/recon-ledger?type=ops&limit=50',{headers:apiHeaders()});
+    if(!res.ok)return;
+    const ops=await res.json();
+    const sendReady=(ops.data||[]).filter(o=>o.tags&&o.tags.includes('send_ready'));
+    if(!sendReady.length)return;
+    // Fetch people details for send_ready entities
+    const pRes=await fetch('/api/command/recon-ledger?type=people&limit=100',{headers:apiHeaders()});
+    if(!pRes.ok)return;
+    const people=(await pRes.json()).data||[];
+    const cRes=await fetch('/api/command/recon-ledger?type=companies&limit=100',{headers:apiHeaders()});
+    if(!cRes.ok)return;
+    const companies=(await cRes.json()).data||[];
+    for(const op of sendReady){
+      const person=people.find(p=>p.id===op.entity_id);
+      if(!person||!person.canonical_email)continue;
+      // Skip if already in prospects
+      if(prospects.find(p=>p.contact&&p.contact.email===person.canonical_email))continue;
+      // Find company
+      const pc=companies.find(c=>c.canonical_domain&&person.canonical_email&&person.canonical_email.includes(c.canonical_domain.replace('www.','')));
+      const co=pc||{};
+      const newId=Math.max(...prospects.map(p=>p.id),0)+1;
+      const flag=person.canonical_country==='Germany'?'🇩🇪':person.canonical_country==='Netherlands'?'🇳🇱':person.canonical_country==='United Kingdom'?'🇬🇧':'🌍';
+      const lang=person.canonical_country==='Germany'?'de':person.canonical_country==='Netherlands'?'nl':'en';
+      prospects.push({
+        id:newId,
+        co:co.canonical_name||person.canonical_email.split('@')[1],
+        icon:(co.canonical_name||'??').substring(0,2).toUpperCase(),
+        src:'recon',
+        heat:op.priority_score||50,
+        exp:'Recon Ledger',
+        lang:lang,
+        flag:flag,
+        stage:op.current_status==='shortlisted'?2:op.current_status==='reviewed'?1:0,
+        industry:co.canonical_industry||'—',
+        size:(co.employee_count||'?')+' emp.',
+        revenue:co.revenue_printed||'—',
+        contact:{name:person.canonical_name||'—',title:person.canonical_title||'—',email:person.canonical_email,li:person.canonical_linkedin||''},
+        tech:Array.isArray(co.tech_stack)?co.tech_stack.map(t=>typeof t==='string'?t:t.name||'').slice(0,15):[],
+        bant:{budget:15,authority:15,need:15,timing:10},
+        timeline:[{color:'var(--cyan)',event:'Recon Ledger · send_ready',time:'auj.'}],
+        seq:'Batch A',
+        seqStep:0,
+        _reconEntityId:op.entity_id,
+        _reconSource:true
+      });
+    }
+    reconSyncDone=true;
+  }catch(e){console.warn('Recon sync failed:',e)}
 }
 
 // ══════════════════════════════════════════════════════════════════

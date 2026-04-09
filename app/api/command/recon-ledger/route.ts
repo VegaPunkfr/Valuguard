@@ -13,7 +13,8 @@ export const runtime = 'nodejs';
 
 // ── State Machine: server-enforced transitions ──
 const TRANSITIONS: Record<string, string[]> = {
-  discovered: ['reviewed', 'suppressed'],
+  discovered: ['reviewed', 'first_seen_high_potential', 'suppressed'],
+  first_seen_high_potential: ['reviewed', 'shortlisted', 'suppressed'],
   reviewed: ['shortlisted', 'suppressed', 'deferred'],
   shortlisted: ['contacted', 'deferred', 'suppressed'],
   contacted: ['replied', 'deferred', 'suppressed'],
@@ -65,7 +66,7 @@ function companyDedupeKey(d: { domain?: string; name?: string }): string {
 }
 
 // ── LEGACY TOOLS DETECTION ──
-const LEGACY_TOOLS = new Set(['dotnetnuke','phusion_passenger','act','homestead','html5_maker','siemens_simatic_s7','cedexis_radar','omniture_adobe']);
+const LEGACY_TOOLS = new Set(['dotnetnuke','phusion_passenger','act','homestead','html5_maker','siemens_simatic_s7','cedexis_radar','omniture_adobe','vmware','kvm','oracle_xml_db','microsoft_windows_server_2012','microsoft-iis','lotus_notes','ibm_websphere','arena_plm','systools_vba_password_recovery']);
 
 function detectLegacy(techStack: unknown[]): boolean {
   if (!Array.isArray(techStack)) return false;
@@ -468,7 +469,8 @@ export async function POST(req: NextRequest) {
           const comp = await q(`recon_companies?dedupe_key=eq.${encodeURIComponent(cdk)}&limit=1`);
           if (comp?.length) {
             const c = comp[0];
-            const stack = c.tech_stack || [];
+            // Use ingest tech_stack if available (fresher than DB), fallback to DB
+            const stack = (r.tech_stack && Array.isArray(r.tech_stack) && r.tech_stack.length > 0) ? r.tech_stack : (c.tech_stack || []);
             const tc = Array.isArray(stack) ? stack.length : 0;
             const legacy = detectLegacy(stack);
             const mc = countClouds(stack);
