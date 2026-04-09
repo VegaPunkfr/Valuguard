@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 // ── State Machine: server-enforced transitions ──
 const TRANSITIONS: Record<string, string[]> = {
   discovered: ['reviewed', 'first_seen_high_potential', 'suppressed'],
-  first_seen_high_potential: ['reviewed', 'shortlisted', 'suppressed'],
+  first_seen_high_potential: ['reviewed', 'shortlisted', 'contacted', 'suppressed'],
   reviewed: ['shortlisted', 'suppressed', 'deferred'],
   shortlisted: ['contacted', 'deferred', 'suppressed'],
   contacted: ['replied', 'deferred', 'suppressed'],
@@ -238,35 +238,35 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data: data || [] });
     }
     case 'prospects_send_ready': {
-      // Server-side assembled: person + company + thesis + ops — no client-side join
-      const opsAll = await q('recon_ops_state?select=*&order=priority_score.desc&limit=200') || [];
+      // Bulk fetch all 4 tables, join in memory — NO N+1
+      const [allOps, allPeople, allRels, allCompanies, allTheses] = await Promise.all([
+        q('recon_ops_state?select=*&order=priority_score.desc&limit=200'),
+        q('recon_people?select=*&canonical_email=not.is.null&limit=200'),
+        q('recon_person_company?is_current=eq.true&select=person_id,company_id,title&order=last_observed_at.desc&limit=500'),
+        q('recon_companies?select=*&limit=200'),
+        q('recon_account_thesis?select=*&order=version.desc&limit=100'),
+      ]);
+
+      const peopleMap: Record<string, any> = {};
+      (allPeople || []).forEach((p: any) => { if (p.id) peopleMap[p.id] = p; });
+      const companyMap: Record<string, any> = {};
+      (allCompanies || []).forEach((c: any) => { if (c.id) companyMap[c.id] = c; });
+      // person→company: first match wins (ordered by last_observed_at desc)
+      const personCompany: Record<string, string> = {};
+      (allRels || []).forEach((r: any) => { if (r.person_id && r.company_id && !personCompany[r.person_id]) personCompany[r.person_id] = r.company_id; });
+      // company→thesis: first match wins (ordered by version desc)
+      const companyThesis: Record<string, any> = {};
+      (allTheses || []).forEach((t: any) => { if (t.company_id && !companyThesis[t.company_id]) companyThesis[t.company_id] = t; });
+
       const prospects: Record<string, unknown>[] = [];
+      for (const op of (allOps || [])) {
+        if (!op.entity_id || op.current_status === 'suppressed') continue;
+        const person = peopleMap[op.entity_id];
+        if (!person?.canonical_email) continue;
 
-      for (const op of opsAll) {
-        if (!op.entity_id) continue;
-        // Get person
-        const personArr = await q(`recon_people?id=eq.${op.entity_id}&limit=1`);
-        if (!personArr?.length || !personArr[0].canonical_email) continue;
-        const person = personArr[0];
-        if (op.current_status === 'suppressed') continue;
-
-        // Get current company via recon_person_company (most recent current relation)
-        const relArr = await q(`recon_person_company?person_id=eq.${op.entity_id}&is_current=eq.true&order=last_observed_at.desc&limit=1`);
-        const rel = relArr?.[0] || null;
-        let company: Record<string, unknown> = {};
-        let thesis: Record<string, unknown> = {};
-
-        if (rel?.company_id) {
-          // Rule B: most recent is_current=true relation wins (ORDER BY last_observed_at DESC LIMIT 1)
-          const compArr = await q(`recon_companies?id=eq.${rel.company_id}&limit=1`);
-          company = compArr?.[0] || {};
-          const thesisArr = await q(`recon_account_thesis?company_id=eq.${rel.company_id}&order=version.desc&limit=1`);
-          thesis = thesisArr?.[0] || {};
-        }
-
-        const hasDraft = !!(thesis.email_draft_body);
-        const hasEmail = !!(person.canonical_email);
-        const sendReady = hasDraft && hasEmail;
+        const companyId = personCompany[op.entity_id];
+        const company = companyId ? companyMap[companyId] || {} : {};
+        const thesis = companyId ? companyThesis[companyId] || {} : {};
 
         prospects.push({
           person_id: person.id,
@@ -276,7 +276,7 @@ export async function GET(req: NextRequest) {
           person_linkedin: person.canonical_linkedin,
           person_country: person.canonical_country,
           person_email_status: person.email_status,
-          company_id: rel?.company_id || null,
+          company_id: companyId || null,
           company_name: company.canonical_name || null,
           company_domain: company.canonical_domain || null,
           company_industry: company.canonical_industry || null,
@@ -298,7 +298,7 @@ export async function GET(req: NextRequest) {
           ops_priority: op.priority_score,
           ops_tags: op.tags || [],
           ops_actionable: op.actionable_now,
-          send_ready: sendReady,
+          send_ready: !!(thesis.email_draft_body && person.canonical_email),
         });
       }
 
