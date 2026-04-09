@@ -45,7 +45,7 @@ console.log('══════════════════════�
 await test('cockpit-auth accepts correct key', async () => {
   const res = await fetch(`${BASE}/api/command/cockpit-auth`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'GhostTax-E2E/1.0' },
     body: JSON.stringify({ key: COMMAND_SECRET }),
   });
   assert(res.ok, `Expected 200, got ${res.status}`);
@@ -56,7 +56,7 @@ await test('cockpit-auth accepts correct key', async () => {
 // Test 2: prospects_send_ready endpoint returns assembled data
 await test('prospects_send_ready returns assembled prospects', async () => {
   const res = await fetch(`${BASE}/api/command/recon-ledger?type=prospects_send_ready`, {
-    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET },
+    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET, 'User-Agent': 'GhostTax-E2E/1.0' },
   });
   assert(res.ok, `Expected 200, got ${res.status}`);
   const data = await res.json();
@@ -68,7 +68,7 @@ await test('prospects_send_ready returns assembled prospects', async () => {
 // Test 3: send_ready prospects have all required fields
 await test('send_ready prospects have person+company+thesis+draft', async () => {
   const res = await fetch(`${BASE}/api/command/recon-ledger?type=prospects_send_ready`, {
-    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET },
+    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET, 'User-Agent': 'GhostTax-E2E/1.0' },
   });
   const data = await res.json();
   const sendReady = data.data.filter(d => d.send_ready);
@@ -91,7 +91,7 @@ await test('send_ready prospects have person+company+thesis+draft', async () => 
 // Test 4: Specific accounts are send_ready
 await test('Trading 212 + Paysend + Liberis + FundApps are send_ready', async () => {
   const res = await fetch(`${BASE}/api/command/recon-ledger?type=prospects_send_ready`, {
-    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET },
+    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET, 'User-Agent': 'GhostTax-E2E/1.0' },
   });
   const data = await res.json();
   const targets = ['trading212.com', 'paysend.com', 'liberis.com', 'fundapps.co'];
@@ -109,7 +109,7 @@ await test('state transition enforcement blocks invalid transitions', async () =
   // Try discovered → qualified (should fail)
   const res = await fetch(`${BASE}/api/command/recon-ledger`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET },
+    headers: { 'Content-Type': 'application/json', 'x-command-key': COMMAND_SECRET, 'User-Agent': 'GhostTax-E2E/1.0' },
     body: JSON.stringify({ action: 'update_ops', entity_id: '00000000-0000-0000-0000-000000000000', updates: { current_status: 'qualified' } }),
   });
   const data = await res.json();
@@ -119,7 +119,7 @@ await test('state transition enforcement blocks invalid transitions', async () =
 // Test 6: Health check passes
 await test('health check returns READY with all tables', async () => {
   const res = await fetch(`${BASE}/api/command/recon-ledger/health`, {
-    headers: { 'x-command-key': COMMAND_SECRET },
+    headers: { 'x-command-key': COMMAND_SECRET, 'User-Agent': 'GhostTax-E2E/1.0' },
   });
   const data = await res.json();
   assert(data.status === 'READY', `Expected READY, got ${data.status}`);
