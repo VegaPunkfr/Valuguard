@@ -702,6 +702,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    // ── REFRESH BENCHMARKS (on-demand) ──
+    if (action === 'refresh_benchmarks') {
+      const allCompanies = await q('recon_companies?select=canonical_industry,employee_count,tool_count,has_legacy_tools,multi_cloud&tool_count=gt.0&limit=500') || [];
+      let updated = 0;
+      if (allCompanies.length >= 3) {
+        const ranges = [
+          { key: 'emp_100_300', min: 100, max: 300 },
+          { key: 'emp_300_1000', min: 300, max: 1000 },
+          { key: 'emp_all', min: 0, max: 100000 }
+        ];
+        for (const range of ranges) {
+          const segment = allCompanies.filter((c: any) => (c.employee_count || 0) >= range.min && (c.employee_count || 0) < range.max);
+          if (segment.length < 3) continue;
+          const tools = segment.map((c: any) => c.tool_count).sort((a: number, b: number) => a - b);
+          const conf = benchmarkConfidence(tools.length);
+          const median = tools[Math.floor(tools.length / 2)];
+          const p25 = tools[Math.floor(tools.length * 0.25)];
+          const p75 = tools[Math.floor(tools.length * 0.75)];
+          const existing = await q(`recon_benchmarks?segment_key=eq.${range.key}&metric_name=eq.tool_count&limit=1`);
+          const bmData = { segment_key: range.key, metric_name: 'tool_count', sample_size: tools.length, min_val: tools[0], p25_val: p25, median_val: median, p75_val: p75, max_val: tools[tools.length - 1], confidence_level: conf, last_computed_at: new Date().toISOString() };
+          if (existing?.length) {
+            await q(`recon_benchmarks?id=eq.${existing[0].id}`, { method: 'PATCH', body: JSON.stringify(bmData) });
+          } else {
+            await q('recon_benchmarks', { method: 'POST', body: JSON.stringify(bmData) });
+          }
+          updated++;
+        }
+      }
+      return NextResponse.json({ ok: true, segments_updated: updated, companies_scanned: allCompanies.length });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
