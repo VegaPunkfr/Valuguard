@@ -237,6 +237,73 @@ export async function GET(req: NextRequest) {
       const data = await q(path);
       return NextResponse.json({ data: data || [] });
     }
+    case 'prospects_send_ready': {
+      // Server-side assembled: person + company + thesis + ops — no client-side join
+      const opsAll = await q('recon_ops_state?select=*&order=priority_score.desc&limit=200') || [];
+      const prospects: Record<string, unknown>[] = [];
+
+      for (const op of opsAll) {
+        if (!op.entity_id) continue;
+        // Get person
+        const personArr = await q(`recon_people?id=eq.${op.entity_id}&limit=1`);
+        if (!personArr?.length || !personArr[0].canonical_email) continue;
+        const person = personArr[0];
+        if (op.current_status === 'suppressed') continue;
+
+        // Get current company via recon_person_company (most recent current relation)
+        const relArr = await q(`recon_person_company?person_id=eq.${op.entity_id}&is_current=eq.true&order=last_observed_at.desc&limit=1`);
+        const rel = relArr?.[0] || null;
+        let company: Record<string, unknown> = {};
+        let thesis: Record<string, unknown> = {};
+
+        if (rel?.company_id) {
+          // Rule B: most recent is_current=true relation wins (ORDER BY last_observed_at DESC LIMIT 1)
+          const compArr = await q(`recon_companies?id=eq.${rel.company_id}&limit=1`);
+          company = compArr?.[0] || {};
+          const thesisArr = await q(`recon_account_thesis?company_id=eq.${rel.company_id}&limit=1`);
+          thesis = thesisArr?.[0] || {};
+        }
+
+        const hasDraft = !!(thesis.email_draft_body);
+        const hasEmail = !!(person.canonical_email);
+        const sendReady = hasDraft && hasEmail;
+
+        prospects.push({
+          person_id: person.id,
+          person_name: person.canonical_name,
+          person_title: person.canonical_title,
+          person_email: person.canonical_email,
+          person_linkedin: person.canonical_linkedin,
+          person_country: person.canonical_country,
+          person_email_status: person.email_status,
+          company_id: rel?.company_id || null,
+          company_name: company.canonical_name || null,
+          company_domain: company.canonical_domain || null,
+          company_industry: company.canonical_industry || null,
+          company_employee_count: company.employee_count || null,
+          company_revenue: company.revenue_printed || null,
+          company_tool_count: company.tool_count || 0,
+          company_has_legacy: company.has_legacy_tools || false,
+          company_multi_cloud: company.multi_cloud || false,
+          company_tech_stack: company.tech_stack || [],
+          thesis_id: thesis.id || null,
+          thesis_status: thesis.thesis_status || null,
+          findings: thesis.findings || [],
+          exposure_range: thesis.exposure_range || null,
+          email_draft_subject: thesis.email_draft_subject || null,
+          email_draft_body: thesis.email_draft_body || null,
+          why_now: thesis.why_now || null,
+          outreach_angle: thesis.outreach_angle || null,
+          ops_status: op.current_status,
+          ops_priority: op.priority_score,
+          ops_tags: op.tags || [],
+          ops_actionable: op.actionable_now,
+          send_ready: sendReady,
+        });
+      }
+
+      return NextResponse.json({ data: prospects });
+    }
     case 'thesis_detail': {
       const companyId = req.nextUrl.searchParams.get('company_id');
       if (!companyId) return NextResponse.json({ thesis: null });

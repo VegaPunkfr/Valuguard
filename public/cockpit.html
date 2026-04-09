@@ -783,76 +783,44 @@ let prospectsLoaded=false;
 async function loadProspectsFromRecon(){
   if(prospectsLoaded)return;
   try{
-    // Load all data sources via API
-    const [peopleRes,opsRes,thesisRes,companiesRes,relRes]=await Promise.all([
-      fetch('/api/command/recon-ledger?type=people&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
-      fetch('/api/command/recon-ledger?type=ops&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
-      fetch('/api/command/recon-ledger?type=thesis&limit=50',{headers:apiHeaders()}).then(r=>r.json()),
-      fetch('/api/command/recon-ledger?type=companies&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
-      fetch('/api/command/recon-ledger?type=relationships_all',{headers:apiHeaders()}).then(r=>r.json()).catch(()=>({data:[]}))
-    ]);
-    const people=peopleRes.data||[];
-    const ops=opsRes.data||[];
-    const theses=thesisRes.data||[];
-    const companies=companiesRes.data||[];
-    const rels=relRes.data||[];
-
-    // Build lookup maps by ID (not by domain)
-    const opsMap={};ops.forEach(o=>{if(o.entity_id)opsMap[o.entity_id]=o});
-    const companyById={};companies.forEach(c=>{if(c.id)companyById[c.id]=c});
-    const thesisByCompanyId={};theses.forEach(t=>{if(t.company_id)thesisByCompanyId[t.company_id]=t});
-
-    // Build person→company mapping via recon_person_company (DB relations, not email domain)
-    const personCompanyMap={};
-    rels.forEach(r=>{
-      if(r.person_id && r.company_id && r.is_current){
-        personCompanyMap[r.person_id]=r.company_id;
-      }
-    });
+    // Single server-side assembled endpoint — no client-side joins
+    const res=await fetch('/api/command/recon-ledger?type=prospects_send_ready',{headers:apiHeaders()});
+    if(!res.ok)throw new Error('API '+res.status);
+    const data=(await res.json()).data||[];
 
     let id=1;
-    people.forEach(p=>{
-      if(!p.canonical_email)return;
-      const op=opsMap[p.id]||{};
-      const status=op.current_status||'discovered';
-      if(status==='suppressed')return;
-
-      // Resolve company via DB relation (person_id → company_id), NOT email domain
-      const companyId=personCompanyMap[p.id];
-      const company=companyId?companyById[companyId]||{}:{};
-      const thesis=companyId?thesisByCompanyId[companyId]||{}:{};
-
-      const flag=p.canonical_country==='Germany'?'🇩🇪':p.canonical_country==='Netherlands'?'🇳🇱':p.canonical_country==='United Kingdom'?'🇬🇧':'🌍';
-      const lang=p.canonical_country==='Germany'?'de':p.canonical_country==='Netherlands'?'nl':'en';
+    data.forEach(d=>{
+      const flag=d.person_country==='Germany'?'🇩🇪':d.person_country==='Netherlands'?'🇳🇱':d.person_country==='United Kingdom'?'🇬🇧':'🌍';
+      const lang=d.person_country==='Germany'?'de':d.person_country==='Netherlands'?'nl':'en';
       const stageMap={discovered:0,first_seen_high_potential:1,reviewed:1,shortlisted:2,contacted:3,replied:3,nurturing:3,qualified:4,closed:4};
-      const hasDraft=!!(thesis.email_draft_body);
-      const findings=(thesis.findings||[]);
+      const findings=d.findings||[];
 
       prospects.push({
         id:id++,
-        co:company.canonical_name||p.canonical_email.split('@')[1]||'—',
-        icon:(company.canonical_name||'??').substring(0,2).toUpperCase(),
-        src:op.tags&&op.tags.includes('wave1')?'scan':op.tags&&op.tags.includes('batch_a')?'apollo':'apollo',
-        heat:op.priority_score||30,
-        exp:thesis.exposure_range||'—',
+        co:d.company_name||d.person_email?.split('@')[1]||'—',
+        icon:(d.company_name||'??').substring(0,2).toUpperCase(),
+        src:(d.ops_tags||[]).includes('wave1')?'scan':(d.ops_tags||[]).includes('batch_a')?'apollo':'apollo',
+        heat:d.ops_priority||30,
+        exp:d.exposure_range||'—',
         lang:lang,
         flag:flag,
-        stage:stageMap[status]||0,
-        industry:company.canonical_industry||'—',
-        size:(company.employee_count||'?')+' emp.',
-        revenue:company.revenue_printed||'—',
-        contact:{name:p.canonical_name||'—',title:p.canonical_title||'—',email:p.canonical_email,li:p.canonical_linkedin||''},
-        tech:Array.isArray(company.tech_stack)?company.tech_stack.map(t=>typeof t==='string'?t:t.name||'').slice(0,20):[],
+        stage:stageMap[d.ops_status]||0,
+        industry:d.company_industry||'—',
+        size:(d.company_employee_count||'?')+' emp.',
+        revenue:d.company_revenue||'—',
+        contact:{name:d.person_name||'—',title:d.person_title||'—',email:d.person_email,li:d.person_linkedin||''},
+        tech:Array.isArray(d.company_tech_stack)?d.company_tech_stack.map(t=>typeof t==='string'?t:t.name||'').slice(0,20):[],
         bant:{budget:15,authority:15,need:15,timing:10},
-        timeline:[{color:status==='shortlisted'?'var(--green)':status==='first_seen_high_potential'?'var(--cyan)':'var(--violet)',event:status,time:'Recon Ledger'}],
-        seq:op.tags&&op.tags.includes('wave1')?'Wave 1':op.tags&&op.tags.includes('batch_a')?'Batch A':'—',
+        timeline:[{color:d.ops_status==='shortlisted'?'var(--green)':d.ops_status==='first_seen_high_potential'?'var(--cyan)':'var(--violet)',event:d.ops_status,time:'Recon Ledger'}],
+        seq:(d.ops_tags||[]).includes('wave1')?'Wave 1':(d.ops_tags||[]).includes('batch_a')?'Batch A':'—',
         seqStep:0,
-        emailDraft:hasDraft?{subject:thesis.email_draft_subject||'',body:thesis.email_draft_body||''}:null,
-        snapshot:findings.length?{range:thesis.exposure_range||'—',findings:findings.map(f=>f.client_formulation||''),benchmark:'',confidence:thesis.benchmark_readiness?'medium':'low'}:null,
-        _reconEntityId:p.id,
-        _reconCompanyId:companyId||null,
+        emailDraft:d.email_draft_body?{subject:d.email_draft_subject||'',body:d.email_draft_body}:null,
+        snapshot:findings.length?{range:d.exposure_range||'—',findings:findings.map(f=>f.client_formulation||''),benchmark:'',confidence:'medium'}:null,
+        _reconEntityId:d.person_id,
+        _reconCompanyId:d.company_id,
         _reconSource:true,
-        _status:status
+        _status:d.ops_status,
+        _sendReady:d.send_ready
       });
     });
     prospectsLoaded=true;
@@ -1570,6 +1538,14 @@ async function sendEmailDirect(id){
       const data=await res.json();
       if(btn){btn.textContent='✓ Envoyé';btn.style.background='hsla(155,100%,39%,.3)'}
       saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:p.emailDraft.subject,body:p.emailDraft.body,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:p.seq,channel:'email'});
+      // Persist to Recon Ledger: log action + update ops status
+      if(p._reconEntityId){
+        fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'log_action',entity_type:'person',entity_id:p._reconEntityId,action_type:'email_sent',action_data:{to:p.contact.email,subject:p.emailDraft.subject,messageId:data.messageId||'',sentAt:new Date().toISOString()},channel:'email'})}).catch(()=>{});
+        fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'update_ops',entity_id:p._reconEntityId,updates:{current_status:'contacted',last_contacted_at:new Date().toISOString(),last_contacted_channel:'email',contact_attempt_count:1}})}).catch(()=>{});
+      }
+      // Refresh UI
+      p._status='contacted';p.stage=3;
+      renderLeads();
     }else{
       const err=await res.json();
       if(btn){btn.textContent='✗ Erreur: '+(err.error||'').substring(0,30);btn.style.color='var(--red)'}
