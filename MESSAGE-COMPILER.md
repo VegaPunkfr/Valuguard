@@ -1388,6 +1388,42 @@ The lint engine runs AFTER language blacklist (Bloc 5) and AFTER claim classific
 - Reason: Send timing affects open rates. Weekend or late-night sends signal automation.
 - Fix: Queue for next valid window. Do not send immediately.
 
+**LINT-031 — Salesforce+HubSpot as sole finding**
+- Type: BLOCK
+- Description: If the only tool overlap detected is Salesforce+HubSpot, the message is blocked. This combination is present in ~70% of mid-market SaaS companies and surprises no one.
+- Reason: Interchangeable finding. Any company could receive this message.
+- Fix: Add a second, company-specific finding. Or do not send.
+
+**LINT-032 — Multi-cloud as sole signal**
+- Type: BLOCK
+- Description: If the only signal is AWS+GCP or AWS+Azure with no other findings, the message is blocked. Multi-cloud is an intentional architectural choice for many companies.
+- Reason: Signal too weak to justify attention.
+- Fix: Combine with another signal (legacy, vendor overlap, headcount change). Or do not send.
+
+**LINT-033 — CEO message exceeds 60 words**
+- Type: BLOCK
+- Description: Any message to a CEO role that exceeds 60 words is blocked.
+- Reason: CEOs scan, they do not read. Every word beyond 60 reduces open-to-action probability.
+- Fix: Cut to observation + one sentence. No findings list, no price, no CTA link.
+
+**LINT-034 — Follow-up without new finding**
+- Type: BLOCK
+- Description: A follow-up message that does not introduce at least one NEW piece of information (new tool detected, new angle, updated data) is blocked.
+- Reason: Follow-up without new info = "just checking in" with extra steps. Destroys attention capital.
+- Fix: Find a new signal or close the sequence cleanly (CTA Class 6).
+
+**LINT-035 — CTA Class 5 on cold account with fewer than 3 findings**
+- Type: BLOCK
+- Description: A paid briefing CTA (€490/€590) on a cold account (seen_count ≤ 2) that has fewer than 3 distinct L1 findings is blocked.
+- Reason: Insufficient evidence density to justify a direct purchase ask. Feels presumptuous.
+- Fix: Downgrade to CTA Class 2 (internal-check) or Class 4 (free scan). Or find more findings first.
+
+**LINT-036 — Same opening pattern on consecutive emails to same domain**
+- Type: BLOCK
+- Description: If the opening pattern (first sentence structure) is identical to the previous message sent to the same domain, the message is blocked.
+- Reason: Template detection by the recipient. Two structurally identical emails = automation visible.
+- Fix: Select a different opening pattern from the library (Bloc 4).
+
 ---
 
 ## BLOC 7 — BEFORE / AFTER LIBRARY
