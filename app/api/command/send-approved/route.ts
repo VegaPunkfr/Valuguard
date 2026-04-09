@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
         text: textBody || undefined,
         tags: [
           { name: 'type', value: 'outreach' },
-          { name: 'domain', value: domain || 'unknown' },
-          { name: 'prospect', value: prospectId || 'unknown' },
+          { name: 'domain', value: (domain || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
+          { name: 'prospect', value: (prospectId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
         ],
       }),
     });
