@@ -71,20 +71,30 @@ const LEGACY_TOOLS = new Set(['dotnetnuke','phusion_passenger','act','homestead'
 function detectLegacy(techStack: unknown[]): boolean {
   if (!Array.isArray(techStack)) return false;
   return techStack.some(t => {
-    const name = (typeof t === 'string' ? t : (t as {uid?:string})?.uid || '').toLowerCase().replace(/[^a-z0-9_]/g,'');
-    return LEGACY_TOOLS.has(name);
+    const raw = typeof t === 'string' ? t : ((t as {name?:string})?.name || (t as {uid?:string})?.uid || '');
+    const normalized = raw.toLowerCase().replace(/[^a-z0-9_]/g,'');
+    // Check exact match AND substring match for names like "Microsoft Windows Server 2012"
+    if (LEGACY_TOOLS.has(normalized)) return true;
+    // Substring checks for common legacy indicators
+    const lower = raw.toLowerCase();
+    return lower.includes('dotnetnuke') || lower.includes('lotus notes') || lower.includes('ibm websphere') ||
+      lower.includes('windows server 2012') || lower.includes('windows server 2008') ||
+      lower.includes('phusion passenger') || lower.includes('arena plm') ||
+      lower.includes('oracle xml db') || (lower === 'act!' || lower === 'act') ||
+      lower.includes('homestead') || lower.includes('cedexis');
   });
 }
 
 function countClouds(techStack: unknown[]): boolean {
   if (!Array.isArray(techStack)) return false;
-  const clouds = new Set<string>();
-  const cloudMap: Record<string,string> = {'amazon_aws':'aws','amazon aws':'aws','aws':'aws','microsoft_azure':'azure','microsoft azure':'azure','azure':'azure','google_cloud':'gcp','gcp':'gcp','google cloud':'gcp'};
+  let hasAws = false, hasAzure = false, hasGcp = false;
   techStack.forEach(t => {
-    const name = (typeof t === 'string' ? t : (t as {name?:string})?.name || '').toLowerCase();
-    if (cloudMap[name]) clouds.add(cloudMap[name]);
+    const name = (typeof t === 'string' ? t : (t as {name?:string})?.name || (t as {uid?:string})?.uid || '').toLowerCase();
+    if (name.includes('aws') || name.includes('amazon')) hasAws = true;
+    if (name.includes('azure') || name.includes('microsoft azure')) hasAzure = true;
+    if (name.includes('google cloud') || name.includes('gcp') || name.includes('google compute') || name.includes('google kubernetes')) hasGcp = true;
   });
-  return clouds.size >= 2;
+  return [hasAws, hasAzure, hasGcp].filter(Boolean).length >= 2;
 }
 
 // ── SCORING FUNCTIONS ──
