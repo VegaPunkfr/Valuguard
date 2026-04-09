@@ -1426,6 +1426,23 @@ function getFilteredLeads(all){
   return all?sorted:sorted.slice(0,displayedCount);
 }
 
+function getSendReadyBadge(p){
+  const hasEmail=p.contact&&p.contact.email;
+  const hasDraft=p.emailDraft&&p.emailDraft.body;
+  const isSendReady=p._reconSource&&hasEmail;
+  if(hasDraft&&hasEmail)return '<div style="padding:2px 6px;background:hsla(155,100%,39%,.12);border:1px solid hsla(155,100%,39%,.25);border-radius:3px;font:700 8px var(--mono);color:var(--green);letter-spacing:.05em;white-space:nowrap;cursor:pointer" onclick="event.stopPropagation();openSendPanel('+p.id+')" title="Email draft prêt">ENVOYER</div>';
+  if(isSendReady&&!hasDraft)return '<div style="padding:2px 6px;background:hsla(40,90%,47%,.1);border:1px solid hsla(40,90%,47%,.2);border-radius:3px;font:700 8px var(--mono);color:var(--gold);letter-spacing:.05em;white-space:nowrap" title="Besoin d\'un draft">DRAFT ∅</div>';
+  if(!hasEmail)return '<div style="padding:2px 6px;background:hsla(352,75%,55%,.1);border:1px solid hsla(352,75%,55%,.2);border-radius:3px;font:700 8px var(--mono);color:var(--red);letter-spacing:.05em;white-space:nowrap" title="Pas d\'email vérifié">EMAIL ∅</div>';
+  return '';
+}
+
+function openSendPanel(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  selectLead(id);
+  // Scroll to action panel if it exists
+  setTimeout(()=>{const ap=document.getElementById('action-panel');if(ap)ap.scrollIntoView({behavior:'smooth'})},200);
+}
+
 function renderLeads(){
   const all=getFilteredLeads(true),visible=getFilteredLeads(false);
   const el=document.getElementById('lead-list');
@@ -1438,6 +1455,7 @@ function renderLeads(){
         <div class="lead-meta"><div class="src-dot" style="background:${SRC_COLORS[p.src]}"></div><span class="lead-stage">${STAGE_LABELS[p.stage]||'Nouveau'}</span></div>
       </div>
       <div class="lead-exp" style="color:${heatColor(p.heat)}">${p.exp.split('–')[0]}</div>
+      ${getSendReadyBadge(p)}
     </div>
   `).join('');
 }
@@ -1466,6 +1484,12 @@ function selectLead(id){
         <div class="d-metric"><span class="d-metric-label">${p.contact.name}</span><span class="d-metric-val" style="color:var(--bronze-hi)">${p.contact.title}</span></div>
         <div class="d-metric"><span class="d-metric-label">E-mail</span><span class="d-metric-val" style="font-size:10px">${p.contact.email}</span></div>
       </div>
+      <div style="margin-top:8px">${getSendReadyBadge(p)}</div>
+      ${p.emailDraft?`<div style="margin-top:8px;padding:8px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:6px;cursor:pointer" onclick="openSendPanel(${p.id})">
+        <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em;margin-bottom:4px">EMAIL DRAFT</div>
+        <div style="font:500 10px var(--body);color:var(--t2)">${sanitize(p.emailDraft.subject||'')}</div>
+        <div style="font:400 9px var(--mono);color:var(--t3);margin-top:4px;max-height:40px;overflow:hidden;text-overflow:ellipsis">${sanitize((p.emailDraft.body||'').substring(0,120))}...</div>
+      </div>`:''}
     </div>
     <div class="d-section">
       <div class="d-section-title">BANT+ Score ${p.bant.budget+p.bant.authority+p.bant.need+p.bant.timing}/100</div>
