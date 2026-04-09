@@ -205,6 +205,10 @@ export async function GET(req: NextRequest) {
       const data = await q(`recon_person_company?person_id=eq.${entityId}&order=last_observed_at.desc`);
       return NextResponse.json({ data: data || [] });
     }
+    case 'relationships_all': {
+      const data = await q(`recon_person_company?is_current=eq.true&select=person_id,company_id,company_name,title,is_current&order=last_observed_at.desc&limit=500`);
+      return NextResponse.json({ data: data || [] });
+    }
     case 'person_detail': {
       if (!entityId) return NextResponse.json({ person: null, ops: null, relationships: [], actions: [], sessions: [] });
       const [person, ops, rels, actions, sess] = await Promise.all([

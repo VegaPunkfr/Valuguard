@@ -783,30 +783,45 @@ let prospectsLoaded=false;
 async function loadProspectsFromRecon(){
   if(prospectsLoaded)return;
   try{
-    const [peopleRes,opsRes,thesisRes,companiesRes]=await Promise.all([
+    // Load all data sources via API
+    const [peopleRes,opsRes,thesisRes,companiesRes,relRes]=await Promise.all([
       fetch('/api/command/recon-ledger?type=people&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
       fetch('/api/command/recon-ledger?type=ops&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
       fetch('/api/command/recon-ledger?type=thesis&limit=50',{headers:apiHeaders()}).then(r=>r.json()),
-      fetch('/api/command/recon-ledger?type=companies&limit=100',{headers:apiHeaders()}).then(r=>r.json())
+      fetch('/api/command/recon-ledger?type=companies&limit=100',{headers:apiHeaders()}).then(r=>r.json()),
+      fetch('/api/command/recon-ledger?type=relationships_all',{headers:apiHeaders()}).then(r=>r.json()).catch(()=>({data:[]}))
     ]);
     const people=peopleRes.data||[];
     const ops=opsRes.data||[];
     const theses=thesisRes.data||[];
     const companies=companiesRes.data||[];
+    const rels=relRes.data||[];
+
+    // Build lookup maps by ID (not by domain)
     const opsMap={};ops.forEach(o=>{if(o.entity_id)opsMap[o.entity_id]=o});
-    const thesisMap={};theses.forEach(t=>{if(t.company_domain)thesisMap[t.company_domain]=t});
-    const companyMap={};companies.forEach(c=>{if(c.canonical_domain)companyMap[c.canonical_domain]=c});
+    const companyById={};companies.forEach(c=>{if(c.id)companyById[c.id]=c});
+    const thesisByCompanyId={};theses.forEach(t=>{if(t.company_id)thesisByCompanyId[t.company_id]=t});
+
+    // Build person→company mapping via recon_person_company (DB relations, not email domain)
+    const personCompanyMap={};
+    rels.forEach(r=>{
+      if(r.person_id && r.company_id && r.is_current){
+        personCompanyMap[r.person_id]=r.company_id;
+      }
+    });
 
     let id=1;
     people.forEach(p=>{
       if(!p.canonical_email)return;
       const op=opsMap[p.id]||{};
-      // Only show contacts with email + relevant status
       const status=op.current_status||'discovered';
       if(status==='suppressed')return;
-      const domain=p.canonical_email.split('@')[1];
-      const thesis=thesisMap[domain]||{};
-      const company=companyMap[domain]||{};
+
+      // Resolve company via DB relation (person_id → company_id), NOT email domain
+      const companyId=personCompanyMap[p.id];
+      const company=companyId?companyById[companyId]||{}:{};
+      const thesis=companyId?thesisByCompanyId[companyId]||{}:{};
+
       const flag=p.canonical_country==='Germany'?'🇩🇪':p.canonical_country==='Netherlands'?'🇳🇱':p.canonical_country==='United Kingdom'?'🇬🇧':'🌍';
       const lang=p.canonical_country==='Germany'?'de':p.canonical_country==='Netherlands'?'nl':'en';
       const stageMap={discovered:0,first_seen_high_potential:1,reviewed:1,shortlisted:2,contacted:3,replied:3,nurturing:3,qualified:4,closed:4};
@@ -815,7 +830,7 @@ async function loadProspectsFromRecon(){
 
       prospects.push({
         id:id++,
-        co:company.canonical_name||domain,
+        co:company.canonical_name||p.canonical_email.split('@')[1]||'—',
         icon:(company.canonical_name||'??').substring(0,2).toUpperCase(),
         src:op.tags&&op.tags.includes('wave1')?'scan':op.tags&&op.tags.includes('batch_a')?'apollo':'apollo',
         heat:op.priority_score||30,
@@ -835,8 +850,8 @@ async function loadProspectsFromRecon(){
         emailDraft:hasDraft?{subject:thesis.email_draft_subject||'',body:thesis.email_draft_body||''}:null,
         snapshot:findings.length?{range:thesis.exposure_range||'—',findings:findings.map(f=>f.client_formulation||''),benchmark:'',confidence:thesis.benchmark_readiness?'medium':'low'}:null,
         _reconEntityId:p.id,
+        _reconCompanyId:companyId||null,
         _reconSource:true,
-        _thesisDomain:domain,
         _status:status
       });
     });
@@ -1481,18 +1496,85 @@ function getFilteredLeads(all){
 function getSendReadyBadge(p){
   const hasEmail=p.contact&&p.contact.email;
   const hasDraft=p.emailDraft&&p.emailDraft.body;
-  const isSendReady=p._reconSource&&hasEmail;
-  if(hasDraft&&hasEmail)return '<div style="padding:2px 6px;background:hsla(155,100%,39%,.12);border:1px solid hsla(155,100%,39%,.25);border-radius:3px;font:700 8px var(--mono);color:var(--green);letter-spacing:.05em;white-space:nowrap;cursor:pointer" onclick="event.stopPropagation();openSendPanel('+p.id+')" title="Email draft prêt">ENVOYER</div>';
-  if(isSendReady&&!hasDraft)return '<div style="padding:2px 6px;background:hsla(40,90%,47%,.1);border:1px solid hsla(40,90%,47%,.2);border-radius:3px;font:700 8px var(--mono);color:var(--gold);letter-spacing:.05em;white-space:nowrap" title="Besoin d\'un draft">DRAFT ∅</div>';
-  if(!hasEmail)return '<div style="padding:2px 6px;background:hsla(352,75%,55%,.1);border:1px solid hsla(352,75%,55%,.2);border-radius:3px;font:700 8px var(--mono);color:var(--red);letter-spacing:.05em;white-space:nowrap" title="Pas d\'email vérifié">EMAIL ∅</div>';
+  if(hasDraft&&hasEmail)return `<button onclick="event.stopPropagation();openSendSurface(${p.id})" style="padding:3px 8px;background:hsla(155,100%,39%,.15);border:1px solid hsla(155,100%,39%,.3);border-radius:4px;font:700 9px var(--mono);color:var(--green);cursor:pointer;white-space:nowrap;letter-spacing:.04em" title="Ouvrir surface d'envoi">ENVOYER ▸</button>`;
+  if(hasEmail&&!hasDraft)return '<span style="padding:2px 6px;background:hsla(40,90%,47%,.08);border:1px solid hsla(40,90%,47%,.18);border-radius:3px;font:700 8px var(--mono);color:var(--gold);letter-spacing:.04em;white-space:nowrap">DRAFT ∅</span>';
+  if(!hasEmail)return '<span style="padding:2px 6px;background:hsla(352,75%,55%,.08);border:1px solid hsla(352,75%,55%,.18);border-radius:3px;font:700 8px var(--mono);color:var(--red);letter-spacing:.04em;white-space:nowrap">EMAIL ∅</span>';
   return '';
 }
 
-function openSendPanel(id){
-  const p=prospects.find(x=>x.id===id);if(!p)return;
+function openSendSurface(id){
+  const p=prospects.find(x=>x.id===id);if(!p||!p.emailDraft)return;
   selectLead(id);
-  // Scroll to action panel if it exists
-  setTimeout(()=>{const ap=document.getElementById('action-panel');if(ap)ap.scrollIntoView({behavior:'smooth'})},200);
+  // Show send overlay
+  const overlay=document.createElement('div');
+  overlay.id='send-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML=`
+    <div style="width:680px;max-height:85vh;background:var(--graphite);border:1px solid var(--bd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+        <span style="font:700 13px var(--body);color:var(--t1)">Surface d'envoi — ${sanitize(p.co)}</span>
+        <button onclick="document.getElementById('send-overlay').remove()" style="background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:20px;overflow-y:auto;flex:1">
+        <div style="margin-bottom:16px">
+          <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">DESTINATAIRE</div>
+          <div style="font:500 12px var(--body);color:var(--t1)">${sanitize(p.contact.name)} · ${sanitize(p.contact.title)}</div>
+          <div style="font:400 11px var(--mono);color:var(--cyan)">${sanitize(p.contact.email)}</div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">OBJET</div>
+          <div style="font:500 12px var(--body);color:var(--t1)">${sanitize(p.emailDraft.subject)}</div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">MESSAGE</div>
+          <pre style="font:400 11px var(--mono);color:var(--t2);white-space:pre-wrap;line-height:1.6;background:rgba(0,0,0,.2);padding:12px;border-radius:6px;max-height:300px;overflow-y:auto">${sanitize(p.emailDraft.body)}</pre>
+        </div>
+        ${p.snapshot&&p.snapshot.findings&&p.snapshot.findings.length?`
+        <div style="margin-bottom:16px">
+          <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">FINDINGS (${p.snapshot.findings.length})</div>
+          ${p.snapshot.findings.map(f=>`<div style="font:400 10px var(--mono);color:var(--t2);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03)">→ ${sanitize(f)}</div>`).join('')}
+        </div>`:''}
+        <div style="margin-bottom:16px">
+          <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">EXPOSITION ESTIMÉE</div>
+          <div style="font:600 14px var(--body);color:var(--gold)">${sanitize(p.exp||'—')}</div>
+        </div>
+        <div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em;margin-bottom:4px">ÉTAT</div>
+        <div style="font:500 11px var(--mono);color:var(--cyan);margin-bottom:16px">${sanitize(p._status||'discovered')}</div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--bd);display:flex;gap:8px">
+        <button onclick="copySendEmail(${p.id})" style="flex:1;padding:8px;background:hsla(174,100%,41%,.1);border:1px solid hsla(174,100%,41%,.2);border-radius:5px;color:var(--cyan);font:700 11px var(--mono);cursor:pointer">Copier le message</button>
+        <button onclick="sendEmailDirect(${p.id})" style="flex:1;padding:8px;background:hsla(155,100%,39%,.15);border:1px solid hsla(155,100%,39%,.3);border-radius:5px;color:var(--green);font:700 11px var(--mono);cursor:pointer">Envoyer via Resend</button>
+        <button onclick="document.getElementById('send-overlay').remove()" style="padding:8px 16px;background:transparent;border:1px solid var(--bd);border-radius:5px;color:var(--t3);font:400 11px var(--mono);cursor:pointer">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+}
+
+function copySendEmail(id){
+  const p=prospects.find(x=>x.id===id);if(!p||!p.emailDraft)return;
+  const text='Subject: '+p.emailDraft.subject+'\nTo: '+p.contact.email+'\n\n'+p.emailDraft.body;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('#send-overlay button:first-child');
+    if(btn){btn.textContent='✓ Copié';btn.style.color='var(--green)';setTimeout(()=>{btn.textContent='Copier le message';btn.style.color='var(--cyan)'},2000)}
+  });
+}
+
+async function sendEmailDirect(id){
+  const p=prospects.find(x=>x.id===id);if(!p||!p.emailDraft||!p.contact.email)return;
+  const btn=document.querySelectorAll('#send-overlay button')[1];
+  if(btn){btn.textContent='⏳ Envoi...';btn.disabled=true}
+  try{
+    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:p.emailDraft.subject,textBody:p.emailDraft.body,domain:p.contact.email.split('@')[1],prospectId:String(p._reconEntityId||p.id),fromName:'Jean-Etienne'})});
+    if(res.ok){
+      const data=await res.json();
+      if(btn){btn.textContent='✓ Envoyé';btn.style.background='hsla(155,100%,39%,.3)'}
+      saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:p.emailDraft.subject,body:p.emailDraft.body,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:p.seq,channel:'email'});
+    }else{
+      const err=await res.json();
+      if(btn){btn.textContent='✗ Erreur: '+(err.error||'').substring(0,30);btn.style.color='var(--red)'}
+    }
+  }catch(e){if(btn){btn.textContent='✗ Erreur réseau';btn.style.color='var(--red)'}}
 }
 
 function renderLeads(){
@@ -1504,7 +1586,7 @@ function renderLeads(){
       <div class="heat-ring">${heatRing(p.heat)}</div>
       <div class="lead-info">
         <div class="lead-co">${p.flag} ${p.co}</div>
-        <div class="lead-meta"><div class="src-dot" style="background:${SRC_COLORS[p.src]}"></div><span class="lead-stage">${STAGE_LABELS[p.stage]||'Nouveau'}</span></div>
+        <div class="lead-meta"><div class="src-dot" style="background:${SRC_COLORS[p.src]}"></div><span class="lead-stage">${p._status||STAGE_LABELS[p.stage]||'discovered'}</span></div>
       </div>
       <div class="lead-exp" style="color:${heatColor(p.heat)}">${p.exp.split('–')[0]}</div>
       ${getSendReadyBadge(p)}
