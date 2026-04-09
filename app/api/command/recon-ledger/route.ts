@@ -238,71 +238,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data: data || [] });
     }
     case 'prospects_send_ready': {
-      // Bulk fetch all 4 tables, join in memory — NO N+1
-      const [allOps, allPeople, allRels, allCompanies, allTheses] = await Promise.all([
-        q('recon_ops_state?select=*&order=priority_score.desc&limit=200'),
-        q('recon_people?select=*&canonical_email=not.is.null&limit=200'),
-        q('recon_person_company?is_current=eq.true&select=person_id,company_id,title&order=last_observed_at.desc&limit=500'),
-        q('recon_companies?select=*&limit=200'),
-        q('recon_account_thesis?select=*&order=version.desc&limit=100'),
-      ]);
-
-      const peopleMap: Record<string, any> = {};
-      (allPeople || []).forEach((p: any) => { if (p.id) peopleMap[p.id] = p; });
-      const companyMap: Record<string, any> = {};
-      (allCompanies || []).forEach((c: any) => { if (c.id) companyMap[c.id] = c; });
-      // person→company: first match wins (ordered by last_observed_at desc)
-      const personCompany: Record<string, string> = {};
-      (allRels || []).forEach((r: any) => { if (r.person_id && r.company_id && !personCompany[r.person_id]) personCompany[r.person_id] = r.company_id; });
-      // company→thesis: first match wins (ordered by version desc)
-      const companyThesis: Record<string, any> = {};
-      (allTheses || []).forEach((t: any) => { if (t.company_id && !companyThesis[t.company_id]) companyThesis[t.company_id] = t; });
-
-      const prospects: Record<string, unknown>[] = [];
-      for (const op of (allOps || [])) {
-        if (!op.entity_id || op.current_status === 'suppressed') continue;
-        const person = peopleMap[op.entity_id];
-        if (!person?.canonical_email) continue;
-
-        const companyId = personCompany[op.entity_id];
-        const company = companyId ? companyMap[companyId] || {} : {};
-        const thesis = companyId ? companyThesis[companyId] || {} : {};
-
-        prospects.push({
-          person_id: person.id,
-          person_name: person.canonical_name,
-          person_title: person.canonical_title,
-          person_email: person.canonical_email,
-          person_linkedin: person.canonical_linkedin,
-          person_country: person.canonical_country,
-          person_email_status: person.email_status,
-          company_id: companyId || null,
-          company_name: company.canonical_name || null,
-          company_domain: company.canonical_domain || null,
-          company_industry: company.canonical_industry || null,
-          company_employee_count: company.employee_count || null,
-          company_revenue: company.revenue_printed || null,
-          company_tool_count: company.tool_count || 0,
-          company_has_legacy: company.has_legacy_tools || false,
-          company_multi_cloud: company.multi_cloud || false,
-          company_tech_stack: company.tech_stack || [],
-          thesis_id: thesis.id || null,
-          thesis_status: thesis.thesis_status || null,
-          findings: thesis.findings || [],
-          exposure_range: thesis.exposure_range || null,
-          email_draft_subject: thesis.email_draft_subject || null,
-          email_draft_body: thesis.email_draft_body || null,
-          why_now: thesis.why_now || null,
-          outreach_angle: thesis.outreach_angle || null,
-          ops_status: op.current_status,
-          ops_priority: op.priority_score,
-          ops_tags: op.tags || [],
-          ops_actionable: op.actionable_now,
-          send_ready: !!(thesis.email_draft_body && person.canonical_email),
-        });
-      }
-
-      return NextResponse.json({ data: prospects });
+      // Single SQL view — no limits, no client join, deterministic thesis (version DESC)
+      // Relation rule: most recent is_current=true per person (last_observed_at DESC)
+      // Thesis rule: highest version per company_id
+      const data = await q(`v_prospects_send_ready?select=*&limit=${limit}&offset=${offset}`);
+      return NextResponse.json({ data: data || [] });
     }
     case 'thesis_detail': {
       const companyId = req.nextUrl.searchParams.get('company_id');
