@@ -260,7 +260,7 @@ export async function GET(req: NextRequest) {
           // Rule B: most recent is_current=true relation wins (ORDER BY last_observed_at DESC LIMIT 1)
           const compArr = await q(`recon_companies?id=eq.${rel.company_id}&limit=1`);
           company = compArr?.[0] || {};
-          const thesisArr = await q(`recon_account_thesis?company_id=eq.${rel.company_id}&limit=1`);
+          const thesisArr = await q(`recon_account_thesis?company_id=eq.${rel.company_id}&order=version.desc&limit=1`);
           thesis = thesisArr?.[0] || {};
         }
 
@@ -701,6 +701,12 @@ export async function POST(req: NextRequest) {
             action_data: { from, to },
           }),
         });
+      }
+
+      // Server-side increment contact_attempt_count if transitioning to contacted
+      if (updates.current_status === 'contacted') {
+        const currentOps = await q(`recon_ops_state?entity_id=eq.${entity_id}&select=contact_attempt_count&limit=1`);
+        updates.contact_attempt_count = ((currentOps?.[0]?.contact_attempt_count) || 0) + 1;
       }
 
       updates.updated_at = new Date().toISOString();

@@ -1538,12 +1538,20 @@ async function sendEmailDirect(id){
       const data=await res.json();
       if(btn){btn.textContent='✓ Envoyé';btn.style.background='hsla(155,100%,39%,.3)'}
       saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:p.emailDraft.subject,body:p.emailDraft.body,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:p.seq,channel:'email'});
-      // Persist to Recon Ledger: log action + update ops status
+      // Persist to Recon Ledger: AWAITED, with rollback on failure
       if(p._reconEntityId){
-        fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'log_action',entity_type:'person',entity_id:p._reconEntityId,action_type:'email_sent',action_data:{to:p.contact.email,subject:p.emailDraft.subject,messageId:data.messageId||'',sentAt:new Date().toISOString()},channel:'email'})}).catch(()=>{});
-        fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'update_ops',entity_id:p._reconEntityId,updates:{current_status:'contacted',last_contacted_at:new Date().toISOString(),last_contacted_channel:'email',contact_attempt_count:1}})}).catch(()=>{});
+        let dbOk=true;
+        try{
+          const logRes=await fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'log_action',entity_type:'person',entity_id:p._reconEntityId,action_type:'email_sent',action_data:{to:p.contact.email,subject:p.emailDraft.subject,messageId:data.messageId||'',sentAt:new Date().toISOString()},channel:'email'})});
+          if(!logRes.ok)dbOk=false;
+          const opsRes=await fetch('/api/command/recon-ledger',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'update_ops',entity_id:p._reconEntityId,updates:{current_status:'contacted',last_contacted_at:new Date().toISOString(),last_contacted_channel:'email'}})});
+          if(!opsRes.ok)dbOk=false;
+        }catch(e){dbOk=false}
+        if(!dbOk){
+          if(btn){btn.textContent='✓ Envoyé (DB sync failed)';btn.style.color='var(--gold)'}
+        }
       }
-      // Refresh UI
+      // Refresh UI from confirmed state
       p._status='contacted';p.stage=3;
       renderLeads();
     }else{
