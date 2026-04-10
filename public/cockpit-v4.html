@@ -2124,6 +2124,8 @@ async function renderSentEmails(){
     ${statPill('Ouverts',counts.opened,'badge-opened')}
     ${statPill('R\u00e9pondus',counts.replied,'badge-replied')}
     ${statPill('Bounced',counts.bounced,'badge-bounced')}
+    ${counts.sent>0?statPill('Taux ouv.',Math.round(counts.opened/counts.sent*100)+'%','badge-opened'):''}
+    ${counts.sent>0?statPill('Taux rep.',Math.round(counts.replied/counts.sent*100)+'%','badge-replied'):''}
   </div>`;
 
   if(!filtered.length){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email avec ce filtre.</div>';return}
