@@ -2781,107 +2781,92 @@ function renderBrief(){
   const smartQ=getSmartQueue();
   const deferredCount=smartQ.filter(q=>q.deferred).length;
   const cod=computeCostOfDelay();
+  const readyCount=smartQ.filter(q=>!q.deferred).length;
+  const hotCount=prospects.filter(p=>p.heat>=80).length;
+  const syncDot=document.getElementById('sync-dot');
+  const syncState=syncDot&&syncDot.style.background==='var(--green)'?'Sync OK':'En cours';
   document.getElementById('brief-panel').innerHTML=`
-    <div style="display:flex;gap:16px;margin-bottom:16px;padding:16px;background:var(--graphite);border:1px solid var(--bd);border-radius:8px">
-      <div style="flex:1">
-        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Etat du systeme</div>
-        <div style="font:600 12px var(--mono);color:var(--t1)" id="cc-system-state">Operationnel</div>
-      </div>
-      <div style="flex:1">
-        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Mode</div>
-        <div style="font:600 12px var(--mono);color:${currentMode==='autonomous'?'var(--cyan)':'var(--gold)'}">${currentMode==='autonomous'?'AUTONOME':'ASSISTE'}</div>
-      </div>
-      <div style="flex:1">
-        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Pipeline</div>
-        <div style="font:600 12px var(--mono);color:var(--t1)">${prospects.length} prospects</div>
-      </div>
-      <div style="flex:1">
-        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Perte/jour</div>
-        <div style="font:600 12px var(--mono);color:var(--red)">EUR ${cod.daily.toLocaleString()}</div>
-      </div>
+    <!-- COUCHE 1 — SYSTEM STATUS STRIP -->
+    <div class="sys-strip">
+      <div class="sys-cell"><div class="sys-lbl">Mode</div><div class="sys-val" style="color:${currentMode==='autonomous'?'var(--cyan)':'var(--gold)'}">${currentMode==='autonomous'?'AUTONOME':'ASSISTE'}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">Pipeline</div><div class="sys-val">${prospects.length}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">File d'envoi</div><div class="sys-val" style="color:var(--green)">${readyCount}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">Perte / jour</div><div class="sys-val" style="color:var(--red)">${cod.daily>0?'EUR '+cod.daily.toLocaleString():'—'}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">Sync</div><div class="sys-val" style="color:var(--green)">${syncState}</div></div>
     </div>
+
+    <!-- TITRE DU BRIEF -->
     <div class="brief-header">
-      <div class="brief-title">Brief — ${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}</div>
+      <div class="brief-title">Centre de commande — ${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}</div>
       <div class="brief-summary">
-        ${isWeekend()?`Mode week-end — ${briefActions.length} actions reportées à lundi.`:`${briefActions.length} actions à traiter · ${deferredCount} reportées (fuseaux/fériés).`}
-        <br>Mode: <strong style="color:${currentMode==='autonomous'?'var(--cyan)':'var(--gold)'}">${currentMode==='autonomous'?'AUTONOME':'ASSISTÉ'}</strong>
+        ${isWeekend()?`Mode week-end — ${briefActions.length} actions reportees a lundi.`:`${briefActions.length} actions a traiter · ${deferredCount} reportees (fuseaux/feries) · ${hotCount} prospects chauds.`}
       </div>
     </div>
+
+    <!-- COUCHE 2 — ACTIONS PRIORITAIRES (triees par EUR impact) -->
+    <div class="section-hdr"><span class="section-hdr-title">Actions prioritaires</span><span class="section-hdr-count">${briefActions.length}</span></div>
     ${briefActions.map((a,idx)=>{
       const blocked=a.lead?!canSendTo(a.lead):isWeekend();
-      return`<div class="brief-card" style="${blocked?'opacity:.5':''}">
+      const typeClass=a.type==='approve'?'type-approve':a.type==='followup'?'type-followup':'type-reply';
+      return`<div class="brief-card brief-card-typed ${typeClass}" style="${blocked?'opacity:.5':''}">
         <div class="bc-top">
           <span>${a.icon}</span><span>${a.flag}</span>
-          <span class="bc-who">${a.who}</span>
+          <span class="bc-who" style="cursor:pointer" onclick="showView('cockpit');selectLead(${a.lead?a.lead.id:0})">${a.who}</span>
           <span class="bc-score" style="color:${heatColor(a.score)};border-color:${heatColor(a.score)}">${a.score}</span>
         </div>
         <div class="bc-reason">${a.reason}</div>
         <div class="bc-exposure">${a.exposure}</div>
         <div class="bc-btns">
-          ${blocked?'<button class="btn" disabled style="opacity:.4">Reporté</button>':`
+          ${blocked?'<button class="btn" disabled style="opacity:.4">Reporte</button>':`
             <button class="btn primary" onclick="briefApproveAction(${idx})">${a.actionLabel}</button>
-            <button class="btn" onclick="showView('cockpit');selectLead(${a.lead.id})">Détail</button>
+            <button class="btn" onclick="showView('cockpit');selectLead(${a.lead.id})">Detail</button>
           `}
         </div>
       </div>`;
     }).join('')}
-    ${briefActions.length===0?'<div style="padding:32px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--t3)">Aucune action urgente. Pipeline au repos.</div>':''}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px">
-      <div onclick="showView('sent')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
-        <div style="font:800 16px var(--disp);color:var(--t1)" id="cc-sent-count">0</div>
-        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Emails</div>
-      </div>
-      <div onclick="showView('tape')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
-        <div style="font:800 16px var(--disp);color:var(--t1)" id="cc-sessions-count">0</div>
-        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Sessions</div>
-      </div>
-      <div onclick="showView('cockpit')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
-        <div style="font:800 16px var(--disp);color:var(--t1)">${prospects.filter(p=>p.heat>=80).length}</div>
-        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Priorite haute</div>
-      </div>
-      <div onclick="showView('revenue')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
-        <div style="font:800 16px var(--disp);color:var(--bronze-hi)">EUR ${REVENUE_TARGETS.currentMRR.toLocaleString()}</div>
-        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">MRR</div>
-      </div>
+    ${briefActions.length===0?'<div style="padding:24px;text-align:center;font:400 12px var(--mono);color:var(--t3)">Aucune action urgente. Pipeline au repos.</div>':''}
+
+    <!-- COUCHE 2 — EVIDENCE RAILS -->
+    <div class="section-hdr" style="margin-top:16px"><span class="section-hdr-title">Preuves et controle</span></div>
+    <div class="ev-grid">
+      <div class="ev-card" onclick="showView('sent')"><div class="ev-val" id="cc-sent-count">0</div><div class="ev-lbl">Emails</div></div>
+      <div class="ev-card" onclick="showView('tape')"><div class="ev-val" id="cc-sessions-count">0</div><div class="ev-lbl">Sessions</div></div>
+      <div class="ev-card" onclick="showView('cockpit')"><div class="ev-val">${hotCount}</div><div class="ev-lbl">Priorite haute</div></div>
+      <div class="ev-card" onclick="showView('revenue')"><div class="ev-val" style="color:var(--bronze-hi)">EUR ${REVENUE_TARGETS.currentMRR.toLocaleString()}</div><div class="ev-lbl">MRR</div></div>
     </div>
   `;
-  // Brief sidebar — quick stats
+  // Brief sidebar — 3 blocs fixes (Quick Metrics, Prospects chauds, File)
   const bs=document.getElementById('brief-sidebar');
   if(bs)bs.innerHTML=`
+    <div class="section-hdr"><span class="section-hdr-title">Metriques</span></div>
     <div class="wg">
-      <div class="wg-title"><span style="color:var(--bronze-hi);font-weight:800">///</span> Session Brief</div>
-      <div class="d-grid" style="gap:8px">
+      <div class="d-grid" style="gap:6px">
         <div class="d-metric"><span class="d-metric-label">Actions</span><span class="d-metric-val">${briefActions.length}</span></div>
-        <div class="d-metric"><span class="d-metric-label">Approuvées</span><span class="d-metric-val" style="color:var(--green)">${briefApproved}</span></div>
-        <div class="d-metric"><span class="d-metric-label">Mode</span><span class="d-metric-val" style="color:${currentMode==='autonomous'?'var(--cyan)':'var(--gold)'}">${currentMode==='autonomous'?'AUTO':'ASSIST'}</span></div>
+        <div class="d-metric"><span class="d-metric-label">Approuvees</span><span class="d-metric-val" style="color:var(--green)">${briefApproved}</span></div>
+        <div class="d-metric"><span class="d-metric-label">File prete</span><span class="d-metric-val" style="color:var(--green)">${readyCount}</span></div>
+        <div class="d-metric"><span class="d-metric-label">Reportees</span><span class="d-metric-val" style="color:var(--gold)">${deferredCount}</span></div>
+        <div class="d-metric"><span class="d-metric-label">Perte/jour</span><span class="d-metric-val" style="color:var(--red)">EUR ${cod.daily.toLocaleString()}</span></div>
       </div>
     </div>
+    <div class="section-hdr"><span class="section-hdr-title">Prospects chauds</span><span class="section-hdr-count">${prospects.filter(p=>p.heat>=85).length}</span></div>
     <div class="wg">
-      <div class="wg-title"><span style="color:var(--red);font-weight:800">///</span> Perte Pipeline</div>
-      <div style="text-align:center;padding:12px 0">
-        <div class="wg-big" style="color:var(--red)">€${cod.daily.toLocaleString()}</div>
-        <div class="wg-sub">par jour non signé</div>
-      </div>
-    </div>
-    <div class="wg">
-      <div class="wg-title"><span style="color:var(--cyan);font-weight:800">///</span> Prospects chauds</div>
       ${prospects.filter(p=>p.heat>=85).sort((a,b)=>b.heat-a.heat).slice(0,5).map(p=>`
-        <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bd)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:800;color:${heatColor(p.heat)}">${p.heat}</span>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--t1);flex:1">${p.flag} ${p.co}</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--t3)">${p.exp.split('–')[0]}</span>
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bd);cursor:pointer" onclick="showView('cockpit');selectLead(${p.id})">
+          <span style="font:800 10px var(--mono);color:${heatColor(p.heat)}">${p.heat}</span>
+          <span style="font:600 10px var(--mono);color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.flag} ${p.co}</span>
+          <span style="font:400 9px var(--mono);color:var(--t3)">${p.exp.split('–')[0]}</span>
         </div>
-      `).join('')}
+      `).join('')||'<div style="padding:8px;font:400 10px var(--mono);color:var(--t4)">—</div>'}
     </div>
+    <div class="section-hdr"><span class="section-hdr-title">File d'envoi</span><span class="section-hdr-count">${smartQ.length}</span></div>
     <div class="wg">
-      <div class="wg-title"><span style="color:var(--green);font-weight:800">///</span> Statut de la file</div>
-      ${getSmartQueue().map(q=>`
+      ${smartQ.map(q=>`
         <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bd)">
           <div style="width:5px;height:5px;border-radius:50%;background:${q.deferred?'var(--gold)':'var(--green)'}"></div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--t2);flex:1">${q.co}</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--t4)">${q.deferred?q.reason:q.time}</span>
+          <span style="font:500 10px var(--mono);color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.co}</span>
+          <span style="font:400 9px var(--mono);color:var(--t4)">${q.deferred?q.reason:q.time}</span>
         </div>
-      `).join('')}
+      `).join('')||'<div style="padding:8px;font:400 10px var(--mono);color:var(--t4)">—</div>'}
     </div>
   `;
   // Populate evidence rail counts
