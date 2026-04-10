@@ -839,14 +839,21 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 
     <!-- VIEW: SEQUENCES -->
     <div class="view-panel" id="view-sequences">
-      <div style="display:grid;grid-template-columns:300px 1fr 300px;height:100%">
-        <div class="seq-list-panel" id="seq-list-panel" style="border-right:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
-        <div class="seq-detail-panel" id="seq-detail-panel" style="overflow-y:auto;padding:20px 24px;background:var(--obsidian)">
-          <div class="d-section-title" style="margin-bottom:12px">File d'attente intelligente</div>
-          <div style="font:400 9px var(--mono);color:var(--t4);padding:4px 14px;border-bottom:1px solid var(--bd)">Données de démonstration · Source live bientôt disponible</div>
-          <div id="seq-queue"></div>
+      <div style="display:flex;flex-direction:column;height:100%">
+        <div class="hl-strip" id="seq-headline">
+          <div class="hl-cell"><div class="hl-val" id="seq-hl-active">—</div><div class="hl-lbl">Sequences actives</div></div>
+          <div class="hl-cell"><div class="hl-val" id="seq-hl-queue" style="color:var(--green)">—</div><div class="hl-lbl">En file</div></div>
+          <div class="hl-cell"><div class="hl-val" id="seq-hl-sent">—</div><div class="hl-lbl">Envoyes cette semaine</div></div>
+          <div class="hl-cell"><div class="hl-val" id="seq-hl-reply" style="color:var(--green)">—</div><div class="hl-lbl">Taux de reponse</div></div>
         </div>
-        <div id="seq-analytics-panel" style="border-left:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
+        <div style="display:grid;grid-template-columns:300px 1fr 300px;flex:1;overflow:hidden">
+          <div class="seq-list-panel" id="seq-list-panel" style="border-right:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
+          <div class="seq-detail-panel" id="seq-detail-panel" style="overflow-y:auto;padding:20px 24px;background:var(--obsidian)">
+            <div class="section-hdr"><span class="section-hdr-title">File d'attente intelligente</span></div>
+            <div id="seq-queue"></div>
+          </div>
+          <div id="seq-analytics-panel" style="border-left:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
+        </div>
       </div>
     </div>
 
@@ -2657,6 +2664,15 @@ function filterLeads(q){currentSearch=q;displayedCount=20;renderLeads()}
 
 // ── SEQUENCES ──
 function renderSequences(){
+  // Populate headline strip
+  const sq=getSmartQueue();
+  const seqReady=sq.filter(q=>!q.deferred).length;
+  const avgReply=sequences.length?Math.round(sequences.reduce((s,x)=>s+x.reply_rate,0)/sequences.length):0;
+  const setHl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  setHl('seq-hl-active',String(sequences.length));
+  setHl('seq-hl-queue',String(seqReady));
+  setHl('seq-hl-sent',String(DRIP_FUNNEL.totals.sent));
+  setHl('seq-hl-reply',avgReply+'%');
   document.getElementById('seq-list-panel').innerHTML=sequences.map(s=>`
     <div class="seq-card${s.id===activeSeqId?' active':''}" onclick="activeSeqId='${s.id}';renderSequences()">
       <div class="seq-name">${s.name}</div>
@@ -3154,6 +3170,12 @@ function renderRevenueView(){
   // Left column: Funnel + Forecast
   // Right column: A/B Performance + Renewals
   el.innerHTML=`
+    <div class="hl-strip" style="grid-column:1/-1">
+      <div class="hl-cell"><div class="hl-val" style="color:var(--bronze-hi)">EUR ${REVENUE_TARGETS.currentMRR.toLocaleString()}</div><div class="hl-lbl">MRR actuel</div></div>
+      <div class="hl-cell"><div class="hl-val">EUR ${REVENUE_TARGETS.currentARR.toLocaleString()}</div><div class="hl-lbl">ARR projete</div></div>
+      <div class="hl-cell"><div class="hl-val" style="color:var(--cyan)">${CONV_FUNNEL.length>=3?((CONV_FUNNEL[2].count/CONV_FUNNEL[0].count)*100).toFixed(1):'—'}%</div><div class="hl-lbl">Scan → Panier</div></div>
+      <div class="hl-cell"><div class="hl-val" style="color:var(--green)">EUR ${(prospects.length*490).toLocaleString()}</div><div class="hl-lbl">Pipeline value</div></div>
+    </div>
     <div style="overflow-y:auto;border-right:1px solid var(--bd);background:var(--graphite)">
       <!-- W3: CONVERSION FUNNEL -->
       <div class="wg">
@@ -3297,11 +3319,20 @@ function renderRevenueView(){
 function renderIntelView(){
   const el=document.getElementById('intel-view');
   if(!el)return;
+  const activePlugins=PLUGINS.filter(p=>p.status==='active').length;
+  const activeConns=CONNECTORS.filter(c=>c.status==='connected').length;
+  const avgConfidence=PLUGINS.length?Math.round(PLUGINS.reduce((s,p)=>s+p.confidence,0)/PLUGINS.length):0;
   el.innerHTML=`
+    <div class="hl-strip" style="grid-column:1/-1">
+      <div class="hl-cell"><div class="hl-val" style="color:var(--cyan)">${activePlugins}/${PLUGINS.length}</div><div class="hl-lbl">Plugins actifs</div></div>
+      <div class="hl-cell"><div class="hl-val" style="color:var(--green)">${activeConns}/${CONNECTORS.length}</div><div class="hl-lbl">Connecteurs</div></div>
+      <div class="hl-cell"><div class="hl-val">${OSINT_SIGNALS.length}</div><div class="hl-lbl">Signaux detectes</div></div>
+      <div class="hl-cell"><div class="hl-val" style="color:${avgConfidence>=80?'var(--green)':'var(--gold)'}">${avgConfidence}%</div><div class="hl-lbl">Confiance moyenne</div></div>
+    </div>
     <!-- X1: PLUGIN DASHBOARD -->
     <div style="overflow-y:auto;border-right:1px solid var(--bd);background:var(--graphite)">
       <div class="wg">
-        <div class="wg-title"><span style="color:var(--cyan);font-weight:800">///</span> Moteur de plugins — ${PLUGINS.filter(p=>p.status==='active').length}/${PLUGINS.length} actifs</div>
+        <div class="wg-title"><span style="color:var(--cyan);font-weight:800">///</span> Moteur de plugins — ${activePlugins}/${PLUGINS.length} actifs</div>
         ${PLUGINS.map(p=>{
           const statusColor=p.status==='active'?'var(--green)':p.status==='standby'?'var(--gold)':'var(--red)';
           return`<div style="padding:10px 12px;border:1px solid var(--bd);border-radius:6px;margin-bottom:6px;background:hsla(0,0%,100%,.01)">
