@@ -75,8 +75,7 @@ export async function POST(req: NextRequest) {
         to: [to],
         reply_to: 'audits@ghost-tax.com',
         subject,
-        html: htmlBody || `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><pre style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: #1a1a1a;">${textBody}</pre></body></html>`,
-        text: textBody || undefined,
+        html: htmlBody || `<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body style="margin:0;padding:20px;background:#ffffff"><div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.7; color: #1a1a1a; max-width: 600px; white-space: pre-wrap;">${textBody}</div></body></html>`,
         tags: [
           { name: 'type', value: 'outreach' },
           { name: 'domain', value: (domain || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
