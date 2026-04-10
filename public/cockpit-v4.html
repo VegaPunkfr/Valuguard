@@ -142,6 +142,57 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 .ts-val.loading{background:linear-gradient(90deg,var(--graphite-hi) 25%,var(--steel) 50%,var(--graphite-hi) 75%);background-size:200% 100%;animation:gt-shimmer 1.5s infinite;color:transparent;border-radius:3px;min-width:30px;display:inline-block}
 
 /* ══════════════════════════════════════════════════════════════════
+   SHARED COMPONENTS — V5 Design System
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Headline Strip — 4 metriques display en ligne, Couche 1 Pyramide Inversee */
+.hl-strip{display:flex;gap:0;border-bottom:1px solid var(--bd);background:var(--graphite)}
+.hl-cell{flex:1;padding:12px 16px;border-right:1px solid var(--bd);text-align:center}
+.hl-cell:last-child{border-right:none}
+.hl-val{font-family:var(--disp);font-size:22px;letter-spacing:.04em;line-height:1.1;color:var(--t1)}
+.hl-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-top:3px}
+
+/* Stats Bar — compteurs horizontaux reutilisables */
+.stats-bar{display:flex;align-items:center;gap:16px;padding:8px 16px;border-bottom:1px solid var(--bd);background:var(--obsidian)}
+.stats-pill{display:flex;align-items:center;gap:5px}
+.stats-pill-val{font-family:var(--disp);font-size:15px;letter-spacing:.04em;min-width:24px;text-align:center}
+.stats-pill-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+
+/* Sidebar separators */
+.nav-sep{width:28px;height:1px;background:var(--bd);margin:6px 0}
+
+/* Brief card type indicators */
+.brief-card-typed{border-left:2px solid var(--bd)}
+.brief-card-typed.type-approve{border-left-color:var(--green)}
+.brief-card-typed.type-followup{border-left-color:var(--gold)}
+.brief-card-typed.type-reply{border-left-color:var(--blue)}
+.brief-card-typed.type-urgent{border-left-color:var(--red)}
+
+/* Evidence rail cards */
+.ev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}
+.ev-card{cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s}
+.ev-card:hover{border-color:var(--bronze)}
+.ev-val{font-family:var(--disp);font-size:18px;letter-spacing:.04em;line-height:1.1;color:var(--t1)}
+.ev-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:2px}
+
+/* System status strip */
+.sys-strip{display:flex;gap:0;padding:0;margin-bottom:16px;background:var(--graphite);border:1px solid var(--bd);border-radius:8px;overflow:hidden}
+.sys-cell{flex:1;padding:12px 16px;border-right:1px solid var(--bd)}
+.sys-cell:last-child{border-right:none}
+.sys-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:3px}
+.sys-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t1)}
+
+/* Event feed */
+.ev-feed{margin:16px 0}
+.ev-feed-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.ev-feed-item:last-child{border-bottom:none}
+.ev-feed-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.ev-feed-time{font-family:var(--mono);font-size:9px;color:var(--t4);white-space:nowrap;min-width:50px}
+.ev-feed-text{font-family:var(--mono);font-size:10px;color:var(--t2);flex:1}
+.ev-feed-link{font-family:var(--mono);font-size:9px;color:var(--bronze-hi);cursor:pointer;white-space:nowrap}
+.ev-feed-link:hover{text-decoration:underline}
+
+/* ══════════════════════════════════════════════════════════════════
    V. MAIN CONTENT — Dynamic asymmetric grid
    ══════════════════════════════════════════════════════════════════ */
 .main{flex:1;overflow:hidden;position:relative}
@@ -681,6 +732,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span class="nav-label">CMD</span>
     </div>
+    <div class="nav-sep"></div>
     <div class="nav-item" data-view="apollo" data-key="2" onclick="showView('apollo')" title="Apollo">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <span class="nav-label">RECH</span>
@@ -693,7 +745,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
       <span class="nav-label">LI</span>
     </div>
-    <div style="width:28px;height:1px;background:var(--bd);margin:6px 0"></div>
+    <div class="nav-sep"></div>
     <div class="nav-item" data-view="revenue" data-key="5" onclick="showView('revenue')" title="Chiffre d'affaires">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <span class="nav-label">CA</span>
@@ -711,6 +763,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       <span class="nav-label">MAIL</span>
     </div>
     <div style="flex:1"></div>
+    <div class="nav-sep"></div>
     <div class="nav-item" data-view="settings" data-key="," onclick="showView('settings')" title="Paramètres">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span class="nav-label">CFG</span>
