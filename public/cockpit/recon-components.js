@@ -50,26 +50,56 @@ export function renderSessionCard(session, index, isExpanded) {
   const intent = s(session.intent || '');
   const filterStr = s(session.filters_summary || '');
   const count = session.result_count ?? session.results?.length ?? 0;
-  const yieldRate = session.yield_rate != null ? `${Math.round(session.yield_rate * 100)}%` : '—';
-  const date = fmtDate(session.created_at || session.timestamp);
+  const emailCount = session.email_count ?? (session.results ? session.results.filter(r => r.email).length : 0);
+  const yieldRaw = session.yield_rate != null ? session.yield_rate : (count > 0 ? emailCount / count : 0);
+  const yieldPct = Math.round(yieldRaw * 100);
+  const yieldStr = session.yield_rate != null || count > 0 ? `${yieldPct}%` : '\u2014';
+  const dateStr = fmtRelative(session.created_at || session.timestamp);
 
   const providerColor = provider === 'apollo' ? 'var(--cyan)' : provider === 'linkedin' ? 'var(--blue)' : 'var(--t2)';
 
+  // Yield color coding: >50% green, >25% gold, <25% red
+  let yieldColor, yieldBadgeClass, yieldLabel;
+  if (yieldPct >= 50) { yieldColor = 'var(--green)'; yieldBadgeClass = 'badge-excellent'; yieldLabel = 'EXCELLENT'; }
+  else if (yieldPct >= 25) { yieldColor = 'var(--gold)'; yieldBadgeClass = 'badge-bon'; yieldLabel = 'BON'; }
+  else { yieldColor = 'var(--red)'; yieldBadgeClass = 'badge-faible'; yieldLabel = 'FAIBLE'; }
+
+  // Pipeline impact estimate (contacts with email = potential pipeline)
+  const impact = emailCount > 0 ? `${emailCount} cibles` : '\u2014';
+
   const snapshots = isExpanded && session.results ? session.results.map((snap, i) => renderSnapshotRow(snap, i + 1)).join('') : '';
 
-  return `<div style="border:1px solid var(--bd);border-radius:6px;margin-bottom:4px;background:var(--graphite);overflow:hidden" data-session-id="${sid}">
-  <div onclick="window.recon.toggleSession('${sid}')" style="cursor:pointer;display:grid;grid-template-columns:18px 70px 60px 1fr 50px 50px 90px;align-items:center;gap:6px;padding:6px 10px;font:400 10px var(--mono);color:var(--t2)">
-    <span style="color:var(--t3);font-size:9px">${index + 1}</span>
+  return `<div class="tape-card${isExpanded ? ' expanded' : ''}" data-session-id="${sid}">
+  <div class="tape-card-head" onclick="window.recon.toggleSession('${sid}')">
     ${badge(provider, 'var(--obsidian)', providerColor)}
-    <span style="color:var(--t3)">${type}</span>
-    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${filterStr}">
-      ${intent ? `<span style="color:var(--violet)">${intent}</span> ` : ''}${filterStr}
-    </span>
-    <span style="text-align:right;color:var(--t1)">${count}</span>
-    <span style="text-align:right;color:${yieldRate !== '—' ? 'var(--green)' : 'var(--t3)'}">${yieldRate}</span>
-    <span style="text-align:right;color:var(--t3);font-size:9px">${date}</span>
+    <span class="tape-type" style="color:var(--t2)">${type}</span>
+    ${intent ? `<span class="tape-intent" title="${intent}">${intent}</span>` : ''}
+    <span class="tape-summary" title="${filterStr}">${filterStr || '\u2014'}</span>
+    <span class="tape-yield-badge ${yieldBadgeClass}">${yieldLabel}</span>
+    <span class="tape-date">${dateStr}</span>
   </div>
-  ${isExpanded ? `<div style="border-top:1px solid var(--bd);max-height:300px;overflow-y:auto">${snapshots || '<div style="padding:12px;text-align:center;color:var(--t4);font:400 10px var(--mono)">Aucun resultat</div>'}</div>` : ''}
+  <div class="tape-metrics">
+    <div class="tape-metric">
+      <div class="tape-metric-val" style="color:var(--t1)">${count}</div>
+      <div class="tape-metric-lbl">R\u00e9sultats</div>
+    </div>
+    <div class="tape-metric">
+      <div class="tape-metric-val" style="color:var(--green)">${emailCount}</div>
+      <div class="tape-metric-lbl">Avec email</div>
+    </div>
+    <div class="tape-metric">
+      <div class="tape-metric-val" style="color:${yieldColor}">${yieldStr}</div>
+      <div class="tape-metric-lbl">Rendement</div>
+      <div class="tape-metric-bar"><div class="tape-metric-bar-fill" style="width:${Math.min(100, yieldPct)}%;background:${yieldColor}"></div></div>
+    </div>
+    <div class="tape-metric">
+      <div class="tape-metric-val" style="color:var(--cyan)">${s(impact)}</div>
+      <div class="tape-metric-lbl">Impact</div>
+    </div>
+  </div>
+  <div class="tape-detail">
+    ${snapshots ? `<div style="max-height:300px;overflow-y:auto">${snapshots}</div>` : '<div style="padding:12px;text-align:center;color:var(--t4);font:400 10px var(--mono)">Aucun r\u00e9sultat</div>'}
+  </div>
 </div>`;
 }
 
