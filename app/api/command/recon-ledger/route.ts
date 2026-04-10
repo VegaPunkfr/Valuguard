@@ -200,6 +200,28 @@ export async function GET(req: NextRequest) {
       const data = await q(`recon_actions?entity_id=eq.${entityId}&order=created_at.desc&limit=${limit}`);
       return NextResponse.json({ data: data || [] });
     }
+    case 'actions_all': {
+      const data = await q(`recon_actions?select=*&order=created_at.desc&limit=${limit}&offset=${offset}`);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'counts': {
+      const [sessions, people, companies, actions, thesis, ops] = await Promise.all([
+        q('recon_sessions?select=id&limit=1000'),
+        q('recon_people?select=id&limit=1000'),
+        q('recon_companies?select=id&limit=1000'),
+        q('recon_actions?select=id&limit=1000'),
+        q('recon_account_thesis?select=id&limit=1000'),
+        q('recon_ops_state?select=entity_id&limit=1000'),
+      ]);
+      return NextResponse.json({
+        sessions: sessions?.length || 0,
+        people: people?.length || 0,
+        companies: companies?.length || 0,
+        actions: actions?.length || 0,
+        thesis: thesis?.length || 0,
+        ops: ops?.length || 0,
+      });
+    }
     case 'relationships': {
       if (!entityId) return NextResponse.json({ data: [] });
       const data = await q(`recon_person_company?person_id=eq.${entityId}&order=last_observed_at.desc`);
@@ -207,6 +229,10 @@ export async function GET(req: NextRequest) {
     }
     case 'relationships_all': {
       const data = await q(`recon_person_company?is_current=eq.true&select=person_id,company_id,company_name,title,is_current&order=last_observed_at.desc&limit=500`);
+      return NextResponse.json({ data: data || [] });
+    }
+    case 'entity_sessions_all': {
+      const data = await q(`recon_entity_sessions?select=person_id,session_id,appeared_at&order=appeared_at.desc&limit=500`);
       return NextResponse.json({ data: data || [] });
     }
     case 'person_detail': {

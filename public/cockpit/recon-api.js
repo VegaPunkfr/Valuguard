@@ -81,6 +81,21 @@ export async function ingestApolloResults(session, results) {
   return api({}, 'POST', { action: 'ingest', session, results });
 }
 
+// Entity-session junction (which person appeared in which session)
+export async function fetchEntitySessionsAll() {
+  return api({ type: 'entity_sessions_all' });
+}
+
+// All actions (global history, no entity_id required)
+export async function fetchActionsAll({ limit = 50, offset = 0 } = {}) {
+  return api({ type: 'actions_all', limit, offset });
+}
+
+// Global counts (sessions, people, companies, actions, thesis, ops)
+export async function fetchCounts() {
+  return api({ type: 'counts' });
+}
+
 // Health
 export async function fetchHealth() {
   try {

@@ -547,7 +547,8 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     <div class="tb-stat"><span class="ts-val" id="tb-exposure">--</span><span class="ts-lbl">Exposition</span></div>
     <div class="tb-stat"><span class="ts-val" id="tb-hot">--</span><span class="ts-lbl">Chaud</span></div>
     <div class="tb-stat"><span class="ts-val" id="tb-reply-rate">--</span><span class="ts-lbl">Réponse</span></div>
-    <div class="tb-stat"><span class="ts-val" id="tb-total">--</span><span class="ts-lbl">Total</span></div>
+    <div class="tb-stat"><span class="ts-val" id="tb-total">--</span><span class="ts-lbl">Visibles</span></div>
+    <div class="tb-stat"><span class="ts-val" id="tb-db-total">--</span><span class="ts-lbl">En base</span></div>
     <div class="tb-stat"><span class="ts-val" id="tb-queue">--</span><span class="ts-lbl">File</span></div>
   </div>
   <div class="tb-right">
@@ -824,6 +825,11 @@ async function loadProspectsFromRecon(){
       });
     });
     prospectsLoaded=true;
+    // Load DB totals for topbar
+    try{
+      const cRes=await fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()});
+      if(cRes.ok){const c=await cRes.json();const el=document.getElementById('tb-db-total');if(el){el.textContent=`${c.people||0}p/${c.companies||0}c/${c.thesis||0}t`;el.title=`${c.people} personnes, ${c.companies} companies, ${c.thesis} thesis, ${c.sessions} sessions, ${c.actions} actions`}}
+    }catch(_){}
   }catch(e){console.warn('Failed to load prospects from Recon Ledger:',e)}
 }
 
@@ -2620,7 +2626,7 @@ function updateTopbar(){
   setVal('tb-exposure',totalExp>=1000?`€${(totalExp/1000).toFixed(1)}M`:`€${Math.round(totalExp)}K`);
   setVal('tb-hot',String(hot));
   setVal('tb-reply-rate',avgReply+'%');
-  setVal('tb-total',String(prospects.length));
+  setVal('tb-total',String(prospects.length)+' vis.');
   setVal('tb-queue',isWeekend()?'⏸ '+queue.length:`${readyCount}/${queue.length}`);
 }
 

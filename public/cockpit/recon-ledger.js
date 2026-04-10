@@ -25,6 +25,7 @@ let _searchTimer = null;
 let S = {
   tab: 'tape',
   sessions: [], people: [], companies: [],
+  entitySessions: [],
   thesis: [],
   triggers: [],
   benchmarks: [],
@@ -254,9 +255,19 @@ function renderPatterns() {
     list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font:400 13px var(--body)">Pas assez de donnees pour afficher les patterns.</div>';
     return;
   }
+  // Build session→person_ids lookup from entity_sessions junction table
+  const sessPeopleMap = {};
+  (S.entitySessions || []).forEach(es => {
+    if (!sessPeopleMap[es.session_id]) sessPeopleMap[es.session_id] = new Set();
+    sessPeopleMap[es.session_id].add(es.person_id);
+  });
+  const peopleById = {};
+  S.people.forEach(p => { peopleById[p.id] = p; });
+
   // Calculate yield per session
   const sessData = S.sessions.map(sess => {
-    const people = S.people.filter(p => p.session_id === sess.id || (sess.id && p.discovery_session_id === sess.id));
+    const personIds = sessPeopleMap[sess.id] || new Set();
+    const people = [...personIds].map(pid => peopleById[pid]).filter(Boolean);
     const withEmail = people.filter(p => !!p.email).length;
     const contacted = people.filter(p => {
       const ops = S.ops[p.id];
@@ -490,14 +501,16 @@ function hideDetail() {
 
 async function loadInitial() {
   setLoading(true);
-  const [sessRes, peopleRes, opsRes] = await Promise.all([
+  const [sessRes, peopleRes, opsRes, esRes] = await Promise.all([
     api.fetchSessions({ limit: S.page.limit }),
     api.fetchPeople({ limit: S.page.limit }),
-    api.fetchOpsStates({ limit: 100 })
+    api.fetchOpsStates({ limit: 100 }),
+    api.fetchEntitySessionsAll()
   ]);
 
   S.sessions = sessRes.data || [];
   S.people = (peopleRes.data || []).map(normPerson);
+  S.entitySessions = esRes.data || [];
   const opsArr = opsRes.data || [];
   opsArr.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
   if (!Array.isArray(S.sessions)) S.sessions = [];
@@ -543,11 +556,17 @@ async function loadTabData(tab) {
       break;
     }
     case 'patterns': {
-      if (S.sessions.length === 0) {
-        const res = await api.fetchSessions({ limit: 100 });
-        S.sessions = res.data || [];
-        if (!Array.isArray(S.sessions)) S.sessions = [];
-      }
+      const [sessRes2, pplRes2, esRes2, opsRes2] = await Promise.all([
+        S.sessions.length === 0 ? api.fetchSessions({ limit: 100 }) : Promise.resolve({ data: S.sessions }),
+        S.people.length === 0 ? api.fetchPeople({ limit: 200 }) : Promise.resolve({ data: S.people }),
+        api.fetchEntitySessionsAll(),
+        Object.keys(S.ops).length === 0 ? api.fetchOpsStates({ limit: 200 }) : Promise.resolve({ data: null })
+      ]);
+      S.sessions = sessRes2.data || S.sessions;
+      if (!Array.isArray(S.sessions)) S.sessions = [];
+      if (pplRes2.data) S.people = (pplRes2.data).map(normPerson);
+      S.entitySessions = esRes2.data || [];
+      if (opsRes2.data) opsRes2.data.forEach(o => { if (o.entity_id) S.ops[o.entity_id] = o; });
       break;
     }
     case 'thesis': {
