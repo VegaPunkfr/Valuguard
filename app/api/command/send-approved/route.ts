@@ -71,11 +71,11 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: `${fromName || 'Jean-Étienne'} <audits@ghost-tax.com>`,
+        from: `${fromName || 'Jean-Etienne'} <audits@ghost-tax.com>`,
         to: [to],
         reply_to: 'audits@ghost-tax.com',
         subject,
-        html: htmlBody || `<pre style="font-family: sans-serif; white-space: pre-wrap;">${textBody}</pre>`,
+        html: htmlBody || `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><pre style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: #1a1a1a;">${textBody}</pre></body></html>`,
         text: textBody || undefined,
         tags: [
           { name: 'type', value: 'outreach' },
