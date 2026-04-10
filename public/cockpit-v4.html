@@ -2287,13 +2287,15 @@ async function syncTapeToSupabase(){
   renderTape();
 }
 
-// TAPE UNIFICATION NOTE: renderTape() is the localStorage fallback.
-// The canonical source is recon-ledger.js (loaded via initReconLedger).
-// renderTape() targets #tape-list which does NOT exist in view-tape.
-// It only activates if called explicitly by syncTapeToSupabase().
-// The recon-ledger.js module governs the entire tape view.
-function renderTape(){
-  const list=document.getElementById('tape-list');if(!list)return;
+// ── TAPE LEGACY (neutralized) ──────────────────────────────────
+// Canonical source: recon-ledger.js via initReconLedger().
+// renderTapeLegacy() operates on #tape-list (localStorage fallback).
+// #tape-list does NOT exist in view-tape — this code is unreachable
+// from the main tape view. Kept for backward compat of
+// syncTapeToSupabase(), cycleTapeEntityStatus(), injectTapeEntityToProspects().
+function renderTape(){return renderTapeLegacy()}
+function renderTapeLegacy(){
+  const list=document.getElementById('tape-list');if(!list){console.debug('[tape-legacy] #tape-list absent — no-op');return}
   const mode=document.getElementById('tape-view-mode')?.value||'sessions';
   const search=(document.getElementById('tape-search')?.value||'').toLowerCase();
   const statusFilter=document.getElementById('tape-status-filter')?.value||'';
