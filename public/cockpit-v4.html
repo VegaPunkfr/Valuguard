@@ -830,6 +830,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
             <div class="apo-tab" onclick="switchApoTab('osint',this)">Signaux OSINT</div>
             <div class="apo-tab" onclick="switchApoTab('visitors',this)">Visiteurs</div>
           </div>
+          <div class="stats-bar" id="apo-stats-bar"></div>
           <div class="apo-results-panel" id="apo-results-panel" style="flex:1;overflow-y:auto"></div>
           <div id="apo-osint-panel" style="flex:1;overflow-y:auto;padding:16px;display:none"></div>
           <div id="apo-visitors-panel" style="flex:1;overflow-y:auto;padding:16px;display:none"></div>
@@ -920,9 +921,9 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       <div style="display:flex;flex-direction:column;height:100%;width:100%">
         <div class="hl-strip" id="tape-headline">
           <div class="hl-cell"><div class="hl-val" id="tape-hl-sessions">—</div><div class="hl-lbl">Sessions</div></div>
-          <div class="hl-cell"><div class="hl-val" id="tape-hl-entities" style="color:var(--cyan)">—</div><div class="hl-lbl">Entites</div></div>
-          <div class="hl-cell"><div class="hl-val" id="tape-hl-emails" style="color:var(--green)">—</div><div class="hl-lbl">Emails collectes</div></div>
-          <div class="hl-cell"><div class="hl-val" id="tape-hl-last" style="color:var(--t3)">—</div><div class="hl-lbl">Derniere session</div></div>
+          <div class="hl-cell"><div class="hl-val" id="tape-hl-entities" style="color:var(--cyan)">—</div><div class="hl-lbl">Personnes</div></div>
+          <div class="hl-cell"><div class="hl-val" id="tape-hl-companies" style="color:var(--green)">—</div><div class="hl-lbl">Companies</div></div>
+          <div class="hl-cell"><div class="hl-val" id="tape-hl-thesis" style="color:var(--bronze-hi)">—</div><div class="hl-lbl">Thesis</div></div>
         </div>
         <div id="recon-ledger-root" style="display:flex;flex-direction:column;flex:1;width:100%;overflow:hidden"></div>
       </div>
@@ -2215,10 +2216,13 @@ function updateSentStatus(index){
 let reconInitialized=false;
 async function initReconLedger(){
   if(reconInitialized)return;
-  // Populate tape headline strip
+  // Populate tape headline strip from real counts
   try{fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()}).then(r=>r.json()).then(c=>{
     const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
-    s('tape-hl-sessions',c.sessions||0);s('tape-hl-entities',c.people||0);s('tape-hl-emails','—');
+    s('tape-hl-sessions',c.sessions||0);
+    s('tape-hl-entities',c.people||0);
+    s('tape-hl-companies',c.companies||0);
+    s('tape-hl-thesis',c.thesis||0);
   }).catch(()=>{})}catch(_){}
   const root=document.getElementById('recon-ledger-root');
   if(!root)return;
@@ -2283,6 +2287,11 @@ async function syncTapeToSupabase(){
   renderTape();
 }
 
+// TAPE UNIFICATION NOTE: renderTape() is the localStorage fallback.
+// The canonical source is recon-ledger.js (loaded via initReconLedger).
+// renderTape() targets #tape-list which does NOT exist in view-tape.
+// It only activates if called explicitly by syncTapeToSupabase().
+// The recon-ledger.js module governs the entire tape view.
 function renderTape(){
   const list=document.getElementById('tape-list');if(!list)return;
   const mode=document.getElementById('tape-view-mode')?.value||'sessions';
@@ -2455,6 +2464,15 @@ function renderApolloSearch(){
 }
 
 function renderApolloResults(){
+  const aStats=document.getElementById('apo-stats-bar');
+  if(aStats){
+    const total=apolloResults.length;
+    const withEmail=apolloResults.filter(r=>r.email).length;
+    const yieldPct=total>0?Math.round(withEmail/total*100):0;
+    const inPipeline=apolloResults.filter(r=>prospects.some(p=>p.co===r.co)).length;
+    const pill=(l,v,c)=>`<div class="stats-pill"><span class="stats-pill-val" style="color:${c}">${v}</span><span class="stats-pill-lbl">${l}</span></div>`;
+    aStats.innerHTML=total>0?pill('Trouves',total,'var(--t1)')+pill('Avec email',withEmail,'var(--green)')+pill('Rendement',yieldPct+'%',yieldPct>=50?'var(--green)':yieldPct>=25?'var(--gold)':'var(--red)')+pill('En pipeline',inPipeline,'var(--cyan)'):'';
+  }
   document.getElementById('apo-results-panel').innerHTML=apolloResults.length?apolloResults.map((r,i)=>`
     <div style="padding:14px;border:1px solid var(--bd);border-radius:8px;background:var(--graphite);margin-bottom:8px;cursor:pointer;transition:all .15s" onclick="toggleApoResult(${i},this)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
@@ -2814,8 +2832,7 @@ function renderBrief(){
   const cod=computeCostOfDelay();
   const readyCount=smartQ.filter(q=>!q.deferred).length;
   const hotCount=prospects.filter(p=>p.heat>=80).length;
-  const syncDot=document.getElementById('sync-dot');
-  const syncState=syncDot&&syncDot.style.background==='var(--green)'?'Sync OK':'En cours';
+  const syncState=window._syncOk===true?'Sync OK':window._syncOk===false?'Erreur':'En cours';
   document.getElementById('brief-panel').innerHTML=`
     <!-- COUCHE 1 — SYSTEM STATUS STRIP -->
     <div class="sys-strip">
@@ -2838,7 +2855,7 @@ function renderBrief(){
     <div class="section-hdr"><span class="section-hdr-title">Actions prioritaires</span><span class="section-hdr-count">${briefActions.length}</span></div>
     ${briefActions.map((a,idx)=>{
       const blocked=a.lead?!canSendTo(a.lead):isWeekend();
-      const typeClass=a.type==='approve'?'type-approve':a.type==='followup'?'type-followup':'type-reply';
+      const typeClass=a.type==='approve'?'type-approve':a.type==='followup'?'type-followup':a.type==='urgent'?'type-urgent':a.type==='reply'?'type-reply':'';
       return`<div class="brief-card brief-card-typed ${typeClass}" style="${blocked?'opacity:.5':''}">
         <div class="bc-top">
           <span>${a.icon}</span><span>${a.flag}</span>
@@ -3547,6 +3564,7 @@ async function syncLiveData(){
     }
 
     liveDataLoaded=true;
+    window._syncOk=true;
     syncDot.style.background='var(--green)';
     syncText.textContent=`En direct · ${data.leads?.length||0} prospects · ${data.osint?.length||0} signaux`;
 
@@ -3555,6 +3573,7 @@ async function syncLiveData(){
 
   }catch(e){
     console.warn('Cockpit sync failed:',e);
+    window._syncOk=false;
     syncDot.style.background='var(--red)';syncText.textContent='Hors ligne — données démo';
   }
 }
