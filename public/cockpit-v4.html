@@ -113,8 +113,8 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
   padding:12px 0;gap:4px;
 }
 .nav-item{
-  width:38px;height:38px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
+  width:38px;min-height:38px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   cursor:pointer;color:var(--t3);font-size:16px;
   transition:all .25s cubic-bezier(.22,1,.36,1);
   position:relative;
@@ -127,6 +127,19 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
   opacity:0;transition:opacity .2s;
 }
 .nav-item:hover::after{opacity:1}
+
+/* Nav labels */
+.nav-label{font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:.04em;color:var(--t4);margin-top:1px;text-transform:uppercase;opacity:0;transition:opacity .15s}
+.nav-item:hover .nav-label,.nav-item.active .nav-label{opacity:1}
+
+/* Section headers — unified */
+.section-hdr{display:flex;align-items:center;gap:6px;padding:10px 16px;border-bottom:1px solid var(--bd)}
+.section-hdr-title{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.section-hdr-count{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--bronze-hi)}
+.section-hdr-action{margin-left:auto}
+
+/* Topbar shimmer loading */
+.ts-val.loading{background:linear-gradient(90deg,var(--graphite-hi) 25%,var(--steel) 50%,var(--graphite-hi) 75%);background-size:200% 100%;animation:gt-shimmer 1.5s infinite;color:transparent;border-radius:3px;min-width:30px;display:inline-block}
 
 /* ══════════════════════════════════════════════════════════════════
    V. MAIN CONTENT — Dynamic asymmetric grid
@@ -637,12 +650,12 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     </svg>
   </div>
   <div class="tb-stats" id="tb-stats">
-    <div class="tb-stat" title="Exposition totale estimee"><span class="ts-val" id="tb-exposure">--</span><span class="ts-lbl">Exposition</span></div>
-    <div class="tb-stat" style="border-right-color:hsla(30,40%,48%,.15)" title="Prospects a priorite haute (score > 80)"><span class="ts-val" id="tb-hot" style="color:var(--red)">--</span><span class="ts-lbl">Priorite haute</span></div>
-    <div class="tb-stat" title="Prospects visibles dans le cockpit"><span class="ts-val" id="tb-total">--</span><span class="ts-lbl">Prospects</span></div>
-    <div class="tb-stat" title="Total personnes/companies/thesis en base Supabase"><span class="ts-val" id="tb-db-total" style="color:var(--cyan)">--</span><span class="ts-lbl">En base</span></div>
-    <div class="tb-stat" title="File d'envoi du jour"><span class="ts-val" id="tb-queue">--</span><span class="ts-lbl">File</span></div>
-    <div class="tb-stat" title="Taux de reponse global"><span class="ts-val" id="tb-reply-rate">--</span><span class="ts-lbl">Reponse</span></div>
+    <div class="tb-stat" title="Exposition totale estimee"><span class="ts-val loading" id="tb-exposure">--</span><span class="ts-lbl">Exposition</span></div>
+    <div class="tb-stat" style="border-right-color:hsla(30,40%,48%,.15)" title="Prospects a priorite haute (score > 80)"><span class="ts-val loading" id="tb-hot" style="color:var(--red)">--</span><span class="ts-lbl">Priorite haute</span></div>
+    <div class="tb-stat" title="Prospects visibles dans le cockpit"><span class="ts-val loading" id="tb-total">--</span><span class="ts-lbl">Prospects</span></div>
+    <div class="tb-stat" title="Total personnes/companies/thesis en base Supabase"><span class="ts-val loading" id="tb-db-total" style="color:var(--cyan)">--</span><span class="ts-lbl">En base</span></div>
+    <div class="tb-stat" title="File d'envoi du jour"><span class="ts-val loading" id="tb-queue">--</span><span class="ts-lbl">File</span></div>
+    <div class="tb-stat" title="Taux de reponse global"><span class="ts-val loading" id="tb-reply-rate">--</span><span class="ts-lbl">Reponse</span></div>
   </div>
   <div class="tb-right">
     <div id="live-clock" style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--t2);white-space:nowrap"></div>
@@ -662,32 +675,41 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
   <div class="sidebar">
     <div class="nav-item active" data-view="cockpit" data-key="1" onclick="showView('cockpit')" title="Cockpit">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="nav-label">CMD</span>
     </div>
     <div class="nav-item" data-view="apollo" data-key="2" onclick="showView('apollo')" title="Apollo">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span class="nav-label">RECH</span>
     </div>
     <div class="nav-item" data-view="sequences" data-key="3" onclick="showView('sequences')" title="Séquences">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label">SEQ</span>
     </div>
     <div class="nav-item" data-view="linkedin" data-key="4" onclick="showView('linkedin')" title="LinkedIn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      <span class="nav-label">LI</span>
     </div>
     <div style="width:28px;height:1px;background:var(--bd);margin:6px 0"></div>
     <div class="nav-item" data-view="revenue" data-key="5" onclick="showView('revenue')" title="Chiffre d'affaires">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="nav-label">CA</span>
     </div>
     <div class="nav-item" data-view="intel" data-key="6" onclick="showView('intel')" title="Renseignement">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <span class="nav-label">INTEL</span>
     </div>
-    <div class="nav-item" data-view="tape" data-key="8" onclick="showView('tape')" title="Intel Tape">
+    <div class="nav-item" data-view="tape" data-key="7" onclick="showView('tape')" title="Intel Tape">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M10 12h4"/></svg>
+      <span class="nav-label">TAPE</span>
     </div>
-    <div class="nav-item" data-view="sent" data-key="7" onclick="showView('sent')" title="Emails envoyés">
+    <div class="nav-item" data-view="sent" data-key="8" onclick="showView('sent')" title="Emails envoyés">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+      <span class="nav-label">MAIL</span>
     </div>
     <div style="flex:1"></div>
     <div class="nav-item" data-view="settings" data-key="," onclick="showView('settings')" title="Paramètres">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label">CFG</span>
     </div>
   </div>
 
@@ -733,7 +755,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
           <div id="detail-content" style="display:none;overflow-y:auto;overflow-x:hidden;max-width:100%"></div>
         </div>
         <div class="act-panel" id="action-panel">
-          <div class="act-head"><span class="act-title" id="act-panel-title">Renseignement</span></div>
+          <div class="section-hdr"><span class="section-hdr-title" id="act-panel-title">Renseignement</span></div>
           <div id="action-content">
             <div id="action-widgets"></div>
           </div>
@@ -764,6 +786,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
         <div class="seq-list-panel" id="seq-list-panel" style="border-right:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
         <div class="seq-detail-panel" id="seq-detail-panel" style="overflow-y:auto;padding:20px 24px;background:var(--obsidian)">
           <div class="d-section-title" style="margin-bottom:12px">File d'attente intelligente</div>
+          <div style="font:400 9px var(--mono);color:var(--t4);padding:4px 14px;border-bottom:1px solid var(--bd)">Données de démonstration · Source live bientôt disponible</div>
           <div id="seq-queue"></div>
         </div>
         <div id="seq-analytics-panel" style="border-left:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
@@ -774,12 +797,12 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     <div class="view-panel" id="view-linkedin">
       <div class="li-view">
         <div class="li-col li-col-left">
-          <div class="li-head"><div class="li-title">Calendrier éditorial</div></div>
+          <div class="section-hdr"><span class="section-hdr-title">Calendrier éditorial</span></div>
           <div id="li-calendar"></div>
           <div id="li-loading" style="display:none;padding:24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--t3)">Chargement Supabase...</div>
         </div>
         <div class="li-col li-col-center">
-          <div class="li-head"><div class="li-title" id="li-post-day">Post du jour</div></div>
+          <div class="section-hdr"><span class="section-hdr-title" id="li-post-day">Post du jour</span></div>
           <div class="fmt-bar">
             <div class="fmt-pill active" onclick="setLiFormat('chiffre_choc',this)"><div class="fp-icon">📊</div><div class="fp-label">Chiffre choc</div></div>
             <div class="fmt-pill" onclick="setLiFormat('histoire_client',this)"><div class="fp-icon">📖</div><div class="fp-label">Histoire</div></div>
@@ -806,9 +829,9 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
           </div>
         </div>
         <div class="li-col li-col-right">
-          <div class="li-head"><div class="li-title">Visiteurs profil <span id="li-routine-done" style="color:var(--bronze-hi)">0/5</span></div></div>
+          <div class="section-hdr"><span class="section-hdr-title">Visiteurs profil</span><span class="section-hdr-count" id="li-routine-done">0/5</span></div>
           <div id="li-visitors"></div>
-          <div class="li-head" style="margin-top:8px"><div class="li-title">Routine hebdo</div></div>
+          <div class="section-hdr" style="margin-top:8px"><span class="section-hdr-title">Routine hebdo</span></div>
           <div id="li-routine"></div>
         </div>
       </div>
@@ -834,8 +857,8 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     </div>
 
     <div class="view-panel" id="view-sent" style="overflow-y:auto;background:var(--obsidian)">
-      <div class="sent-header">
-        <div style="font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--t1)">Historique des actions</div>
+      <div class="section-hdr" style="background:var(--graphite)">
+        <span class="section-hdr-title" style="color:var(--t1)">Historique des actions</span>
         <div class="sent-filters">
           <button class="sent-filter active" onclick="filterSentEmails('all',this)">Tous</button>
           <button class="sent-filter" onclick="filterSentEmails('sent',this)">Envoyés</button>
@@ -958,7 +981,7 @@ async function loadProspectsFromRecon(){
     // Load DB totals for topbar
     try{
       const cRes=await fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()});
-      if(cRes.ok){const c=await cRes.json();const el=document.getElementById('tb-db-total');if(el){el.textContent=`${c.people||0}p/${c.companies||0}c/${c.thesis||0}t`;el.title=`${c.people} personnes, ${c.companies} companies, ${c.thesis} thesis, ${c.sessions} sessions, ${c.actions} actions`}}
+      if(cRes.ok){const c=await cRes.json();const el=document.getElementById('tb-db-total');if(el){el.textContent=`${c.people||0}p/${c.companies||0}c/${c.thesis||0}t`;el.classList.remove('loading');el.title=`${c.people} personnes, ${c.companies} companies, ${c.thesis} thesis, ${c.sessions} sessions, ${c.actions} actions`}}
     }catch(_){}
   }catch(e){console.warn('Failed to load prospects from Recon Ledger:',e)}
 }
@@ -1286,6 +1309,7 @@ function renderDashboardWidgets(){
   const el=document.getElementById('dashboard-widgets');
   if(!el)return;
   el.innerHTML=`
+    <div class="section-hdr"><span class="section-hdr-title">Vue d'ensemble</span></div>
     <!-- W1: REVENUE TICKER -->
     <div class="wg" style="border-bottom:1px solid var(--bd)">
       <div class="wg-title"><span style="color:var(--bronze-hi);font-weight:800">///</span> Suivi du chiffre d'affaires</div>
@@ -1367,6 +1391,7 @@ function renderActionWidgets(){
   const el=document.getElementById('action-widgets');
   if(!el)return;
   el.innerHTML=`
+    <div style="padding:6px 16px;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t4);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--bd)">Signaux temps réel</div>
     <div class="wg">
       <div class="wg-title"><span style="color:var(--violet);font-weight:800">///</span> Flux OSINT en direct</div>
       <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:8px">${OSINT_SIGNALS.length} signaux · dernières 72h</div>
@@ -1701,11 +1726,16 @@ function renderLeads(){
   const all=getFilteredLeads(true),visible=getFilteredLeads(false);
   const el=document.getElementById('lead-list');
   document.getElementById('lead-count').textContent=`${all.length} prospects`;
+  const statusBadge=(s)=>{
+    const map={discovered:{bg:'hsla(258,58%,57%,.1)',c:'var(--violet)',l:'DISC'},first_seen_high_potential:{bg:'hsla(174,100%,41%,.1)',c:'var(--cyan)',l:'PRIO'},reviewed:{bg:'hsla(40,90%,47%,.1)',c:'var(--gold)',l:'VU'},shortlisted:{bg:'hsla(155,100%,39%,.1)',c:'var(--green)',l:'SHORT'},contacted:{bg:'hsla(217,91%,60%,.1)',c:'var(--blue)',l:'CONTACT'},replied:{bg:'hsla(155,100%,39%,.15)',c:'var(--green)',l:'REP'},nurturing:{bg:'hsla(30,40%,48%,.1)',c:'var(--bronze-hi)',l:'NURT'},qualified:{bg:'hsla(155,100%,39%,.12)',c:'var(--green)',l:'QUAL'},closed:{bg:'hsla(30,50%,58%,.15)',c:'var(--bronze-hi)',l:'CLOS'}};
+    const st=map[s]||map.discovered;
+    return `<span style="font:600 8px var(--mono);padding:1px 4px;border-radius:2px;background:${st.bg};color:${st.c};letter-spacing:.03em;text-transform:uppercase">${st.l}</span>`;
+  };
   el.innerHTML=visible.map(p=>`
     <div class="lead-row${p.id===activeLeadId?' active':''}" onclick="selectLead(${p.id})">
       <div class="heat-ring">${heatRing(p.heat)}</div>
       <div class="lead-info">
-        <div class="lead-co">${p.flag} ${p.co}</div>
+        <div class="lead-co">${p.flag} ${p.co} ${statusBadge(p._status||STAGE_LABELS[p.stage]||'discovered')}</div>
         <div class="lead-meta"><div class="src-dot" style="background:${SRC_COLORS[p.src]}"></div><span class="lead-stage">${p._status||STAGE_LABELS[p.stage]||'discovered'}</span></div>
       </div>
       <div class="lead-exp" style="color:${heatColor(p.heat)}">${p.exp.split('–')[0]}</div>
@@ -2850,7 +2880,7 @@ function updateTopbar(){
   const hot=prospects.filter(p=>p.heat>=80).length;
   const avgReply=sequences.length?Math.round(sequences.reduce((s,sq)=>s+sq.reply_rate,0)/sequences.length):0;
   const smartQ=getSmartQueue();const readyCount=smartQ.filter(q=>!q.deferred).length;
-  const setVal=(id,v)=>{const el=document.getElementById(id);if(el&&el.textContent!==v){el.textContent=v;el.classList.remove('metric-pulse');void el.offsetWidth;el.classList.add('metric-pulse')}};
+  const setVal=(id,v)=>{const el=document.getElementById(id);if(el&&el.textContent!==v){el.textContent=v;el.classList.remove('loading','metric-pulse');void el.offsetWidth;el.classList.add('metric-pulse')}};
   setVal('tb-exposure',totalExp>=1000?`€${(totalExp/1000).toFixed(1)}M`:`€${Math.round(totalExp)}K`);
   setVal('tb-hot',String(hot));
   setVal('tb-reply-rate',avgReply+'%');
