@@ -673,7 +673,11 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 <div class="app-body">
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="nav-item active" data-view="cockpit" data-key="1" onclick="showView('cockpit')" title="Cockpit">
+    <div class="nav-item active" data-view="brief" data-key="0" onclick="showView('brief')" title="Centre de commande" style="border-left:2px solid var(--bronze)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span class="nav-label">CENTRE</span>
+    </div>
+    <div class="nav-item" data-view="cockpit" data-key="1" onclick="showView('cockpit')" title="Cockpit">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span class="nav-label">CMD</span>
     </div>
@@ -717,7 +721,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
   <div class="main">
 
     <!-- VIEW: BRIEF -->
-    <div class="view-panel" id="view-brief" style="overflow:hidden;background:var(--obsidian)">
+    <div class="view-panel visible" id="view-brief" style="overflow:hidden;background:var(--obsidian)">
       <div style="display:grid;grid-template-columns:1fr 320px;height:100%">
         <div style="overflow-y:auto"><div class="brief-panel" id="brief-panel"></div></div>
         <div id="brief-sidebar" style="border-left:1px solid var(--bd);overflow-y:auto;background:var(--graphite)"></div>
@@ -725,7 +729,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     </div>
 
     <!-- VIEW: COCKPIT -->
-    <div class="view-panel visible" id="view-cockpit">
+    <div class="view-panel" id="view-cockpit">
       <div class="cockpit-grid">
         <div class="src-panel">
           <div class="src-head">
@@ -1941,6 +1945,7 @@ function showView(v){
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
   const target=document.getElementById('view-'+v);
   if(target){target.classList.add('visible','view-enter');target.style.display='flex'}
+  if(v==='brief')renderBrief();
   if(v==='cockpit'){loadProspectsFromRecon().then(()=>{renderLeads();if(activeLeadId)selectLead(activeLeadId)})}
   if(v==='apollo')renderApolloSearch();
   if(v==='sequences'){renderSequences();renderDripAnalytics()}
@@ -2722,7 +2727,26 @@ function renderBrief(){
   const months=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
   const smartQ=getSmartQueue();
   const deferredCount=smartQ.filter(q=>q.deferred).length;
+  const cod=computeCostOfDelay();
   document.getElementById('brief-panel').innerHTML=`
+    <div style="display:flex;gap:16px;margin-bottom:16px;padding:16px;background:var(--graphite);border:1px solid var(--bd);border-radius:8px">
+      <div style="flex:1">
+        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Etat du systeme</div>
+        <div style="font:600 12px var(--mono);color:var(--t1)" id="cc-system-state">Operationnel</div>
+      </div>
+      <div style="flex:1">
+        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Mode</div>
+        <div style="font:600 12px var(--mono);color:${currentMode==='autonomous'?'var(--cyan)':'var(--gold)'}">${currentMode==='autonomous'?'AUTONOME':'ASSISTE'}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Pipeline</div>
+        <div style="font:600 12px var(--mono);color:var(--t1)">${prospects.length} prospects</div>
+      </div>
+      <div style="flex:1">
+        <div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Perte/jour</div>
+        <div style="font:600 12px var(--mono);color:var(--red)">EUR ${cod.daily.toLocaleString()}</div>
+      </div>
+    </div>
     <div class="brief-header">
       <div class="brief-title">Brief — ${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}</div>
       <div class="brief-summary">
@@ -2749,9 +2773,26 @@ function renderBrief(){
       </div>`;
     }).join('')}
     ${briefActions.length===0?'<div style="padding:32px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--t3)">Aucune action urgente. Pipeline au repos.</div>':''}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px">
+      <div onclick="showView('sent')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
+        <div style="font:800 16px var(--disp);color:var(--t1)" id="cc-sent-count">0</div>
+        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Emails</div>
+      </div>
+      <div onclick="showView('tape')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
+        <div style="font:800 16px var(--disp);color:var(--t1)" id="cc-sessions-count">0</div>
+        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Sessions</div>
+      </div>
+      <div onclick="showView('cockpit')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
+        <div style="font:800 16px var(--disp);color:var(--t1)">${prospects.filter(p=>p.heat>=80).length}</div>
+        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Priorite haute</div>
+      </div>
+      <div onclick="showView('revenue')" style="cursor:pointer;padding:10px;background:var(--graphite);border:1px solid var(--bd);border-radius:6px;text-align:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--bronze)'" onmouseleave="this.style.borderColor='var(--bd)'">
+        <div style="font:800 16px var(--disp);color:var(--bronze-hi)">EUR ${REVENUE_TARGETS.currentMRR.toLocaleString()}</div>
+        <div style="font:700 8px var(--mono);color:var(--t3);letter-spacing:.08em;text-transform:uppercase">MRR</div>
+      </div>
+    </div>
   `;
   // Brief sidebar — quick stats
-  const cod=computeCostOfDelay();
   const bs=document.getElementById('brief-sidebar');
   if(bs)bs.innerHTML=`
     <div class="wg">
@@ -2790,6 +2831,11 @@ function renderBrief(){
       `).join('')}
     </div>
   `;
+  // Populate evidence rail counts
+  try{fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()}).then(r=>r.json()).then(c=>{
+    const se=document.getElementById('cc-sent-count');if(se)se.textContent=c.actions||0;
+    const ss=document.getElementById('cc-sessions-count');if(ss)ss.textContent=c.sessions||0;
+  }).catch(()=>{})}catch(_){}
 }
 
 function briefApproveAction(idx){
@@ -3304,12 +3350,15 @@ function renderIntelView(){
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
   const k=e.key;
-  if(k==='1')showView('cockpit');
+  if(k==='0')showView('brief');
+  else if(k==='1')showView('cockpit');
   else if(k==='2')showView('apollo');
   else if(k==='3')showView('sequences');
   else if(k==='4')showView('linkedin');
   else if(k==='5')showView('revenue');
   else if(k==='6')showView('intel');
+  else if(k==='7')showView('tape');
+  else if(k==='8')showView('sent');
   else if(k==='b'||k==='B')toggleBrief();
   else if(k===',')showView('settings');
   else if(k==='/'){e.preventDefault();document.getElementById('search-input').focus()}
@@ -3448,6 +3497,7 @@ function timeAgo(iso){
   updateClock();
   setInterval(updateClock,1000);
   renderBrief();
+  showView('brief');
   renderDashboardWidgets();
   renderActionWidgets();
   initWebGL();
