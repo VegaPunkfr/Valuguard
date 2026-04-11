@@ -591,24 +591,32 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 .apo-tab.active{color:var(--bronze-hi);border-bottom-color:var(--bronze)}
 
 /* ══════════════════════════════════════════════════════════════════
-   SENT EMAILS — Premium Operator View
+   SENT EMAILS — Unified V5
    ══════════════════════════════════════════════════════════════════ */
-.sent-header{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--graphite)}
+.sent-header{padding:8px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--graphite)}
 .sent-filters{display:flex;gap:4px}
 .sent-filter{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:4px;cursor:pointer;border:1px solid var(--bd);background:transparent;color:var(--t3);transition:all .15s}
 .sent-filter:hover{color:var(--t2);background:hsla(0,0%,100%,.03)}
 .sent-filter.active{color:var(--bronze-hi);background:hsla(30,40%,48%,.1);border-color:hsla(30,40%,48%,.3)}
-.email-card{padding:14px 20px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s}
-.email-card:hover{background:hsla(30,40%,48%,.03)}
-.email-card.expanded{background:hsla(30,40%,48%,.04)}
-.email-line1{display:flex;align-items:center;gap:10px}
-.email-company{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--t1);letter-spacing:.02em;white-space:nowrap}
-.email-contact{font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.email-line2{display:flex;align-items:center;gap:10px;margin-top:4px}
-.email-addr{font-family:var(--mono);font-size:10px;color:var(--t3)}
-.email-subject{font-family:var(--body);font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.email-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
-.email-time{font-family:var(--mono);font-size:10px;color:var(--t3)}
+.sent-row{display:flex;align-items:stretch;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s}
+.sent-row:hover{background:hsla(30,40%,48%,.03)}
+.sent-row.expanded{background:hsla(30,40%,48%,.05)}
+.sr-dot{width:4px;flex-shrink:0;border-right:none}
+.sr-main{flex:1;min-width:0;padding:10px 16px;display:flex;flex-direction:column;gap:3px}
+.sr-line1{display:flex;align-items:center;gap:10px}
+.sr-company{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--t1);letter-spacing:.02em;white-space:nowrap}
+.sr-contact{font-family:var(--mono);font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-line2{display:flex;align-items:center;gap:8px}
+.sr-email{font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.sr-subject{font-family:var(--body);font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.sr-right{display:flex;align-items:center;gap:6px;padding:10px 16px;flex-shrink:0}
+.sr-time{font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap}
+.sr-detail{display:none;padding:14px 20px 18px 20px;background:var(--graphite);border-bottom:1px solid var(--bd)}
+.sent-row.expanded+.sr-detail{display:block}
+.sr-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 20px;margin-bottom:12px}
+.sr-detail-lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:2px}
+.sr-detail-val{font-family:var(--mono);font-size:11px;color:var(--t1)}
+.sr-detail-body{font-family:var(--mono);font-size:11px;color:var(--t2);white-space:pre-wrap;line-height:1.6;max-height:260px;overflow-y:auto;padding:12px;background:rgba(255,255,255,.02);border-radius:6px;border:1px solid var(--bd);margin-top:6px}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .badge-sent{background:hsla(155,100%,39%,.1);color:hsl(155,100%,39%);border:1px solid hsla(155,100%,39%,.2)}
 .badge-opened{background:hsla(40,90%,47%,.1);color:hsl(40,90%,47%);border:1px solid hsla(40,90%,47%,.2)}
@@ -617,6 +625,17 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 .badge-draft{background:hsla(258,58%,57%,.1);color:hsl(258,58%,57%);border:1px solid hsla(258,58%,57%,.2)}
 .badge-db{background:hsla(174,100%,41%,.08);color:hsl(174,100%,41%);border:1px solid hsla(174,100%,41%,.15);font-size:8px;padding:1px 5px}
 .badge-local{background:hsla(40,90%,47%,.08);color:hsl(40,90%,47%);border:1px solid hsla(40,90%,47%,.15);font-size:8px;padding:1px 5px}
+/* TAPE ENTITY CARDS — email-card classes used by renderTape() entity view */
+.email-card{background:var(--graphite);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:6px;cursor:pointer;transition:background .15s,border-color .15s}
+.email-card:hover{border-color:var(--bds);background:hsla(30,40%,48%,.03)}
+.email-line1{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.email-company{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--t1);letter-spacing:.02em;white-space:nowrap}
+.email-contact{font-family:var(--mono);font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.email-time{font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap}
+.email-line2{display:flex;align-items:center;gap:8px;margin-top:2px}
+.email-addr{font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.email-subject{font-family:var(--body);font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .email-expand{margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);display:none}
 .email-card.expanded .email-expand{display:block}
 
@@ -640,39 +659,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 .badge-bon{background:hsla(40,90%,47%,.1);color:hsl(40,90%,47%);border:1px solid hsla(40,90%,47%,.2)}
 .badge-faible{background:hsla(352,75%,55%,.1);color:hsl(352,75%,55%);border:1px solid hsla(352,75%,55%,.2)}
 
-/* ══════════════════════════════════════════════════════════════════
-   SENT EMAILS — Table Layout V2
-   ══════════════════════════════════════════════════════════════════ */
-.sent-stats-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--obsidian);border-bottom:1px solid var(--bd)}
-.sent-stat-pill{display:flex;align-items:center;gap:6px}
-.sent-stat-pill .sent-stat-val{font-family:var(--disp);font-size:16px;letter-spacing:.04em;min-width:28px;text-align:center}
-.sent-stat-pill .sent-stat-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-.badge-total{background:hsla(0,0%,100%,.06);color:var(--t1);border:1px solid var(--bd)}
-.sent-table{width:100%;border-collapse:collapse;table-layout:fixed}
-.sent-table thead tr{border-bottom:1px solid var(--bds)}
-.sent-table th{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);padding:8px 10px;text-align:left;white-space:nowrap;user-select:none}
-.sent-row{cursor:pointer;border-bottom:1px solid var(--bd);transition:background .12s}
-.sent-row:hover{background:hsla(30,40%,48%,.03)}
-.sent-row.expanded{background:hsla(30,40%,48%,.05)}
-.sent-row td{font-family:var(--mono);font-size:11px;color:var(--t2);padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
-.st-col-status{width:28px;text-align:center}
-.st-col-company{width:16%;font-weight:700;color:var(--t1) !important}
-.st-col-contact{width:14%}
-.st-col-email{width:18%;color:var(--t3) !important;font-size:10px !important}
-.st-col-subject{width:auto;font-family:var(--body) !important;font-size:11px !important;color:var(--t2) !important}
-.st-col-date{width:90px;color:var(--t3) !important;font-size:10px !important;text-align:right}
-.st-col-source{width:52px;text-align:center}
-.st-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle}
-.sent-detail-row{background:var(--graphite)}
-.sent-detail-row td{padding:0 !important}
-.sent-detail-inner{padding:14px 20px 18px 38px}
-.sent-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 20px;margin-bottom:12px}
-.sent-detail-section{display:flex;flex-direction:column;gap:3px}
-.sent-detail-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t4)}
-.sent-detail-value{font-family:var(--mono);font-size:11px;color:var(--t1)}
-.sent-detail-mid{font-family:var(--mono);font-size:9px;color:var(--t4);word-break:break-all}
-.sent-detail-body-wrap{margin-top:4px}
-.sent-detail-body{font-family:var(--mono);font-size:11px;color:var(--t2);white-space:pre-wrap;line-height:1.6;max-height:260px;overflow-y:auto;padding:12px;background:rgba(255,255,255,.02);border-radius:6px;border:1px solid var(--bd);margin-top:6px}
+/* (ancien Table Layout V2 supprime — remplace par Unified V5 ci-dessus) */
 
 /* ══════════════════════════════════════════════════════════════════
    TAPE SESSION CARDS — Redesigned V2
@@ -930,19 +917,32 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     </div>
 
     <div class="view-panel" id="view-sent" style="overflow-y:auto;background:var(--obsidian)">
-      <div class="section-hdr" style="background:var(--graphite)">
-        <span class="section-hdr-title" style="color:var(--t1)">Historique des actions</span>
-        <div class="sent-filters">
-          <button class="sent-filter active" onclick="filterSentEmails('all',this)">Tous</button>
-          <button class="sent-filter" onclick="filterSentEmails('sent',this)">Envoyés</button>
-          <button class="sent-filter" onclick="filterSentEmails('opened',this)">Ouverts</button>
-          <button class="sent-filter" onclick="filterSentEmails('replied',this)">Répondus</button>
-          <button class="sent-filter" onclick="filterSentEmails('bounced',this)">Bounced</button>
+      <div style="display:flex;flex-direction:column;height:100%">
+        <!-- HEADLINE STRIP -->
+        <div class="hl-strip" id="sent-hl">
+          <div class="hl-cell"><div class="hl-val" id="sent-hl-total">—</div><div class="hl-lbl">Total</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sent-hl-sent" style="color:var(--green)">—</div><div class="hl-lbl">Envoyés</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sent-hl-opened" style="color:hsl(40,90%,47%)">—</div><div class="hl-lbl">Ouverts</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sent-hl-replied" style="color:var(--blue)">—</div><div class="hl-lbl">Répondus</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sent-hl-rate" style="color:var(--cyan)">—</div><div class="hl-lbl">Taux réponse</div></div>
+        </div>
+        <!-- FILTER BAR -->
+        <div class="sent-header">
+          <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)">Historique</span>
+          <div class="sent-filters">
+            <button class="sent-filter active" onclick="filterSentEmails('all',this)">Tous</button>
+            <button class="sent-filter" onclick="filterSentEmails('sent',this)">Envoyés</button>
+            <button class="sent-filter" onclick="filterSentEmails('opened',this)">Ouverts</button>
+            <button class="sent-filter" onclick="filterSentEmails('replied',this)">Répondus</button>
+            <button class="sent-filter" onclick="filterSentEmails('bounced',this)">Bounced</button>
+          </div>
+        </div>
+        <!-- CONTENT -->
+        <div style="flex:1;overflow-y:auto">
+          <div id="sent-list"></div>
+          <div id="sent-empty" style="display:none;padding:40px 20px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email envoyé pour l'instant.<br>Les emails apparaîtront ici après envoi depuis le cockpit.</div>
         </div>
       </div>
-      <div id="sent-stats" style="display:flex;gap:0;border-bottom:1px solid var(--bd)"></div>
-      <div id="sent-list"></div>
-      <div id="sent-empty" style="display:none;padding:60px 20px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email envoyé pour l'instant.<br>Les emails apparaîtront ici après envoi depuis le cockpit.</div>
     </div>
 
   </div>
@@ -2092,7 +2092,7 @@ function saveSentEmail(entry){const emails=getSentEmails();emails.unshift(entry)
 async function renderSentEmails(){
   const list=document.getElementById('sent-list');
   const empty=document.getElementById('sent-empty');
-  list.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Chargement historique...</div>';
+  list.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:11px">Chargement...</div>';
   empty.style.display='none';
 
   // Primary source: Supabase recon_actions via actions_all
@@ -2103,13 +2103,13 @@ async function renderSentEmails(){
       const actions=(await res.json()).data||[];
       emails=actions.map(a=>{
         const d=a.action_data||{};
-        const actionLabels={email_sent:'ENVOY\u00c9',email_opened:'OUVERT',email_replied:'R\u00c9PONDU',email_bounced:'BOUNCED',email_drafted:'BROUILLON',status_changed:'STATUT',enrichment_completed:'ENRICHI',note_added:'NOTE',tagged:'TAG'};
-        return{to:d.to||'\u2014',company:d.company||d.domain||'\u2014',contact:d.contact||'\u2014',subject:d.subject||'\u2014',body:d.body||'',rawDate:a.created_at||'',date:a.created_at?new Date(a.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'\u2014',status:a.action_type==='email_replied'?'replied':a.action_type==='email_opened'?'opened':a.action_type==='email_bounced'?'bounced':'sent',messageId:d.messageId||'',actionType:a.action_type,actionLabel:actionLabels[a.action_type]||a.action_type,source:'supabase'};
+        const actionLabels={email_sent:'Envoyé',email_opened:'Ouvert',email_replied:'Répondu',email_bounced:'Bounced',email_drafted:'Brouillon',status_changed:'Statut',enrichment_completed:'Enrichi',note_added:'Note',tagged:'Tag'};
+        return{to:d.to||'—',company:d.company||d.domain||'—',contact:d.contact||'—',subject:d.subject||'—',body:d.body||'',rawDate:a.created_at||'',status:a.action_type==='email_replied'?'replied':a.action_type==='email_opened'?'opened':a.action_type==='email_bounced'?'bounced':'sent',messageId:d.messageId||'',actionType:a.action_type,actionLabel:actionLabels[a.action_type]||a.action_type,source:'supabase'};
       });
     }
   }catch(_){}
 
-  // Fallback: merge localStorage entries not yet in Supabase
+  // Fallback: merge localStorage entries
   const local=getSentEmails();
   if(local.length&&emails.length===0){emails=local.map(e=>({...e,source:'local'}))}
   else if(local.length){
@@ -2117,86 +2117,64 @@ async function renderSentEmails(){
     local.forEach(e=>{if(e.messageId&&!supaIds.has(e.messageId))emails.push({...e,source:'local'})});
   }
 
-  if(!emails.length){list.innerHTML='';empty.style.display='block';document.getElementById('sent-stats').innerHTML='';return}
-
-  // Filter by sentFilterMode
-  let filtered=emails;
-  if(sentFilterMode!=='all')filtered=emails.filter(e=>e.status===sentFilterMode);
-
-  // Stats bar — pill counters
+  // Populate headline strip
   const counts={sent:0,opened:0,replied:0,bounced:0};
   emails.forEach(e=>{if(counts[e.status]!==undefined)counts[e.status]++});
-  const statPill=(label,val,cls)=>`<div class="sent-stat-pill"><span class="sent-stat-val badge ${cls}">${val}</span><span class="sent-stat-lbl">${label}</span></div>`;
-  document.getElementById('sent-stats').innerHTML=`<div class="sent-stats-bar">
-    ${statPill('Total',emails.length,'badge-total')}
-    ${statPill('Envoy\u00e9s',counts.sent,'badge-sent')}
-    ${statPill('Ouverts',counts.opened,'badge-opened')}
-    ${statPill('R\u00e9pondus',counts.replied,'badge-replied')}
-    ${statPill('Bounced',counts.bounced,'badge-bounced')}
-    ${counts.sent>0?statPill('Taux ouv.',Math.round(counts.opened/counts.sent*100)+'%','badge-opened'):''}
-    ${counts.sent>0?statPill('Taux rep.',Math.round(counts.replied/counts.sent*100)+'%','badge-replied'):''}
-  </div>`;
+  const hl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  hl('sent-hl-total',String(emails.length));
+  hl('sent-hl-sent',String(counts.sent));
+  hl('sent-hl-opened',String(counts.opened));
+  hl('sent-hl-replied',String(counts.replied));
+  hl('sent-hl-rate',counts.sent>0?Math.round(counts.replied/counts.sent*100)+'%':'—');
 
-  if(!filtered.length){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email avec ce filtre.</div>';return}
+  if(!emails.length){list.innerHTML='';empty.style.display='block';return}
 
-  // Status dot color map
+  // Filter
+  let filtered=emails;
+  if(sentFilterMode!=='all')filtered=emails.filter(e=>e.status===sentFilterMode);
+  if(!filtered.length){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:11px">Aucun email avec ce filtre.</div>';return}
+
+  // Color map
   const dotColor={sent:'var(--green)',opened:'var(--gold)',replied:'var(--blue)',bounced:'var(--red)',draft:'var(--violet)'};
 
-  // Table header
-  let html=`<table class="sent-table"><thead><tr>
-    <th class="st-col-status"></th>
-    <th class="st-col-company">Soci\u00e9t\u00e9</th>
-    <th class="st-col-contact">Contact</th>
-    <th class="st-col-email">Email</th>
-    <th class="st-col-subject">Objet</th>
-    <th class="st-col-date">Date</th>
-    <th class="st-col-source">Src</th>
-  </tr></thead><tbody>`;
-
-  filtered.forEach((e,i)=>{
+  // Render rows
+  list.innerHTML=filtered.map((e,i)=>{
     const dc=dotColor[e.status]||'var(--t3)';
-    const badgeClass=e.status==='replied'?'badge-replied':e.status==='opened'?'badge-opened':e.status==='bounced'?'badge-bounced':e.status==='draft'?'badge-draft':'badge-sent';
+    const badgeCls=e.status==='replied'?'badge-replied':e.status==='opened'?'badge-opened':e.status==='bounced'?'badge-bounced':e.status==='draft'?'badge-draft':'badge-sent';
+    const statusLabel=e.actionLabel||(e.status==='replied'?'Répondu':e.status==='opened'?'Ouvert':e.status==='bounced'?'Bounced':'Envoyé');
     const srcBadge=e.source==='supabase'?'badge-db':'badge-local';
     const srcLabel=e.source==='supabase'?'DB':'Local';
-    const timeStr=relativeDate(e.rawDate||e.date);
-    const rowId='sent-row-'+i;
-
-    // Main row
-    html+=`<tr class="sent-row" onclick="(function(el){var d=document.getElementById('${rowId}');if(d.style.display==='table-row'){d.style.display='none';el.classList.remove('expanded')}else{d.style.display='table-row';el.classList.add('expanded')}})(this)">
-      <td class="st-col-status"><span class="st-dot" style="background:${dc}"></span></td>
-      <td class="st-col-company">${sanitize(e.company||'\u2014')}</td>
-      <td class="st-col-contact">${sanitize(e.contact||'\u2014')}</td>
-      <td class="st-col-email">${sanitize(e.to||'\u2014')}</td>
-      <td class="st-col-subject">${sanitize(e.subject||'\u2014')}</td>
-      <td class="st-col-date">${sanitize(timeStr)}</td>
-      <td class="st-col-source"><span class="badge ${srcBadge}">${srcLabel}</span></td>
-    </tr>`;
-
-    // Detail row (hidden by default)
-    html+=`<tr class="sent-detail-row" id="${rowId}" style="display:none"><td colspan="7">
-      <div class="sent-detail-inner">
-        <div class="sent-detail-grid">
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Statut</div>
-            <span class="badge ${badgeClass}">${sanitize(e.actionLabel||e.status)}</span>
-          </div>
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Objet</div>
-            <div class="sent-detail-value">${sanitize(e.subject||'\u2014')}</div>
-          </div>
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Destinataire</div>
-            <div class="sent-detail-value">${sanitize(e.to||'\u2014')}</div>
-          </div>
-          ${e.messageId?`<div class="sent-detail-section"><div class="sent-detail-label">Message ID</div><div class="sent-detail-mid">${sanitize(e.messageId)}</div></div>`:''}
+    const timeStr=relativeDate(e.rawDate||'');
+    return `<div class="sent-row" id="sr-${i}" onclick="var el=this;el.classList.toggle('expanded');var d=document.getElementById('srd-${i}');d.style.display=d.style.display==='block'?'none':'block'">
+      <div class="sr-dot" style="background:${dc}"></div>
+      <div class="sr-main">
+        <div class="sr-line1">
+          <span class="sr-company">${sanitize(e.company)}</span>
+          <span class="sr-contact">${sanitize(e.contact||e.to)}</span>
         </div>
-        ${e.body?`<div class="sent-detail-body-wrap"><div class="sent-detail-label">Message</div><div class="sent-detail-body">${sanitize(e.body)}</div></div>`:''}
+        <div class="sr-line2">
+          <span class="sr-email">${sanitize(e.to)}</span>
+          <span class="sr-subject">${sanitize(e.subject)}</span>
+        </div>
       </div>
-    </td></tr>`;
-  });
-
-  html+='</tbody></table>';
-  list.innerHTML=html;
+      <div class="sr-right">
+        <span class="badge ${badgeCls}">${statusLabel}</span>
+        <span class="badge ${srcBadge}">${srcLabel}</span>
+        <span class="sr-time">${sanitize(timeStr)}</span>
+      </div>
+    </div>
+    <div class="sr-detail" id="srd-${i}" style="display:none">
+      <div class="sr-detail-grid">
+        <div><div class="sr-detail-lbl">Statut</div><span class="badge ${badgeCls}">${statusLabel}</span></div>
+        <div><div class="sr-detail-lbl">Destinataire</div><div class="sr-detail-val">${sanitize(e.to)}</div></div>
+        <div><div class="sr-detail-lbl">Contact</div><div class="sr-detail-val">${sanitize(e.contact)}</div></div>
+        ${e.messageId?`<div><div class="sr-detail-lbl">Message ID</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);word-break:break-all">${sanitize(e.messageId)}</div></div>`:''}
+      </div>
+      <div class="sr-detail-lbl">Objet</div>
+      <div class="sr-detail-val" style="margin-bottom:10px">${sanitize(e.subject)}</div>
+      ${e.body?`<div class="sr-detail-lbl">Message</div><div class="sr-detail-body">${sanitize(e.body)}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
 function updateSentStatus(index){
@@ -3309,308 +3287,4 @@ function renderRevenueView(){
             </div>
           `).join('')}
         </div>
-        <div style="margin-top:10px;padding:10px;border-radius:6px;background:hsla(155,100%,39%,.04);border:1px solid hsla(155,100%,39%,.1)">
-          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green)">CONSTAT : D14 Breakup + DE = 33,3% réponse</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--t3)">Le marché allemand sur-performe de 2x. Doubler le volume DACH.</div>
-        </div>
-      </div>
-
-      <!-- CONVERSION RATE BY MARKET -->
-      <div class="wg">
-        <div class="wg-title"><span style="color:var(--gold);font-weight:800">///</span> CAC & Économie unitaire</div>
-        <div class="d-grid" style="gap:8px">
-          <div class="d-metric"><span class="d-metric-label">CAC Rail A (objectif)</span><span class="d-metric-val" style="color:var(--cyan)">&lt; €80</span></div>
-          <div class="d-metric"><span class="d-metric-label">CAC Rail A (actuel)</span><span class="d-metric-val" style="color:${REVENUE_TARGETS.railA.current>0?'var(--green)':'var(--red)'}">€${REVENUE_TARGETS.railA.current>0?Math.round(49/REVENUE_TARGETS.railA.current*REVENUE_TARGETS.railA.current):'N/A'}</span></div>
-          <div class="d-metric"><span class="d-metric-label">LTV mixte</span><span class="d-metric-val" style="color:var(--bronze-hi)">€1,990</span></div>
-          <div class="d-metric"><span class="d-metric-label">LTV/CAC ratio</span><span class="d-metric-val" style="color:var(--green)">${REVENUE_TARGETS.railA.current>0?'24.9x':'—'}</span></div>
-          <div class="d-metric"><span class="d-metric-label">Rail A → B conv.</span><span class="d-metric-val">Objectif : 10%</span></div>
-          <div class="d-metric"><span class="d-metric-label">Retour sur investissement</span><span class="d-metric-val" style="color:var(--cyan)">&lt; 1 mois</span></div>
-        </div>
-      </div>
-
-      <!-- REVENUE BY GEO -->
-      <div class="wg">
-        <div class="wg-title"><span style="color:var(--blue);font-weight:800">///</span> Pipeline par marché</div>
-        ${['DE','UK','US','NL'].map(geo=>{
-          const geoP=prospects.filter(p=>flagToCountry(p.flag)===geo);
-          const hotCount=geoP.filter(p=>p.heat>=80).length;
-          return`<div style="margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-              <span class="wg-lbl">${geo}</span>
-              <span style="font-family:var(--mono);font-size:10px"><span style="color:var(--t1);font-weight:700">${geoP.length}</span> prospects · <span style="color:var(--red);font-weight:700">${hotCount}</span> chauds</span>
-            </div>
-            <div class="d-bar"><div class="d-bar-fill" style="width:${geoP.length/prospects.length*100}%;background:${geo==='DE'?'var(--gold)':geo==='UK'?'var(--cyan)':geo==='US'?'var(--blue)':'var(--green)'}"></div></div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// RENDER: INTEL VIEW (Tab 6) — X1 + X2 + X3
-// ══════════════════════════════════════════════════════════════════
-function renderIntelView(){
-  const el=document.getElementById('intel-view');
-  if(!el)return;
-  const activePlugins=PLUGINS.filter(p=>p.status==='active').length;
-  const activeConns=CONNECTORS.filter(c=>c.status==='connected').length;
-  const avgConfidence=PLUGINS.length?Math.round(PLUGINS.reduce((s,p)=>s+p.confidence,0)/PLUGINS.length):0;
-  el.innerHTML=`
-    <div class="hl-strip" style="grid-column:1/-1">
-      <div class="hl-cell"><div class="hl-val" style="color:var(--cyan)">${activePlugins}/${PLUGINS.length}</div><div class="hl-lbl">Plugins actifs</div></div>
-      <div class="hl-cell"><div class="hl-val" style="color:var(--green)">${activeConns}/${CONNECTORS.length}</div><div class="hl-lbl">Connecteurs</div></div>
-      <div class="hl-cell"><div class="hl-val">${OSINT_SIGNALS.length}</div><div class="hl-lbl">Signaux detectes</div></div>
-      <div class="hl-cell"><div class="hl-val" style="color:${avgConfidence>=80?'var(--green)':'var(--gold)'}">${avgConfidence}%</div><div class="hl-lbl">Confiance moyenne</div></div>
-    </div>
-    <!-- X1: PLUGIN DASHBOARD -->
-    <div style="overflow-y:auto;border-right:1px solid var(--bd);background:var(--graphite)">
-      <div class="wg">
-        <div class="wg-title"><span style="color:var(--cyan);font-weight:800">///</span> Moteur de plugins — ${activePlugins}/${PLUGINS.length} actifs</div>
-        ${PLUGINS.map(p=>{
-          const statusColor=p.status==='active'?'var(--green)':p.status==='standby'?'var(--gold)':'var(--red)';
-          return`<div style="padding:10px 12px;border:1px solid var(--bd);border-radius:6px;margin-bottom:6px;background:hsla(0,0%,100%,.01)">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <div style="width:24px;height:24px;border-radius:5px;background:hsla(174,100%,41%,.06);border:1px solid hsla(174,100%,41%,.12);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--cyan)">${p.icon}</div>
-              <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t1);flex:1">${p.name}</span>
-              <div style="width:6px;height:6px;border-radius:50%;background:${statusColor}"></div>
-            </div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--t2);margin-bottom:4px">${p.output}</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-family:var(--mono);font-size:9px;color:var(--t4)">${p.lastRun}</span>
-              <div style="flex:1;height:3px;border-radius:2px;background:hsla(0,0%,100%,.04)"><div style="height:100%;width:${p.confidence}%;border-radius:2px;background:${p.confidence>=80?'var(--green)':p.confidence>=60?'var(--gold)':'var(--red)'}"></div></div>
-              <span style="font-family:var(--mono);font-size:9px;font-weight:700;color:${p.confidence>=80?'var(--green)':'var(--gold)'}">${p.confidence}%</span>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- X2: CONNECTOR STATUS -->
-    <div style="overflow-y:auto;border-right:1px solid var(--bd);background:var(--obsidian)">
-      <div class="wg">
-        <div class="wg-title"><span style="color:var(--green);font-weight:800">///</span> Connecteurs — ${CONNECTORS.filter(c=>c.status==='connected').length}/${CONNECTORS.length} actifs</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
-          <div style="text-align:center;padding:10px;border-radius:6px;background:hsla(155,100%,39%,.04);border:1px solid hsla(155,100%,39%,.1)">
-            <div style="font-family:var(--disp);font-size:22px;color:var(--green)">${CONNECTORS.reduce((s,c)=>s+c.records,0).toLocaleString()}</div>
-            <div class="wg-sub">Données synchronisées</div>
-          </div>
-          <div style="text-align:center;padding:10px;border-radius:6px;background:hsla(174,100%,41%,.04);border:1px solid hsla(174,100%,41%,.1)">
-            <div style="font-family:var(--disp);font-size:22px;color:var(--cyan)">${Math.round(CONNECTORS.filter(c=>c.health>0).reduce((s,c)=>s+c.health,0)/CONNECTORS.filter(c=>c.health>0).length)}%</div>
-            <div class="wg-sub">Santé moyenne</div>
-          </div>
-        </div>
-        ${CONNECTORS.map(c=>{
-          const statusColor=c.status==='connected'?'var(--green)':c.status==='pending'?'var(--gold)':'var(--red)';
-          const statusLabel=c.status==='connected'?'ACTIF':c.status==='pending'?'EN ATTENTE':'ERREUR';
-          return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)">
-            <div style="width:28px;height:28px;border-radius:6px;background:hsla(0,0%,100%,.03);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--t2)">${c.icon}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t1)">${c.name}</div>
-              <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${c.lastSync} · ${c.records.toLocaleString()} enregistrements</div>
-            </div>
-            <span style="font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:3px;background:${statusColor}12;color:${statusColor};border:1px solid ${statusColor}25">${statusLabel}</span>
-            ${c.health>0?`<div style="width:40px;height:3px;border-radius:2px;background:hsla(0,0%,100%,.04)"><div style="height:100%;width:${c.health}%;border-radius:2px;background:${c.health>=90?'var(--green)':c.health>=70?'var(--gold)':'var(--red)'}"></div></div>`:''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- X3: NEGOTIATION PLAYBOOKS -->
-    <div style="overflow-y:auto;background:var(--graphite)">
-      <div class="wg">
-        <div class="wg-title"><span style="color:var(--red);font-weight:800">///</span> Stratégies de négociation</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:12px">Carte de préparation — fournisseurs prêts à négocier MAINTENANT</div>
-        ${PLAYBOOKS.sort((a,b)=>b.readiness-a.readiness).map(p=>{
-          const gradeColor=p.grade==='READY'?'var(--green)':p.grade==='NEAR'?'var(--cyan)':p.grade==='PREP'?'var(--gold)':'var(--t3)';
-          return`<div style="padding:12px;border:1px solid var(--bd);border-radius:6px;margin-bottom:8px;background:hsla(0,0%,100%,.01)">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span style="font-family:var(--mono);font-size:13px;font-weight:800;color:var(--t1)">${p.vendor}</span>
-              <span style="font-family:var(--mono);font-size:9px;font-weight:800;padding:2px 8px;border-radius:3px;background:${gradeColor}12;color:${gradeColor};border:1px solid ${gradeColor}25">${p.grade}</span>
-              <span style="margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:800;color:${gradeColor}">${p.readiness}/100</span>
-            </div>
-            <div style="margin-bottom:6px">
-              <div style="height:4px;border-radius:2px;background:hsla(0,0%,100%,.04)"><div style="height:100%;width:${p.readiness}%;border-radius:2px;background:${gradeColor}"></div></div>
-            </div>
-            <div style="display:flex;gap:8px;margin-bottom:6px">
-              <span style="font-family:var(--mono);font-size:10px;color:var(--t3)">Approche : <strong style="color:var(--t2)">${p.approach}</strong></span>
-              <span style="font-family:var(--mono);font-size:10px;color:var(--green)">Économies : ${p.savings}</span>
-            </div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--cyan);margin-bottom:8px">Levier : ${p.leverage}</div>
-            <div style="border-left:2px solid var(--bd);padding-left:10px">
-              ${p.steps.map((s,i)=>`<div style="font-family:var(--mono);font-size:10px;color:var(--t2);padding:3px 0;display:flex;gap:6px"><span style="color:var(--t4);font-weight:700;flex-shrink:0">${i+1}.</span>${s}</div>`).join('')}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ══════════════════════════════════════════════════════════════════
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-  const k=e.key;
-  if(k==='0')showView('brief');
-  else if(k==='1')showView('cockpit');
-  else if(k==='2')showView('apollo');
-  else if(k==='3')showView('sequences');
-  else if(k==='4')showView('linkedin');
-  else if(k==='5')showView('revenue');
-  else if(k==='6')showView('intel');
-  else if(k==='7')showView('tape');
-  else if(k==='8')showView('sent');
-  else if(k==='b'||k==='B')toggleBrief();
-  else if(k===',')showView('settings');
-  else if(k==='/'){e.preventDefault();document.getElementById('search-input').focus()}
-  else if(k==='Escape'){
-    if(activeLeadId)deselectLead();
-    else if(currentView!=='cockpit')showView('cockpit');
-  }
-  else if(k==='j'||k==='ArrowDown'){
-    e.preventDefault();
-    const leads=getFilteredLeads(true);
-    const idx=leads.findIndex(p=>p.id===activeLeadId);
-    if(idx<leads.length-1)selectLead(leads[idx+1].id);
-    else if(idx===-1&&leads.length)selectLead(leads[0].id);
-  }
-  else if(k==='k'||k==='ArrowUp'){
-    e.preventDefault();
-    const leads=getFilteredLeads(true);
-    const idx=leads.findIndex(p=>p.id===activeLeadId);
-    if(idx>0)selectLead(leads[idx-1].id);
-  }
-  else if(k==='?')showView('settings');
-});
-
-// ══════════════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════
-// LIVE DATA SYNC — Supabase → Cockpit
-// ══════════════════════════════════════════════════════════════════
-let liveDataLoaded=false;
-
-async function syncLiveData(){
-  const syncDot=document.getElementById('sync-dot');
-  const syncText=document.getElementById('sync-text');
-  syncDot.style.background='var(--gold)';syncText.textContent='Synchronisation...';
-
-  try{
-    const res=await fetch('/api/command/cockpit-data',{headers:{'x-command-key':getCommandKey()}});
-    if(!res.ok){syncDot.style.background='var(--red)';syncText.textContent='Échec sync';return}
-    const data=await res.json();
-
-    // ── Map outreach_leads → prospects format ──
-    if(data.leads&&data.leads.length>0){
-      const mapped=data.leads.map((l,i)=>({
-        id:l.id||i+100,
-        co:l.company_name||l.domain,
-        domain:l.domain,
-        icon:(l.company_name||l.domain||'XX').substring(0,2).toUpperCase(),
-        src:l.source||'apollo',
-        heat:l.score||50,
-        exp:l.metadata?.exposure||'—',
-        lang:l.locale||'en',
-        flag:l.geo_market==='DE'||l.geo_market==='DACH'?'🇩🇪':l.geo_market==='UK'?'🇬🇧':l.geo_market==='NL'?'🇳🇱':l.geo_market==='FR'?'🇫🇷':'🇺🇸',
-        stage:l.status==='new'?0:l.status==='contacted'?1:l.status==='replied'?2:l.status==='qualified'?3:0,
-        industry:l.industry||'Technologie',
-        size:l.headcount?l.headcount+' emp.':'—',
-        revenue:'—',
-        contact:{name:l.metadata?.contact_name||'—',title:l.metadata?.contact_title||'CFO',email:l.email||'',li:l.metadata?.linkedin||''},
-        tech:l.metadata?.tech_stack||[],
-        bant:{budget:15,authority:12,need:14,timing:10},
-        timeline:[{color:'var(--violet)',event:`${l.source||'Apollo'} · Score ${l.score||0}`,time:timeAgo(l.created_at)}],
-        seq:l.metadata?.rail_target==='C'?'Rail C':l.metadata?.rail_target==='B'?'Rail B':'Rail A',
-        seqStep:l.drip_step||0,
-      }));
-      // Merge: keep demo prospects, add live ones (deduplicate by domain)
-      const existingDomains=new Set(prospects.map(p=>p.domain).filter(Boolean));
-      for(const mp of mapped){
-        if(!existingDomains.has(mp.domain)){prospects.push(mp);existingDomains.add(mp.domain)}
-      }
-    }
-
-    // ── Map osint_prospects → OSINT_SIGNALS ──
-    if(data.osint&&data.osint.length>0){
-      const osintMapped=data.osint.map(o=>{
-        const signalType=o.signals?.[0]?.type||'ICP_MATCH';
-        return{
-          type:signalType,severity:o.intent_score>=85?'critical':o.intent_score>=70?'high':'moderate',
-          company:o.company_name||o.domain,domain:o.domain,geo:o.geo_market||'US',
-          detail:o.signals?.[0]?.detail||`${o.industry} · ${o.headcount||'?'} emp · Score ${o.intent_score}`,
-          score:o.intent_score||60,time:timeAgo(o.created_at),
-        };
-      });
-      // Prepend live signals, keep demo as fallback
-      OSINT_SIGNALS.unshift(...osintMapped);
-    }
-
-    // ── Map visitor_intel_pipeline → VISITOR_INTEL ──
-    if(data.visitors&&data.visitors.length>0){
-      const visMapped=data.visitors.map(v=>({
-        company:v.company||v.domain,domain:v.domain||'',country:v.country||'US',city:v.city||'',
-        visitScore:v.visit_score||50,pages:v.pages_viewed||[],highIntent:v.high_intent||false,
-        time:timeAgo(v.created_at),
-      }));
-      VISITOR_INTEL.unshift(...visMapped);
-    }
-
-    // ── Update revenue from audit_requests ──
-    if(data.revenue){
-      REVENUE_TARGETS.railA.current=data.revenue.railACount||REVENUE_TARGETS.railA.current;
-      REVENUE_TARGETS.currentMRR=REVENUE_TARGETS.railA.current*490+REVENUE_TARGETS.railB.current*4990;
-      REVENUE_TARGETS.currentARR=REVENUE_TARGETS.currentMRR*12;
-    }
-
-    liveDataLoaded=true;
-    window._syncOk=true;
-    syncDot.style.background='var(--green)';
-    syncText.textContent=`En direct · ${data.leads?.length||0} prospects · ${data.osint?.length||0} signaux`;
-
-    // Re-render everything with live data
-    renderLeads();updateTopbar();renderDashboardWidgets();renderActionWidgets();
-
-  }catch(e){
-    console.warn('Cockpit sync failed:',e);
-    window._syncOk=false;
-    syncDot.style.background='var(--red)';syncText.textContent='Hors ligne — données démo';
-  }
-}
-
-function timeAgo(iso){
-  if(!iso)return'—';
-  const diff=Date.now()-new Date(iso).getTime();
-  const min=Math.floor(diff/60000);
-  if(min<60)return`il y a ${min}min`;
-  const h=Math.floor(min/60);
-  if(h<24)return`il y a ${h}h`;
-  const d=Math.floor(h/24);
-  return`il y a ${d}j`;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// INIT — EVERYTHING STARTS HERE
-// ══════════════════════════════════════════════════════════════════
-(async function init(){
-  await loadProspectsFromRecon();
-  renderLeads();
-  updateTopbar();
-  setMode(localStorage.getItem('gt-mode')||'assisted');
-  updateClock();
-  setInterval(updateClock,1000);
-  renderBrief();
-  showView('brief');
-  renderDashboardWidgets();
-  renderActionWidgets();
-  initWebGL();
-  // Sync live data (async — UI renders immediately with demo data, then updates)
-  syncLiveData();
-  // Re-sync every 5 minutes
-  setInterval(syncLiveData,300000);
-})();
-</script>
-</body>
-</html>
+        <div style="margin-top:10px;padding:10px;border-radius:6px;background:hsla(15
