@@ -929,20 +929,21 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       </div>
     </div>
 
-    <div class="view-panel" id="view-sent" style="overflow-y:auto;background:var(--obsidian)">
-      <div class="section-hdr" style="background:var(--graphite)">
-        <span class="section-hdr-title" style="color:var(--t1)">Historique des actions</span>
-        <div class="sent-filters">
-          <button class="sent-filter active" onclick="filterSentEmails('all',this)">Tous</button>
-          <button class="sent-filter" onclick="filterSentEmails('sent',this)">Envoyés</button>
-          <button class="sent-filter" onclick="filterSentEmails('opened',this)">Ouverts</button>
-          <button class="sent-filter" onclick="filterSentEmails('replied',this)">Répondus</button>
-          <button class="sent-filter" onclick="filterSentEmails('bounced',this)">Bounced</button>
+    <div class="view-panel" id="view-sent" style="overflow:hidden;background:var(--obsidian)">
+      <div style="display:flex;flex-direction:column;height:100%;width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--bd);background:var(--graphite);flex-shrink:0">
+          <span style="font:800 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--t1)">Historique</span>
+          <div class="sent-filters">
+            <button class="sent-filter active" onclick="filterSentEmails('all',this)">Tous</button>
+            <button class="sent-filter" onclick="filterSentEmails('email',this)">Emails</button>
+            <button class="sent-filter" onclick="filterSentEmails('status',this)">Statuts</button>
+            <button class="sent-filter" onclick="filterSentEmails('other',this)">Autres</button>
+          </div>
         </div>
+        <div id="sent-stats" style="flex-shrink:0"></div>
+        <div id="sent-list" style="flex:1;overflow-y:auto"></div>
+        <div id="sent-empty" style="display:none;padding:24px;text-align:center;color:var(--t3);font:400 12px var(--mono)">Aucune action enregistree.</div>
       </div>
-      <div id="sent-stats" style="display:flex;gap:0;border-bottom:1px solid var(--bd)"></div>
-      <div id="sent-list"></div>
-      <div id="sent-empty" style="display:none;padding:60px 20px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email envoyé pour l'instant.<br>Les emails apparaîtront ici après envoi depuis le cockpit.</div>
     </div>
 
   </div>
@@ -982,13 +983,18 @@ function relativeDate(dateStr){
   return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
 }
 
-// ── SENT EMAIL FILTER STATE ──
+// ── SENT FILTER STATE ──
 let sentFilterMode='all';
 function filterSentEmails(mode,btn){
   sentFilterMode=mode;
   document.querySelectorAll('.sent-filter').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   renderSentEmails();
+}
+function classifyAction(type){
+  if(['email_sent','email_opened','email_replied','email_bounced','email_drafted'].includes(type))return 'email';
+  if(['status_changed','priority_changed'].includes(type))return 'status';
+  return 'other';
 }
 
 // ── AUTH ──
@@ -2092,110 +2098,97 @@ function saveSentEmail(entry){const emails=getSentEmails();emails.unshift(entry)
 async function renderSentEmails(){
   const list=document.getElementById('sent-list');
   const empty=document.getElementById('sent-empty');
-  list.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Chargement historique...</div>';
+  list.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font:400 12px var(--mono)">Chargement...</div>';
   empty.style.display='none';
 
-  // Primary source: Supabase recon_actions via actions_all
-  let emails=[];
+  // Primary source: Supabase recon_actions
+  let allActions=[];
   try{
-    const res=await fetch('/api/command/recon-ledger?type=actions_all&limit=100',{headers:apiHeaders()});
-    if(res.ok){
-      const actions=(await res.json()).data||[];
-      emails=actions.map(a=>{
-        const d=a.action_data||{};
-        const actionLabels={email_sent:'ENVOY\u00c9',email_opened:'OUVERT',email_replied:'R\u00c9PONDU',email_bounced:'BOUNCED',email_drafted:'BROUILLON',status_changed:'STATUT',enrichment_completed:'ENRICHI',note_added:'NOTE',tagged:'TAG'};
-        return{to:d.to||'\u2014',company:d.company||d.domain||'\u2014',contact:d.contact||'\u2014',subject:d.subject||'\u2014',body:d.body||'',rawDate:a.created_at||'',date:a.created_at?new Date(a.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'\u2014',status:a.action_type==='email_replied'?'replied':a.action_type==='email_opened'?'opened':a.action_type==='email_bounced'?'bounced':'sent',messageId:d.messageId||'',actionType:a.action_type,actionLabel:actionLabels[a.action_type]||a.action_type,source:'supabase'};
-      });
-    }
+    const res=await fetch('/api/command/recon-ledger?type=actions_all&limit=200',{headers:apiHeaders()});
+    if(res.ok){allActions=(await res.json()).data||[]}
   }catch(_){}
 
-  // Fallback: merge localStorage entries not yet in Supabase
+  // Merge localStorage emails
   const local=getSentEmails();
-  if(local.length&&emails.length===0){emails=local.map(e=>({...e,source:'local'}))}
-  else if(local.length){
-    const supaIds=new Set(emails.map(e=>e.messageId).filter(Boolean));
-    local.forEach(e=>{if(e.messageId&&!supaIds.has(e.messageId))emails.push({...e,source:'local'})});
+  if(local.length){
+    const supaIds=new Set(allActions.filter(a=>a.action_data?.messageId).map(a=>a.action_data.messageId));
+    local.forEach(e=>{if(e.messageId&&!supaIds.has(e.messageId)){
+      allActions.push({action_type:'email_sent',action_data:{to:e.to,company:e.company,contact:e.contact,subject:e.subject,body:e.body,messageId:e.messageId},created_at:e.rawDate||'',_source:'local'});
+    }});
   }
 
-  if(!emails.length){list.innerHTML='';empty.style.display='block';document.getElementById('sent-stats').innerHTML='';return}
+  if(!allActions.length){list.innerHTML='';empty.style.display='block';document.getElementById('sent-stats').innerHTML='';return}
 
-  // Filter by sentFilterMode
-  let filtered=emails;
-  if(sentFilterMode!=='all')filtered=emails.filter(e=>e.status===sentFilterMode);
+  // Classify
+  allActions.forEach(a=>{a._cat=classifyAction(a.action_type);a._source=a._source||'supabase'});
 
-  // Stats bar — pill counters
-  const counts={sent:0,opened:0,replied:0,bounced:0};
-  emails.forEach(e=>{if(counts[e.status]!==undefined)counts[e.status]++});
-  const statPill=(label,val,cls)=>`<div class="sent-stat-pill"><span class="sent-stat-val badge ${cls}">${val}</span><span class="sent-stat-lbl">${label}</span></div>`;
-  document.getElementById('sent-stats').innerHTML=`<div class="sent-stats-bar">
-    ${statPill('Total',emails.length,'badge-total')}
-    ${statPill('Envoy\u00e9s',counts.sent,'badge-sent')}
-    ${statPill('Ouverts',counts.opened,'badge-opened')}
-    ${statPill('R\u00e9pondus',counts.replied,'badge-replied')}
-    ${statPill('Bounced',counts.bounced,'badge-bounced')}
-    ${counts.sent>0?statPill('Taux ouv.',Math.round(counts.opened/counts.sent*100)+'%','badge-opened'):''}
-    ${counts.sent>0?statPill('Taux rep.',Math.round(counts.replied/counts.sent*100)+'%','badge-replied'):''}
+  // Filter
+  let filtered=allActions;
+  if(sentFilterMode==='email')filtered=allActions.filter(a=>a._cat==='email');
+  else if(sentFilterMode==='status')filtered=allActions.filter(a=>a._cat==='status');
+  else if(sentFilterMode==='other')filtered=allActions.filter(a=>a._cat==='other');
+
+  // Stats
+  const emailCount=allActions.filter(a=>a._cat==='email').length;
+  const statusCount=allActions.filter(a=>a._cat==='status').length;
+  const otherCount=allActions.filter(a=>a._cat==='other').length;
+  const pill=(l,v,c)=>`<div class="stats-pill"><span class="stats-pill-val" style="color:${c}">${v}</span><span class="stats-pill-lbl">${l}</span></div>`;
+  document.getElementById('sent-stats').innerHTML=`<div class="stats-bar">
+    ${pill('Total',allActions.length,'var(--t1)')}
+    ${pill('Emails',emailCount,'var(--green)')}
+    ${pill('Statuts',statusCount,'var(--cyan)')}
+    ${pill('Autres',otherCount,'var(--t3)')}
   </div>`;
 
-  if(!filtered.length){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--mono);font-size:12px">Aucun email avec ce filtre.</div>';return}
+  if(!filtered.length){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--t3);font:400 12px var(--mono)">Aucune action avec ce filtre.</div>';return}
 
-  // Status dot color map
-  const dotColor={sent:'var(--green)',opened:'var(--gold)',replied:'var(--blue)',bounced:'var(--red)',draft:'var(--violet)'};
+  // Render based on category
+  const typeColors={email_sent:'var(--green)',email_opened:'var(--gold)',email_replied:'var(--blue)',email_bounced:'var(--red)',email_drafted:'var(--violet)',status_changed:'var(--cyan)',priority_changed:'var(--gold)',tagged:'var(--bronze-hi)',enrichment_completed:'var(--cyan)',note_added:'var(--t2)'};
+  const typeLabels={email_sent:'Email envoye',email_opened:'Email ouvert',email_replied:'Reponse recue',email_bounced:'Email bounced',email_drafted:'Brouillon',status_changed:'Changement statut',priority_changed:'Priorite changee',tagged:'Tag ajoute',enrichment_completed:'Enrichissement',note_added:'Note',marked_revisit:'A revoir',marked_suppress:'Supprime'};
 
-  // Table header
-  let html=`<table class="sent-table"><thead><tr>
-    <th class="st-col-status"></th>
-    <th class="st-col-company">Soci\u00e9t\u00e9</th>
-    <th class="st-col-contact">Contact</th>
-    <th class="st-col-email">Email</th>
-    <th class="st-col-subject">Objet</th>
-    <th class="st-col-date">Date</th>
-    <th class="st-col-source">Src</th>
-  </tr></thead><tbody>`;
-
-  filtered.forEach((e,i)=>{
-    const dc=dotColor[e.status]||'var(--t3)';
-    const badgeClass=e.status==='replied'?'badge-replied':e.status==='opened'?'badge-opened':e.status==='bounced'?'badge-bounced':e.status==='draft'?'badge-draft':'badge-sent';
-    const srcBadge=e.source==='supabase'?'badge-db':'badge-local';
-    const srcLabel=e.source==='supabase'?'DB':'Local';
-    const timeStr=relativeDate(e.rawDate||e.date);
+  let html='';
+  filtered.forEach((a,i)=>{
+    const d=a.action_data||{};
+    const cat=a._cat;
+    const color=typeColors[a.action_type]||'var(--t3)';
+    const label=typeLabels[a.action_type]||a.action_type;
+    const time=relativeDate(a.created_at);
+    const srcBadge=a._source==='local'?'<span class="badge badge-local">Local</span>':'<span class="badge badge-db">DB</span>';
     const rowId='sent-row-'+i;
 
-    // Main row
-    html+=`<tr class="sent-row" onclick="(function(el){var d=document.getElementById('${rowId}');if(d.style.display==='table-row'){d.style.display='none';el.classList.remove('expanded')}else{d.style.display='table-row';el.classList.add('expanded')}})(this)">
-      <td class="st-col-status"><span class="st-dot" style="background:${dc}"></span></td>
-      <td class="st-col-company">${sanitize(e.company||'\u2014')}</td>
-      <td class="st-col-contact">${sanitize(e.contact||'\u2014')}</td>
-      <td class="st-col-email">${sanitize(e.to||'\u2014')}</td>
-      <td class="st-col-subject">${sanitize(e.subject||'\u2014')}</td>
-      <td class="st-col-date">${sanitize(timeStr)}</td>
-      <td class="st-col-source"><span class="badge ${srcBadge}">${srcLabel}</span></td>
-    </tr>`;
-
-    // Detail row (hidden by default)
-    html+=`<tr class="sent-detail-row" id="${rowId}" style="display:none"><td colspan="7">
-      <div class="sent-detail-inner">
-        <div class="sent-detail-grid">
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Statut</div>
-            <span class="badge ${badgeClass}">${sanitize(e.actionLabel||e.status)}</span>
-          </div>
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Objet</div>
-            <div class="sent-detail-value">${sanitize(e.subject||'\u2014')}</div>
-          </div>
-          <div class="sent-detail-section">
-            <div class="sent-detail-label">Destinataire</div>
-            <div class="sent-detail-value">${sanitize(e.to||'\u2014')}</div>
-          </div>
-          ${e.messageId?`<div class="sent-detail-section"><div class="sent-detail-label">Message ID</div><div class="sent-detail-mid">${sanitize(e.messageId)}</div></div>`:''}
+    if(cat==='email'){
+      // EMAIL ROW — full detail
+      html+=`<div style="padding:10px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s" onmouseenter="this.style.background='hsla(30,40%,48%,.03)'" onmouseleave="this.style.background=''" onclick="var d=document.getElementById('${rowId}');d.style.display=d.style.display==='none'?'block':'none'">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="st-dot" style="background:${color}"></span>
+          <span style="font:700 12px var(--mono);color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sanitize(d.company||d.to?.split('@')[1]||'—')}</span>
+          <span style="font:400 10px var(--mono);color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sanitize(d.contact||'')}</span>
+          <span style="font:400 10px var(--mono);color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${sanitize(d.to||'—')}</span>
+          <span class="badge badge-sent" style="background:${color}15;color:${color};border-color:${color}30">${label}</span>
+          ${srcBadge}
+          <span style="font:400 9px var(--mono);color:var(--t4);white-space:nowrap">${time}</span>
         </div>
-        ${e.body?`<div class="sent-detail-body-wrap"><div class="sent-detail-label">Message</div><div class="sent-detail-body">${sanitize(e.body)}</div></div>`:''}
+        ${d.subject?`<div style="font:400 11px var(--body);color:var(--t2);margin-top:4px;padding-left:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sanitize(d.subject)}</div>`:''}
       </div>
-    </td></tr>`;
+      <div id="${rowId}" style="display:none;padding:12px 16px 16px 30px;background:var(--graphite);border-bottom:1px solid var(--bd)">
+        ${d.subject?`<div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Objet</div><div style="font:400 11px var(--mono);color:var(--t1);margin-bottom:10px">${sanitize(d.subject)}</div>`:''}
+        ${d.to?`<div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Destinataire</div><div style="font:400 11px var(--mono);color:var(--t2);margin-bottom:10px">${sanitize(d.to)}</div>`:''}
+        ${d.messageId?`<div style="font:400 9px var(--mono);color:var(--t4);margin-bottom:10px">ID: ${sanitize(d.messageId)}</div>`:''}
+        ${d.body?`<div style="font:700 9px var(--mono);color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Message</div><div style="font:400 11px var(--mono);color:var(--t2);white-space:pre-wrap;line-height:1.6;max-height:260px;overflow-y:auto;padding:10px;background:rgba(255,255,255,.02);border-radius:6px;border:1px solid var(--bd)">${sanitize(d.body)}</div>`:''}
+      </div>`;
+    } else {
+      // SYSTEM ACTION ROW — compact one-liner
+      const detail=cat==='status'?`${sanitize(d.from||'?')} → ${sanitize(d.to||'?')}`:a.action_type==='tagged'?'Tag':'';
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--bd)">
+        <span class="st-dot" style="background:${color}"></span>
+        <span style="font:600 10px var(--mono);color:${color};min-width:120px">${label}</span>
+        <span style="font:400 10px var(--mono);color:var(--t2);flex:1">${detail}</span>
+        ${srcBadge}
+        <span style="font:400 9px var(--mono);color:var(--t4);white-space:nowrap">${time}</span>
+      </div>`;
+    }
   });
 
-  html+='</tbody></table>';
   list.innerHTML=html;
 }
 
