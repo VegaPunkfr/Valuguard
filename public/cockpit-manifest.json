@@ -1,0 +1,15 @@
+{
+  "name": "Ghost Tax Cockpit",
+  "short_name": "Cockpit",
+  "description": "Poste de commande Ghost Tax",
+  "start_url": "/cockpit-v4.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#010101",
+  "theme_color": "#010101",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
