@@ -193,6 +193,8 @@ hr{border:none}
 .mandate-bar[data-state="no-strategy"] .mb-banner,.mandate-bar[data-state="no-mandate"] .mb-banner,.mandate-bar[data-state="paused"] .mb-banner,.mandate-bar[data-state="blocked"] .mb-banner{visibility:visible}
 .mandate-bar[data-state="blocked"] .mb-banner{border-top-color:var(--alert)!important;color:var(--alert)}
 
+/* Fix view switching : .view[hidden] specificity (0,2,0) bat .view-command (0,1,0) même avec !important */
+.view[hidden]{display:none!important}
 /* ── VUE COMMANDE — grille asymétrique 62/38 ── */
 .view-command{display:grid!important;grid-template-columns:minmax(0, 62fr) minmax(0, 38fr);gap:32px;padding:24px 32px!important;align-items:stretch}
 .view-command > #command-focal-slot{grid-column:1;display:flex;flex-direction:column;gap:0;min-height:560px;position:relative;background:var(--glass-02);border:1px solid var(--edge-soft)}
@@ -441,6 +443,28 @@ hr{border:none}
 .panel{border-radius:0!important}
 .badge{border-radius:2px!important}
 
+/* ── PATTERN UNIQUE TRANSITIONNEL INERTE (Fellow closure 2026-04-16) ──
+   Usage : bouton ou action visuellement présente mais fonctionnellement
+   en attente d'une phase ultérieure (CP7, OBS-2). Aucun alert(), aucun
+   popup. Comportement homogène, tooltip natif, curseur help.
+   ═══════════════════════════════════════════════════════════════════ */
+.cta-pending{
+  color:var(--ink-500)!important;
+  border-bottom:1px dashed var(--edge-soft)!important;
+  cursor:help!important;
+  opacity:0.7;
+}
+.cta-pending:hover{
+  color:var(--ink-300)!important;
+  border-bottom-color:var(--edge-strong)!important;
+}
+.cta-pending::after{
+  content:" ·";
+  color:var(--ink-700);
+  margin-left:4px;
+  font-size:0.85em;
+}
+
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-300);border:1px solid var(--edge-soft);border-radius:var(--r-1);background:var(--glass-02);white-space:nowrap}
 .badge-level{color:var(--accent);border-color:var(--edge-brand);background:rgba(95,212,224,0.06)}
 .badge-review{color:var(--warn);border-color:rgba(232,177,73,0.30);background:rgba(232,177,73,0.04)}
@@ -486,16 +510,7 @@ hr{border:none}
 /* ══════════════════ VIEWS ══════════════════ */
 .view{display:flex;flex-direction:column;position:relative;z-index:1}
 
-/* ═══ LIVE OPS ═══ */
-.live-ops{display:grid;grid-template-columns:24px repeat(12,1fr) 24px;column-gap:16px;row-gap:16px;padding:16px 0 24px}
-.lo-brief{grid-column:2 / span 2}
-.lo-queue{grid-column:4 / span 3}
-.lo-exceptions{grid-column:7 / span 3}
-.lo-journal{grid-column:10 / span 4}
-.lo-reserve{grid-column:2 / span 12}
-.live-ops > .panel{height:500px}
-.live-ops > .lo-reserve{height:80px}
-
+/* ═══ COMMAND VIEW — component base styles ═══ */
 .kpi-stack{display:flex;flex-direction:column;gap:12px}
 .kpi-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .kpi-row dt{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-700);text-transform:uppercase}
@@ -752,14 +767,6 @@ hr{border:none}
   .status-dot-alert{animation:none}
 }
 
-@media (max-width:1280px){
-  .lo-brief{grid-column:2 / span 3}
-  .lo-queue{grid-column:5 / span 4}
-  .lo-exceptions{grid-column:9 / span 5}
-  .lo-journal{display:none}
-  .lo-reserve{grid-column:2 / span 12}
-}
-
 .kbd-hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:30;display:flex;gap:18px;align-items:center;padding:6px 16px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-700);background:var(--glass-02);backdrop-filter:blur(12px);border:1px solid var(--edge-faint);border-radius:var(--r-1);pointer-events:none;white-space:nowrap}
 .kbd-hint span{display:inline-flex;align-items:center;gap:4px}
 .kbd-hint kbd{font-family:var(--font-mono);font-size:9px;padding:1px 5px;background:rgba(0,0,0,0.25);border:1px solid var(--edge-soft);border-radius:2px;color:var(--ink-500)}
@@ -826,10 +833,10 @@ hr{border:none}
   </div>
 
   <div class="mb-actions">
-    <button class="btn-mb" id="btn-pause" title="Mettre en pause (Espace)">
+    <button class="btn-mb cta-pending" id="btn-pause" title="Pause locale · non persistée (table bot_mandates absente · backlog G4)">
       <span id="btn-pause-label">PAUSE</span>
     </button>
-    <button class="btn-mb btn-mb-destructive" id="btn-revoke" title="Révoquer le mandat">
+    <button class="btn-mb btn-mb-destructive cta-pending" id="btn-revoke" title="Révocation locale · non persistée (table bot_mandates absente · backlog G4)">
       <span>RÉVOQUER</span>
     </button>
   </div>
@@ -847,7 +854,7 @@ hr{border:none}
     <div class="focal-header">
       <span class="coord-inst coord-hero">C.02 / FILE DU JOUR</span>
       <div class="focal-title">FILE OPÉRATOIRE</div>
-      <div class="focal-mode" id="focal-mode-label">LIVE OPS · CADRE MARDI-JEUDI</div>
+      <div class="focal-mode" id="focal-mode-label">—</div>
     </div>
     <section class="panel lo-queue panel-queue">
       <div class="panel-header"><span class="coord">C.02</span><h2 class="panel-title">FILE DU JOUR</h2><span class="panel-sub" id="queue-sub"><span class="status-dot status-dot-idle" style="width:5px;height:5px"></span> —</span></div>
@@ -987,8 +994,8 @@ hr{border:none}
           <div><dt>LIVRABLE</dt><dd data-bind="asset">—</dd></div>
         </dl>
         <div class="drw-actions">
-          <button class="btn-primary" data-shortcut="S" id="btn-send-now">ENVOYER MAINTENANT  →</button>
-          <button class="btn-secondary" data-shortcut="R" id="btn-review">PASSER EN REVUE</button>
+          <button class="btn-secondary cta-pending" data-shortcut="S" id="btn-send-now" title="En attente · Phase CP7 · Envoi réel via V4 pour l'instant">ENVOYER MAINTENANT</button>
+          <button class="btn-secondary cta-pending" data-shortcut="R" id="btn-review" title="En attente · Phase CP7 · Envoi en revue via V4">PASSER EN REVUE</button>
           <button class="btn-secondary" data-shortcut="D" id="btn-defer">DIFFÉRER</button>
           <button class="btn-destructive" data-shortcut="X" id="btn-reject">REJETER</button>
         </div>
@@ -1018,9 +1025,9 @@ hr{border:none}
         <div class="draft-body" contenteditable="false" spellcheck="false" id="draft-body" data-bind="draft-body"></div>
         <div class="draft-meta" id="drw-draft-meta"></div>
         <div class="draft-actions">
-          <button class="btn-ghost" data-shortcut="G" id="btn-regen">REGÉNÉRER</button>
-          <button class="btn-ghost" id="btn-change-angle">CHANGER L'ANGLE</button>
-          <button class="btn-ghost" data-shortcut="E" id="btn-edit-draft">ÉDITER</button>
+          <button class="btn-ghost cta-pending" data-shortcut="G" id="btn-regen" title="En attente · Phase CP7 · Régénération brouillon via V4">REGÉNÉRER</button>
+          <button class="btn-ghost cta-pending" id="btn-change-angle" title="En attente · Phase CP7 · Changement d'angle via V4">CHANGER L'ANGLE</button>
+          <button class="btn-ghost cta-pending" data-shortcut="E" id="btn-edit-draft" title="En attente · Édition locale non persistée — utilisée uniquement pour prévisualisation">ÉDITER</button>
         </div>
       </section>
 
@@ -1032,7 +1039,7 @@ hr{border:none}
       </section>
 
       <section class="drw-sec" data-sec="context">
-        <div class="drw-sec-head"><span class="coord">D.06 / NOTES PILOTE</span><button class="btn-inline-add" data-shortcut="N" id="btn-add-note" style="background:none;border:none;border-bottom:1px solid var(--edge-soft);padding:0;color:var(--ink-500);font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-left:auto">+ AJOUTER</button></div>
+        <div class="drw-sec-head"><span class="coord">D.06 / NOTES PILOTE</span><button class="btn-inline-add cta-pending" data-shortcut="N" id="btn-add-note" title="En attente · Phase OBS-2 · Table pilot_notes à spécifier" style="background:none;padding:0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-left:auto">+ AJOUTER</button></div>
         <div class="pilot-notes">
           <div class="empty-slot" id="drw-pilot-notes" style="font-family:var(--font-mono);font-size:11px;color:var(--ink-700);letter-spacing:0.08em">— aucune —</div>
         </div>
@@ -1327,9 +1334,11 @@ function renderMandateBar(){
   if (hasStrategy) {
     stamp.classList.remove('stamp-missing');
     stamp.textContent = state.strategy.version || '—';
-    sub.textContent = state.strategy.activated_at
-      ? 'RATIFIÉE · ' + new Date(state.strategy.activated_at).toLocaleDateString('fr-FR') + ' · EXP. 19.04.2026'
-      : 'BROUILLON · NON RATIFIÉE';
+    const actParts = [];
+    if (state.strategy.activated_at) actParts.push('RATIFIÉE · ' + new Date(state.strategy.activated_at).toLocaleDateString('fr-FR'));
+    else actParts.push('BROUILLON');
+    if (state.strategy.expires_at) actParts.push('EXP. ' + new Date(state.strategy.expires_at).toLocaleDateString('fr-FR'));
+    sub.textContent = actParts.join(' · ');
     if (stampMini) stampMini.style.display = 'inline-flex';
   } else {
     stamp.classList.add('stamp-missing');
@@ -1923,12 +1932,13 @@ document.getElementById('btn-edit-draft').addEventListener('click', ()=> {
   db.contentEditable = editable ? 'false' : 'true';
   if (!editable) db.focus();
 });
-document.getElementById('btn-send-now').addEventListener('click', ()=> {
-  alert('Action ENVOYER : câblage backend pour envoi atomique en attente (Phase CP7).\nUtiliser le Cockpit V4 pour l\'envoi réel.');
-});
-document.getElementById('btn-review').addEventListener('click', ()=> {
-  alert('Envoi en revue : la route /api/command/send-approved existe. Câblage V5 prévu en Phase CP7.');
-});
+/* Transitional CTAs — comportement inerte avec tooltip explicite (voir .cta-pending).
+   Pas d'alert(), pas de popup. Phase CP7 ouvrira les handlers réels. */
+document.getElementById('btn-send-now').addEventListener('click', e => { e.preventDefault(); });
+document.getElementById('btn-review').addEventListener('click', e => { e.preventDefault(); });
+document.getElementById('btn-regen')?.addEventListener('click', e => { e.preventDefault(); });
+document.getElementById('btn-change-angle')?.addEventListener('click', e => { e.preventDefault(); });
+document.getElementById('btn-add-note')?.addEventListener('click', e => { e.preventDefault(); });
 document.getElementById('btn-defer').addEventListener('click', async ()=> {
   const c = state.clients.find(x => String(x.id) === String(state.currentClientId));
   if (!c) return;
@@ -2184,7 +2194,7 @@ async function obsEnhanceFiabilityBadge() {
   const el = document.getElementById('mb-fiability-badge');
   if (!el) return;
   try {
-    const res = await api('/api/admin/outreach/gate-status');
+    const res = await api('/api/outreach/gate-status');
     if (!res || !res.gate_status) { el.hidden = true; return; }
     const map = {
       PASS:    { c:'◉', cls:'fiab-ok',   sum:'HISTORIQUE COMPLET' },
@@ -2210,6 +2220,28 @@ async function obsEnhanceFiabilityBadge() {
 /* Badge fiabilité : initial + refresh toutes les 5 min */
 obsEnhanceFiabilityBadge();
 setInterval(obsEnhanceFiabilityBadge, 300000);
+
+/* Focal mode dynamique — calcul simple depuis horloge locale.
+   Pas de bascule de layout, seulement l'étiquette honnête. */
+function computeFocalMode() {
+  const d = new Date();
+  const dow = d.getDay();  // 0 = dim, 5 = ven, 6 = sam
+  const h = d.getHours();
+  if (dow === 5 && h >= 18) return 'WEEK CLOSING · VENDREDI ≥ 18:00';
+  if (dow === 5 && h >= 22) return 'MANUFACTURING WATCH · VEN 22:00 → DIM 20:00';
+  if (dow === 6) return 'MANUFACTURING WATCH · SAMEDI';
+  if (dow === 0 && h < 20) return 'MANUFACTURING WATCH · DIM < 20:00';
+  if (dow === 0 && h >= 20) return 'MONDAY BRIEF · DIM 20:00 → LUN 09:30';
+  if (dow === 1 && h < 9) return 'MONDAY BRIEF · LUN < 09:30';
+  if (dow >= 2 && dow <= 4 && h >= 9 && h <= 17) return 'LIVE OPS · FENÊTRE MARDI-JEUDI';
+  return 'AMBIANT · HORS FENÊTRE OPÉRATOIRE';
+}
+function refreshFocalMode() {
+  const el = document.getElementById('focal-mode-label');
+  if (el) el.textContent = computeFocalMode();
+}
+refreshFocalMode();
+setInterval(refreshFocalMode, 60000);
 </script>
 </body>
 </html>
