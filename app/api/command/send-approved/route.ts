@@ -8,8 +8,24 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { renderEmailHTML, renderEmailPlaintext } from '@/lib/email/template';
+import { sanitizeEmailText, sanitizeSubject, validateEmailBeforeSend, hasMojibake } from '@/lib/email/sanitize';
 
 export const runtime = 'nodejs';
+
+// ── Language detection for template rendering ──
+function detectLang(text: string): 'de' | 'en' | 'fr' | 'nl' {
+  const lower = text.toLowerCase();
+  const deMarkers = ['ich', 'und', 'der', 'die', 'das', 'nicht', 'für', 'sie', 'ein', 'mit'].filter(w => lower.includes(w));
+  const frMarkers = ['je', 'vous', 'les', 'des', 'une', 'est', 'pas', 'que', 'pour'].filter(w => lower.includes(w));
+  const nlMarkers = ['het', 'een', 'van', 'zijn', 'niet', 'voor', 'met', 'dat'].filter(w => lower.includes(w));
+  if (deMarkers.length >= 3) return 'de';
+  if (frMarkers.length >= 3) return 'fr';
+  if (nlMarkers.length >= 3) return 'nl';
+  return 'en';
+}
+
+// Note: mojibake/placeholder/spam checks now handled by @/lib/email/sanitize
 
 // ── Rate limiting: 50/hour per IP, 200/day total ──
 const emailRateMap = new Map<string, { count: number; reset: number }>();
@@ -55,6 +71,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 });
   }
 
+  // V6 Phase 1 — Guard L0 : refus d'envoi si autonomie désactivée
+  try {
+    const { createAdminSupabase: getDb } = await import('@/lib/supabase');
+    const db = getDb();
+    if (db) {
+      const { data: lvlRow } = await (db as any).from('bot_settings').select('value').eq('key', 'autonomy_level').maybeSingle();
+      const lvl = lvlRow?.value ? parseInt(JSON.parse(lvlRow.value), 10) : 0;
+      if (lvl === 0) {
+        return NextResponse.json({ error: 'Envoi interdit : autonomie L0 (lecture seule)' }, { status: 403 });
+      }
+    }
+  } catch (_) { /* si bot_settings inaccessible, on laisse passer (fail-open pour ne pas bloquer prod) */ }
+
   try {
     const body = await req.json();
     const { to, subject, htmlBody, textBody, domain, prospectId, fromName } = body;
@@ -62,6 +91,87 @@ export async function POST(req: NextRequest) {
     if (!to || !subject || (!htmlBody && !textBody)) {
       return NextResponse.json({ error: 'Missing required fields: to, subject, body' }, { status: 400 });
     }
+
+    // ── QUALITY GATE ─────────────────────────────────────────────
+    const emailBody = textBody || htmlBody || '';
+
+    // 1. Pre-normalization mojibake detection (catches raw corrupt input)
+    if (hasMojibake(subject) || hasMojibake(emailBody)) {
+      // Log but don't block — sanitize will fix mojibake. Only block if it persists after.
+    }
+
+    // 2. Sanitize all text through centralized module
+    const cleanSubject = sanitizeSubject(subject);
+    const cleanTextBody = textBody ? sanitizeEmailText(textBody) : textBody;
+    const cleanHtmlBody = htmlBody ? sanitizeEmailText(htmlBody) : htmlBody;
+
+    // 3. Centralized validation (covers: empty, corrupt, placeholders, spam, recipient)
+    const validation = validateEmailBeforeSend({
+      subject: cleanSubject,
+      body: cleanTextBody || cleanHtmlBody || '',
+      to,
+      ctaUrl: 'https://ghost-tax.com/intel',
+    });
+
+    if (!validation.valid) {
+      return NextResponse.json({
+        error: `QUALITY_GATE_BLOCK: ${validation.errors[0]}`,
+        gate: validation.gate,
+        allErrors: validation.errors,
+      }, { status: 422 });
+    }
+
+    console.log(`[QualityGate] PASS — to:${to}, subject:"${cleanSubject.slice(0, 50)}...", domain:${domain}, chars:${emailBody.length}`);
+    // ── END QUALITY GATE ─────────────────────────────────────────
+
+    // ── Template rendering ───────────────────────────────────────
+    const lang = (body as any).lang || detectLang(cleanTextBody || cleanSubject || '');
+    const senderName = fromName || 'Ghost Tax';
+
+    const templateParams = {
+      mode: 'external_send' as const,
+      subject: cleanSubject,
+      preheaderText: (cleanTextBody || '').slice(0, 90),
+      recipientName: '',
+      bodyText: cleanTextBody || '',
+      deliverableBlock: {
+        title: lang === 'de' ? 'Was Sie erhalten' : lang === 'fr' ? 'Ce que vous recevez' : lang === 'nl' ? 'Wat u ontvangt' : 'What you receive',
+        items: lang === 'de'
+          ? ['SaaS & IT-Bestandsaufnahme', 'Einspar-Roadmap mit konkreten Beträgen', 'Executive Memo (CFO-ready)']
+          : lang === 'fr'
+          ? ['Inventaire SaaS & IT', 'Feuille de route économies avec montants concrets', 'Mémo exécutif (CFO-ready)']
+          : lang === 'nl'
+          ? ['SaaS & IT-inventarisatie', 'Besparingsroadmap met concrete bedragen', 'Executive memo (CFO-ready)']
+          : ['SaaS & IT inventory analysis', 'Savings roadmap with specific amounts', 'Executive memo (CFO-ready)'],
+      },
+      ctaText: lang === 'de' ? '\u2192 Diagnostic starten \u2014 Ergebnis in 48h' : lang === 'fr' ? '\u2192 Lancer le diagnostic \u2014 R\u00e9sultat en 48h' : '\u2192 Start diagnostic \u2014 Results in 48h',
+      ctaUrl: 'https://ghost-tax.com/intel',
+      trustItems: lang === 'de'
+        ? ['21 Analysephasen', 'Zero-Knowledge-Architektur', 'SOC 2']
+        : lang === 'fr'
+        ? ['21 phases d\'analyse', 'Architecture Zero-Knowledge', 'SOC 2']
+        : ['21 detection phases', 'Zero-knowledge architecture', 'SOC 2'],
+      signature: {
+        name: senderName,
+        title: 'Financial Exposure Detection',
+        email: 'audits@ghost-tax.com',
+      },
+      lang,
+    };
+
+    const htmlEmail = cleanHtmlBody || renderEmailHTML(templateParams);
+    const plaintextEmail = cleanTextBody ? renderEmailPlaintext(templateParams) : undefined;
+
+    // V6 Phase 1 : resolve strategy + generate attempt_id before send
+    let v6StrategyVersion = 'pre-doctrine';
+    let v6StrategyMode: 'native'|'retroactive'|'absent' = 'absent';
+    const v6AttemptId = crypto.randomUUID();
+    try {
+      const { getActiveStrategyVersion } = await import('@/lib/outreach/events');
+      const sv = await getActiveStrategyVersion();
+      v6StrategyVersion = sv.version;
+      v6StrategyMode = sv.mode;
+    } catch (_) {}
 
     // Send via Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -71,15 +181,19 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: `${fromName || 'Jean-Etienne'} <audits@ghost-tax.com>`,
+        from: `${senderName} <audits@ghost-tax.com>`,
         to: [to],
         reply_to: 'audits@ghost-tax.com',
-        subject,
-        html: htmlBody || `<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body style="margin:0;padding:20px;background:#ffffff"><div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.7; color: #1a1a1a; max-width: 600px; white-space: pre-wrap;">${textBody}</div></body></html>`,
+        subject: cleanSubject,
+        html: htmlEmail,
+        text: plaintextEmail,
         tags: [
           { name: 'type', value: 'outreach' },
           { name: 'domain', value: (domain || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
           { name: 'prospect', value: (prospectId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
+          { name: 'client_id', value: (prospectId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },
+          { name: 'attempt_id', value: v6AttemptId },
+          { name: 'strategy_version', value: v6StrategyVersion.replace(/[^a-zA-Z0-9._-]/g, '_') },
         ],
       }),
     });
@@ -90,6 +204,32 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
+
+    // V6 Phase 1 : emit SEND_SUCCESS avec draft_snapshot
+    try {
+      const { emitOutreachEvent } = await import('@/lib/outreach/events');
+      await emitOutreachEvent({
+        at: new Date().toISOString(),
+        client_id: prospectId || null,
+        orphan: !prospectId,
+        strategy_version: v6StrategyVersion,
+        strategy_assignment_mode: v6StrategyMode,
+        attempt_id: v6AttemptId,
+        kind: 'SEND_SUCCESS',
+        provider: 'resend',
+        provider_event_id: data.id || null,
+        provider_event_type: 'email.sent',
+        actor: 'send-approved',
+        ingest_mode: 'live',
+        payload: { resend_id: data.id },
+        derived: {
+          to, from: `${senderName} <audits@ghost-tax.com>`,
+          subject: cleanSubject,
+          body_preview: (cleanTextBody || '').slice(0, 200),
+          draft_snapshot: { subject: cleanSubject, body_preview: (cleanTextBody || '').slice(0, 200) },
+        },
+      });
+    } catch (_) { /* fire-and-forget */ }
 
     // Mark as sent in Supabase if available
     if (domain && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -110,6 +250,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      gate: 'PASS',
       messageId: data.id,
       sentTo: to,
       sentAt: new Date().toISOString(),

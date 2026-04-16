@@ -134,6 +134,27 @@ export async function PATCH(req: NextRequest) {
       await (supabase as any).from('sprint_accounts')
         .update({ status: body.status, last_action_at: new Date().toISOString(), next_action: body.nextAction || '' })
         .eq('id', body.id);
+
+      // V6 Phase 1 : emit outreach_event pour actions opérateur DEFER/REJECT
+      if (body.status === 'DEFERRED' || body.status === 'REJECTED') {
+        try {
+          const { emitOutreachEvent, getActiveStrategyVersion } = await import('@/lib/outreach/events');
+          const strat = await getActiveStrategyVersion();
+          await emitOutreachEvent({
+            at: new Date().toISOString(),
+            client_id: body.id,
+            orphan: false,
+            strategy_version: strat.version,
+            strategy_assignment_mode: strat.mode,
+            kind: body.status === 'DEFERRED' ? 'DEFER' : 'REJECT',
+            provider: 'internal',
+            actor: 'operator',
+            ingest_mode: 'live',
+            derived: { reason: body.nextAction || null, source: 'cockpit_patch' },
+          });
+        } catch (_) { /* fire-and-forget : ne jamais bloquer le PATCH principal */ }
+      }
+
       return NextResponse.json({ ok: true });
     }
 
