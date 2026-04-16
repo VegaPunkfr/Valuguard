@@ -156,8 +156,10 @@ hr{border:none}
 .tb-fresh:hover{background:none!important;border:none!important;color:var(--ink-300)!important}
 .tb-fresh .dot{width:4px!important;height:4px!important;border-radius:0!important;animation:tb-pulse 30s steps(3,end) infinite}
 @keyframes tb-pulse{0%,100%{opacity:1}33%{opacity:0.35}66%{opacity:0.7}}
-.tb-palette,.tb-settings{width:auto!important;height:auto!important;border:none!important;background:none!important;color:var(--ink-500)!important;font-family:var(--font-mono);font-size:13px}
-.tb-palette:hover,.tb-settings:hover{background:none!important;border:none!important;color:var(--ink-300)!important}
+.tb-palette{width:auto!important;height:auto!important;border:none!important;background:none!important;color:var(--ink-500)!important;font-family:var(--font-mono);font-size:13px;cursor:pointer}
+.tb-palette:hover{background:none!important;border:none!important;color:var(--ink-300)!important}
+/* btn-settings : aucune surface settings n'existe → retiré de la surface live */
+.tb-settings{display:none!important}
 .tb-palette svg,.tb-settings svg{display:none}
 .tb-palette::after{content:"⌘"}
 .tb-settings::after{content:"§"}
@@ -189,15 +191,16 @@ hr{border:none}
 .btn-mb svg{width:10px;height:10px}
 .btn-mb.btn-mb-destructive{color:var(--ink-500)!important}
 .btn-mb.btn-mb-destructive:hover{color:var(--alert)!important;border-bottom-color:var(--alert)!important}
-.mb-banner{position:static!important;grid-column:1/-1;grid-row:2;display:flex!important;align-items:center;justify-content:flex-start;gap:12px;padding:6px 24px!important;background:var(--glass-01)!important;border:none!important;border-top:1px solid var(--warn)!important;border-radius:0!important;font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-300);transform:none!important;white-space:nowrap;visibility:hidden}
-.mandate-bar[data-state="no-strategy"] .mb-banner,.mandate-bar[data-state="no-mandate"] .mb-banner,.mandate-bar[data-state="paused"] .mb-banner,.mandate-bar[data-state="blocked"] .mb-banner{visibility:visible}
+/* banner : display:none par défaut (pas visibility:hidden) pour ne pas occuper d'espace grid */
+.mb-banner{position:static!important;grid-column:1/-1;grid-row:2;display:none!important;align-items:center;justify-content:flex-start;gap:12px;padding:6px 24px!important;background:var(--glass-01)!important;border:none!important;border-top:1px solid var(--warn)!important;border-radius:0!important;font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-300);transform:none!important;white-space:nowrap}
+.mandate-bar[data-state="no-strategy"] .mb-banner,.mandate-bar[data-state="no-mandate"] .mb-banner,.mandate-bar[data-state="paused"] .mb-banner,.mandate-bar[data-state="blocked"] .mb-banner{display:flex!important}
 .mandate-bar[data-state="blocked"] .mb-banner{border-top-color:var(--alert)!important;color:var(--alert)}
 
 /* Fix view switching : .view[hidden] specificity (0,2,0) bat .view-command (0,1,0) même avec !important */
 .view[hidden]{display:none!important}
 /* ── VUE COMMANDE — grille asymétrique 62/38 ── */
 .view-command{display:grid!important;grid-template-columns:minmax(0, 62fr) minmax(0, 38fr);gap:32px;padding:24px 32px!important;align-items:stretch}
-.view-command > #command-focal-slot{grid-column:1;display:flex;flex-direction:column;gap:0;min-height:560px;position:relative;background:var(--glass-02);border:1px solid var(--edge-soft)}
+.view-command > #command-focal-slot{grid-column:1;display:flex;flex-direction:column;gap:0;position:relative;background:var(--glass-02);border:1px solid var(--edge-soft)}
 .view-command > #command-east-strata{grid-column:2;display:flex;flex-direction:column;gap:0;position:relative}
 .east-strata-block{padding:20px 24px;border-bottom:1px solid var(--edge-soft)}
 .east-strata-block:last-child{border-bottom:none}
@@ -448,22 +451,14 @@ hr{border:none}
    en attente d'une phase ultérieure (CP7, OBS-2). Aucun alert(), aucun
    popup. Comportement homogène, tooltip natif, curseur help.
    ═══════════════════════════════════════════════════════════════════ */
-.cta-pending{
-  color:var(--ink-500)!important;
-  border-bottom:1px dashed var(--edge-soft)!important;
-  cursor:help!important;
-  opacity:0.7;
-}
-.cta-pending:hover{
-  color:var(--ink-300)!important;
-  border-bottom-color:var(--edge-strong)!important;
-}
-.cta-pending::after{
-  content:" ·";
-  color:var(--ink-700);
-  margin-left:4px;
-  font-size:0.85em;
-}
+/* Phase 0D : tout bouton inerte (.cta-pending) est RETIRÉ de la surface live.
+   Pas dimmed, pas disabled : invisible. Aucun bouton mort affiché.
+   Les éléments restent dans le DOM (JS listeners ne cassent pas) mais hors viewport. */
+.cta-pending{display:none!important}
+/* mandate actions bloc : vidé (PAUSE + RÉVOQUER retirés) → masquer le conteneur */
+.mb-actions{display:none!important}
+/* draft-actions : tous les enfants cta-pending → le conteneur est vide → masquer */
+.draft-actions:has(.cta-pending:only-child),.draft-actions:not(:has(button:not(.cta-pending))){display:none!important}
 
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-300);border:1px solid var(--edge-soft);border-radius:var(--r-1);background:var(--glass-02);white-space:nowrap}
 .badge-level{color:var(--accent);border-color:var(--edge-brand);background:rgba(95,212,224,0.06)}
@@ -1932,13 +1927,18 @@ document.getElementById('btn-edit-draft').addEventListener('click', ()=> {
   db.contentEditable = editable ? 'false' : 'true';
   if (!editable) db.focus();
 });
-/* Transitional CTAs — comportement inerte avec tooltip explicite (voir .cta-pending).
-   Pas d'alert(), pas de popup. Phase CP7 ouvrira les handlers réels. */
+/* Phase 0D : CTA inertes masqués par .cta-pending{display:none}. Listeners conservés pour éviter
+   getElementById throws, mais les éléments sont hors viewport. */
 document.getElementById('btn-send-now').addEventListener('click', e => { e.preventDefault(); });
 document.getElementById('btn-review').addEventListener('click', e => { e.preventDefault(); });
 document.getElementById('btn-regen')?.addEventListener('click', e => { e.preventDefault(); });
 document.getElementById('btn-change-angle')?.addEventListener('click', e => { e.preventDefault(); });
 document.getElementById('btn-add-note')?.addEventListener('click', e => { e.preventDefault(); });
+/* Palette button (⌘) → même action que raccourci ⌘K : bascule clients + focus search */
+document.getElementById('btn-palette')?.addEventListener('click', () => {
+  showView('clients');
+  document.getElementById('clients-search')?.focus();
+});
 document.getElementById('btn-defer').addEventListener('click', async ()=> {
   const c = state.clients.find(x => String(x.id) === String(state.currentClientId));
   if (!c) return;
