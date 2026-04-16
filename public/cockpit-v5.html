@@ -1647,9 +1647,9 @@ function renderEngine(){
   ].join('');
 
   // Cadence
-  const days = m?.activeDays?.join('·') || 'MAR·MER·JEU';
-  const caps = m ? Object.entries(m.caps||{}).map(([k,v])=>`${v}/J ${k}`).join(' · ') : '—';
-  const windows = m ? Object.entries(m.windows||{}).map(([k,v])=>`${k} ${v.start}-${v.end}`).join(' · ') : '—';
+  const days = m?.activeDays?.join(' · ') || 'MAR · MER · JEU';
+  const caps = m?.caps ? Object.entries(m.caps).map(([k,v])=>`${v}/J ${k}`).join(' · ') : '—';
+  const windows = m?.windows ? (typeof m.windows === 'string' ? m.windows : Object.entries(m.windows).map(([k,v])=>`${k} ${v?.start||'?'}-${v?.end||'?'}`).join(' · ')) : '—';
 
   // Last run
   const lastRun = m?.lastRun ? new Date(m.lastRun).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}) + ' UTC' : '—';
