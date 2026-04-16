@@ -144,6 +144,8 @@ hr{border:none}
 .toolbar{height:56px!important;padding:0 24px!important;background:var(--glass-01)!important;border-bottom:1px solid var(--edge-strong)!important;backdrop-filter:none!important}
 .tb-logo{display:none!important}
 .tb-brand{padding:0!important;border:none!important;margin-right:0!important;gap:0!important}
+a.tb-brand{cursor:pointer;transition:opacity var(--dur-quick)}
+a.tb-brand:hover{opacity:0.8}
 .tb-brand-text{font-family:var(--font-display)!important;font-size:18px!important;letter-spacing:0.24em!important;color:var(--ink-100)!important;font-weight:500!important;padding-right:18px!important;border-right:1px solid var(--edge-strong)!important;margin-right:18px!important}
 .tb-tabs{gap:24px!important;margin-left:0!important}
 .tb-tab{padding:0!important;height:56px!important;display:inline-flex!important;align-items:center!important;font-family:var(--font-mono)!important;font-size:13px!important;letter-spacing:0.18em!important;color:var(--ink-500)!important;border-bottom:none!important;background:none!important}
@@ -442,6 +444,12 @@ hr{border:none}
 .kbd-hint kbd{background:none!important;border:1px solid var(--edge-soft)!important;border-radius:0!important;padding:0 4px!important;color:var(--ink-500)!important;font-family:var(--font-mono)!important}
 
 /* ── MOTEUR AUTONOME — surface lisibilité système ── */
+/* Sélecteur autonomie fonctionnel */
+.autonomy-control{display:flex;align-items:center;gap:12px}
+.autonomy-select{background:none;border:none;border-bottom:1px solid var(--edge-strong);color:var(--ink-100);font-family:var(--font-mono);font-size:13px;letter-spacing:0.08em;padding:4px 0;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><polyline points='0,0 5,5 10,0' fill='none' stroke='%238A94A8' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 0 center;padding-right:16px}
+.autonomy-select:focus{outline:none;border-bottom-color:var(--edge-brand)}
+.autonomy-select option{background:var(--carbon-800);color:var(--ink-100)}
+.autonomy-source{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--ink-500);text-transform:uppercase}
 .engine-grid{display:grid;grid-template-columns:88px 1fr;gap:4px 12px;align-items:baseline}
 .engine-grid dt{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-500);text-transform:uppercase;text-align:right;white-space:nowrap;padding:3px 0}
 .engine-grid dd{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-300);padding:3px 0;display:flex;flex-wrap:wrap;gap:4px 8px}
@@ -805,14 +813,13 @@ hr{border:none}
 
 <!-- ══════ TOPBAR ══════ -->
 <header class="topbar" role="banner">
-  <div class="tb-brand">
-    <div class="tb-logo">G</div>
-    <div class="tb-brand-text">GHOST TAX · COCKPIT V5</div>
-  </div>
+  <a href="/" class="tb-brand" title="Retour à l'accueil Ghost Tax" style="text-decoration:none">
+    <div class="tb-brand-text">GHOST TAX</div>
+  </a>
   <nav class="tb-tabs" role="navigation">
-    <button class="tb-tab" aria-current="page" data-tab="command"><span class="tab-n">C.</span>COMMANDE</button>
-    <button class="tb-tab" data-tab="clients"><span class="tab-n">K.</span>CLIENTS</button>
-    <button class="tb-tab" data-tab="sources"><span class="tab-n">S.</span>SOURCES</button>
+    <button class="tb-tab" aria-current="page" data-tab="command">Opérations</button>
+    <button class="tb-tab" data-tab="clients">Clients</button>
+    <button class="tb-tab" data-tab="sources">Sources</button>
   </nav>
   <div class="tb-right">
     <button class="tb-fresh" id="freshness-badge" title="Forcer la revalidation">
@@ -1660,22 +1667,46 @@ function renderEngine(){
   else if (draft > 0) prochain = `revue de ${draft} brouillon(s) requise avant promotion READY`;
   else prochain = 'aucun — file vide · import ou promotion nécessaire';
 
-  body.innerHTML = `<dl class="engine-grid">
-    <dt>NIVEAU</dt><dd><span class="engine-val">L${lvl}</span> <span class="engine-dim">· ${esc(lvlLabels[lvl]||'—')}</span></dd>
+  const lvlOptions = [0,1,2,3].map(n => `<option value="${n}"${n===lvl?' selected':''}>${n===0?'Off':n===1?'L1 · envoi sous mandat':n===2?'L2 · prospection + envoi':'L3 · autonomie complète'}</option>`).join('');
+
+  body.innerHTML = `
+  <div class="autonomy-control">
+    <select class="autonomy-select" id="autonomy-select">${lvlOptions}</select>
+    <span class="autonomy-source">source : bot_settings</span>
+  </div>
+  <dl class="engine-grid" style="margin-top:12px">
     <dt>ÉTAT</dt><dd><span class="${stateClass}">${esc(engineState)}</span></dd>
     <dt>RAISON</dt><dd>${esc(engineReason)}</dd>
     <div class="engine-sep"></div>
     <dt>MARCHÉS</dt><dd>${marketHtml || '—'}</dd>
+    <dd style="grid-column:1/-1" class="engine-dim" style="font-size:10px;letter-spacing:0.2em">IMPOSÉS PAR DOCTRINE · NON MODIFIABLE ICI</dd>
     <dt>CADENCE</dt><dd><span class="engine-dim">${esc(days)}</span> <span class="engine-dim">· ${esc(windows)}</span></dd>
     <dt>CAPS</dt><dd><span class="engine-dim">${esc(caps)}</span></dd>
     <div class="engine-sep"></div>
-    <dt>FILE</dt><dd><span class="engine-val">${ready}</span> READY · <span class="engine-val">${draft}</span> REVUE · <span class="engine-val">${sent}</span> SENT · <span class="engine-val">${deferred}</span> DIF · <span class="engine-val">${blocked}</span> BLOC · <span class="engine-val">${replied}</span> REP</dd>
+    <dt>FILE</dt><dd><span class="engine-val">${ready}</span> prêts · <span class="engine-val">${draft}</span> en revue · <span class="engine-val">${sent}</span> envoyés · <span class="engine-val">${deferred}</span> différés · <span class="engine-val">${blocked}</span> bloqués · <span class="engine-val">${replied}</span> réponses</dd>
     <dt>PROCHAIN</dt><dd>${esc(prochain)}</dd>
     <dt>DERNIER</dt><dd>${esc(lastRun)} <span class="engine-dim">· ${sent} envoyés cumulés</span></dd>
     <div class="engine-sep"></div>
-    <dt>DOCTRINE</dt><dd><span class="engine-val">${esc(s?.version||'—')}</span> <span class="engine-dim">${s?.activated_at ? '· ACTIVE' : '· ABSENTE'}</span></dd>
-    <dt>LEARNER</dt><dd><span class="engine-dim">${esc(s?.body?.learning?.mode||'—')}</span> <span class="engine-dim">· ${esc(s?.body?.learning?.reason||'')}</span></dd>
+    <dt>DOCTRINE</dt><dd><span class="engine-val">${esc(s?.version||'—')}</span> <span class="engine-dim">${s?.activated_at ? '· active' : '· absente'}</span></dd>
+    <dd style="grid-column:1/-1" class="engine-dim" style="font-size:10px;letter-spacing:0.2em">IMPOSÉE PAR STRATÉGIE · NON MODIFIABLE ICI</dd>
+    <dt>APPRENTISSAGE</dt><dd><span class="engine-dim">${esc(s?.body?.learning?.mode||'—')}</span></dd>
   </dl>`;
+
+  // Wire autonomy select change
+  const sel = document.getElementById('autonomy-select');
+  if (sel) sel.addEventListener('change', async (e) => {
+    const newLevel = parseInt(e.target.value, 10);
+    sel.disabled = true;
+    try {
+      await api('/api/command/sprint', { method:'POST', body:{ setting:'autonomy_level', value:newLevel }});
+      await fetchSprint();
+      renderCommandView();
+      flashToast('Niveau d\'autonomie → L'+newLevel);
+    } catch(err) {
+      flashToast('Échec : '+err.message, true);
+    }
+    sel.disabled = false;
+  });
 }
 
 function renderCommandView(){
