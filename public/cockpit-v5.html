@@ -441,6 +441,27 @@ hr{border:none}
 .kbd-hint{font-family:var(--font-mono)!important;font-size:10px!important;color:var(--ink-500)!important;letter-spacing:0.18em!important;text-transform:uppercase;background:none!important;padding:6px 24px!important;border-top:1px solid var(--edge-faint)!important}
 .kbd-hint kbd{background:none!important;border:1px solid var(--edge-soft)!important;border-radius:0!important;padding:0 4px!important;color:var(--ink-500)!important;font-family:var(--font-mono)!important}
 
+/* ── MOTEUR AUTONOME — surface lisibilité système ── */
+.engine-grid{display:grid;grid-template-columns:88px 1fr;gap:4px 12px;align-items:baseline}
+.engine-grid dt{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-500);text-transform:uppercase;text-align:right;white-space:nowrap;padding:3px 0}
+.engine-grid dd{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-300);padding:3px 0;display:flex;flex-wrap:wrap;gap:4px 8px}
+.engine-grid .engine-val{color:var(--ink-100);font-weight:500}
+.engine-grid .engine-dim{color:var(--ink-500)}
+.engine-grid .engine-warn{color:var(--warn)}
+.engine-grid .engine-alert{color:var(--alert)}
+.engine-grid .engine-ok{color:var(--success)}
+.engine-sep{grid-column:1/-1;height:1px;background:var(--edge-faint);margin:4px 0}
+.engine-market-row{display:inline-flex;gap:4px;align-items:center}
+.engine-market-row .dot{width:6px;height:6px;border-radius:0;display:inline-block}
+
+/* Drawer arbitrage — surface raisonnement par client */
+.drw-arbitrage{display:grid;grid-template-columns:88px 1fr;gap:4px 12px;align-items:baseline;margin-top:16px;padding-top:16px;border-top:1px solid var(--edge-faint)}
+.drw-arbitrage dt{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-500);text-transform:uppercase;text-align:right;white-space:nowrap;padding:2px 0}
+.drw-arbitrage dd{font-family:var(--font-mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-300);padding:2px 0}
+.drw-arbitrage .arb-yes{color:var(--success)}
+.drw-arbitrage .arb-no{color:var(--alert)}
+.drw-arbitrage .arb-wait{color:var(--warn)}
+
 /* ── OBS badges drawer D.03 ── */
 .retro-tag,.orphan-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-500);text-transform:uppercase;padding:0 4px;border:1px solid var(--edge-soft);border-radius:0;margin-left:6px}
 .orphan-tag{color:var(--warn);border-color:rgba(232,177,73,0.3)}
@@ -873,6 +894,12 @@ hr{border:none}
       </section>
     </div>
     <div class="east-strata-block">
+      <section class="panel lo-engine">
+        <div class="panel-header"><span class="coord">C.06</span><h2 class="panel-title">MOTEUR AUTONOME</h2></div>
+        <div class="panel-body" id="engine-body" style="padding:0"></div>
+      </section>
+    </div>
+    <div class="east-strata-block">
       <section class="panel lo-exceptions panel-exceptions">
         <div class="panel-header"><span class="coord">C.03</span><h2 class="panel-title">EXCEPTIONS</h2><span class="panel-sub" id="exc-sub">—</span></div>
         <div class="panel-body" style="padding:0" id="exceptions-body">
@@ -993,11 +1020,12 @@ hr{border:none}
           <div><dt>LIVRABLE</dt><dd data-bind="asset">—</dd></div>
         </dl>
         <div class="drw-actions">
-          <button class="btn-secondary cta-pending" data-shortcut="S" id="btn-send-now" title="En attente · Phase CP7 · Envoi réel via V4 pour l'instant">ENVOYER MAINTENANT</button>
-          <button class="btn-secondary cta-pending" data-shortcut="R" id="btn-review" title="En attente · Phase CP7 · Envoi en revue via V4">PASSER EN REVUE</button>
+          <button class="btn-secondary cta-pending" data-shortcut="S" id="btn-send-now" title="En attente · Phase CP7">ENVOYER MAINTENANT</button>
+          <button class="btn-secondary cta-pending" data-shortcut="R" id="btn-review" title="En attente · Phase CP7">PASSER EN REVUE</button>
           <button class="btn-secondary" data-shortcut="D" id="btn-defer">DIFFÉRER</button>
           <button class="btn-destructive" data-shortcut="X" id="btn-reject">REJETER</button>
         </div>
+        <dl class="drw-arbitrage" id="drw-arbitrage"></dl>
       </section>
 
       <section class="drw-sec" data-sec="hero">
@@ -1567,10 +1595,94 @@ function renderReserve(){
   `;
 }
 
+function renderEngine(){
+  const body = document.getElementById('engine-body');
+  if (!body) return;
+  const m = state.mandate;
+  const s = state.strategy;
+  const cs = state.clients;
+  const lvl = m?.level ?? 0;
+  const lvlLabels = {0:'DÉSACTIVÉ',1:'ENVOI AUTOMATIQUE SOUS MANDAT',2:'PROSPECTION + ENVOI',3:'AUTONOMIE COMPLÈTE'};
+
+  // Queue breakdown
+  const counts = {};
+  cs.forEach(c => { counts[c.state] = (counts[c.state]||0)+1; });
+  const ready = counts['READY']||0;
+  const sched = counts['SCHEDULED']||0;
+  const sent = counts['SENT']||0;
+  const draft = counts['DRAFT_REVIEW']||0;
+  const deferred = counts['DEFERRED']||0;
+  const blocked = counts['BLOCKED']||0;
+  const replied = counts['REPLIED']||0;
+  const rejected = counts['REJECTED']||0;
+
+  // Engine state
+  let engineState, engineReason;
+  if (!s) { engineState = 'SANS STRATÉGIE'; engineReason = 'doctrine non insérée en base'; }
+  else if (!m || lvl === 0) { engineState = 'SANS MANDAT'; engineReason = 'niveau d\'autonomie L0 — aucune action autorisée'; }
+  else if (m.paused) { engineState = 'EN PAUSE'; engineReason = 'pause opérateur locale'; }
+  else if (ready + sched > 0) { engineState = 'PRÊT À AGIR'; engineReason = `${ready+sched} client(s) en file`; }
+  else if (draft > 0) { engineState = 'EN ATTENTE'; engineReason = `${draft} brouillon(s) en revue — aucun READY`; }
+  else { engineState = 'FILE VIDE'; engineReason = `${sent} envoyé(s), ${deferred} différé(s) — aucun client prêt`; }
+
+  const stateClass = engineState === 'PRÊT À AGIR' ? 'engine-ok' :
+                     engineState === 'FILE VIDE' || engineState === 'EN ATTENTE' ? 'engine-dim' :
+                     'engine-warn';
+
+  // Markets from strategy body or mandate
+  const mkts = s?.body?.markets || {};
+  const activeNow = mkts.active_now || [];
+  const dormant = mkts.dormant || [];
+  const forbidden = mkts.forbidden || [];
+  const marketHtml = [
+    ...activeNow.map(mk => {
+      const code = typeof mk === 'string' ? mk : mk.code;
+      const prudence = typeof mk === 'object' && mk.prudence_mode;
+      const cls = prudence ? 'engine-warn' : 'engine-ok';
+      const label = prudence ? `${code} PRUDENCE` : `${code} AUTO`;
+      return `<span class="engine-market-row"><span class="dot" style="background:var(${prudence?'--warn':'--success'})"></span><span class="${cls}">${label}</span></span>`;
+    }),
+    ...dormant.map(mk => `<span class="engine-market-row"><span class="dot" style="background:var(--ink-500)"></span><span class="engine-dim">${mk} DORMANT</span></span>`),
+    ...forbidden.map(mk => `<span class="engine-market-row"><span class="dot" style="background:var(--alert)"></span><span class="engine-alert">${mk} INTERDIT</span></span>`)
+  ].join('');
+
+  // Cadence
+  const days = m?.activeDays?.join('·') || 'MAR·MER·JEU';
+  const caps = m ? Object.entries(m.caps||{}).map(([k,v])=>`${v}/J ${k}`).join(' · ') : '—';
+  const windows = m ? Object.entries(m.windows||{}).map(([k,v])=>`${k} ${v.start}-${v.end}`).join(' · ') : '—';
+
+  // Last run
+  const lastRun = m?.lastRun ? new Date(m.lastRun).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}) + ' UTC' : '—';
+
+  // Prochain
+  let prochain = '—';
+  if (ready + sched > 0) prochain = `${ready+sched} client(s) prêt(s) · attente fenêtre d'envoi`;
+  else if (draft > 0) prochain = `revue de ${draft} brouillon(s) requise avant promotion READY`;
+  else prochain = 'aucun — file vide · import ou promotion nécessaire';
+
+  body.innerHTML = `<dl class="engine-grid">
+    <dt>NIVEAU</dt><dd><span class="engine-val">L${lvl}</span> <span class="engine-dim">· ${esc(lvlLabels[lvl]||'—')}</span></dd>
+    <dt>ÉTAT</dt><dd><span class="${stateClass}">${esc(engineState)}</span></dd>
+    <dt>RAISON</dt><dd>${esc(engineReason)}</dd>
+    <div class="engine-sep"></div>
+    <dt>MARCHÉS</dt><dd>${marketHtml || '—'}</dd>
+    <dt>CADENCE</dt><dd><span class="engine-dim">${esc(days)}</span> <span class="engine-dim">· ${esc(windows)}</span></dd>
+    <dt>CAPS</dt><dd><span class="engine-dim">${esc(caps)}</span></dd>
+    <div class="engine-sep"></div>
+    <dt>FILE</dt><dd><span class="engine-val">${ready}</span> READY · <span class="engine-val">${draft}</span> REVUE · <span class="engine-val">${sent}</span> SENT · <span class="engine-val">${deferred}</span> DIF · <span class="engine-val">${blocked}</span> BLOC · <span class="engine-val">${replied}</span> REP</dd>
+    <dt>PROCHAIN</dt><dd>${esc(prochain)}</dd>
+    <dt>DERNIER</dt><dd>${esc(lastRun)} <span class="engine-dim">· ${sent} envoyés cumulés</span></dd>
+    <div class="engine-sep"></div>
+    <dt>DOCTRINE</dt><dd><span class="engine-val">${esc(s?.version||'—')}</span> <span class="engine-dim">${s?.activated_at ? '· ACTIVE' : '· ABSENTE'}</span></dd>
+    <dt>LEARNER</dt><dd><span class="engine-dim">${esc(s?.body?.learning?.mode||'—')}</span> <span class="engine-dim">· ${esc(s?.body?.learning?.reason||'')}</span></dd>
+  </dl>`;
+}
+
 function renderCommandView(){
   renderMandateBar();
   renderBrief();
   renderQueue();
+  renderEngine();
   renderExceptions();
   renderJournal();
   renderReserve();
@@ -1910,6 +2022,50 @@ function renderDrawer(c){
     <div><dt>IMPORTÉ</dt><dd>${c.importedAt ? new Date(c.importedAt).toLocaleString('fr-FR') : '—'}</dd></div>
     <div><dt>DERNIÈRE ACTION</dt><dd>${c.lastActionAt ? new Date(c.lastActionAt).toLocaleString('fr-FR')+' · il y a '+ageFromIso(c.lastActionAt) : '—'}</dd></div>
   `;
+
+  // Arbitrage bloc — raisonnement moteur pour ce client
+  const arb = document.getElementById('drw-arbitrage');
+  if (arb) {
+    const st = c.state || 'NEW';
+    const isSendable = st === 'READY' || st === 'SCHEDULED';
+    const alreadySent = st === 'SENT';
+    const isBlocked = st === 'BLOCKED' || st === 'REJECTED';
+    const isDraft = st === 'DRAFT_REVIEW' || st === 'NEW';
+
+    let envoyable, envClass;
+    if (isSendable) { envoyable = 'OUI · en file d\'envoi'; envClass = 'arb-yes'; }
+    else if (alreadySent) { envoyable = `NON · déjà envoyé${c.lastActionAt ? ' le '+new Date(c.lastActionAt).toLocaleDateString('fr-FR') : ''}`; envClass = 'arb-no'; }
+    else if (isBlocked) { envoyable = `NON · ${stateLabel(st)}`; envClass = 'arb-no'; }
+    else if (isDraft) { envoyable = 'PAS ENCORE · brouillon en revue'; envClass = 'arb-wait'; }
+    else { envoyable = `NON · ${stateLabel(st)}`; envClass = 'arb-wait'; }
+
+    const gate = c.draft?.gateResult || '—';
+    const gateClass = gate.startsWith('PASS') ? 'arb-yes' : gate.includes('WARN') ? 'arb-wait' : 'arb-no';
+    const gateLabel = gate.startsWith('PASS') ? `${gate} · SCORE ${c.score||0} ≥ 65` : gate;
+
+    const signal = c.primarySignal !== '—' ? `${c.primarySignal} · CONFIANCE ${confidenceLabel(c.signalConfidence||'MEDIUM')}` : 'AUCUN SIGNAL FORT';
+
+    const cooldownDomain = c.lastActionAt ? Math.max(0, 30 - Math.floor((Date.now() - new Date(c.lastActionAt).getTime()) / 86400000)) : '—';
+    const cooldownLabel = typeof cooldownDomain === 'number' ? (cooldownDomain > 0 ? `${cooldownDomain}J RESTANTS · DOMAINE 30J` : 'EXPIRÉ · RELANCE POSSIBLE') : '—';
+    const cooldownClass = typeof cooldownDomain === 'number' ? (cooldownDomain > 0 ? 'arb-wait' : 'arb-yes') : '';
+
+    let prochainClient = '—';
+    if (isSendable) prochainClient = 'envoi à la prochaine fenêtre active';
+    else if (alreadySent && typeof cooldownDomain === 'number' && cooldownDomain > 0) {
+      const relanceDate = new Date(new Date(c.lastActionAt).getTime() + 30*86400000);
+      prochainClient = `relance possible après le ${relanceDate.toLocaleDateString('fr-FR')}`;
+    }
+    else if (isDraft) prochainClient = 'promotion READY après revue gate';
+    else if (isBlocked) prochainClient = 'action manuelle requise (déblocage ou rejet)';
+
+    arb.innerHTML = `
+      <dt>ENVOYABLE</dt><dd><span class="${envClass}">${esc(envoyable)}</span></dd>
+      <dt>GATE</dt><dd><span class="${gateClass}">${esc(gateLabel)}</span></dd>
+      <dt>SIGNAL</dt><dd>${esc(signal)}</dd>
+      <dt>COOLDOWN</dt><dd><span class="${cooldownClass}">${esc(cooldownLabel)}</span></dd>
+      <dt>PROCHAIN</dt><dd>${esc(prochainClient)}</dd>
+    `;
+  }
 
   document.getElementById('drw-scroll').scrollTop = 0;
   if (typeof obsEnhanceDrawer === 'function' && c && c.id) obsEnhanceDrawer(c.id);
