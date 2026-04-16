@@ -486,6 +486,14 @@ a.tb-brand:hover{opacity:0.8}
    ═══════════════════════════════════════════════════════════════════ */
 /* V6 : plus de classe cta-pending ni de boutons morts. Nettoyé structurellement. */
 
+/* ── V6 Phase 3 — exec actions dynamiques ── */
+.drw-exec-actions{display:flex;gap:20px;margin-top:16px;padding-top:12px;border-top:1px solid var(--edge-faint);flex-wrap:wrap}
+.drw-exec-actions:empty{display:none}
+.drw-exec-btn{padding:0;background:none;border:none;border-bottom:1px solid var(--edge-soft);padding-bottom:2px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-500);cursor:pointer}
+.drw-exec-btn:hover{color:var(--ink-300);border-bottom-color:var(--edge-strong)}
+.drw-exec-btn.exec-primary{color:var(--ink-100);border-bottom-color:var(--accent)}
+.drw-exec-btn.exec-primary:hover{color:var(--ink-100)}
+
 /* ── MODULE CONVERSATIONS — split 40/60 ── */
 .conversations-view{padding:0!important;display:flex!important;height:calc(100vh - 220px)}
 .conv-layout{display:grid;grid-template-columns:40% 60%;width:100%;height:100%}
@@ -1074,6 +1082,7 @@ a.tb-brand:hover{opacity:0.8}
           <button class="btn-destructive" data-shortcut="X" id="btn-reject">REJETER</button>
         </div>
         <dl class="drw-arbitrage" id="drw-arbitrage"></dl>
+        <div class="drw-exec-actions" id="drw-exec-actions"></div>
       </section>
 
       <section class="drw-sec" data-sec="hero">
@@ -1131,7 +1140,7 @@ a.tb-brand:hover{opacity:0.8}
 
 <!-- Pied de page raccourcis clavier -->
 <div class="kbd-hint" aria-hidden="true">
-  <span><kbd>C</kbd><kbd>K</kbd><kbd>S</kbd> vues</span>
+  <span><kbd>C</kbd><kbd>K</kbd><kbd>V</kbd><kbd>S</kbd> vues</span>
   <span><kbd>Échap</kbd> fermer</span>
   <span><kbd>←</kbd><kbd>→</kbd> naviguer</span>
   <span><kbd>D</kbd> différer</span>
@@ -1710,7 +1719,7 @@ function renderEngine(){
   body.innerHTML = `
   <div style="display:flex;flex-direction:column;gap:16px">
     <div>
-      <div class="engine-dim" style="margin-bottom:6px">Mode autonome</div>
+      <div class="engine-dim" style="margin-bottom:6px">Mode autonome${lvl === 0 ? ' <span style="color:var(--alert);margin-left:8px">· LECTURE SEULE</span>' : lvl === 1 ? ' <span style="color:var(--warn);margin-left:8px">· ENVOI MANUEL UNIQUEMENT</span>' : lvl >= 2 ? ' <span style="color:var(--success);margin-left:8px">· ENVOI AUTOMATIQUE</span>' : ''}</div>
       <div class="autonomy-control">
         <select class="autonomy-select" id="autonomy-select">${lvlOptions}</select>
       </div>
@@ -1744,7 +1753,12 @@ function renderEngine(){
   // Wire autonomy select change
   const sel = document.getElementById('autonomy-select');
   if (sel) sel.addEventListener('change', async (e) => {
-    const newLevel = parseInt(e.target.value, 10);
+    let newLevel = parseInt(e.target.value, 10);
+    // V6 Phase 4 : L3 forcé L2 (non implémenté)
+    if (newLevel === 3) {
+      newLevel = 2;
+      flashToast('L3 non disponible — capacités insuffisantes. Rétrogradé à L2.', true);
+    }
     sel.disabled = true;
     try {
       await api('/api/command/sprint', { method:'POST', body:{ setting:'autonomy_level', value:newLevel }});
@@ -2147,6 +2161,87 @@ function renderDrawer(c){
     `;
   }
 
+  // V6 Phase 3 — Dynamic exec CTAs based on real backend capabilities + autonomy level
+  const execDiv = document.getElementById('drw-exec-actions');
+  if (execDiv) {
+    const lvl = state.mandate?.level ?? 0;
+    const hasDraft = !!(c.draft?.subject && c.draft?.body);
+    const gatePass = c.draft?.gateResult?.startsWith('PASS');
+    const isSendable = (c.state === 'READY' || c.state === 'SCHEDULED') && hasDraft && gatePass && lvl >= 1;
+    const canRegen = hasDraft || c.state === 'NEW' || c.state === 'DRAFT_REVIEW';
+    const canEdit = hasDraft;
+
+    const btns = [];
+    if (isSendable && lvl === 1) {
+      btns.push(`<button class="drw-exec-btn exec-primary" data-exec="send">APPROUVER L'ENVOI</button>`);
+    }
+    if (canRegen) {
+      btns.push(`<button class="drw-exec-btn" data-exec="regen">REGÉNÉRER</button>`);
+    }
+    if (canEdit) {
+      btns.push(`<button class="drw-exec-btn" data-exec="edit">ÉDITER</button>`);
+    }
+    execDiv.innerHTML = btns.join('');
+
+    // Wire handlers
+    execDiv.querySelectorAll('[data-exec]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const action = btn.dataset.exec;
+        btn.disabled = true;
+        btn.textContent += ' …';
+        try {
+          if (action === 'send') {
+            const textBody = c.draft.body;
+            await api('/api/command/send-approved', {
+              method: 'POST',
+              body: { to: c.contact.email, subject: c.draft.subject, textBody, prospectId: c.id, domain: c.domain }
+            });
+            await api('/api/command/sprint', { method: 'PATCH', body: { id: c.id, status: 'SENT', nextAction: 'Envoyé depuis V6' } });
+            flashToast('Email envoyé · ' + c.company);
+            await fetchSprint();
+            renderCommandView();
+            if (state.currentView === 'clients') renderClientsView();
+            closeDrawer();
+          } else if (action === 'regen') {
+            await api('/api/command/generate-message', {
+              method: 'POST',
+              body: { prospectId: c.id, company: c.company, domain: c.domain, market: c.market, signal: c.primarySignal, angle: c.angle, contactName: c.contact.name, contactTitle: c.contact.title }
+            });
+            flashToast('Brouillon regénéré · ' + c.company);
+            await fetchSprint();
+            renderDrawer(state.clients.find(x => x.id === c.id) || c);
+          } else if (action === 'edit') {
+            const db = document.getElementById('draft-body');
+            if (db) {
+              db.contentEditable = db.contentEditable === 'true' ? 'false' : 'true';
+              if (db.contentEditable === 'true') {
+                db.focus();
+                btn.textContent = 'SAUVER';
+                btn.dataset.exec = 'save';
+              }
+            }
+          } else if (action === 'save') {
+            const db = document.getElementById('draft-body');
+            if (db) {
+              db.contentEditable = 'false';
+              const newBody = db.innerText;
+              await api('/api/command/sprint', {
+                method: 'POST',
+                body: { account: { id: c.id, draft: { body: newBody, subject: c.draft?.subject, gateResult: c.draft?.gateResult } } }
+              });
+              flashToast('Brouillon sauvé · ' + c.company);
+              await fetchSprint();
+              renderDrawer(state.clients.find(x => x.id === c.id) || c);
+            }
+          }
+        } catch (err) {
+          flashToast('Erreur : ' + err.message, true);
+        }
+        btn.disabled = false;
+      });
+    });
+  }
+
   document.getElementById('drw-scroll').scrollTop = 0;
   if (typeof obsEnhanceDrawer === 'function' && c && c.id) obsEnhanceDrawer(c.id);
 }
@@ -2349,7 +2444,8 @@ document.addEventListener('keydown', e => {
   if (typing) return;
   const k = e.key.toLowerCase();
   if (k === 'c') { e.preventDefault(); showView('command'); return; }
-  if (k === 'l') { e.preventDefault(); showView('clients'); return; }
+  if (k === 'k') { e.preventDefault(); showView('clients'); return; }
+  if (k === 'v') { e.preventDefault(); showView('conversations'); return; }
   if (k === 's' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); showView('sources'); return; }
   if (k === 'r') { e.preventDefault(); refresh(); return; }
   /* V6 : Space/Pause supprimé (PAUSE absent du DOM) */
