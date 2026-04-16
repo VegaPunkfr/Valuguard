@@ -486,6 +486,39 @@ a.tb-brand:hover{opacity:0.8}
    ═══════════════════════════════════════════════════════════════════ */
 /* V6 : plus de classe cta-pending ni de boutons morts. Nettoyé structurellement. */
 
+/* ── MODULE CONVERSATIONS — split 40/60 ── */
+.conversations-view{padding:0!important;display:flex!important;height:calc(100vh - 220px)}
+.conv-layout{display:grid;grid-template-columns:40% 60%;width:100%;height:100%}
+.conv-list{border-right:1px solid var(--edge-soft);display:flex;flex-direction:column;overflow:hidden}
+.conv-list-header{padding:16px 24px;border-bottom:1px solid var(--edge-soft);display:flex;flex-direction:column;gap:8px}
+.conv-search{background:none;border:none;border-bottom:1px solid var(--edge-soft);padding:6px 0;font-family:var(--font-mono);font-size:11px;color:var(--ink-100);letter-spacing:0.04em;width:100%}
+.conv-search:focus{outline:none;border-bottom-color:var(--edge-brand)}
+.conv-list-body{overflow-y:auto;flex:1}
+.conv-item{padding:14px 24px;border-bottom:1px solid var(--edge-faint);cursor:pointer;transition:background var(--dur-quick)}
+.conv-item:hover{background:var(--glass-01)}
+.conv-item.conv-active{background:var(--glass-02);border-left:2px solid var(--accent)}
+.conv-item-company{font-family:var(--font-display);font-size:15px;color:var(--ink-100);font-weight:500;margin-bottom:2px}
+.conv-item-summary{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-500);text-transform:uppercase}
+.conv-item-meta{font-family:var(--font-mono);font-size:10px;color:var(--ink-700);margin-top:4px;display:flex;justify-content:space-between}
+.conv-thread{display:flex;flex-direction:column;overflow:hidden}
+.conv-thread-header{padding:16px 24px;border-bottom:1px solid var(--edge-soft);min-height:48px}
+.conv-thread-header .conv-th-company{font-family:var(--font-display);font-size:17px;color:var(--ink-100);font-weight:500}
+.conv-thread-header .conv-th-meta{font-family:var(--font-mono);font-size:10px;color:var(--ink-500);letter-spacing:0.14em;margin-top:4px}
+.conv-thread-body{overflow-y:auto;flex:1;padding:16px 24px}
+.conv-empty{font-family:var(--font-mono);font-size:11px;color:var(--ink-500);letter-spacing:0.16em;text-transform:uppercase;padding:48px 24px}
+.conv-msg{margin-bottom:16px;padding:12px 16px;border-left:2px solid var(--edge-soft)}
+.conv-msg.conv-outbound{border-left-color:var(--accent)}
+.conv-msg.conv-inbound{border-left-color:var(--warn)}
+.conv-msg.conv-signal{border-left-color:var(--ink-700);padding:6px 16px}
+.conv-msg.conv-operator{border-left-color:var(--ink-500)}
+.conv-msg.conv-block{border-left-color:var(--alert)}
+.conv-msg-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.conv-msg-dir{font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;color:var(--ink-300);text-transform:uppercase}
+.conv-msg-time{font-family:var(--font-mono);font-size:10px;color:var(--ink-500);letter-spacing:0.14em}
+.conv-msg-body{font-family:var(--font-mono);font-size:11px;color:var(--ink-300);line-height:1.6;letter-spacing:0.04em}
+.conv-msg-body .conv-absent{color:var(--ink-500);font-style:normal}
+.conv-msg.conv-signal .conv-msg-dir{font-size:10px;color:var(--ink-500)}
+
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-300);border:1px solid var(--edge-soft);border-radius:var(--r-1);background:var(--glass-02);white-space:nowrap}
 .badge-level{color:var(--accent);border-color:var(--edge-brand);background:rgba(95,212,224,0.06)}
 .badge-review{color:var(--warn);border-color:rgba(232,177,73,0.30);background:rgba(232,177,73,0.04)}
@@ -812,6 +845,7 @@ a.tb-brand:hover{opacity:0.8}
   <nav class="tb-tabs" role="navigation">
     <button class="tb-tab" aria-current="page" data-tab="command">Opérations</button>
     <button class="tb-tab" data-tab="clients">Clients</button>
+    <button class="tb-tab" data-tab="conversations">Conversations</button>
     <button class="tb-tab" data-tab="sources">Sources</button>
   </nav>
   <div class="tb-right">
@@ -950,6 +984,29 @@ a.tb-brand:hover{opacity:0.8}
       <div class="loading-lines"><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div></div>
     </div>
   </section>
+</main>
+
+<!-- ═══ VIEW : SOURCES ═══ -->
+<!-- ═══ VIEW : CONVERSATIONS ═══ -->
+<main class="view conversations-view" id="view-conversations" role="main" hidden>
+  <div class="conv-layout">
+    <aside class="conv-list" id="conv-list">
+      <div class="conv-list-header">
+        <span class="coord">CV.01</span>
+        <h2 class="panel-title">Fils de contact</h2>
+        <div class="conv-filters">
+          <input type="search" class="conv-search" id="conv-search" placeholder="Rechercher…" />
+        </div>
+      </div>
+      <div class="conv-list-body" id="conv-list-body"></div>
+    </aside>
+    <section class="conv-thread" id="conv-thread">
+      <div class="conv-thread-header" id="conv-thread-header"></div>
+      <div class="conv-thread-body" id="conv-thread-body">
+        <div class="conv-empty">Sélectionnez un fil de contact.</div>
+      </div>
+    </section>
+  </div>
 </main>
 
 <!-- ═══ VIEW : SOURCES ═══ -->
@@ -1318,6 +1375,7 @@ function showView(view){
     else t.removeAttribute('aria-current');
   });
   if (view === 'clients') renderClientsView();
+  if (view === 'conversations') renderConversationsView();
   if (view === 'sources') renderSourcesView();
   if (view === 'command') renderCommandView();
 }
@@ -1761,7 +1819,7 @@ function renderClientsView(){
       <span class="cr-contact mono-s ink-500">${esc(c.contact.name)}</span>
       <span class="badge badge-state badge-${(c.state||'NEW').toLowerCase()}">${esc(stateLabel(c.state))}</span>
       <div class="cr-score"><div class="cr-score-bar"><div class="cr-score-bar-fill" style="width:${scorePct}%"></div></div><span class="cr-score-val">${c.score||0}</span></div>
-      <span class="cr-age">${ageFromIso(c.lastActionAt)}</span>
+      <span class="cr-age" title="Dernier contact">${ageFromIso(c.lastActionAt)}</span>
     </div>`;
   }).join('');
   body.querySelectorAll('.clients-row').forEach(el => {
@@ -2107,6 +2165,132 @@ document.getElementById('drw-next').addEventListener('click', ()=> navClient(1))
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeDrawer(); });
 
 /* V6 : les CTAs edit-draft/send-now/review/regen/change-angle/add-note sont absents du DOM */
+/* ══════════════════════════════════════════════════════════════════
+   V6 Phase 2 — Module Conversations
+   Projection outreach_events en registre de traces.
+   ══════════════════════════════════════════════════════════════════ */
+
+const CONV_DIR = {SEND_ATTEMPT:'outbound',SEND_SUCCESS:'outbound',SEND_FAIL:'outbound',DELIVERED:'signal',OPENED:'signal',CLICKED:'signal',REPLIED:'inbound',BOUNCE:'block',COMPLAINED:'block',UNSUBSCRIBED:'block',DEFER:'operator',REJECT:'operator',REVIEW:'operator'};
+const CONV_LABELS = {SEND_ATTEMPT:'tentative',SEND_SUCCESS:'envoyé',SEND_FAIL:'échec envoi',DELIVERED:'remis',OPENED:'lu',CLICKED:'lien cliqué',REPLIED:'réponse reçue',BOUNCE:'bounce',COMPLAINED:'plainte',UNSUBSCRIBED:'désabonné',DEFER:'différé',REJECT:'rejeté',REVIEW:'revue'};
+const CONV_ARROWS = {outbound:'→',inbound:'←',signal:'·',operator:'⊘',block:'✕'};
+
+async function loadConversations(){
+  try {
+    const events = await obsFetchEvents({limit:'500'});
+    if (!events) return [];
+    // Group by client_id, exclude orphans
+    const grouped = {};
+    events.filter(e => e.client_id && !e.orphan).forEach(e => {
+      if (!grouped[e.client_id]) grouped[e.client_id] = {client_id:e.client_id, events:[], lastAt:e.at};
+      grouped[e.client_id].events.push(e);
+      if (e.at > grouped[e.client_id].lastAt) grouped[e.client_id].lastAt = e.at;
+    });
+    // Enrich with client info
+    const convos = Object.values(grouped).sort((a,b) => b.lastAt.localeCompare(a.lastAt));
+    convos.forEach(c => {
+      const client = state.clients.find(cl => cl.id === c.client_id);
+      c.company = client?.company || c.client_id;
+      c.domain = client?.domain || '';
+      c.market = client?.market || '';
+      c.state = client?.state || '?';
+      c.lastKind = c.events[0]?.kind || '';
+      c.lastSubject = c.events.find(e => e.derived?.subject)?.derived?.subject || '';
+    });
+    return convos;
+  } catch(e) { return []; }
+}
+
+let convState = { conversations:[], selectedId:null };
+
+async function renderConversationsView(){
+  const convos = await loadConversations();
+  convState.conversations = convos;
+  const body = document.getElementById('conv-list-body');
+  if (!body) return;
+
+  if (convos.length === 0) {
+    body.innerHTML = '<div class="conv-empty">Aucun fil de contact.<br><span style="font-size:10px;color:var(--ink-700)">Les prospects sans traces sont visibles dans Clients.</span></div>';
+    return;
+  }
+
+  body.innerHTML = convos.map(c => {
+    const stLabel = stateLabel(c.state);
+    const lastLabel = CONV_LABELS[c.lastKind] || c.lastKind;
+    const age = ageFromIso(c.lastAt);
+    const summary = c.lastSubject ? c.lastSubject.slice(0,50) : `${lastLabel} · ${stLabel}`;
+    return `<div class="conv-item${convState.selectedId===c.client_id?' conv-active':''}" data-conv-id="${c.client_id}">
+      <div class="conv-item-company">${esc(c.company)}</div>
+      <div class="conv-item-summary">${esc(summary)}</div>
+      <div class="conv-item-meta"><span>${esc(c.market)} · ${esc(stLabel)}</span><span>${age}</span></div>
+    </div>`;
+  }).join('');
+
+  body.querySelectorAll('.conv-item').forEach(el => {
+    el.addEventListener('click', () => {
+      convState.selectedId = el.dataset.convId;
+      renderConversationsView();
+      renderThread(el.dataset.convId);
+    });
+  });
+
+  if (convState.selectedId) renderThread(convState.selectedId);
+}
+
+function renderThread(clientId){
+  const conv = convState.conversations.find(c => c.client_id === clientId);
+  const header = document.getElementById('conv-thread-header');
+  const body = document.getElementById('conv-thread-body');
+  if (!header || !body || !conv) return;
+
+  header.innerHTML = `<div class="conv-th-company">${esc(conv.company)}</div>
+    <div class="conv-th-meta">${esc(conv.domain)} · ${esc(conv.market)} · ${conv.events.length} traces</div>`;
+
+  // Sort events oldest first for thread view
+  const sorted = [...conv.events].sort((a,b) => a.at.localeCompare(b.at));
+
+  body.innerHTML = sorted.map(e => {
+    const dir = CONV_DIR[e.kind] || 'signal';
+    const arrow = CONV_ARROWS[dir];
+    const label = CONV_LABELS[e.kind] || e.kind;
+    const time = e.at ? new Date(e.at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}) + ' UTC' : '—';
+    const cls = `conv-msg conv-${dir}`;
+
+    let bodyHtml = '';
+    if (dir === 'outbound' && e.kind === 'SEND_SUCCESS') {
+      const subj = e.derived?.subject || e.derived?.draft_snapshot?.subject || '';
+      const preview = e.derived?.body_preview || e.derived?.draft_snapshot?.body_preview || '';
+      bodyHtml = subj ? `<div>Objet : ${esc(subj)}</div>` : '';
+      if (preview) bodyHtml += `<div>${esc(preview)}</div>`;
+      else bodyHtml += '<div class="conv-absent">Contenu hébergé chez Resend — seul le sujet est visible ici.</div>';
+      if (e.strategy_version) bodyHtml += `<div class="conv-absent">Doctrine ${esc(e.strategy_version)}</div>`;
+    } else if (dir === 'inbound') {
+      bodyHtml = '<div class="conv-absent">Réponse détectée — contenu non disponible (poller non activé).</div>';
+    } else if (dir === 'signal') {
+      bodyHtml = `<div>${esc(e.derived?.to || '')} ${e.derived?.subject ? '· '+esc(e.derived.subject) : ''}</div>`;
+    } else if (dir === 'operator') {
+      bodyHtml = e.derived?.reason ? `<div>${esc(e.derived.reason)}</div>` : '';
+    } else if (dir === 'block') {
+      bodyHtml = `<div>${esc(e.provider || '')} ${e.derived?.to ? '· '+esc(e.derived.to) : ''}</div>`;
+    }
+
+    return `<div class="${cls}">
+      <div class="conv-msg-head">
+        <span class="conv-msg-dir">${arrow} ${esc(label)}</span>
+        <span class="conv-msg-time">${time}</span>
+      </div>
+      <div class="conv-msg-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('conv-search')?.addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.conv-item').forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+});
+
 /* V6 : aucun listener de bouton mort */
 /* Palette button (⌘) → même action que raccourci ⌘K : bascule clients + focus search */
 document.getElementById('btn-palette')?.addEventListener('click', () => {
