@@ -859,14 +859,7 @@ a.tb-brand:hover{opacity:0.8}
     <div class="mb-value" id="mb-rhythm-row"></div>
   </div>
 
-  <div class="mb-actions">
-    <button class="btn-mb cta-pending" id="btn-pause" title="Pause locale · non persistée (table bot_mandates absente · backlog G4)">
-      <span id="btn-pause-label">PAUSE</span>
-    </button>
-    <button class="btn-mb btn-mb-destructive cta-pending" id="btn-revoke" title="Révocation locale · non persistée (table bot_mandates absente · backlog G4)">
-      <span>RÉVOQUER</span>
-    </button>
-  </div>
+  <!-- mb-actions : PAUSE + RÉVOQUER retirés du DOM (backlog G4 bot_mandates) -->
 
   <div class="mb-banner" id="mb-banner"><span id="mb-banner-text">AUCUNE STRATÉGIE ACTIVE · DOCTRINE EN ATTENTE D'INSERTION</span></div>
 </header>
@@ -902,7 +895,7 @@ a.tb-brand:hover{opacity:0.8}
     </div>
     <div class="east-strata-block">
       <section class="panel lo-engine">
-        <div class="panel-header"><span class="coord">C.06</span><h2 class="panel-title">MOTEUR AUTONOME</h2></div>
+        <div class="panel-header"><span class="coord">C.06</span><h2 class="panel-title">Autonomie</h2></div>
         <div class="panel-body" id="engine-body" style="padding:0"></div>
       </section>
     </div>
@@ -1027,8 +1020,6 @@ a.tb-brand:hover{opacity:0.8}
           <div><dt>LIVRABLE</dt><dd data-bind="asset">—</dd></div>
         </dl>
         <div class="drw-actions">
-          <button class="btn-secondary cta-pending" data-shortcut="S" id="btn-send-now" title="En attente · Phase CP7">ENVOYER MAINTENANT</button>
-          <button class="btn-secondary cta-pending" data-shortcut="R" id="btn-review" title="En attente · Phase CP7">PASSER EN REVUE</button>
           <button class="btn-secondary" data-shortcut="D" id="btn-defer">DIFFÉRER</button>
           <button class="btn-destructive" data-shortcut="X" id="btn-reject">REJETER</button>
         </div>
@@ -1058,11 +1049,7 @@ a.tb-brand:hover{opacity:0.8}
         <div class="draft-subject"><span class="draft-label">OBJET</span><span class="draft-value" data-bind="draft-subject">—</span></div>
         <div class="draft-body" contenteditable="false" spellcheck="false" id="draft-body" data-bind="draft-body"></div>
         <div class="draft-meta" id="drw-draft-meta"></div>
-        <div class="draft-actions">
-          <button class="btn-ghost cta-pending" data-shortcut="G" id="btn-regen" title="En attente · Phase CP7 · Régénération brouillon via V4">REGÉNÉRER</button>
-          <button class="btn-ghost cta-pending" id="btn-change-angle" title="En attente · Phase CP7 · Changement d'angle via V4">CHANGER L'ANGLE</button>
-          <button class="btn-ghost cta-pending" data-shortcut="E" id="btn-edit-draft" title="En attente · Édition locale non persistée — utilisée uniquement pour prévisualisation">ÉDITER</button>
-        </div>
+        <!-- draft-actions : REGÉNÉRER/CHANGER L'ANGLE/ÉDITER retirés du DOM (backlog CP7) -->
       </section>
 
       <section class="drw-sec" data-sec="context">
@@ -1073,7 +1060,7 @@ a.tb-brand:hover{opacity:0.8}
       </section>
 
       <section class="drw-sec" data-sec="context">
-        <div class="drw-sec-head"><span class="coord">D.06 / NOTES PILOTE</span><button class="btn-inline-add cta-pending" data-shortcut="N" id="btn-add-note" title="En attente · Phase OBS-2 · Table pilot_notes à spécifier" style="background:none;padding:0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-left:auto">+ AJOUTER</button></div>
+        <div class="drw-sec-head"><span class="coord">D.06 / NOTES PILOTE</span></div>
         <div class="pilot-notes">
           <div class="empty-slot" id="drw-pilot-notes" style="font-family:var(--font-mono);font-size:11px;color:var(--ink-700);letter-spacing:0.08em">— aucune —</div>
         </div>
@@ -1415,7 +1402,7 @@ function renderMandateBar(){
   else if (dataState === 'no-mandate') banner.textContent = 'AUCUN MANDAT · BOT EN MODE OBSERVATION';
   else if (dataState === 'paused') banner.textContent = 'MANDAT EN PAUSE';
 
-  const pLabel = document.getElementById('btn-pause-label');
+  const pLabel = document.getElementById('btn-pause-label'); // null-safe (btn removed)
   if (pLabel) pLabel.textContent = paused ? 'REPRENDRE' : 'PAUSE';
 }
 
@@ -1670,27 +1657,38 @@ function renderEngine(){
   const lvlOptions = [0,1,2,3].map(n => `<option value="${n}"${n===lvl?' selected':''}>${n===0?'Off':n===1?'L1 · envoi sous mandat':n===2?'L2 · prospection + envoi':'L3 · autonomie complète'}</option>`).join('');
 
   body.innerHTML = `
-  <div class="autonomy-control">
-    <select class="autonomy-select" id="autonomy-select">${lvlOptions}</select>
-    <span class="autonomy-source">source : bot_settings</span>
-  </div>
-  <dl class="engine-grid" style="margin-top:12px">
-    <dt>ÉTAT</dt><dd><span class="${stateClass}">${esc(engineState)}</span></dd>
-    <dt>RAISON</dt><dd>${esc(engineReason)}</dd>
-    <div class="engine-sep"></div>
-    <dt>MARCHÉS</dt><dd>${marketHtml || '—'}</dd>
-    <dd style="grid-column:1/-1" class="engine-dim" style="font-size:10px;letter-spacing:0.2em">IMPOSÉS PAR DOCTRINE · NON MODIFIABLE ICI</dd>
-    <dt>CADENCE</dt><dd><span class="engine-dim">${esc(days)}</span> <span class="engine-dim">· ${esc(windows)}</span></dd>
-    <dt>CAPS</dt><dd><span class="engine-dim">${esc(caps)}</span></dd>
-    <div class="engine-sep"></div>
-    <dt>FILE</dt><dd><span class="engine-val">${ready}</span> prêts · <span class="engine-val">${draft}</span> en revue · <span class="engine-val">${sent}</span> envoyés · <span class="engine-val">${deferred}</span> différés · <span class="engine-val">${blocked}</span> bloqués · <span class="engine-val">${replied}</span> réponses</dd>
-    <dt>PROCHAIN</dt><dd>${esc(prochain)}</dd>
-    <dt>DERNIER</dt><dd>${esc(lastRun)} <span class="engine-dim">· ${sent} envoyés cumulés</span></dd>
-    <div class="engine-sep"></div>
-    <dt>DOCTRINE</dt><dd><span class="engine-val">${esc(s?.version||'—')}</span> <span class="engine-dim">${s?.activated_at ? '· active' : '· absente'}</span></dd>
-    <dd style="grid-column:1/-1" class="engine-dim" style="font-size:10px;letter-spacing:0.2em">IMPOSÉE PAR STRATÉGIE · NON MODIFIABLE ICI</dd>
-    <dt>APPRENTISSAGE</dt><dd><span class="engine-dim">${esc(s?.body?.learning?.mode||'—')}</span></dd>
-  </dl>`;
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div>
+      <div class="engine-dim" style="margin-bottom:6px">Mode autonome</div>
+      <div class="autonomy-control">
+        <select class="autonomy-select" id="autonomy-select">${lvlOptions}</select>
+      </div>
+    </div>
+
+    <dl class="engine-grid">
+      <dt>Situation</dt><dd><span class="${stateClass}">${esc(engineState)}</span></dd>
+      <dt>Raison</dt><dd>${esc(engineReason)}</dd>
+      <dt>Prochain</dt><dd>${esc(prochain)}</dd>
+      <dt>Dernière exéc.</dt><dd>${esc(lastRun)} · ${sent} envoyés au total</dd>
+    </dl>
+
+    <div class="engine-sep" style="margin:0"></div>
+
+    <dl class="engine-grid">
+      <dt>Marchés</dt><dd>${marketHtml || '—'}</dd>
+      <dt>Jours actifs</dt><dd>${esc(days)} · ${esc(windows)}</dd>
+      <dt>Limites</dt><dd>${esc(caps)}</dd>
+    </dl>
+    <div class="engine-dim" style="font-size:10px;letter-spacing:0.16em">Marchés et cadence imposés par la doctrine active — non modifiables ici.</div>
+
+    <div class="engine-sep" style="margin:0"></div>
+
+    <dl class="engine-grid">
+      <dt>File clients</dt><dd><span class="engine-val">${ready}</span> prêts · <span class="engine-val">${draft}</span> en revue · <span class="engine-val">${sent}</span> envoyés · <span class="engine-val">${deferred}</span> différés · <span class="engine-val">${blocked}</span> bloqués · <span class="engine-val">${replied}</span> réponses</dd>
+      <dt>Doctrine</dt><dd>${esc(s?.version||'aucune')} ${s?.activated_at ? '· active' : '· absente'}</dd>
+      <dt>Apprentissage</dt><dd>${esc(s?.body?.learning?.mode==='DORMANT'?'Désactivé (pas assez de données)':s?.body?.learning?.mode||'—')}</dd>
+    </dl>
+  </div>`;
 
   // Wire autonomy select change
   const sel = document.getElementById('autonomy-select');
@@ -2115,19 +2113,8 @@ document.getElementById('drw-prev').addEventListener('click', ()=> navClient(-1)
 document.getElementById('drw-next').addEventListener('click', ()=> navClient(1));
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeDrawer(); });
 
-document.getElementById('btn-edit-draft').addEventListener('click', ()=> {
-  const db = document.getElementById('draft-body');
-  const editable = db.contentEditable === 'true';
-  db.contentEditable = editable ? 'false' : 'true';
-  if (!editable) db.focus();
-});
-/* Phase 0D : CTA inertes masqués par .cta-pending{display:none}. Listeners conservés pour éviter
-   getElementById throws, mais les éléments sont hors viewport. */
-document.getElementById('btn-send-now').addEventListener('click', e => { e.preventDefault(); });
-document.getElementById('btn-review').addEventListener('click', e => { e.preventDefault(); });
-document.getElementById('btn-regen')?.addEventListener('click', e => { e.preventDefault(); });
-document.getElementById('btn-change-angle')?.addEventListener('click', e => { e.preventDefault(); });
-document.getElementById('btn-add-note')?.addEventListener('click', e => { e.preventDefault(); });
+/* btn-edit-draft retiré du DOM (backlog CP7) */
+/* Boutons morts retirés du DOM. Plus de listeners nécessaires. */
 /* Palette button (⌘) → même action que raccourci ⌘K : bascule clients + focus search */
 document.getElementById('btn-palette')?.addEventListener('click', () => {
   showView('clients');
@@ -2176,11 +2163,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { e.preventDefault(); navClient(1); return; }
     if (typing) return;
     const k = e.key.toLowerCase();
-    if (k === 'n') { e.preventDefault(); document.getElementById('btn-add-note').click(); return; }
-    if (k === 'g') { e.preventDefault(); document.getElementById('btn-regen').click(); return; }
-    if (k === 'e') { e.preventDefault(); document.getElementById('btn-edit-draft').click(); return; }
-    if (k === 's') { e.preventDefault(); document.getElementById('btn-send-now').click(); return; }
-    if (k === 'r') { e.preventDefault(); document.getElementById('btn-review').click(); return; }
+    /* Raccourcis n/g/e/s/r drawer : retirés (boutons supprimés du DOM, backlog CP7) */
     if (k === 'd') { e.preventDefault(); document.getElementById('btn-defer').click(); return; }
     if (k === 'x') { e.preventDefault(); document.getElementById('btn-reject').click(); return; }
     return;
@@ -2192,23 +2175,10 @@ document.addEventListener('keydown', e => {
   if (k === 'l') { e.preventDefault(); showView('clients'); return; }
   if (k === 's' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); showView('sources'); return; }
   if (k === 'r') { e.preventDefault(); refresh(); return; }
-  if (e.key === ' ') { e.preventDefault(); togglePause(); return; }
+  /* Space = pause retiré (btn-pause supprimé du DOM, backlog G4 bot_mandates) */
 });
 
-/* ══════════════════════════════════════════════════════════════════
-   14. Contrôles Mandat
-   ══════════════════════════════════════════════════════════════════ */
-function togglePause(){
-  if (!state.mandate) return;
-  state.mandate.paused = !state.mandate.paused;
-  renderMandateBar();
-}
-document.getElementById('btn-pause').addEventListener('click', togglePause);
-document.getElementById('btn-revoke').addEventListener('click', ()=> {
-  if (!confirm('Révoquer le mandat ? Tous les envois sont mis en pause immédiatement.')) return;
-  state.mandate = null;
-  renderMandateBar();
-});
+/* Section 14 : Contrôles Mandat — retirés du DOM (PAUSE + RÉVOQUER, backlog G4) */
 
 /* ══════════════════════════════════════════════════════════════════
    15. Badge de fraîcheur + actualisation
