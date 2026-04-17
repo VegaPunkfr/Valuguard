@@ -1118,7 +1118,7 @@ a.tb-brand:hover{opacity:0.8}
   <div class="apollo-setup-notice" id="apollo-setup-notice">
     <div class="notice-title">⚡ Actions manuelles requises dans Apollo UI</div>
     <ol>
-      <li><strong>Connecter la boîte email</strong> — Apollo Settings → Email Accounts → Connect Gmail → utiliser <code>audits@ghost-tax.com</code> (fallback: <code>hashirama973@gmail.com</code>). Vérifier DKIM/SPF OK.</li>
+      <li>✅ <strong>Mailbox connectée</strong> — <code>contact@ghost-tax.com</code> via OAuth Google, warmup progressif 10→40/jour actif, DKIM en propagation.</li>
       <li><strong>Créer la séquence</strong> — Apollo Sequences → New Sequence → nom : <code>Ghost Tax — DACH UK NL Q2 2026</code> → 3 touches (J0 / J+3 / J+7). Templates dans <code>lib/drip-templates.ts</code>. Send window : Mar-Jeu 9h30-11h30. Throttle : 20/jour.</li>
       <li><strong>Enroller les 29 contacts</strong> — Apollo Contacts → filtrer label <code>Ghost Tax Q2 2026</code> → sélectionner tous → Add to Sequence. Le cron <code>/api/cron/apollo-sync</code> se synchronisera automatiquement dès le lendemain 06h15 UTC.</li>
       <li><strong>Activer intent signals</strong> — Apollo Signals → Job Change Alerts sur vos 30 comptes (Finance, CFO, FinOps, Procurement) + News Alerts (funding, M&A, licenciements).</li>

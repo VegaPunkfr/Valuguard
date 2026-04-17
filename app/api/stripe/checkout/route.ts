@@ -67,6 +67,15 @@ export async function POST(request: NextRequest) {
     const monthlySpendEur = typeof body.monthlySpendEur === "number" ? body.monthlySpendEur : undefined;
     const industry = typeof body.industry === "string" ? body.industry.trim() : undefined;
 
+    // Geo country detection — P0 fix 17 avril 2026 :
+    // 1. body.country explicite (côté client via /api/geo),
+    // 2. Vercel edge header x-vercel-ip-country (fiable en prod),
+    // 3. fallback : undefined → getRailAPrice retombe sur locale.
+    const country: string | undefined =
+      (typeof body.country === "string" && body.country.length === 2 ? body.country.toUpperCase() : undefined) ||
+      (request.headers.get("x-vercel-ip-country") || "").toUpperCase() ||
+      undefined;
+
     const stripe = getStripe();
     const currency = getCurrency(locale);
 
@@ -76,9 +85,9 @@ export async function POST(request: NextRequest) {
     let successUrl = `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`;
 
     if (rail === "A") {
-      // ── Rail A: Tiered pricing by headcount ──
+      // ── Rail A: Tiered pricing by headcount + geo (DACH 590€, other 490€) ──
       const tier = getHeadcountTier(headcount);
-      const amount = getRailAPrice(headcount, locale);
+      const amount = getRailAPrice(headcount, locale, country);
       const railConfig = RAILS.A;
 
       const productName = locale === "fr" ? railConfig.name
@@ -109,6 +118,7 @@ export async function POST(request: NextRequest) {
         locale,
         currency,
         amount: String(amount),
+        ...(country && { country }),
         ...(domain && { domain }),
         ...(companyName && { companyName }),
         ...(headcount && { headcount: String(headcount) }),

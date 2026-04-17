@@ -171,11 +171,12 @@ export function getStripePriceId(rail: "A" | "B_SETUP" | "B_STABILIZE" | "B_MONI
   }
 }
 
-/** Get the right price for a rail based on locale */
+/** Get the right price for a rail based on locale + country (DACH premium) */
 export function getRailPrice(
   rail: "A" | "B_STABILIZE" | "B_MONITOR" | "B_MONITOR_ANNUAL" | "C",
   locale: PricingLocale,
-  headcount?: number
+  headcount?: number,
+  country?: string
 ): { amount: number; currency: "usd" | "eur"; symbol: string; formatted: string } {
   const cur = getCurrency(locale);
   const sym = getCurrencySymbol(locale);
@@ -183,7 +184,7 @@ export function getRailPrice(
 
   switch (rail) {
     case "A":
-      amount = getRailAPrice(headcount, locale);
+      amount = getRailAPrice(headcount, locale, country);
       break;
     case "B_STABILIZE":
       amount = cur === "usd" ? RAILS.B_STABILIZE.price_usd : RAILS.B_STABILIZE.price_eur;
