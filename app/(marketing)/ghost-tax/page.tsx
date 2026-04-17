@@ -33,7 +33,8 @@ const BENCHMARKS: Record<string, { wastePercent: [number, number] }> = {
 function fmtEur(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 10_000) return Math.round(n / 1000) + "k";
-  return Math.round(n).toLocaleString("fr-FR");
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+  return Math.round(n).toLocaleString(locale);
 }
 
 // ── JSON-LD Structured Data ──────────────────────────────
@@ -46,7 +47,7 @@ const webAppJsonLd = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
-    "Free IT waste calculator: estimate how much your company loses annually to invisible SaaS, Cloud, and AI spending waste. Based on industry benchmarks from Gartner, Flexera, and 200+ enterprise audits.",
+    "Free IT waste calculator: estimate how much your company loses annually to invisible SaaS, Cloud, and AI spending waste. Based on industry benchmarks from Gartner, Flexera, and Zylo.",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -101,7 +102,7 @@ const faqJsonLd = {
       name: "How accurate is the Ghost Tax Calculator?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "The Ghost Tax Calculator provides industry-average estimates based on benchmarks from Gartner, Flexera, Zylo, and 200+ Ghost Tax analyses. Results are presented as ranges (not point estimates) to reflect natural variation. For exact, vendor-level exposure data, a full detection scan is recommended.",
+        text: "The Ghost Tax Calculator provides industry-average estimates based on benchmarks from Gartner, Flexera, and Zylo industry reports. Results are presented as ranges (not point estimates) to reflect natural variation. For exact, vendor-level exposure data, a full detection scan is recommended.",
       },
     },
   ],

@@ -4,11 +4,11 @@ const SITE_URL = "https://ghost-tax.com";
 
 export const metadata: Metadata = {
   title:
-    "Ghost Tax Calculator — How Much Is Your Company Losing to IT Waste? | Ghost Tax",
+    "Calculator — How Much Is Your Company Losing to IT Waste?",
   description:
     "Free SaaS cost calculator: estimate how much your company loses annually to invisible IT waste. " +
     "Calculate shadow IT cost, cloud spending waste, and unused SaaS licenses in 10 seconds. " +
-    "Based on Gartner, Flexera, and 200+ enterprise audits.",
+    "Based on industry benchmarks from Gartner, Flexera, and Zylo.",
   keywords: [
     "SaaS waste calculator",
     "IT cost audit",

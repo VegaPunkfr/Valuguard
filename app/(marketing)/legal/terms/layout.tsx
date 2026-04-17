@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Ghost Tax",
+  title: "Terms of Service",
   description:
     "Terms of Service for the Ghost Tax financial intelligence platform. Payments, intellectual property, liability, and governing law.",
   alternates: { canonical: "https://ghost-tax.com/legal/terms" },
   openGraph: {
-    title: "Terms of Service — Ghost Tax",
+    title: "Terms of Service",
     description:
       "Terms of Service for the Ghost Tax financial intelligence platform. Payments, intellectual property, liability, and governing law.",
     url: "https://ghost-tax.com/legal/terms",

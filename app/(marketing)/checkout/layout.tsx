@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Secure Checkout — Ghost Tax",
-  description: "Complete your purchase securely. 256-bit encryption. SOC 2 compliant.",
+  title: "Secure Checkout",
+  description: "Complete your purchase securely. 256-bit encryption. SOC 2 Type II audit-ready.",
   robots: { index: false, follow: false },
 };
 

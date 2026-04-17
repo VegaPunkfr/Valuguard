@@ -24,7 +24,7 @@ const PIPELINE_PHASES = [
   { num: "15", key: "counterfactual",    label: "Counterfactual",      desc: "What happens if nothing changes. Compound exposure model at 6/12/24 months." },
   { num: "16", key: "decisionFriction",  label: "Decision Friction",   desc: "Organizational blockers to correction. Prioritization difficulty. Ownership ambiguity." },
   { num: "17", key: "decisionPressure",  label: "Decision Pressure",   desc: "Urgency composite: renewal windows, drift velocity, confidence grade, market timing." },
-  { num: "18", key: "negotiation",       label: "Negotiation",         desc: "10+ vendor-specific playbooks. Leverage points, timing, benchmark pricing, script templates." },
+  { num: "18", key: "negotiation",       label: "Negotiation",         desc: "10+ vendor-specific playbooks. Negotiation tactics, timing, benchmark pricing, script templates." },
   { num: "19", key: "confidenceModel",   label: "Confidence Model",    desc: "Final confidence assembly. Weakest layer sets ceiling. 5-layer scoring matrix." },
   { num: "20", key: "decisionPack",      label: "Decision Pack",       desc: "4-document assembly: CFO memo, CIO brief, Board one-pager, Procurement action plan." },
   { num: "21", key: "executiveSnapshot", label: "Executive Snapshot",  desc: "Earned summary — streams LAST. Evidence before conclusions is doctrine." },

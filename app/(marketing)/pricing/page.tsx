@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CheckCircle, ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { c, f, inset } from "@/lib/tokens";
@@ -10,17 +10,37 @@ import FaqItem from "@/components/ui/faq-item";
 
 type BillingCycle = "monthly" | "annual";
 
+interface GeoData {
+  country: string;
+  locale: string;
+  isDACH: boolean;
+  priceEur: number;
+}
+
 export default function PricingPage() {
   const { t, locale } = useI18n();
   const pLocale = (locale === "fr" ? "fr" : locale === "de" ? "de" : "en") as PricingLocale;
-  const isUSD = pLocale === "en";
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState(false);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Prices by locale
-  const detectPrice = 490;
+  // Fix 17 avril 2026 P0 : détection geo pour pricing cohérent
+  // Avant : detectPrice hardcoded 490, isUSD basé sur locale (UK voyait USD)
+  // Après : /api/geo détecte country réel, DACH voit 590€, US voit $
+  const [geo, setGeo] = useState<GeoData | null>(null);
+  useEffect(() => {
+    fetch("/api/geo")
+      .then((r) => r.json())
+      .then((d: GeoData) => setGeo(d))
+      .catch(() => setGeo(null));
+  }, []);
+
+  // isUSD basé sur country réel (US seulement), plus sur locale
+  const isUSD = geo?.country === "US";
+
+  // detectPrice dynamique : DACH (DE/AT/CH) = 590€, autres = 490€ EUR, US = $490
+  const detectPrice = geo?.isDACH ? 590 : 490;
   const stabilize = 4990;
   const monitorMonthly = 1990;
   const monitorAnnual = 19900;
@@ -44,6 +64,7 @@ export default function PricingPage() {
         body: JSON.stringify({
           rail,
           locale: pLocale,
+          country: geo?.country,
           ...(tierHeadcount && { headcount: tierHeadcount }),
         }),
       });

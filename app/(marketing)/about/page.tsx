@@ -77,7 +77,7 @@ export default function AboutPage() {
               { value: "2025", label: t("about.fact1.label") },
               { value: "48h", label: t("about.fact2.label") },
               { value: "21", label: t("about.fact3.label") },
-              { value: "200+", label: t("about.fact4.label") },
+              { value: "12", label: t("about.fact4.label") },
             ].map(function (fact) {
               return (
                 <div key={fact.label} className="gt-panel" style={{ padding: "28px 20px", textAlign: "center" }}>

@@ -423,7 +423,7 @@ export default async function VerticalPage({
           <p style={{ fontSize: 11, color: c.text3, margin: 0, lineHeight: 1.6 }}>
             21-phase analysis &bull; Vendor-level proof &bull; Negotiation playbooks &bull; CFO-ready memos
             <br />
-            No integration required &bull; Results in 48 hours &bull; In 200+ analyses, zero had zero exposure
+            No integration required &bull; Results in 48 hours &bull; Industry benchmarks: Gartner, Flexera, Zylo
           </p>
         </section>
 
@@ -489,7 +489,7 @@ export default async function VerticalPage({
         {/* ── Trust footer ─────────────────────────────── */}
         <div style={{ textAlign: "center", padding: "20px 0" }}>
           <p style={{ fontSize: 11, color: c.text3, lineHeight: 1.7 }}>
-            Data sourced from Gartner, Flexera, Zylo, and 200+ Ghost Tax analyses.
+            Data sourced from Gartner, Flexera, and Zylo industry reports (2025).
             <br />
             Benchmarks updated March 2026. All figures are ranges, not point estimates.
           </p>

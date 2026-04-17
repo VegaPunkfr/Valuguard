@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Integrations & API — Ghost Tax",
+  title: "Integrations & API",
   description:
     "Ghost Tax connects to your existing stack: 10 intelligence plugins and 11 data connectors for Stripe, QuickBooks, AWS, Azure, Salesforce, Okta, and more. Enterprise API available.",
   alternates: { canonical: "https://ghost-tax.com/integrations" },
   openGraph: {
-    title: "Integrations & API — Ghost Tax",
+    title: "Integrations & API",
     description:
       "10 intelligence plugins, 11 data connectors. Ghost Tax plugs into your existing SaaS, Cloud, and Finance stack.",
     url: "https://ghost-tax.com/integrations",

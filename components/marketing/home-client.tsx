@@ -46,6 +46,7 @@ function useIsMobile(bp = 768): boolean {
 
 // ─── Live Leak Counter — obsidian context only ────────────────────────────────
 const LeakCounter: React.FC = () => {
+  const { t, locale } = useI18n();
   const [amount, setAmount] = useState(294847);
   useEffect(() => {
     const t = setInterval(() => {
@@ -53,6 +54,9 @@ const LeakCounter: React.FC = () => {
     }, 1800);
     return () => clearInterval(t);
   }, []);
+  // Fix 17 avril 2026 — P0 : format nombre selon locale (avant hardcoded de-DE)
+  // + label i18n (avant "DÉTECTÉS AUJOURD'HUI" hardcoded FR).
+  const numLocale = locale === "de" ? "de-DE" : locale === "nl" ? "nl-NL" : locale === "fr" ? "fr-FR" : "en-US";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
       <span
@@ -75,7 +79,7 @@ const LeakCounter: React.FC = () => {
           letterSpacing: "0.02em",
         }}
       >
-        €{amount.toLocaleString("de-DE")} DÉTECTÉS AUJOURD&apos;HUI
+        €{amount.toLocaleString(numLocale)} {t("v2.leakCounter.label") || "DETECTED TODAY"}
       </span>
     </div>
   );
@@ -351,7 +355,7 @@ const HeroSection: React.FC = () => {
               marginBottom: "4px",
             }}
           >
-            SIGNAL ACTIF
+            {t("v2.dataPanel.activeSignal") || "ACTIVE SIGNAL"}
           </div>
           <div
             style={{
@@ -361,13 +365,13 @@ const HeroSection: React.FC = () => {
             }}
           />
 
-          {/* Metrics */}
+          {/* Metrics — fix 17 avril 2026 P0 : labels i18n (avant tous hardcoded FR) */}
           {[
-            { val: "48H",        lbl: "Délai de livraison garanti",      color: C.green },
-            { val: "21",         lbl: "Phases de détection autonomes",   color: C.cyan },
-            { val: "€490",       lbl: "Détection one-shot, pas abonnement", color: C.red },
-            { val: "12",         lbl: "Types de fuites détectées",       color: C.gold },
-            { val: "48 HEURES",  lbl: "Détection → pack décisionnel",    color: C.parchment },
+            { val: "48H",        lbl: t("v2.dataPanel.guaranteedDelivery") || "Guaranteed delivery",      color: C.green },
+            { val: "21",         lbl: t("v2.dataPanel.autonomousPhases") || "Autonomous detection phases",   color: C.cyan },
+            { val: "€490",       lbl: t("v2.dataPanel.oneShot") || "One-shot detection, no subscription", color: C.red },
+            { val: "12",         lbl: t("v2.dataPanel.leakTypes") || "Leak types detected",       color: C.gold },
+            { val: "48H",        lbl: t("v2.dataPanel.scanToPack") || "Scan → Decision Pack",    color: C.parchment },
           ].map(({ val, lbl, color }, i) => (
             <div
               key={i}
@@ -414,7 +418,7 @@ const HeroSection: React.FC = () => {
               opacity: 0.75,
             }}
           >
-            PIPELINE 21 PHASES · ZÉRO ACCÈS SYSTÈME
+            {t("v2.pipeline.footer") || "21-PHASE PIPELINE · ZERO SYSTEM ACCESS"}
           </div>
         </div>
       </div>
@@ -1147,10 +1151,14 @@ const PricingSection: React.FC = () => {
   const handleRailA = async () => {
     setIsLoading(true);
     try {
+      // Fix 17 avril 2026 P0 : ne plus envoyer domain: "demo.com" hardcoded.
+      // Le checkout serveur détecte country via x-vercel-ip-country header
+      // et applique 490/590 selon DACH. Si user veut un vrai scan, il passe
+      // par ScanForm qui fetch /api/geo + accepte le domain saisi.
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: "demo.com", rail: "A" }),
+        body: JSON.stringify({ rail: "A" }),
       });
       if (res.ok) {
         const { url } = await res.json();
@@ -1563,6 +1571,35 @@ const FinalCTA: React.FC = () => {
           }}
         >
           ghost-tax.com · DECISION INTELLIGENCE · 2026
+        </div>
+
+        {/* Legal footer links — ajouté 17 avril 2026 (P0.13)
+            Conformité RGPD Art. 13 : lien Privacy/Terms obligatoire pour tout
+            site qui collecte emails (checkout, lead capture). */}
+        <div
+          style={{
+            marginTop: "12px",
+            fontFamily: "var(--gt-font-mono)",
+            fontSize: "11px",
+            color: "rgba(141,155,181,0.55)",
+            letterSpacing: "0.06em",
+            display: "flex",
+            gap: "14px",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <a href="/legal/privacy" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+            Privacy
+          </a>
+          <span>·</span>
+          <a href="/legal/terms" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+            Terms
+          </a>
+          <span>·</span>
+          <a href="/legal/imprint" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+            Impressum
+          </a>
         </div>
       </div>
     </section>
