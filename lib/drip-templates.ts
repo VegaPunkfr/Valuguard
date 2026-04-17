@@ -676,6 +676,24 @@ function buildTouch3(data: DripData): DripEmailResult {
 
     ${ctaButton(T.t3Cta[l], checkoutUrl)}
     ${paymentTerms(l)}
+
+    <!-- Rail B Monitor hint — soft positioning, 17 avril 2026.
+         Pas de push, juste un signal discret pour les CFO qui préfèrent
+         récurrent. La majorité achètera Rail A one-time. -->
+    <div style="margin-top:24px;padding:14px 18px;border-top:1px dashed #E2E8F0;border-bottom:1px dashed #E2E8F0">
+      <p style="font-size:11px;color:#475569;line-height:1.6;margin:0">
+        ${l === "fr"
+          ? "Vous pr\u00e9f\u00e9rez un monitoring continu plut\u00f4t qu'un audit ponctuel\u00a0? Rail B Monitor (1\u00a0990\u00a0\u20ac/mois) r\u00e9actualise votre analyse chaque 30 jours avec alertes renewal et d\u00e9rive budg\u00e9taire."
+          : l === "de"
+            ? "Bevorzugen Sie kontinuierliches Monitoring gegen\u00fcber einem punktuellen Audit\u00a0? Rail B Monitor (1\u00a0990\u00a0\u20ac/Monat) aktualisiert Ihre Analyse alle 30 Tage mit Vertragserneuerungs- und Budget-Drift-Alerts."
+            : "Prefer ongoing monitoring over a point-in-time audit? Rail B Monitor (1\u00a0990\u00a0\u20ac/month) refreshes your analysis every 30 days with renewal alerts and budget drift warnings."}
+      </p>
+      <p style="font-size:11px;margin:6px 0 0 0">
+        <a href="${SITE_URL}/pricing" style="color:#475569;text-decoration:underline">
+          ${l === "fr" ? "Voir tous les plans" : l === "de" ? "Alle Pl\u00e4ne ansehen" : "See all plans"}
+        </a>
+      </p>
+    </div>
   `, preheader, unsubUrl, l);
 
   const text = `${T.t3BenchmarkLabel[l]}:
@@ -691,6 +709,13 @@ ${T.t3SocialProofItems[l].map(i => `- ${i}`).join("\n")}
 ${stripHtml(T.t3Cta[l])}: ${checkoutUrl}
 
 ${T.oneTimePayment[l]} | ${T.reportIn48h[l]} | ${T.noCommitment[l]}
+
+---
+${l === "fr"
+  ? "Option continu : Rail B Monitor 1 990 \u20ac/mois avec alertes renewal + drift. " + SITE_URL + "/pricing"
+  : l === "de"
+    ? "Kontinuierliche Option : Rail B Monitor 1 990 \u20ac/Monat mit Renewal- und Drift-Alerts. " + SITE_URL + "/pricing"
+    : "Ongoing option : Rail B Monitor 1 990 \u20ac/month with renewal + drift alerts. " + SITE_URL + "/pricing"}
 
 ---
 ${T.unsubText[l]}

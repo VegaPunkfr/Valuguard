@@ -364,6 +364,32 @@ export default function SampleReport() {
           </div>
         </div>
 
+        {/* ─── AFTER THE PACK — Rail B Monitor upsell — 17 avril 2026 ───
+            Positionne Rail B Monitor comme évolution OPTIONNELLE, pas push.
+            Un CFO qui a reçu son audit voit que l'exposition dérive. Monitor
+            = la seule façon de ne pas refaire un nouvel audit dans 6 mois. */}
+        <div className="gt-panel" style={{ padding: 22, marginTop: 14, border: `1px dashed ${c.border}`, background: "#0A0D19" }}>
+          <p className="gt-section-label" style={{ marginBottom: 10, color: c.text2 }}>
+            AFTER THE DECISION PACK — OPTIONAL ONGOING MONITORING
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "center" }}>
+            <div>
+              <p style={{ fontSize: 13, color: c.text2, lineHeight: 1.65, marginBottom: 8 }}>
+                Your Decision Pack is a point-in-time audit. <strong style={{ color: c.text1 }}>SaaS exposure drifts 8-15% per quarter</strong> from new tools, auto-renewals, and headcount changes. If you want early-warning alerts (renewal windows, new vendor detected, budget drift above threshold), Rail B Monitor refreshes your analysis every 30 days.
+              </p>
+              <p style={{ fontSize: 12, color: c.text3, lineHeight: 1.6 }}>
+                Not required. Most clients run one Decision Pack per year. Monitor is for high-velocity orgs or those approaching a renewal cycle.
+              </p>
+            </div>
+            <div style={{ textAlign: "right", minWidth: 140 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 9, color: c.text3, letterSpacing: "0.14em", marginBottom: 4 }}>RAIL B MONITOR</p>
+              <p style={{ fontFamily: f.mono, fontSize: 20, fontWeight: 700, color: c.text1, marginBottom: 2 }}>1 990 € / month</p>
+              <p style={{ fontSize: 10, color: c.text3 }}>or 19 900 € / year (save 17%)</p>
+              <a href="/pricing" style={{ display: "inline-block", marginTop: 10, fontSize: 11, color: c.cyan, textDecoration: "underline" }}>→ Details</a>
+            </div>
+          </div>
+        </div>
+
         {/* BOTTOM CTA */}
         <div className="gt-panel" style={{ padding: 22, marginTop: 14, textAlign: "center" }}>
           <p style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>{t("sample.cta.title1")} <span style={{ color: c.green }}>{t("sample.cta.title2")}</span></p>
