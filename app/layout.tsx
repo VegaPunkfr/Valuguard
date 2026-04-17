@@ -24,10 +24,11 @@ const fontMono = JetBrains_Mono({
 /* ─── Constants ─────────────────────────────────────── */
 const SITE_URL = "https://ghost-tax.com";
 const SITE_NAME = "Ghost Tax";
-const TITLE = "Ghost Tax \u2014 AI Financial Control Plane for SaaS & AI Spend";
+const TITLE = "Ghost Tax \u2014 SaaS & Cloud waste audit for CFOs";
 const DESCRIPTION =
-  "Ghost Tax detects hidden SaaS, AI & cloud spending exposure. " +
-  "$490 one-time analysis. Board-ready decision pack in 48 hours. 21-phase autonomous detection.";
+  "Find what your SaaS stack really costs — 18-32% of mid-market IT budgets leak invisibly. " +
+  "Board-ready PDF in 48 hours from public signals only. No integration, no calls. " +
+  "Decision Pack 490€ (DACH 590€).";
 
 /* ─── Metadata (merged from layout-meta.js) ─────────── */
 export const metadata: Metadata = {
@@ -56,7 +57,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
     languages: {
+      // hreflang complet 17 avril 2026 — targets DACH/UK/US/NL (markets primaires)
       "en": SITE_URL,
+      "en-US": SITE_URL,
+      "en-GB": SITE_URL,
+      "de": SITE_URL,
+      "de-DE": SITE_URL,
+      "de-AT": SITE_URL,
+      "de-CH": SITE_URL,
+      "nl": SITE_URL,
+      "nl-NL": SITE_URL,
+      "fr": SITE_URL,
       "x-default": SITE_URL,
     },
   },

@@ -298,6 +298,38 @@ const HeroSection: React.FC = () => {
           >
             21 phases autonomes · Livraison 48h · Zéro accès système
           </div>
+
+          {/* Trust bar — added 17 avril 2026 (P1.2)
+              4 signaux qu'un CFO DACH/UK veut voir avant de cliquer. */}
+          <div
+            style={{
+              marginTop: "20px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "10px",
+              fontFamily: "var(--gt-font-mono)",
+              fontSize: "11px",
+              letterSpacing: "0.04em",
+              color: C.ink3,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: C.cyan, fontWeight: 700 }}>●</span>
+              <span>{t("v2.hero.trustBar.gdpr") || "GDPR-safe · zero data collection"}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: C.cyan, fontWeight: 700 }}>●</span>
+              <span>{t("v2.hero.trustBar.delivery") || "48h delivery · PDF only"}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: C.cyan, fontWeight: 700 }}>●</span>
+              <span>{t("v2.hero.trustBar.method") || "12 leak types · public signals only"}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: C.cyan, fontWeight: 700 }}>●</span>
+              <span>{t("v2.hero.trustBar.pricing") || "One-time 490€ · 590€ DACH"}</span>
+            </div>
+          </div>
         </div>
 
         {/* ── Right: obsidian data panel ── */}

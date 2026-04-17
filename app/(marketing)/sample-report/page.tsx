@@ -299,6 +299,71 @@ export default function SampleReport() {
           </div>
         )}
 
+        {/* ─── MÉTHODOLOGIE — ajouté 17 avril 2026 (P1.4) ───
+            L'audit a révélé : "aucune méthodologie visible" = distrust CFO.
+            Fix : 3 sources de signaux explicites + niveaux de confiance clairs. */}
+        <div className="gt-panel" style={{ padding: 22, marginTop: 14 }}>
+          <p className="gt-section-label" style={{ marginBottom: 10, color: c.text2 }}>
+            METHODOLOGY — how we reach these numbers
+          </p>
+          <div style={{ fontSize: 13, color: c.text2, lineHeight: 1.65, marginBottom: 14 }}>
+            We reconstruct your spend from <strong style={{ color: c.text1 }}>three public signal layers</strong>. No access to your accounting, HRIS, or vendor portals is required — ever.
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+            <div className="gt-card" style={{ padding: 14 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 10, color: c.green, letterSpacing: "0.1em", marginBottom: 6 }}>LAYER 1 · OBSERVED (95% conf.)</p>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.55 }}>
+                DNS records, job postings, public tech stack fingerprints, press releases.
+              </p>
+            </div>
+            <div className="gt-card" style={{ padding: 14 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 10, color: c.amber, letterSpacing: "0.1em", marginBottom: 6 }}>LAYER 2 · INFERRED (70% conf.)</p>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.55 }}>
+                Vendor SKU patterns × peer benchmarks for your headcount band, industry, and revenue range.
+              </p>
+            </div>
+            <div className="gt-card" style={{ padding: 14 }}>
+              <p style={{ fontFamily: f.mono, fontSize: 10, color: c.text3, letterSpacing: "0.1em", marginBottom: 6 }}>LAYER 3 · ESTIMATED (50% conf.)</p>
+              <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.55 }}>
+                Range-based extrapolation from industry distributions when signals are incomplete. Disclosed per finding.
+              </p>
+            </div>
+          </div>
+          <p style={{ fontSize: 11, color: c.text3, marginTop: 12, lineHeight: 1.55 }}>
+            GDPR/DSGVO-safe. Zero PII processed. Sample data shown is synthetic — your actual findings are recomputed for your domain at scan time.
+          </p>
+        </div>
+
+        {/* ─── DECISION PACK PREVIEW — ajouté 17 avril 2026 (P1.4) ───
+            L'audit a dit : "Upgrade CTA opaque, CFO ne sait pas ce qu'il paye".
+            Fix : lister concrètement ce qu'il y a dans les 490€. */}
+        <div className="gt-panel" style={{ padding: 22, marginTop: 14, border: `1px solid ${c.greenBd}` }}>
+          <p className="gt-section-label" style={{ marginBottom: 10, color: c.green }}>
+            WHAT'S INSIDE THE DECISION PACK — 490 € (590 € DACH)
+          </p>
+          <p style={{ fontSize: 13, color: c.text2, lineHeight: 1.6, marginBottom: 14 }}>
+            Your sample report above shows the shape. The full Decision Pack adds the depth a CFO needs to act this quarter:
+          </p>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 10 }}>
+            {[
+              { t: "Per-vendor leak breakdown", d: "47+ vendors with named findings, renewal dates, leverage windows." },
+              { t: "Methodology appendix", d: "Every number sourced back to its signal layer and confidence grade." },
+              { t: "30/60/90 action plan", d: "Sequenced quick-wins + vendor negotiation playbooks you can run solo." },
+              { t: "Peer benchmark card", d: "Your position vs comparable headcount + industry band, not marketing averages." },
+              { t: "Board-ready memo template", d: "One-pager for CFO circulation to Board/CEO. Editable." },
+              { t: "GDPR/DSGVO attestation", d: "Data provenance log — any risk flag reviewable by your DPO." },
+            ].map((it) => (
+              <li key={it.t} className="gt-card" style={{ padding: 14 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, color: c.text1 }}>{it.t}</p>
+                <p style={{ fontSize: 12, color: c.text2, lineHeight: 1.5 }}>{it.d}</p>
+              </li>
+            ))}
+          </ul>
+          <div style={{ marginTop: 16, fontSize: 11, color: c.text3, lineHeight: 1.55 }}>
+            Delivered as PDF within 48 hours. One-time payment. No auto-renewal. No call, no demo required.
+          </div>
+        </div>
+
         {/* BOTTOM CTA */}
         <div className="gt-panel" style={{ padding: 22, marginTop: 14, textAlign: "center" }}>
           <p style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>{t("sample.cta.title1")} <span style={{ color: c.green }}>{t("sample.cta.title2")}</span></p>
