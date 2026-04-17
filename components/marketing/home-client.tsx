@@ -516,6 +516,143 @@ const StatsStrip: React.FC = () => {
   );
 };
 
+// ─── Industry Validation — ajouté 17 avril 2026 (P2.2) ──────────────────────
+// Remplace les faux testimonials (pas éthique sans clients réels) par de la
+// recherche industrie publique que le CFO peut vérifier. Trust sans mensonge.
+const IndustryValidation: React.FC = () => {
+  const { t } = useI18n();
+  const isMobile = useIsMobile();
+
+  const stats = [
+    {
+      num: "30%",
+      label: t("v2.validation.gartner") || "of enterprise SaaS licenses will be idle or duplicate by end of 2026",
+      source: "Gartner IT Spending Forecast 2026",
+    },
+    {
+      num: "42%",
+      label: t("v2.validation.flexera") || "of mid-market CFOs cut SaaS budgets in H1 2026",
+      source: "Flexera State of the Cloud 2026",
+    },
+    {
+      num: "12.2%",
+      label: t("v2.validation.saas_inflation") || "annual SaaS price inflation — 5× general inflation",
+      source: "Vertice SaaS Inflation Index 2026",
+    },
+    {
+      num: "90%",
+      label: t("v2.validation.finops") || "of organizations now manage SaaS spend via FinOps (up from 65% in 2025)",
+      source: "FinOps Foundation State of FinOps 2026",
+    },
+  ];
+
+  return (
+    <section style={{ background: "#060912", padding: isMobile ? "60px 16px" : "80px 24px" }}>
+      <div className="gt-container" style={{ maxWidth: 1160 }}>
+        <div style={{ textAlign: "center", marginBottom: isMobile ? 32 : 48 }}>
+          <div
+            style={{
+              fontFamily: "var(--gt-font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "#00BCD4",
+              marginBottom: 14,
+            }}
+          >
+            {t("v2.validation.eyebrow") || "VALIDATED BY INDUSTRY RESEARCH"}
+          </div>
+          <h2
+            style={{
+              fontSize: isMobile ? 24 : 32,
+              fontWeight: 800,
+              color: "#E2E8F0",
+              lineHeight: 1.2,
+              maxWidth: 720,
+              margin: "0 auto",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {t("v2.validation.title") || "We didn't invent the problem. Every major analyst confirms it."}
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(4, 1fr)",
+            gap: isMobile ? "14px" : "20px",
+          }}
+        >
+          {stats.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#0A0D19",
+                border: "1px solid rgba(36,48,78,0.5)",
+                padding: isMobile ? "20px" : "24px 22px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--gt-font-mono)",
+                  fontSize: 36,
+                  fontWeight: 800,
+                  color: i === 0 ? "#F27155" : i === 1 ? "#E8B149" : i === 2 ? "#F27155" : "#6DD49D",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {s.num}
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#CBD5E1",
+                  lineHeight: 1.55,
+                  flexGrow: 1,
+                }}
+              >
+                {s.label}
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--gt-font-mono)",
+                  fontSize: 10,
+                  letterSpacing: "0.08em",
+                  color: "rgba(141,155,181,0.7)",
+                  paddingTop: 8,
+                  borderTop: "1px solid rgba(36,48,78,0.35)",
+                }}
+              >
+                {s.source}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p
+          style={{
+            marginTop: 28,
+            textAlign: "center",
+            fontSize: 12,
+            color: "rgba(141,155,181,0.65)",
+            maxWidth: 640,
+            margin: "28px auto 0",
+            lineHeight: 1.6,
+          }}
+        >
+          {t("v2.validation.footer") ||
+            "Ghost Tax is new. Our product is transparent methodology, not customer testimonials. Every number in the sample report is sourced back to a public signal."}
+        </p>
+      </div>
+    </section>
+  );
+};
+
 // ─── Problem Section ──────────────────────────────────────────────────────────
 const ProblemSection: React.FC = () => {
   const { t } = useI18n();
@@ -1447,6 +1584,7 @@ export function HomePageClient() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageGraph) }}
       />
       <HeroSection />
+      <IndustryValidation />
       <StatsStrip />
       <ProblemSection />
       <PipelineSection />

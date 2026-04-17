@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
+import { SpeedInsights as VercelSpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
 import CrispChat from "@/components/ui/crisp-chat";
@@ -189,6 +191,11 @@ export default function RootLayout({
           </ErrorBoundary>
         </I18nProvider>
         <CrispChat />
+        {/* Vercel Analytics + Speed Insights — ajoutés 17 avril 2026 (P2.1)
+            Sans cookie banner. Complémentaire à PostHog (event-based plus riche).
+            Mesure page views + Core Web Vitals pour funnel conversion. */}
+        <VercelAnalytics />
+        <VercelSpeedInsights />
       </body>
     </html>
   );
