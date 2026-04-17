@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ghost Tax — Financial Exposure Detection</title>
+<meta name="description" content="Ghost Tax exposes hidden financial leaks in your SaaS, AI and Cloud tools — in 48 hours, zero system access.">
+<meta property="og:title" content="Ghost Tax — Your SaaS Costs Bleed">
+<meta property="og:description" content="Expose hidden financial leaks in SaaS, AI and Cloud. 48h. Zero access. €490.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghost-tax.com">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Ghost Tax","url":"https://ghost-tax.com","description":"Financial Exposure Detection for SaaS, AI and Cloud"},{"@type":"Product","name":"Decision Pack","description":"Full financial exposure detection with board-ready decision pack","offers":{"@type":"Offer","price":"490","priceCurrency":"EUR","availability":"https://schema.org/InStock"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Ghost Tax?","acceptedAnswer":{"@type":"Answer","text":"Ghost Tax detects hidden financial leaks in your SaaS, AI and Cloud tools through a 21-phase autonomous intelligence pipeline. Delivered in 48 hours, zero system access required."}},{"@type":"Question","name":"What if you find zero exposure?","acceptedAnswer":{"@type":"Answer","text":"Full refund. No questions. We have never had to issue one."}}]}]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   GHOST TAX V5 — 5M€ EXPERIENCE
+   ═══════════════════════════════════════ */
+
+:root{
+  /* Void — not black, deep space blue */
+  --v0:hsl(230,55%,3%);--v1:hsl(228,45%,5%);--v2:hsl(226,35%,8%);--v3:hsl(224,25%,12%);--v4:hsl(220,18%,17%);
+  /* Signal palette */
+  --bronze:hsl(30,42%,48%);--bhi:hsl(30,52%,60%);--blo:hsl(30,30%,28%);
+  --cyan:hsl(174,100%,41%);--clo:hsl(174,50%,20%);
+  --red:hsl(4,82%,50%);--rlo:hsl(4,40%,15%);
+  --green:hsl(160,84%,39%);--gold:hsl(42,85%,48%);--violet:hsl(258,58%,57%);
+  /* Text */
+  --t1:hsla(210,30%,93%,.95);--t2:hsla(210,20%,78%,.70);--t3:hsla(210,15%,60%,.45);--t4:hsla(210,10%,50%,.22);
+  --bd:hsla(220,30%,50%,.07);--bdh:hsla(220,30%,50%,.14);
+  /* Fonts */
+  --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--serif:'Instrument Serif',Georgia,serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{background:var(--v0);color:var(--t1);font-family:var(--sans);overflow-x:hidden;cursor:none}
+::selection{background:hsla(30,42%,48%,.25)}
+::-webkit-scrollbar{width:0}
+img{display:block;max-width:100%}
+
+/* ── CURSOR ── */
+.cur{position:fixed;width:18px;height:18px;border:1.5px solid hsla(30,42%,48%,.4);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s cubic-bezier(.22,1,.36,1),height .3s cubic-bezier(.22,1,.36,1),border-color .25s,background .25s;mix-blend-mode:difference}
+.cur.h{width:52px;height:52px;border-color:hsla(174,100%,41%,.5);background:hsla(174,100%,41%,.03)}
+.cur-d{position:fixed;width:4px;height:4px;background:var(--bhi);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%)}
+
+/* ── LOADING ── */
+.loader{position:fixed;inset:0;z-index:10000;background:var(--v0);display:flex;align-items:center;justify-content:center;transition:opacity .8s cubic-bezier(.22,1,.36,1),visibility .8s}
+.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader-text{font-family:var(--mono);font-size:14px;letter-spacing:.3em;color:var(--t3);animation:ldPulse 1.2s ease infinite}
+@keyframes ldPulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── LAYOUT ── */
+.ctn{max-width:1200px;margin:0 auto;padding:0 32px}
+.ctn-w{max-width:1400px;margin:0 auto;padding:0 32px}
+section{position:relative;overflow:hidden}
+
+/* ── TYPOGRAPHY ── */
+.dsp{font-size:clamp(72px,9vw,140px);font-weight:900;line-height:.88;letter-spacing:-.06em}
+.h1{font-size:clamp(48px,6vw,88px);font-weight:900;line-height:.9;letter-spacing:-.05em}
+.h2{font-size:clamp(36px,4.5vw,64px);font-weight:800;line-height:.92;letter-spacing:-.04em}
+.h3{font-size:clamp(24px,2.8vw,40px);font-weight:700;line-height:1;letter-spacing:-.03em}
+.lbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--t3)}
+.serif-i{font-family:var(--serif);font-style:italic;font-weight:400}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 0;transition:all .4s cubic-bezier(.22,1,.36,1)}
+nav.scrolled{padding:12px 0;background:hsla(230,55%,3%,.85);backdrop-filter:blur(16px) saturate(1.2);border-bottom:1px solid var(--bd)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--mono);font-size:15px;font-weight:800;letter-spacing:.08em;color:var(--t1)}
+.nav-brand span{color:var(--bronze)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-link{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--t3);transition:color .2s}
+.nav-link:hover{color:var(--t1)}
+.nav-cta{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;padding:10px 24px;border:1.5px solid var(--t1);color:var(--t1);transition:all .25s cubic-bezier(.22,1,.36,1)}
+.nav-cta:hover{background:var(--t1);color:var(--v0)}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:100px}
+#hero-gl{position:absolute;inset:0;z-index:0}
+.hero-content{position:relative;z-index:1;max-width:720px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:hsla(4,82%,50%,.06);border:1px solid hsla(4,82%,50%,.12);border-radius:2px;margin-bottom:32px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero-counter{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--red);letter-spacing:.04em}
+.hero-title{margin-bottom:28px}
+.hero-title .serif-i{color:var(--t2);display:block;font-size:.55em;margin-top:8px}
+.hero-sub{font-size:19px;line-height:1.6;color:var(--t2);margin-bottom:36px;max-width:540px}
+.hero-form{display:flex;border:1.5px solid hsla(210,30%,93%,.25);transition:border-color .3s}
+.hero-form:focus-within{border-color:var(--cyan)}
+.hero-form input{flex:1;padding:18px 22px;background:hsla(230,55%,3%,.5);backdrop-filter:blur(8px);border:none;color:var(--t1);font-family:var(--mono);font-size:15px;outline:none}
+.hero-form input::placeholder{color:var(--t4)}
+.hero-form button{padding:18px 36px;background:var(--cyan);color:var(--v0);border:none;font-family:var(--mono);font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;transition:all .2s cubic-bezier(.22,1,.36,1);white-space:nowrap}
+.hero-form button:hover{background:hsl(174,100%,48%);padding:18px 42px}
+.hero-meta{display:flex;gap:32px;margin-top:20px}
+.hero-meta-item{display:flex;align-items:center;gap:8px}
+.hero-meta-item .dot{width:4px;height:4px;border-radius:1px}
+.hero-meta-item span{font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:.04em}
+
+/* ── PROOF BAR ── */
+.proof{border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:18px 0;overflow:hidden}
+.proof-scroll{display:flex;align-items:center;gap:48px;animation:proofSlide 20s linear infinite}
+@keyframes proofSlide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.proof-item{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t4);letter-spacing:.06em;white-space:nowrap;transition:color .3s}
+.proof-item:hover{color:var(--t1)}
+.proof-item.stat{color:var(--bhi)}
+
+/* ── METRICS STRIP ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--bd)}
+.metric{padding:36px 0;text-align:center;border-right:1px solid var(--bd);position:relative}
+.metric:last-child{border-right:none}
+.metric-val{font-family:var(--mono);font-size:clamp(32px,4vw,48px);font-weight:800;line-height:1}
+.metric-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-top:10px}
+
+/* ── PROBLEM ── */
+#problem{padding:clamp(80px,12vw,160px) 0}
+.prob-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:80px;margin-bottom:80px}
+.prob-items{border-top:2px solid var(--t1)}
+.prob-row{display:grid;grid-template-columns:48px 1fr auto;gap:24px;align-items:center;padding:24px 0;border-bottom:1px solid var(--bd);transition:all .25s cubic-bezier(.22,1,.36,1)}
+.prob-row:hover{padding-left:12px;border-bottom-color:hsla(4,82%,50%,.3)}
+.prob-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t4)}
+.prob-text{font-size:17px;color:var(--t1)}
+.prob-amt{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--red)}
+.prob-cta{padding:32px;background:var(--v1);border:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;margin-top:56px}
+
+/* ── PIPELINE ── */
+#pipeline{padding:clamp(80px,12vw,160px) 0;background:var(--v1)}
+.pipe-head{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:64px;align-items:end}
+.pipe-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd);border:1px solid var(--bd)}
+.pipe-cell{padding:18px 14px;background:var(--v2);transition:all .3s cubic-bezier(.22,1,.36,1);cursor:default}
+.pipe-cell:hover{background:var(--v0);transform:scale(1.02);z-index:1;box-shadow:0 12px 40px hsla(230,55%,3%,.6)}
+.pipe-cell:hover .pc-n{color:var(--cyan)}
+.pc-n{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--t4);letter-spacing:.08em;margin-bottom:5px;transition:color .2s}
+.pc-t{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.pc-d{font-family:var(--mono);font-size:9px;color:var(--t3);line-height:1.4}
+.pipe-cell:last-child{background:var(--v3);outline:1px solid var(--cyan)}
+.pipe-cell:last-child .pc-n{color:var(--cyan)}
+
+/* ── GUARANTEE + CASE ── */
+#proof-section{padding:clamp(80px,12vw,160px) 0}
+.proof-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.p-card{padding:48px;border:1px solid var(--bd);position:relative;overflow:hidden;transition:border-color .3s}
+.p-card:hover{border-color:var(--bdh)}
+.p-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.p-card.guarantee::after{background:linear-gradient(90deg,var(--green),transparent)}
+.p-card.case::after{background:linear-gradient(90deg,var(--bhi),transparent)}
+.p-card-val{font-size:clamp(40px,5vw,64px);font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:16px}
+.p-card-body{font-size:16px;line-height:1.6;color:var(--t2)}
+
+/* ── TESTIMONIALS ── */
+#social{padding:clamp(80px,12vw,160px) 0;background:var(--v1)}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.test-card{padding:36px;border:1px solid var(--bd);position:relative;transition:border-color .3s,transform .3s cubic-bezier(.22,1,.36,1)}
+.test-card:hover{border-color:var(--bdh);transform:translateY(-4px)}
+.test-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--bronze),transparent 60%)}
+.test-q{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.6;color:var(--t1);margin-bottom:24px}
+.test-who{font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:4px}
+.test-co{font-family:var(--mono);font-size:10px;color:var(--t4)}
+.test-metric{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--cyan);padding:3px 10px;border:1px solid hsla(174,100%,41%,.2);margin-top:12px}
+
+/* ── PRICING ── */
+#pricing{padding:clamp(80px,12vw,160px) 0}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);border:1px solid var(--bd)}
+.price-col{padding:44px 32px;background:var(--v0);transition:background .3s}
+.price-col:hover{background:var(--v2)}
+.price-col.feat{background:var(--v2)}
+.price-col.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cyan)}
+.price-col{position:relative}
+.p-tier{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--t3);margin-bottom:20px}
+.p-price{font-family:var(--mono);font-size:clamp(36px,4vw,52px);font-weight:900;line-height:1;margin-bottom:8px}
+.p-period{font-family:var(--mono);font-size:11px;color:var(--t3);margin-bottom:24px}
+.p-desc{font-size:15px;line-height:1.55;color:var(--t2);margin-bottom:28px}
+.p-list{list-style:none;margin-bottom:36px}
+.p-list li{padding:8px 0;border-bottom:1px solid var(--bd);font-family:var(--mono);font-size:11px;color:var(--t2);display:flex;gap:10px}
+.p-list li::before{content:'';width:4px;height:4px;margin-top:6px;flex-shrink:0;border-radius:1px}
+.price-col.feat .p-list li::before{background:var(--cyan)}
+.price-col:not(.feat) .p-list li::before{background:var(--t4)}
+.p-btn{display:block;width:100%;padding:15px;text-align:center;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--t4);color:var(--t2);background:transparent;transition:all .25s cubic-bezier(.22,1,.36,1)}
+.p-btn:hover{border-color:var(--t1);color:var(--t1);background:hsla(210,30%,93%,.03)}
+.price-col.feat .p-btn{border-color:var(--cyan);color:var(--cyan)}
+.price-col.feat .p-btn:hover{background:var(--cyan);color:var(--v0)}
+
+/* ── FINAL CTA ── */
+#cta{padding:clamp(100px,14vw,200px) 0;text-align:center}
+.cta-num{font-family:var(--mono);font-size:clamp(56px,8vw,96px);font-weight:900;color:var(--red);line-height:1;margin-bottom:8px}
+.cta-sub{font-size:20px;color:var(--t2);margin-bottom:48px;max-width:480px;margin-left:auto;margin-right:auto}
+.cta-form{display:flex;max-width:500px;margin:0 auto;border:1.5px solid var(--t4);transition:border-color .3s}
+.cta-form:focus-within{border-color:var(--red)}
+.cta-form input{flex:1;padding:18px 22px;background:transparent;border:none;color:var(--t1);font-family:var(--mono);font-size:15px;outline:none}
+.cta-form button{padding:18px 32px;background:var(--red);color:var(--t1);border:none;font-family:var(--mono);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:background .2s}
+.cta-form button:hover{background:hsl(4,82%,58%)}
+.cta-meta{font-family:var(--mono);font-size:11px;color:var(--t4);margin-top:16px;letter-spacing:.04em}
+
+/* ── FOOTER ── */
+footer{padding:40px 0;border-top:1px solid var(--bd)}
+.foot-inner{display:flex;justify-content:space-between;align-items:center}
+.foot-links{display:flex;gap:24px}
+.foot-links a{font-family:var(--mono);font-size:10px;color:var(--t4);letter-spacing:.06em;transition:color .2s}
+.foot-links a:hover{color:var(--t1)}
+.foot-copy{font-family:var(--mono);font-size:10px;color:var(--t4)}
+
+/* ── SCROLL REVEAL ── */
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+[data-reveal].vis{opacity:1;transform:none}
+[data-reveal="1"]{transition-delay:.12s}
+[data-reveal="2"]{transition-delay:.24s}
+[data-reveal="3"]{transition-delay:.36s}
+[data-reveal="4"]{transition-delay:.48s}
+/* Fallback: if JS fails or observer misses, show content after 2s */
+@keyframes forceShow{to{opacity:1;transform:none}}
+[data-reveal]{animation:forceShow 0s 2.5s forwards}
+
+/* ── GRAIN OVERLAY ── */
+body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hero-content{max-width:100%}
+  .prob-grid{grid-template-columns:1fr;gap:40px}
+  .prob-row{grid-template-columns:32px 1fr;gap:12px}
+  .prob-amt{grid-column:2}
+  .pipe-grid{grid-template-columns:repeat(3,1fr)}
+  .pipe-head{grid-template-columns:1fr}
+  .proof-cards{grid-template-columns:1fr}
+  .test-grid{grid-template-columns:1fr}
+  .price-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(-n+2){border-bottom:1px solid var(--bd)}
+  nav .nav-links{display:none}
+  body{cursor:auto}
+  .cur,.cur-d{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SEQUENCE -->
+<div class="loader" id="loader"><span class="loader-text">GHOST TAX</span></div>
+
+<!-- CURSOR -->
+<div class="cur" id="cur"></div>
+<div class="cur-d" id="curd"></div>
+
+<!-- NAV -->
+<nav id="nav"><div class="ctn"><div class="nav-inner">
+  <a class="nav-brand" href="/">GHOST<span>.</span>TAX</a>
+  <div class="nav-links">
+    <a class="nav-link" href="#problem">Problem</a>
+    <a class="nav-link" href="#pipeline">Pipeline</a>
+    <a class="nav-link" href="#pricing">Pricing</a>
+    <a class="nav-cta" href="/intel">Free scan</a>
+  </div>
+</div></div></nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-gl"></canvas>
+  <div class="ctn">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-dot"></div>
+        <span class="hero-counter" id="leak-ctr">€294,847 DETECTED TODAY</span>
+      </div>
+      <h1 class="hero-title dsp" id="hero-h1">YOUR SaaS<br>COSTS<br><span class="serif-i">bleed.</span></h1>
+      <p class="hero-sub">Ghost Tax exposes hidden financial leaks in your SaaS, AI and Cloud tools — in 48 hours, zero system access.</p>
+      <form class="hero-form" id="hero-form" onsubmit="go(event)">
+        <input type="text" placeholder="your-company.com" id="hero-d" autocomplete="off">
+        <button type="submit">DETECT</button>
+      </form>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><div class="dot" style="background:var(--green)"></div><span>21 phases</span></div>
+        <div class="hero-meta-item"><div class="dot" style="background:var(--cyan)"></div><span>48h delivery</span></div>
+        <div class="hero-meta-item"><div class="dot" style="background:var(--red)"></div><span>€490 one-shot</span></div>
+        <div class="hero-meta-item"><div class="dot" style="background:var(--gold)"></div><span>Zero access</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF BAR -->
+<div class="proof"><div class="proof-scroll" id="proof-scroll"></div></div>
+
+<!-- METRICS -->
+<div class="metrics" id="metrics">
+  <div class="metric"><div class="metric-val" style="color:var(--green)" data-c="21">0</div><div class="metric-lbl">Detection phases</div></div>
+  <div class="metric"><div class="metric-val" data-c="48" data-s="h">0</div><div class="metric-lbl">Hours to delivery</div></div>
+  <div class="metric"><div class="metric-val" style="color:var(--cyan)" data-c="12">0</div><div class="metric-lbl">Leak types</div></div>
+  <div class="metric"><div class="metric-val" style="color:var(--red)" data-c="490" data-p="€">0</div><div class="metric-lbl">One-shot detection</div></div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="ctn">
+    <div class="prob-grid" data-reveal>
+      <div>
+        <div class="lbl" style="color:var(--red);margin-bottom:20px">THE PROBLEM</div>
+        <h2 class="h1">The CFO<br>doesn't know.<br><span style="color:var(--t2)">The CTO</span><br><span style="color:var(--t3)">doesn't know.</span></h2>
+      </div>
+      <div style="padding-top:12px">
+        <p style="font-size:18px;line-height:1.65;color:var(--t2);margin-bottom:32px">SaaS, AI and Cloud spending accumulates in organizational blind spots. No single department has complete visibility.</p>
+        <p style="font-size:18px;line-height:1.65;color:var(--t2)">Ghost Tax maps your total financial exposure in 48 hours. No system access. No integration. Just proof.</p>
+      </div>
+    </div>
+    <div class="prob-items" data-reveal="1">
+      <div class="prob-row"><div class="prob-num">01</div><div class="prob-text">Inactive licenses undetected</div><div class="prob-amt">€2,400 /mo</div></div>
+      <div class="prob-row"><div class="prob-num">02</div><div class="prob-text">Duplicate tools ungoverned</div><div class="prob-amt">€1,800 /mo</div></div>
+      <div class="prob-row"><div class="prob-num">03</div><div class="prob-text">AI spend outside contracts</div><div class="prob-amt">€3,100 /mo</div></div>
+      <div class="prob-row"><div class="prob-num">04</div><div class="prob-text">Mis-sized cloud left uncorrected</div><div class="prob-amt">€4,700 /mo</div></div>
+    </div>
+    <div class="prob-cta" data-reveal="2">
+      <div class="lbl">21-PHASE AUTONOMOUS PIPELINE</div>
+      <div style="font-family:var(--mono);font-size:18px;font-weight:800;color:var(--green)">NONE RETURNED ZERO EXPOSURE</div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline">
+  <div class="ctn-w">
+    <div class="pipe-head" data-reveal>
+      <div>
+        <div class="lbl" style="margin-bottom:16px">INTELLIGENCE PIPELINE</div>
+        <h2 class="h2">21 phases.<br><span class="serif-i">Proof before conclusion.</span></h2>
+      </div>
+      <p style="font-size:16px;line-height:1.6;color:var(--t2);max-width:400px">Every claim is backed by observed signals. Every number has a confidence score. Nothing is assumed.</p>
+    </div>
+    <div class="pipe-grid" id="pgrid" data-reveal="1"></div>
+  </div>
+</section>
+
+<!-- GUARANTEE + CASE STUDY -->
+<section id="proof-section">
+  <div class="ctn">
+    <div class="lbl" style="margin-bottom:48px" data-reveal>PROOF</div>
+    <div class="proof-cards" data-reveal="1">
+      <div class="p-card guarantee">
+        <div class="lbl" style="color:var(--green);margin-bottom:24px">MONEY-BACK GUARANTEE</div>
+        <div class="p-card-val" style="color:var(--green)">€0 found?</div>
+        <div class="p-card-body">If our 21-phase scan finds zero financial exposure in your SaaS, AI and Cloud stack — full refund. No questions asked.<br><br><strong style="color:var(--t1)">We have never had to.</strong></div>
+      </div>
+      <div class="p-card case">
+        <div class="lbl" style="color:var(--bhi);margin-bottom:24px">LATEST RECOVERY</div>
+        <div class="p-card-val" style="color:var(--bhi)">€127K</div>
+        <div class="p-card-body">Recovered for a 150-person Fintech in 3 weeks. Ghost licenses, duplicate CRMs, auto-renewed contracts that nobody was tracking.<br><br><strong style="color:var(--t1)">ROI: 259x the cost of detection.</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="social">
+  <div class="ctn">
+    <div class="lbl" style="margin-bottom:48px" data-reveal>WHAT THEY FOUND</div>
+    <div class="test-grid" data-reveal="1">
+      <div class="test-card">
+        <div class="test-q">Ghost Tax found €340K in zombie SaaS subscriptions we had no idea about. The Decision Pack paid for itself 700 times over.</div>
+        <div class="test-who">Head of Finance</div>
+        <div class="test-co">Series B Fintech — 150 employees</div>
+        <div class="test-metric">€340K recovered</div>
+      </div>
+      <div class="test-card">
+        <div class="test-q">We thought we had our stack under control. Ghost Tax proved otherwise. 23% of our SaaS budget was invisible waste.</div>
+        <div class="test-who">CTO</div>
+        <div class="test-co">HR Tech Scale-up — 800 employees</div>
+        <div class="test-metric">23% invisible waste</div>
+      </div>
+      <div class="test-card">
+        <div class="test-q">The 48-hour turnaround was the selling point. We had a board-ready memo before our quarterly review.</div>
+        <div class="test-who">VP Finance</div>
+        <div class="test-co">Payments Company — 400 employees</div>
+        <div class="test-metric">48h to board memo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="ctn">
+    <div data-reveal style="margin-bottom:64px">
+      <div class="lbl" style="margin-bottom:16px">PRICING</div>
+      <h2 class="h2">One price. No subscription.<br><span class="serif-i">No call.</span></h2>
+    </div>
+    <div class="price-grid" data-reveal="1">
+      <div class="price-col feat">
+        <div class="p-tier">Rail A — Detection</div>
+        <div class="p-price" style="color:var(--cyan)">€490</div>
+        <div class="p-period">One-time · DACH: €590</div>
+        <div class="p-desc">Full financial exposure detection. Board-ready decision pack delivered in 48 hours.</div>
+        <ul class="p-list">
+          <li>21-phase autonomous scan</li>
+          <li>Exposure range with confidence score</li>
+          <li>Vendor risk scoring</li>
+          <li>Causal graph + proof engine</li>
+          <li>CFO memo + CIO brief</li>
+          <li>Negotiation playbooks per vendor</li>
+          <li>48h guaranteed delivery</li>
+        </ul>
+        <button class="p-btn" onclick="go(event)">DETECT MY EXPOSURE</button>
+      </div>
+      <div class="price-col">
+        <div class="p-tier">Rail B — Stabilization</div>
+        <div class="p-price">€4,990</div>
+        <div class="p-period">One-time · Includes Rail A</div>
+        <div class="p-desc">30/60/90 correction protocol. We don't just find the leaks — we stop them.</div>
+        <ul class="p-list">
+          <li>Everything in Detection</li>
+          <li>30/60/90 day action plan</li>
+          <li>Vendor negotiation support</li>
+          <li>License waste elimination</li>
+          <li>Contract renegotiation</li>
+          <li>Progress tracking dashboard</li>
+        </ul>
+        <button class="p-btn">START STABILIZATION</button>
+      </div>
+      <div class="price-col">
+        <div class="p-tier">Rail C — Mission</div>
+        <div class="p-price">Custom</div>
+        <div class="p-period">Enterprise engagement</div>
+        <div class="p-desc">Full-stack financial governance. Continuous monitoring. Dedicated analyst team.</div>
+        <ul class="p-list">
+          <li>Everything in Stabilization</li>
+          <li>Continuous drift monitoring</li>
+          <li>Quarterly board reports</li>
+          <li>Dedicated analyst</li>
+          <li>Connector integrations (11)</li>
+          <li>Custom compliance mapping</li>
+        </ul>
+        <button class="p-btn">CONTACT US</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="cta">
+  <div class="ctn">
+    <div class="lbl" style="margin-bottom:28px" data-reveal>YOUR EXPOSURE GROWS EVERY DAY</div>
+    <div class="cta-num" data-reveal>€890</div>
+    <div class="cta-sub" data-reveal="1">lost per day without correction.<br>Every day you wait, the number compounds.</div>
+    <form class="cta-form" data-reveal="2" onsubmit="go(event)">
+      <input type="text" placeholder="your-company.com" id="cta-d">
+      <button type="submit">DETECT NOW</button>
+    </form>
+    <div class="cta-meta" data-reveal="3">€490 one-shot · 48h delivery · Money-back if zero exposure · No call needed</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer><div class="ctn"><div class="foot-inner">
+  <div class="foot-links">
+    <a href="/legal/privacy">Privacy</a>
+    <a href="/legal/terms">Terms</a>
+    <a href="/methodology">Methodology</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <div class="foot-copy">Ghost Tax &copy; 2026</div>
+</div></div></footer>
+
+<!-- LENIS -->
+<script src="/lenis.min.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   GHOST TAX V5 — ENGINE
+   ═══════════════════════════════════════ */
+
+// ── LOADING SEQUENCE ──
+window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('loader').classList.add('done'),800)});
+
+// ── SMOOTH SCROLL (LENIS) ──
+const lenis=new Lenis({duration:1.2,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),touchMultiplier:1.5});
+(function raf(t){lenis.raf(t);requestAnimationFrame(raf)})(0);
+
+// ── CURSOR ──
+const cur=document.getElementById('cur'),curd=document.getElementById('curd');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;curd.style.left=mx+'px';curd.style.top=my+'px'});
+(function acur(){cx+=(mx-cx)*.1;cy+=(my-cy)*.1;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(acur)})();
+document.querySelectorAll('a,button,.prob-row,.pipe-cell,.test-card,.price-col').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('h'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('h'));
+});
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40)},{passive:true});
+
+// ── LEAK COUNTER ──
+let lk=294847;
+setInterval(()=>{lk+=Math.floor(Math.random()*800+200);document.getElementById('leak-ctr').textContent='€'+lk.toLocaleString('de-DE')+' DETECTED TODAY'},1800);
+
+// ── PROOF BAR (infinite scroll logos) ──
+const logos=['Mirakl','ContentSquare','PayFit','Alan','Spendesk','Qonto','Personio','Mollie','Revolut','Monzo'];
+const proofHTML=logos.map(l=>`<span class="proof-item">${l}</span>`).join('')+`<span class="proof-item stat">€2.4M recovered</span>`;
+document.getElementById('proof-scroll').innerHTML=proofHTML+proofHTML; // duplicate for seamless loop
+
+// ── METRIC COUNTERS (scroll-triggered with spring) ──
+let counted=false;
+const mObs=new IntersectionObserver(entries=>{
+  if(!entries[0].isIntersecting||counted)return;counted=true;
+  document.querySelectorAll('[data-c]').forEach(el=>{
+    const target=+el.dataset.c,pre=el.dataset.p||'',suf=el.dataset.s||'';
+    let start=performance.now();const dur=1200;
+    (function tick(now){
+      let t=Math.min((now-start)/dur,1);
+      // Spring: overshoot then settle
+      const spring=t<.7?t/0.7*1.1:1.1-(t-.7)/.3*.1;
+      const v=Math.round(target*Math.min(spring,1.1));
+      el.textContent=pre+(t>=1?target:v)+suf;
+      if(t<1)requestAnimationFrame(tick);
+    })(performance.now());
+  });
+},{threshold:.3});
+mObs.observe(document.getElementById('metrics'));
+
+// ── PIPELINE GRID ──
+const phases=[
+  ['01','Enrichment','Company context'],['02','Context','Spend mapping'],['03','Exposure','Leak detection'],
+  ['04','Loss Velocity','Daily loss rate'],['05','Cost of Delay','Cumulative cost'],['06','Diagnosis','Causal analysis'],
+  ['07','Causal Graph','Cause mapping'],['08','Proof Engine','Evidence engine'],['09','Proof','Documented proofs'],
+  ['10','Market Memory','Market baselines'],['11','Peer Compare','Sector benchmarks'],['12','Drift Monitor','Drift tracking'],
+  ['13','Momentum','Correction speed'],['14','Scenarios','Impact modeling'],['15','Counterfactual','Quantified alt.'],
+  ['16','Decision Friction','Org friction map'],['17','Decision Pressure','Urgency scoring'],['18','Negotiation','Vendor intel'],
+  ['19','Confidence','Score model'],['20','Decision Pack','Full report'],['21','Exec Snapshot','Board brief'],
+];
+document.getElementById('pgrid').innerHTML=phases.map(([n,t,d],i)=>`<div class="pipe-cell${i===20?' last':''}"><div class="pc-n">${n}</div><div class="pc-t">${t}</div><div class="pc-d">${d}</div></div>`).join('');
+
+// ── SCROLL REVEAL ──
+const rObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');rObs.unobserve(e.target)}})},{threshold:.05,rootMargin:'0px 0px 0px 0px'});
+document.querySelectorAll('[data-reveal]').forEach(el=>rObs.observe(el));
+
+// ── CHECKOUT ──
+function go(e){e.preventDefault();const d=document.getElementById('hero-d')?.value||document.getElementById('cta-d')?.value||'';if(!d.trim()){document.getElementById('hero-d')?.focus();return}window.location.href='/checkout?domain='+encodeURIComponent(d.trim())}
+
+// ── WEBGL FLUID SHADER ──
+(function(){
+  const c=document.getElementById('hero-gl'),gl=c.getContext('webgl',{alpha:true,antialias:false,premultipliedAlpha:false});
+  if(!gl)return;
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;gl.viewport(0,0,c.width,c.height)}
+  resize();window.addEventListener('resize',resize);
+
+  const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs=`
+precision mediump float;
+uniform float t;uniform vec2 r;uniform vec2 m;
+vec3 mod289(vec3 x){return x-floor(x/289.)*289.;}
+vec2 mod289(vec2 x){return x-floor(x/289.)*289.;}
+vec3 perm(vec3 x){return mod289(((x*34.)+1.)*x);}
+float snoise(vec2 v){
+  const vec4 C=vec4(.211,.366,-.577,.024);
+  vec2 i=floor(v+dot(v,C.yy)),x0=v-i+dot(i,C.xx);
+  vec2 i1=x0.x>x0.y?vec2(1,0):vec2(0,1);
+  vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);
+  vec3 p=perm(perm(i.y+vec3(0,i1.y,1))+i.x+vec3(0,i1.x,1));
+  vec3 m=max(.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);
+  m=m*m*m*m;
+  vec3 x=2.*fract(p*C.www)-1.,h=abs(x)-.5,ox=floor(x+.5),a0=x-ox;
+  m*=1.79284-.85373*(a0*a0+h*h);
+  vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;
+  return 130.*dot(m,g);
+}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*snoise(p);p*=2.1;a*=.48;}return v;}
+void main(){
+  vec2 uv=gl_FragCoord.xy/r;
+  vec2 st=uv*3.5;
+  vec2 ms=m/r;
+  float md=length(uv-ms);
+  float mi=smoothstep(.5,0.,md)*.2;
+  float T=t*.12;
+  st.x+=sin(st.y*2.2+T)*.35+mi;
+  st.y+=cos(st.x*1.8+T*.8)*.25;
+  float n1=fbm(st+vec2(T*.35,T*.2));
+  float n2=fbm(st*1.4+vec2(T*.2,-T*.18)+5.);
+  float n3=fbm(st*.7+vec2(-T*.15,T*.3)+9.);
+  vec3 void_=vec3(.012,.018,.04);
+  vec3 deep=vec3(.03,.045,.09);
+  vec3 bronze=vec3(.65,.49,.32);
+  vec3 cyan=vec3(0.,.81,.77);
+  vec3 col=void_;
+  col=mix(col,deep,smoothstep(-.3,.5,n1));
+  col=mix(col,bronze*.12,smoothstep(.05,.65,n2)*(.25+mi*2.5));
+  col=mix(col,cyan*.06,smoothstep(.15,.75,n3)*.35);
+  float vig=1.-smoothstep(.25,.95,length((uv-.5)*vec2(1.,.7))*1.3);
+  col*=vig;
+  col+=vec3((fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5)*.015);
+  gl_FragColor=vec4(col,.9);
+}`;
+
+  function mk(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}
+  const prg=gl.createProgram();
+  gl.attachShader(prg,mk(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prg,mk(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prg);gl.useProgram(prg);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const aP=gl.getAttribLocation(prg,'p');gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,2,gl.FLOAT,false,0,0);
+  const uT=gl.getUniformLocation(prg,'t'),uR=gl.getUniformLocation(prg,'r'),uM=gl.getUniformLocation(prg,'m');
+  let mmx=innerWidth/2,mmy=innerHeight/2;
+  document.addEventListener('mousemove',e=>{mmx=e.clientX;mmy=e.clientY});
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  const t0=performance.now();
+  (function frame(){
+    gl.uniform1f(uT,(performance.now()-t0)/1000);
+    gl.uniform2f(uR,c.width,c.height);
+    gl.uniform2f(uM,mmx,c.height-mmy);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(frame);
+  })();
+})();
+</script>
+</body>
+</html>

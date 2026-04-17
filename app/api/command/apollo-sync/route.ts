@@ -33,7 +33,7 @@ function isRateLimited(): boolean {
 // ── Auth check ──────────────────────────────────────
 function isAuthorized(req: NextRequest): boolean {
   const key = req.headers.get('x-command-key') || ''
-  const secret = process.env.CRON_SECRET || process.env.COMMAND_KEY || ''
+  const secret = process.env.COMMAND_SECRET || process.env.CRON_SECRET || ''
   return secret.length > 0 && key === secret
 }
 
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (filters.countries?.length) {
-      apolloPayload.person_locations = filters.countries
+      apolloPayload.organization_locations = filters.countries
     }
 
     if (filters.minEmployees || filters.maxEmployees) {
@@ -133,10 +133,10 @@ export async function POST(req: NextRequest) {
 
     // Transform to Ghost Tax prospect format
     const prospects: ProspectFromApollo[] = people
-      .filter((p: any) => p.organization?.primary_domain)
+      .filter((p: any) => p.organization?.name || p.organization?.primary_domain)
       .map((p: any) => ({
-        domain: p.organization.primary_domain,
-        company: p.organization.name || p.organization.primary_domain,
+        domain: p.organization.primary_domain || p.organization.website_url?.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || '',
+        company: p.organization.name || p.organization.primary_domain || 'Unknown',
         contactName: [p.first_name, p.last_name].filter(Boolean).join(' '),
         contactTitle: p.title || '',
         contactEmail: p.email_status === 'verified' ? p.email : null,

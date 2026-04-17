@@ -557,7 +557,7 @@ export default function IntelPage() {
                       background: i === 3 ? "rgba(239,68,68,0.06)" : "rgba(239,68,68,0.02)",
                       border: `1px solid rgba(239,68,68,${i === 3 ? "0.18" : "0.08"})`,
                     }}>
-                    <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{tier.label}</p>
+                    <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{tier.label}</p>
                     <p style={{ fontFamily: MO, fontSize: i === 3 ? 22 : i === 0 ? 18 : 16, fontWeight: i === 3 ? 900 : 800, color: i === 3 ? C.red : C.text1, lineHeight: 1, letterSpacing: "-.02em" }}>
                       {fmt(tier.low)}&ndash;{fmt(tier.high)}
                     </p>
@@ -620,11 +620,11 @@ export default function IntelPage() {
                   const range = phases.lossVelocity[period.key];
                   return (
                     <div key={period.key} className={`vg-metric vg-countup vg-delay-${i + 1}`} style={{ background: "rgba(239,68,68,0.02)", borderColor: "rgba(239,68,68,0.08)" }}>
-                      <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{period.label}</p>
+                      <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{period.label}</p>
                       <p style={{ fontFamily: MO, fontSize: 14, fontWeight: 700, color: phases.lossVelocity.softened ? C.amber : C.red, lineHeight: 1.2 }}>
                         {phases.lossVelocity.softened ? "~" : ""}{fmt(range[0])}&ndash;{fmt(range[1])}
                       </p>
-                      <p style={{ fontSize: 7, color: C.text4, marginTop: 2, fontFamily: MO }}>&euro;</p>
+                      <p style={{ fontSize: 11, color: C.text4, marginTop: 2, fontFamily: MO }}>&euro;</p>
                     </div>
                   );
                 })}
@@ -646,21 +646,21 @@ export default function IntelPage() {
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                 <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)", textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.everyDay")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.everyDay")}</p>
                   <p style={{ fontFamily: MO, fontSize: 22, fontWeight: 900, color: C.red, lineHeight: 1 }}>
                     {fmt(phases.costOfDelay.dailyCostOfDelay[0])}&ndash;{fmt(phases.costOfDelay.dailyCostOfDelay[1])}
                   </p>
-                  <p style={{ fontSize: 8, color: C.red, marginTop: 4, fontFamily: MO }}>{t("intel.costOfDelay.eurDayLost")}</p>
+                  <p style={{ fontSize: 12, color: C.red, marginTop: 4, fontFamily: MO }}>{t("intel.costOfDelay.eurDayLost")}</p>
                 </div>
                 <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)", textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.everyMonth")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.everyMonth")}</p>
                   <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.amber, lineHeight: 1 }}>
                     {fmt(phases.costOfDelay.monthlyCostOfDelay[0])}&ndash;{fmt(phases.costOfDelay.monthlyCostOfDelay[1])}
                   </p>
                   <p style={{ fontSize: 8, color: C.text4, marginTop: 4, fontFamily: MO }}>{t("intel.costOfDelay.eurMoLost")}</p>
                 </div>
                 <div style={{ padding: "14px 12px", borderRadius: "var(--r-lg)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)", textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.ninetyDayProjection")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.metric.ninetyDayProjection")}</p>
                   <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.amber, lineHeight: 1 }}>
                     {fmt(phases.costOfDelay.projectedDelayLoss90[0])}&ndash;{fmt(phases.costOfDelay.projectedDelayLoss90[1])}
                   </p>
@@ -695,7 +695,7 @@ export default function IntelPage() {
                   <div key={metric.label} style={{ display: "grid", gridTemplateColumns: "130px 1fr 36px", gap: 8, alignItems: "center" }}>
                     <div>
                       <span style={{ fontSize: 10, color: C.text2, fontWeight: 500, display: "block" }}>{metric.label}</span>
-                      <span style={{ fontSize: 8, color: C.text4, fontFamily: MO }}>{metric.desc}</span>
+                      <span style={{ fontSize: 12, color: C.text4, fontFamily: MO }}>{metric.desc}</span>
                     </div>
                     <div className="vg-conf-track">
                       <div className="vg-conf-fill vg-bar-grow" style={{ width: `${Math.min(95, metric.value)}%`, background: signalColor(metric.value) }} />
@@ -729,7 +729,7 @@ export default function IntelPage() {
 
               {phases.proof.confidenceDrivers?.length > 0 && (
                 <div className="vg-inset" style={{ marginTop: 12, padding: "10px 14px" }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.proof.confidenceDrivers")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.proof.confidenceDrivers")}</p>
                   {phases.proof.confidenceDrivers.map((d: string, i: number) => (
                     <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.5, marginBottom: 2 }}>{d}</p>
                   ))}
@@ -737,7 +737,7 @@ export default function IntelPage() {
               )}
               {phases.proof.boundaries?.length > 0 && (
                 <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(239,68,68,0.02)", border: "1px solid rgba(239,68,68,0.06)" }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.proof.boundaries")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.proof.boundaries")}</p>
                   {phases.proof.boundaries.map((b: string, i: number) => (
                     <p key={i} style={{ fontSize: 10, color: C.text4, lineHeight: 1.5, marginBottom: 2 }}>{b}</p>
                   ))}
@@ -759,22 +759,22 @@ export default function IntelPage() {
               {/* Baseline */}
               {phases.marketMemory.baseline && (
                 <div className="vg-inset" style={{ padding: "12px 14px", marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.market.industryBaseline")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.market.industryBaseline")}</p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                     <div>
-                      <p style={{ fontSize: 8, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.market.spendPerEmployee")}</p>
+                      <p style={{ fontSize: 12, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.market.spendPerEmployee")}</p>
                       <p style={{ fontFamily: MO, fontSize: 13, fontWeight: 700, color: C.text1 }}>
                         {fmt(phases.marketMemory.baseline.medianSpendPerEmployee[0])}&ndash;{fmt(phases.marketMemory.baseline.medianSpendPerEmployee[1])} &euro;
                       </p>
                     </div>
                     <div>
-                      <p style={{ fontSize: 8, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.market.exposureRate")}</p>
+                      <p style={{ fontSize: 12, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.market.exposureRate")}</p>
                       <p style={{ fontFamily: MO, fontSize: 13, fontWeight: 700, color: C.amber }}>
                         {phases.marketMemory.baseline.medianExposurePercent[0]}&ndash;{phases.marketMemory.baseline.medianExposurePercent[1]}%
                       </p>
                     </div>
                     <div>
-                      <p style={{ fontSize: 8, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.metric.confidence")}</p>
+                      <p style={{ fontSize: 12, color: C.text4, fontFamily: MO, marginBottom: 2 }}>{t("intel.metric.confidence")}</p>
                       <p style={{ fontFamily: MO, fontSize: 13, fontWeight: 700, color: signalColor(phases.marketMemory.baseline.confidence) }}>
                         {phases.marketMemory.baseline.confidence}/100
                       </p>
@@ -794,7 +794,7 @@ export default function IntelPage() {
               {/* Vendor References */}
               {phases.marketMemory.vendorReferences?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.market.vendorReferences")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.market.vendorReferences")}</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
                     {phases.marketMemory.vendorReferences.slice(0, 5).map((vr: any, i: number) => (
                       <div key={i} className="vg-inset" style={{ display: "grid", gridTemplateColumns: "100px 1fr 60px", gap: 8, padding: "7px 10px", alignItems: "center" }}>
@@ -815,7 +815,7 @@ export default function IntelPage() {
               {/* Exposure Clusters */}
               {phases.marketMemory.exposureClusters?.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.market.exposurePatternMatches")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.market.exposurePatternMatches")}</p>
                   {phases.marketMemory.exposureClusters.map((ec: any, i: number) => (
                     <div key={i} style={{ padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
@@ -855,7 +855,7 @@ export default function IntelPage() {
                 <>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                     <div className="vg-metric vg-countup">
-                      <p style={{ fontSize: 7, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.yourPercentile")}</p>
+                      <p style={{ fontSize: 11, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.yourPercentile")}</p>
                       <p style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: signalColor(100 - (phases.peerComparison.efficiencyPercentile ?? 50)), lineHeight: 1 }}>
                         P{phases.peerComparison.efficiencyPercentile}
                       </p>
@@ -869,9 +869,9 @@ export default function IntelPage() {
                       <div className="vg-conf-fill vg-bar-grow" style={{ width: `${Math.min(95, phases.peerComparison.efficiencyPercentile ?? 0)}%`, background: `linear-gradient(90deg, ${C.green}, ${C.amber}, ${C.red})` }} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
-                      <span style={{ fontSize: 7, fontFamily: MO, color: C.green }}>{t("intel.benchmark.top10")}</span>
+                      <span style={{ fontSize: 11, fontFamily: MO, color: C.green }}>{t("intel.benchmark.top10")}</span>
                       <span style={{ fontSize: 7, fontFamily: MO, color: C.text4 }}>{t("intel.benchmark.p50")}</span>
-                      <span style={{ fontSize: 7, fontFamily: MO, color: C.red }}>{t("intel.benchmark.bottom10")}</span>
+                      <span style={{ fontSize: 11, fontFamily: MO, color: C.red }}>{t("intel.benchmark.bottom10")}</span>
                     </div>
                   </div>
                   <p style={{ fontSize: 9, fontFamily: MO, color: C.text4 }}>
@@ -895,11 +895,11 @@ export default function IntelPage() {
               {/* Overall drift score */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                 <div className="vg-metric vg-countup" style={{ borderColor: signalColor(100 - phases.driftMonitor.overallDriftScore) + "18" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.driftScore")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.driftScore")}</p>
                   <p style={{ fontFamily: MO, fontSize: 24, fontWeight: 800, color: signalColor(100 - phases.driftMonitor.overallDriftScore), lineHeight: 1 }}>
                     {phases.driftMonitor.overallDriftScore}
                   </p>
-                  <p style={{ fontSize: 7, color: C.text4, marginTop: 3 }}>/100</p>
+                  <p style={{ fontSize: 11, color: C.text4, marginTop: 3 }}>/100</p>
                 </div>
                 <Metric label={t("intel.metric.direction")} value={phases.driftMonitor.driftDirection.toUpperCase()} color={phases.driftMonitor.driftDirection === "worsening" ? C.red : phases.driftMonitor.driftDirection === "improving" ? C.green : C.amber} />
                 <Metric label={t("intel.metric.confidence")} value={`${phases.driftMonitor.driftConfidence}/100`} color={signalColor(phases.driftMonitor.driftConfidence)} />
@@ -908,7 +908,7 @@ export default function IntelPage() {
               {/* Vendor drifts */}
               {phases.driftMonitor.vendorDrifts?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.drift.vendorPricingDrift")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.drift.vendorPricingDrift")}</p>
                   {phases.driftMonitor.vendorDrifts.slice(0, 4).map((vd: any, i: number) => {
                     const sc = vd.driftSeverity === "critical" ? C.red : vd.driftSeverity === "high" ? C.amber : C.text2;
                     return (
@@ -928,7 +928,7 @@ export default function IntelPage() {
               {/* Category drifts */}
               {phases.driftMonitor.categoryDrifts?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.drift.categoryCostDrift")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.drift.categoryCostDrift")}</p>
                   {phases.driftMonitor.categoryDrifts.slice(0, 3).map((cd: any, i: number) => (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 50px 1fr", gap: 6, padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 3, alignItems: "center" }}>
                       <div>
@@ -945,7 +945,7 @@ export default function IntelPage() {
               {/* Window compression */}
               {phases.driftMonitor.windowCompression?.compressionDays > 0 && (
                 <div style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(239,68,68,0.03)", border: "1px solid rgba(239,68,68,0.10)" }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.red, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.drift.windowCompression")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.red, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.drift.windowCompression")}</p>
                   <p style={{ fontSize: 12, color: C.text1, fontWeight: 600 }}>
                     {t("intel.drift.windowCompressedBy")} {phases.driftMonitor.windowCompression.compressionDays}d ({phases.driftMonitor.windowCompression.originalWindowDays}d &rarr; {phases.driftMonitor.windowCompression.compressedWindowDays}d)
                   </p>
@@ -976,7 +976,7 @@ export default function IntelPage() {
 
               {/* Dominant cause */}
               <div className="vg-inset" style={{ padding: "12px 14px", marginBottom: 14 }}>
-                <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.causal.dominantCause")}</p>
+                <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.causal.dominantCause")}</p>
                 <p style={{ fontSize: 13, fontWeight: 600, color: C.text1 }}>{phases.causalGraph.dominantCause}</p>
               </div>
 
@@ -999,7 +999,7 @@ export default function IntelPage() {
               {/* Secondary causes */}
               {phases.causalGraph.secondaryCauses?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.causal.secondaryCauses")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.causal.secondaryCauses")}</p>
                   {phases.causalGraph.secondaryCauses.map((c: string, i: number) => (
                     <p key={i} style={{ fontSize: 11, color: C.text2, padding: "5px 10px", borderRadius: "var(--r-xs)", background: C.inset, marginBottom: 3 }}>{c}</p>
                   ))}
@@ -1009,7 +1009,7 @@ export default function IntelPage() {
               {/* Leverage points */}
               {phases.causalGraph.leveragePoints?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.causal.leveragePoints")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.causal.leveragePoints")}</p>
                   {phases.causalGraph.leveragePoints.map((lp: any, i: number) => (
                     <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 4 }}>
                       <span style={{ fontFamily: MO, fontSize: 11, fontWeight: 800, color: C.green + "60", flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
@@ -1194,7 +1194,7 @@ export default function IntelPage() {
                   <div className="vg-compare" style={{ marginBottom: 14 }}
                     onMouseEnter={() => trackEvent(EVENTS.INTEL_CURRENT_VS_SIMULATED_VIEWED)}>
                     <div className="vg-compare-side vg-compare-current">
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 8 }}>{t("intel.simulator.currentState")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 8 }}>{t("intel.simulator.currentState")}</p>
                       <p style={{ fontFamily: MO, fontSize: 20, fontWeight: 800, color: C.red, lineHeight: 1, marginBottom: 6 }}>
                         {fmt(phases.counterfactual.baselineExposure[0])}&ndash;{fmt(phases.counterfactual.baselineExposure[1])}
                       </p>
@@ -1207,7 +1207,7 @@ export default function IntelPage() {
                     </div>
                     <div className="vg-compare-divider" />
                     <div className="vg-compare-side vg-compare-simulated">
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 8 }}>{t("intel.simulator.simulatedState")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 8 }}>{t("intel.simulator.simulatedState")}</p>
                       <p style={{ fontFamily: MO, fontSize: 20, fontWeight: 800, color: C.green, lineHeight: 1, marginBottom: 6 }}>
                         {fmt(simulated.adjustedExposure[0])}&ndash;{fmt(simulated.adjustedExposure[1])}
                       </p>
@@ -1247,7 +1247,7 @@ export default function IntelPage() {
                   {/* Simulation rationale */}
                   {simulated.rationales.length > 0 && (
                     <div className="vg-inset" style={{ padding: "10px 14px", marginBottom: 10 }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.simulator.whyChanges")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.simulator.whyChanges")}</p>
                       {simulated.rationales.map((r, i) => (
                         <p key={i} style={{ fontSize: 10, color: C.text2, lineHeight: 1.5, marginBottom: 2 }}>{r}</p>
                       ))}
@@ -1281,11 +1281,11 @@ export default function IntelPage() {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                 <div className="vg-metric" style={{ borderColor: signalColor(100 - phases.decisionFriction.frictionScore) + "20" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.friction")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.friction")}</p>
                   <p className="vg-countup" style={{ fontFamily: MO, fontSize: 28, fontWeight: 800, color: signalColor(100 - phases.decisionFriction.frictionScore), lineHeight: 1 }}>
                     {phases.decisionFriction.frictionScore}
                   </p>
-                  <p style={{ fontSize: 7, color: C.text4, marginTop: 3 }}>{t("intel.friction.higherHarder")}</p>
+                  <p style={{ fontSize: 11, color: C.text4, marginTop: 3 }}>{t("intel.friction.higherHarder")}</p>
                 </div>
                 <Metric label={t("intel.metric.ownershipAmbiguity")} value={`${phases.decisionFriction.ownershipAmbiguityScore}/100`} color={signalColor(100 - phases.decisionFriction.ownershipAmbiguityScore)} />
                 <Metric label={t("intel.metric.crossFunctional")} value={`${phases.decisionFriction.crossFunctionalDependencies} ${t("intel.friction.functions")}`} color={C.blueHi} />
@@ -1302,7 +1302,7 @@ export default function IntelPage() {
               {/* Stakeholder impact map */}
               {phases.decisionFriction.stakeholderMap?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.friction.stakeholderMap")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.friction.stakeholderMap")}</p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 52px 1.5fr", gap: 6, padding: "4px 10px", fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".04em", marginBottom: 4 }}>
                     <span>{t("intel.friction.role")}</span><span style={{ textAlign: "center" }}>{t("intel.friction.impact")}</span><span style={{ textAlign: "center" }}>{t("intel.friction.resist")}</span><span>{t("intel.friction.reason")}</span>
                   </div>
@@ -1336,11 +1336,11 @@ export default function IntelPage() {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
                     {phases.decisionPressure !== undefined && (
                       <div className="vg-metric vg-countup" style={{ borderColor: signalColor(100 - phases.decisionPressure) + "18" }}>
-                        <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.pressure")}</p>
+                        <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.pressure")}</p>
                         <p style={{ fontFamily: MO, fontSize: 22, fontWeight: 800, color: signalColor(100 - phases.decisionPressure), lineHeight: 1 }}>
                           {phases.decisionPressure}
                         </p>
-                        <p style={{ fontSize: 7, color: C.text4, marginTop: 3 }}>/100</p>
+                        <p style={{ fontSize: 11, color: C.text4, marginTop: 3 }}>/100</p>
                       </div>
                     )}
                     <Metric label={t("intel.metric.recoveryWindow")} value={`${phases.correctionMomentum.medianRecoveryWindowDays}d`} color={C.blueHi} />
@@ -1349,7 +1349,7 @@ export default function IntelPage() {
                   </div>
                   {phases.correctionMomentum.readinessDrivers?.length > 0 && (
                     <div className="vg-inset" style={{ padding: "10px 14px" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.friction.readinessDrivers")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.friction.readinessDrivers")}</p>
                       {phases.correctionMomentum.readinessDrivers.map((d: string, i: number) => (
                         <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.5, marginBottom: 2 }}>{d}</p>
                       ))}
@@ -1373,11 +1373,11 @@ export default function IntelPage() {
               {/* Readiness */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                 <div className="vg-metric vg-countup" style={{ borderColor: signalColor(phases.negotiation.readiness.overallReadiness) + "18" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.readiness")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.readiness")}</p>
                   <p style={{ fontFamily: MO, fontSize: 22, fontWeight: 800, color: signalColor(phases.negotiation.readiness.overallReadiness), lineHeight: 1 }}>
                     {phases.negotiation.readiness.overallReadiness}
                   </p>
-                  <p style={{ fontSize: 7, color: C.text4, marginTop: 3 }}>/100</p>
+                  <p style={{ fontSize: 11, color: C.text4, marginTop: 3 }}>/100</p>
                 </div>
                 <Metric label={t("intel.metric.grade")} value={phases.negotiation.readiness.readinessGrade.toUpperCase().replace("-", " ")} color={phases.negotiation.readiness.readinessGrade === "ready" ? C.green : phases.negotiation.readiness.readinessGrade === "near-ready" ? C.amber : C.red} />
                 <Metric label={t("intel.metric.confidence")} value={`${phases.negotiation.negotiationConfidence}/100`} color={signalColor(phases.negotiation.negotiationConfidence)} />
@@ -1386,7 +1386,7 @@ export default function IntelPage() {
               {/* Leverage Points — first one visible, rest behind paywall */}
               {phases.negotiation.leveragePoints?.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
-                  <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.leveragePoints")}</p>
+                  <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.leveragePoints")}</p>
                   {/* First leverage point always visible */}
                   {phases.negotiation.leveragePoints.slice(0, 1).map((lp: any, i: number) => {
                     const sc = lp.strength === "strong" ? C.green : lp.strength === "moderate" ? C.amber : C.text4;
@@ -1454,7 +1454,7 @@ export default function IntelPage() {
                   {/* Teaser content rendered but blurred */}
                   {phases.negotiation.topEconomicArguments?.length > 0 && (
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.economicArguments")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.economicArguments")}</p>
                       {phases.negotiation.topEconomicArguments.slice(0, 3).map((ea: any, i: number) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 3 }}>
                           <div style={{ flex: 1 }}>
@@ -1470,7 +1470,7 @@ export default function IntelPage() {
                   )}
                   {phases.negotiation.vendorPlaybooks?.length > 0 && (
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.vendorPlaybooks")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.vendorPlaybooks")}</p>
                       {phases.negotiation.vendorPlaybooks.slice(0, 3).map((pb: any, i: number) => (
                         <div key={i} style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
                           <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>{pb.vendor}</span>
@@ -1484,7 +1484,7 @@ export default function IntelPage() {
                   {/* Unlocked: full economic arguments */}
                   {phases.negotiation.topEconomicArguments?.length > 0 && (
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.economicArguments")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.economicArguments")}</p>
                       {phases.negotiation.topEconomicArguments.map((ea: any, i: number) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.02)", border: "1px solid rgba(52,211,153,0.08)", marginBottom: 3 }}>
                           <div style={{ flex: 1 }}>
@@ -1501,13 +1501,13 @@ export default function IntelPage() {
                   {/* Unlocked: full vendor playbooks */}
                   {phases.negotiation.vendorPlaybooks?.length > 0 && (
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.vendorPlaybookPreview")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 6 }}>{t("intel.negotiation.vendorPlaybookPreview")}</p>
                       {phases.negotiation.vendorPlaybooks.slice(0, 3).map((pb: any, i: number) => (
                         <div key={i} style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.02)", border: "1px solid rgba(59,130,246,0.08)", marginBottom: 4 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                             <span style={{ fontSize: 12, fontWeight: 600, color: C.text1 }}>{pb.vendor}</span>
                             <div style={{ display: "flex", gap: 4 }}>
-                              <span className="vg-badge" style={{ background: signalColor(pb.readinessScore) + "10", border: `1px solid ${signalColor(pb.readinessScore)}20`, color: signalColor(pb.readinessScore), fontSize: 7 }}>
+                              <span className="vg-badge" style={{ background: signalColor(pb.readinessScore) + "10", border: `1px solid ${signalColor(pb.readinessScore)}20`, color: signalColor(pb.readinessScore), fontSize: 10 }}>
                                 {pb.suggestedApproach.toUpperCase()}
                               </span>
                               <span style={{ fontSize: 8, fontFamily: MO, color: C.text4 }}>readiness {pb.readinessScore}</span>
@@ -1528,7 +1528,7 @@ export default function IntelPage() {
                   {/* Unlocked: internal memo frame */}
                   {phases.negotiation.internalMemoFrame && (
                     <div className="vg-inset" style={{ padding: "10px 14px" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>{t("intel.negotiation.internalDecisionFrame")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".06em", marginBottom: 4 }}>{t("intel.negotiation.internalDecisionFrame")}</p>
                       <p style={{ fontSize: 11, color: C.text2, lineHeight: 1.5 }}>{phases.negotiation.internalMemoFrame}</p>
                     </div>
                   )}
@@ -1688,7 +1688,7 @@ export default function IntelPage() {
                   <p style={{ fontSize: 9, fontFamily: MO, color: C.blue, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.confidence.defensibility")}</p>
 
                   <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(52,211,153,0.03)", border: "1px solid rgba(52,211,153,0.10)" }}>
-                    <p style={{ fontSize: 8, fontFamily: MO, color: C.green, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.strongEvidence")}</p>
+                    <p style={{ fontSize: 12, fontFamily: MO, color: C.green, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.strongEvidence")}</p>
                     {phases.decisionPack.consensusView.strongEvidence.map((e: string, i: number) => (
                       <p key={i} style={{ fontSize: 11, color: C.text1, lineHeight: 1.5, marginBottom: 3, paddingLeft: 8, borderLeft: `2px solid ${C.green}30` }}>{e}</p>
                     ))}
@@ -1696,7 +1696,7 @@ export default function IntelPage() {
 
                   {phases.decisionPack.consensusView.directionalEvidence.length > 0 && (
                     <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.blueHi, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.directionalEvidence")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.blueHi, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.directionalEvidence")}</p>
                       {phases.decisionPack.consensusView.directionalEvidence.map((e: string, i: number) => (
                         <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.5, marginBottom: 3, paddingLeft: 8, borderLeft: `2px solid ${C.blueHi}30` }}>{e}</p>
                       ))}
@@ -1704,20 +1704,20 @@ export default function IntelPage() {
                   )}
 
                   <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.10)" }}>
-                    <p style={{ fontSize: 8, fontFamily: MO, color: C.amber, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.keyUncertainties")}</p>
+                    <p style={{ fontSize: 12, fontFamily: MO, color: C.amber, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.keyUncertainties")}</p>
                     {phases.decisionPack.consensusView.keyUncertainties.map((u: string, i: number) => (
                       <p key={i} style={{ fontSize: 11, color: C.text2, lineHeight: 1.5, marginBottom: 3, paddingLeft: 8, borderLeft: `2px solid ${C.amber}30` }}>{u}</p>
                     ))}
                   </div>
 
                   <div className="vg-inset" style={{ padding: "10px 12px" }}>
-                    <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.confidence.recommendedAction")}</p>
+                    <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.confidence.recommendedAction")}</p>
                     <p style={{ fontSize: 12, color: C.text1, lineHeight: 1.5, fontWeight: 500 }}>{phases.decisionPack.consensusView.recommendedAction}</p>
                   </div>
 
                   {phases.decisionPack.consensusView.requiresDeeperValidation.length > 0 && (
                     <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "rgba(239,68,68,0.02)", border: "1px solid rgba(239,68,68,0.08)" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.red, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.deeperValidation")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.red, letterSpacing: ".08em", marginBottom: 6 }}>{t("intel.confidence.deeperValidation")}</p>
                       {phases.decisionPack.consensusView.requiresDeeperValidation.map((v: string, i: number) => (
                         <p key={i} style={{ fontSize: 11, color: C.text3, lineHeight: 1.5, marginBottom: 3, paddingLeft: 8, borderLeft: `2px solid ${C.red}20` }}>{v}</p>
                       ))}
@@ -1735,7 +1735,7 @@ export default function IntelPage() {
               <LayerLabel num="11" label={t("intel.section.correctiveProtocol")} />
 
               {/* What the full protocol contains */}
-              <p style={{ fontSize: 12, color: C.text3, lineHeight: 1.5, marginBottom: 16 }}>
+              <p style={{ fontSize: 14, color: C.text3, lineHeight: 1.6, marginBottom: 16 }}>
                 {t("intel.desc.correctiveProtocol")}
               </p>
 
@@ -1749,10 +1749,10 @@ export default function IntelPage() {
                   { num: "06", title: t("intel.protocol.executiveDecisionPack"), desc: t("intel.protocol.executiveDecisionPackDesc") },
                 ].map((item) => (
                   <div key={item.num} className="vg-inset" style={{ display: "flex", gap: 12, padding: "10px 14px", alignItems: "flex-start" }}>
-                    <span style={{ fontFamily: MO, fontSize: 10, fontWeight: 800, color: C.green + "50", flexShrink: 0, width: 20, textAlign: "center", marginTop: 1 }}>{item.num}</span>
+                    <span style={{ fontFamily: MO, fontSize: 13, fontWeight: 800, color: C.green + "50", flexShrink: 0, width: 22, textAlign: "center", marginTop: 1 }}>{item.num}</span>
                     <div>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: C.text1, marginBottom: 2 }}>{item.title}</p>
-                      <p style={{ fontSize: 10, color: C.text4, lineHeight: 1.4 }}>{item.desc}</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: C.text1, marginBottom: 3 }}>{item.title}</p>
+                      <p style={{ fontSize: 13, color: C.text4, lineHeight: 1.5 }}>{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -1761,16 +1761,16 @@ export default function IntelPage() {
               {/* Delivery timeline */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 20 }}>
                 <div className="vg-metric" style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.delivery")}</p>
-                  <p style={{ fontFamily: MO, fontSize: 16, fontWeight: 700, color: C.blueHi }}>48h</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.delivery")}</p>
+                  <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 700, color: C.blueHi }}>48h</p>
                 </div>
                 <div className="vg-metric" style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.format")}</p>
-                  <p style={{ fontFamily: MO, fontSize: 11, fontWeight: 600, color: C.text2 }}>{t("intel.protocol.deliveryFormat")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.format")}</p>
+                  <p style={{ fontFamily: MO, fontSize: 13, fontWeight: 600, color: C.text2 }}>{t("intel.protocol.deliveryFormat")}</p>
                 </div>
                 <div className="vg-metric" style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 7, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.includes")}</p>
-                  <p style={{ fontFamily: MO, fontSize: 11, fontWeight: 600, color: C.text2 }}>{t("intel.protocol.deliveryIncludes")}</p>
+                  <p style={{ fontSize: 11, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.metric.includes")}</p>
+                  <p style={{ fontFamily: MO, fontSize: 13, fontWeight: 600, color: C.text2 }}>{t("intel.protocol.deliveryIncludes")}</p>
                 </div>
               </div>
 
@@ -1794,13 +1794,13 @@ export default function IntelPage() {
                 {phases.exposure && (
                   <div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 14, flexWrap: "wrap" }}>
                     <div style={{ textAlign: "center", padding: "10px 18px", borderRadius: 8, background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.cta.yourExposure")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.cta.yourExposure")}</p>
                       <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.red, lineHeight: 1 }}>{fmt(phases.exposure.lowEur)}&ndash;{fmt(phases.exposure.highEur)} &euro;</p>
                       <p style={{ fontSize: 8, color: C.text4, marginTop: 2, fontFamily: MO }}>/yr</p>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", padding: "0 8px", color: C.text4, fontSize: 18, fontWeight: 300 }}>vs</div>
                     <div style={{ textAlign: "center", padding: "10px 18px", borderRadius: 8, background: "rgba(52,211,153,0.04)", border: "1px solid rgba(52,211,153,0.12)" }}>
-                      <p style={{ fontSize: 8, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.cta.investmentCost")}</p>
+                      <p style={{ fontSize: 12, fontFamily: MO, color: C.text4, letterSpacing: ".08em", marginBottom: 4 }}>{t("intel.cta.investmentCost")}</p>
                       <p style={{ fontFamily: MO, fontSize: 18, fontWeight: 800, color: C.green, lineHeight: 1 }}>490 &euro;</p>
                       <p style={{ fontSize: 8, color: C.text4, marginTop: 2, fontFamily: MO }}>{t("intel.cta.oneTime")}</p>
                     </div>
@@ -1925,7 +1925,7 @@ function LayerLabel({ num, label }: { num: string; label: string }) {
 function Metric({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="vg-metric">
-      <p style={{ fontSize: 7, color: "#94A3B8", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4, fontFamily: "var(--font-mono)" }}>{label}</p>
+      <p style={{ fontSize: 11, color: "#94A3B8", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4, fontFamily: "var(--font-mono)" }}>{label}</p>
       <p style={{ fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700, color, lineHeight: 1.2 }}>{value}</p>
     </div>
   );
@@ -1934,7 +1934,7 @@ function Metric({ label, value, color }: { label: string; value: string; color: 
 function SimMetric({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ textAlign: "center" }}>
-      <p style={{ fontSize: 7, color: "#94A3B8", marginBottom: 2, fontFamily: "var(--font-mono)", letterSpacing: ".06em" }}>{label}</p>
+      <p style={{ fontSize: 11, color: "#94A3B8", marginBottom: 2, fontFamily: "var(--font-mono)", letterSpacing: ".06em" }}>{label}</p>
       <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color }}>{value}</p>
     </div>
   );

@@ -306,10 +306,12 @@ export async function GET(req: NextRequest) {
           body: JSON.stringify({
             from: 'Ghost Tax <audits@ghost-tax.com>',
             to: [account.contact_email],
-            reply_to: 'audits@ghost-tax.com',
+            reply_to: process.env.REPLY_TO_EMAIL || 'contact@ghost-tax.com',
             subject: cleanedSubject,
             html,
             text,
+            track_opens: process.env.TRACK_OPENS !== 'false',
+            track_clicks: process.env.TRACK_CLICKS !== 'false',
             tags: [
               { name: 'type', value: 'outreach' },
               { name: 'source', value: 'bot-cron' },

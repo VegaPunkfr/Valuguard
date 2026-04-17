@@ -483,8 +483,11 @@ async function sendDeliveryEmail(
     body: JSON.stringify({
       from: "Ghost Tax <reports@ghost-tax.com>",
       to: [to],
+      reply_to: process.env.REPLY_TO_EMAIL || "contact@ghost-tax.com",
       subject,
       html: htmlBody,
+      track_opens: process.env.TRACK_OPENS !== "false",
+      track_clicks: process.env.TRACK_CLICKS !== "false",
     }),
   });
 

@@ -69,7 +69,17 @@ function verifySignature(rawBody: string, headers: Headers): boolean {
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
+  const receivedAt = new Date().toISOString();
+
+  // DEBUG 2026-04-17 : log chaque réception webhook pour diagnostiquer pourquoi
+  // seulement 1/819 DELIVERED. Si ce log n'apparaît jamais → Resend n'envoie
+  // RIEN (webhook URL pas configuré dashboard OU tracking désactivé).
+  console.log(`[webhook-resend] ${receivedAt} HIT size=${rawBody.length}B type=${(() => {
+    try { return JSON.parse(rawBody).type || "?"; } catch { return "unparseable"; }
+  })()}`);
+
   if (!verifySignature(rawBody, req.headers)) {
+    console.warn(`[webhook-resend] ${receivedAt} REJECTED invalid_signature — secret set=${!!process.env.RESEND_WEBHOOK_SECRET}`);
     return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
   }
 

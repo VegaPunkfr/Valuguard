@@ -1,8 +1,8 @@
 const { createClient } = require("@supabase/supabase-js");
 
 const sb = createClient(
-  "https://cuvxhrzrwzuysnfnoqje.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1dnhocnpyd3p1eXNuZm5vcWplIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjgzMjU1MCwiZXhwIjoyMDg4NDA4NTUwfQ.6ntf-Gc4kpjy9D29oWJdMi2CD4S3XgBH3pYJ9SsQoI4"
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const prospects = [

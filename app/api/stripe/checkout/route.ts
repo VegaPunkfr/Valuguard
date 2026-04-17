@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ["card"],
       line_items: [lineItem as never],
       success_url: successUrl,
-      cancel_url: `${SITE_URL}/cancel`,
+      cancel_url: `${SITE_URL}/pricing`,
       customer_email: email,
       allow_promotion_codes: true,
       metadata: sessionMetadata,

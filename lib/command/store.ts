@@ -67,7 +67,12 @@ export async function syncWithSarah(): Promise<{ accounts: Account[]; added: num
     const key = typeof window !== 'undefined'
       ? document.cookie.match(/gt-command-key=([^;]+)/)?.[1] || ''
       : '';
-    const res = await fetch(`/api/command/sync${key ? `?key=${key}` : ''}`, { cache: 'no-store' });
+    // P0 sécurité : COMMAND_SECRET passe maintenant en header Authorization
+    // (plus en query string) — évite fuite dans browser history, proxies, logs.
+    const res = await fetch('/api/command/sync', {
+      cache: 'no-store',
+      headers: key ? { Authorization: `Bearer ${key}` } : {},
+    });
     if (!res.ok) return { accounts: local, added: 0, updated: 0 };
 
     const { accounts: remote } = await res.json() as { accounts: Account[] };

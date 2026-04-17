@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ["card"],
       line_items: [lineItem as never],
       success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}&rail=B_MONITOR`,
-      cancel_url: `${SITE_URL}/cancel`,
+      cancel_url: `${SITE_URL}/pricing`,
       customer_email: email,
       metadata: {
         rail: "B_MONITOR",

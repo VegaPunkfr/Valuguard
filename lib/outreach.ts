@@ -278,8 +278,11 @@ export async function sendOutreachEmail(
       body: JSON.stringify({
         from: "Ghost Tax <reports@ghost-tax.com>",
         to: [params.to],
+        reply_to: process.env.REPLY_TO_EMAIL || "contact@ghost-tax.com",
         subject: params.subject,
         html: params.html,
+        track_opens: process.env.TRACK_OPENS !== "false",
+        track_clicks: process.env.TRACK_CLICKS !== "false",
         tags: params.tags,
       }),
     });

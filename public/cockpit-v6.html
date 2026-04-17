@@ -855,6 +855,7 @@ a.tb-brand:hover{opacity:0.8}
     <button class="tb-tab" data-tab="clients">Clients</button>
     <button class="tb-tab" data-tab="conversations">Conversations</button>
     <button class="tb-tab" data-tab="sources">Sources</button>
+    <button class="tb-tab" data-tab="apollo">Apollo Sync</button>
   </nav>
   <div class="tb-right">
     <button class="tb-fresh" id="freshness-badge" title="Forcer la revalidation">
@@ -945,7 +946,7 @@ a.tb-brand:hover{opacity:0.8}
     <div class="east-strata-block">
       <section class="panel lo-journal panel-journal">
         <div class="panel-header"><span class="coord">C.04</span><h2 class="panel-title">JOURNAL</h2>
-          <div class="journal-filter"><button class="chip chip-active" data-jfilter="ALL">TOUS</button><button class="chip" data-jfilter="SENT">ENVOI</button><button class="chip" data-jfilter="WEBHOOK">WEBHOOK</button><button class="chip" data-jfilter="BLOCK">BLOCAGE</button></div>
+          <div class="journal-filter"><button class="chip chip-active" data-jfilter="ALL">TOUS</button><button class="chip" data-jfilter="SENT">ENVOI</button><button class="chip" data-jfilter="WEBHOOK">WEBHOOK</button><button class="chip" data-jfilter="BLOCK">BLOCAGE</button><button class="chip" data-jfilter="OPERATOR">OPÉRATEUR</button></div>
         </div>
         <div class="panel-body" style="padding:0" id="journal-body">
           <div class="loading-lines"><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div></div>
@@ -1030,6 +1031,124 @@ a.tb-brand:hover{opacity:0.8}
     <div class="panel-header"><span class="coord">S.01</span><h2 class="panel-title" id="source-title">APOLLO</h2><span class="panel-sub" id="source-sub">ADAPTATEUR TRANSITIONNEL</span></div>
     <div class="panel-body" id="source-content" style="padding:24px"></div>
   </section>
+</main>
+
+<!-- ═══ VIEW : APOLLO SYNC ═══ -->
+<main class="view apollo-sync-view" id="view-apollo" role="main" hidden>
+  <style>
+    .apollo-header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 16px;border-bottom:1px solid var(--edge-soft)}
+    .apollo-header-left{display:flex;flex-direction:column;gap:4px}
+    .apollo-title{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-300)}
+    .apollo-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-700);text-transform:uppercase}
+    .apollo-sync-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-300);border:1px solid var(--edge-soft);border-radius:var(--r-2);background:var(--glass-02);cursor:pointer;transition:all var(--dur-quick)}
+    .apollo-sync-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .apollo-sync-btn.loading{opacity:0.6;pointer-events:none}
+    .apollo-kpi-row{display:flex;gap:1px;background:var(--edge-faint);border-bottom:1px solid var(--edge-soft)}
+    .apollo-kpi{flex:1;display:flex;flex-direction:column;gap:4px;padding:18px 20px;background:var(--carbon-900)}
+    .apollo-kpi-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-700)}
+    .apollo-kpi-val{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--ink-100)}
+    .apollo-kpi-val.accent{color:var(--accent)}
+    .apollo-kpi-val.success{color:var(--success)}
+    .apollo-kpi-val.warn{color:var(--warn)}
+    .apollo-kpi-val.alert{color:var(--alert)}
+    .apollo-setup-notice{margin:24px 28px;padding:20px 24px;border:1px solid rgba(232,177,73,0.30);border-radius:var(--r-3);background:rgba(232,177,73,0.04)}
+    .apollo-setup-notice .notice-title{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--warn);margin-bottom:12px}
+    .apollo-setup-notice ol{padding-left:20px;display:flex;flex-direction:column;gap:8px}
+    .apollo-setup-notice li{font-size:12px;color:var(--ink-300);line-height:1.6}
+    .apollo-setup-notice code{font-family:var(--font-mono);font-size:11px;color:var(--accent);background:var(--glass-02);padding:2px 6px;border-radius:3px}
+    .apollo-table-wrap{margin:0 28px 28px;border:1px solid var(--edge-soft);border-radius:var(--r-3);overflow:hidden}
+    .apollo-table{width:100%;border-collapse:collapse}
+    .apollo-table thead tr{background:var(--glass-02);border-bottom:1px solid var(--edge-soft)}
+    .apollo-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-700);padding:10px 14px;text-align:left;white-space:nowrap}
+    .apollo-table td{padding:10px 14px;font-size:12px;color:var(--ink-300);border-bottom:1px solid var(--edge-faint);vertical-align:middle}
+    .apollo-table tr:last-child td{border-bottom:none}
+    .apollo-table tr:hover td{background:var(--glass-01)}
+    .apollo-seq-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase}
+    .apollo-seq-badge.active{background:rgba(109,212,157,0.15);color:var(--success)}
+    .apollo-seq-badge.finished{background:rgba(95,212,224,0.12);color:var(--accent)}
+    .apollo-seq-badge.paused{background:rgba(232,177,73,0.12);color:var(--warn)}
+    .apollo-seq-badge.bounced,.apollo-seq-badge.stopped{background:rgba(242,113,85,0.12);color:var(--alert)}
+    .apollo-seq-badge.pending{background:var(--glass-02);color:var(--ink-700)}
+    .apollo-open-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;color:var(--ink-500);border:1px solid var(--edge-faint);border-radius:var(--r-1);text-decoration:none;transition:all var(--dur-quick)}
+    .apollo-open-btn:hover{color:var(--accent);border-color:var(--accent)}
+    .apollo-sync-ts{font-family:var(--font-mono);font-size:10px;color:var(--ink-700);padding:0 28px 16px}
+    .replied-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);margin-right:4px;vertical-align:middle}
+  </style>
+
+  <div class="apollo-header">
+    <div class="apollo-header-left">
+      <span class="apollo-title">Apollo Sync — Ghost Tax Q2 2026</span>
+      <span class="apollo-sub">29 contacts DACH · UK · NL · séquence 3 touches</span>
+    </div>
+    <button class="apollo-sync-btn" id="apollo-refresh-btn" onclick="syncApolloNow()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Sync Apollo
+    </button>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="apollo-kpi-row" id="apollo-kpi-row">
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Contacts</span>
+      <span class="apollo-kpi-val" id="ak-total">29</span>
+    </div>
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Enrollés</span>
+      <span class="apollo-kpi-val accent" id="ak-enrolled">—</span>
+    </div>
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Ouvertures</span>
+      <span class="apollo-kpi-val" id="ak-opens">—</span>
+    </div>
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Clics</span>
+      <span class="apollo-kpi-val" id="ak-clicks">—</span>
+    </div>
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Réponses</span>
+      <span class="apollo-kpi-val success" id="ak-replies">—</span>
+    </div>
+    <div class="apollo-kpi">
+      <span class="apollo-kpi-label">Bounces</span>
+      <span class="apollo-kpi-val alert" id="ak-bounces">—</span>
+    </div>
+  </div>
+
+  <!-- Notice setup si séquence non créée -->
+  <div class="apollo-setup-notice" id="apollo-setup-notice">
+    <div class="notice-title">⚡ Actions manuelles requises dans Apollo UI</div>
+    <ol>
+      <li><strong>Connecter la boîte email</strong> — Apollo Settings → Email Accounts → Connect Gmail → utiliser <code>audits@ghost-tax.com</code> (fallback: <code>hashirama973@gmail.com</code>). Vérifier DKIM/SPF OK.</li>
+      <li><strong>Créer la séquence</strong> — Apollo Sequences → New Sequence → nom : <code>Ghost Tax — DACH UK NL Q2 2026</code> → 3 touches (J0 / J+3 / J+7). Templates dans <code>lib/drip-templates.ts</code>. Send window : Mar-Jeu 9h30-11h30. Throttle : 20/jour.</li>
+      <li><strong>Enroller les 29 contacts</strong> — Apollo Contacts → filtrer label <code>Ghost Tax Q2 2026</code> → sélectionner tous → Add to Sequence. Le cron <code>/api/cron/apollo-sync</code> se synchronisera automatiquement dès le lendemain 06h15 UTC.</li>
+      <li><strong>Activer intent signals</strong> — Apollo Signals → Job Change Alerts sur vos 30 comptes (Finance, CFO, FinOps, Procurement) + News Alerts (funding, M&A, licenciements).</li>
+      <li><strong>Créer les vues</strong> — Apollo People → Saved Filters : <em>Priority 8+</em>, <em>DACH</em>, <em>Replied</em>, <em>Bounced</em>.</li>
+    </ol>
+  </div>
+
+  <div class="apollo-sync-ts" id="apollo-sync-ts">Dernière sync : jamais — cliquez "Sync Apollo" pour rafraîchir</div>
+
+  <!-- Table contacts -->
+  <div class="apollo-table-wrap">
+    <table class="apollo-table" id="apollo-contacts-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Contact</th>
+          <th>Entreprise</th>
+          <th>Email</th>
+          <th>Séquence</th>
+          <th>Opens</th>
+          <th>Clicks</th>
+          <th>Reply</th>
+          <th>Apollo</th>
+        </tr>
+      </thead>
+      <tbody id="apollo-contacts-tbody">
+        <!-- Pré-chargé avec les 29 contacts statiques -->
+      </tbody>
+    </table>
+  </div>
 </main>
 
 </div><!-- /view-root -->
@@ -1387,6 +1506,7 @@ function showView(view){
   if (view === 'conversations') renderConversationsView();
   if (view === 'sources') renderSourcesView();
   if (view === 'command') renderCommandView();
+  if (view === 'apollo') renderApolloView();
 }
 
 document.querySelectorAll('.tb-tab').forEach(t => {
@@ -1833,7 +1953,7 @@ function renderClientsView(){
       <span class="cr-contact mono-s ink-500">${esc(c.contact.name)}</span>
       <span class="badge badge-state badge-${(c.state||'NEW').toLowerCase()}">${esc(stateLabel(c.state))}</span>
       <div class="cr-score"><div class="cr-score-bar"><div class="cr-score-bar-fill" style="width:${scorePct}%"></div></div><span class="cr-score-val">${c.score||0}</span></div>
-      <span class="cr-age" title="Dernier contact">${ageFromIso(c.lastActionAt)}</span>
+      <span class="cr-age" title="Dernier contact">${ageFromIso(c.lastActionAt)} · ${stateLabel(c.state).toLowerCase()}</span>
     </div>`;
   }).join('');
   body.querySelectorAll('.clients-row').forEach(el => {
@@ -1871,6 +1991,128 @@ document.querySelectorAll('[data-jfilter]').forEach(b => {
 /* ══════════════════════════════════════════════════════════════════
    11. Rendu — vue Sources (adaptateurs transitionnels)
    ══════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   APOLLO SYNC VIEW
+   ══════════════════════════════════════════════════════════════════ */
+
+// Données statiques des 29 contacts Ghost Tax Q2 2026
+const APOLLO_CONTACTS_STATIC = [
+  {id:"69e2460b6ae18e001dd2ff98",name:"Philip Gardner",company:"Rocket Medical",email:"philipg@rocketmedical.com"},
+  {id:"69e246176ddd5e000d5d58b5",name:"Martijn Klerk",company:"P1 Travel",email:"m.deklerk@p1travel.com"},
+  {id:"69e2461a6ddd5e000d5d58c2",name:"Maryse Trommelen",company:"PIDZ",email:"maryse.trommelen@pidz.nl"},
+  {id:"69e24604c1bf470019777202",name:"Peter Kainz",company:"Ontime Logistics",email:"peter.kainz@ontimelogistics.com"},
+  {id:"69e2461bd3b3ca00150be0c6",name:"Yolanda Both",company:"Papendal",email:"yolanda.deboth@papendal.nl"},
+  {id:"69e24606c1bf47001977722f",name:"Karsten Kammer",company:"BCN",email:"karsten.kammer@bcn.group"},
+  {id:"69e2460de0c4d80021bc892c",name:"Phil Ward",company:"Astech",email:"phil.ward@astechprojects.co.uk"},
+  {id:"69e24616d3b3ca00150be0ae",name:"Jeroen Willard",company:"Canon Business Center NL",email:"jeroen.willard@cbc-nederland.nl"},
+  {id:"69e24607bc93b1001d7792a0",name:"Stefan Stuker",company:"UCC Coffee Switzerland",email:"stefan.stuker@ucc-coffee.ch"},
+  {id:"69e24603bc93b1001d77928a",name:"Roman Bernold",company:"Kongresshaus Zürich",email:"roman.bernold@kongresshaus.ch"},
+  {id:"69e246156ddd5e000d5d5894",name:"Nick Van Der Steen",company:"Sawiday",email:"nick@sawiday.com"},
+  {id:"69e24605e90b12000dd4649c",name:"Andrej Nikitin",company:"Toyota Material Handling AT",email:"andrej@toyota-forklifts.at"},
+  {id:"69e246046ae18e001dd2fee1",name:"Kevin Matjeka",company:"ASTRA Bremen",email:"kevin.matjeka@astra-bremen.com"},
+  {id:"69e24619184deb0015586be7",name:"Marcel Oosterveld",company:"Consumentenbond",email:"moosterveld@consumentenbond.nl"},
+  {id:"69e2461c74c25000218e0970",name:"Martin Filius",company:"Topa Verpakking",email:"martin.filius@topa.nl"},
+  {id:"69e2460ebc93b1001d779322",name:"Stephen Smales",company:"Survitec / Beaufort",email:"stephen.smales@survitecgroup.com"},
+  {id:"69e2460f6ddd5e000d5d5819",name:"Charlie Irvine",company:"Ergonomic Solutions",email:"charlie.irvine@ergonomic.solutions"},
+  {id:"69e24610d3b3ca00150be08a",name:"Ellie Poltorak",company:"Inclusive Employers",email:"epoltorak@inclusiveemployers.co.uk"},
+  {id:"69e2460fbc93b1001d77932b",name:"Chris Romain",company:"Pareto Financial Planning",email:"chris.romain@paretofp.co.uk"},
+  {id:"69e24616184deb0015586bb2",name:"Patrick Helvensteijn",company:"Ampowr",email:"p.helvensteijn@ampowr.com"},
+  {id:"69e24612e0c4d80021bc8959",name:"Jenny Peel",company:"MAGTEC",email:"j.peel@magtec.co.uk"},
+  {id:"69e24618e0c4d80021bc8a6e",name:"Eric Luttikhuis",company:"Baan Twente",email:"e.luttikhuis@baantwente.nl"},
+  {id:"69e2460aef7cd2001512a780",name:"Marc Schmidt",company:"IMTRON GmbH",email:"schmidt.m@imtron.eu"},
+  {id:"69e2460a088db8001d294a12",name:"Laila Haller",company:"Eturnity",email:"laila.haller@eturnity.com"},
+  {id:"69e2460cd3b3ca00150be081",name:"Gill Martin",company:"Cumbria Education Trust",email:"gmartin@cumbriaeducationtrust.org"},
+  {id:"69e246086ddd5e000d5d57c6",name:"Christian Schoen",company:"Alois Dallmayr",email:"christian.schoen@dallmayr.de"},
+  {id:"69e24611184deb0015586a67",name:"Deborah Spence",company:"The CFO Centre UK",email:"deborah.spence@cfocentre.com"},
+  {id:"69e24614ef7cd2001512a7a1",name:"Ad Breepoel",company:"VERVAET",email:"ad.breepoel@vervaet.nl"},
+  {id:"69e24609e90b12000dd46506",name:"Reto Graf",company:"BRAUN AG",email:"reto.graf@braun.ch"},
+];
+
+let apolloLiveData = {}; // keyed by apollo contact id
+
+function seqBadge(status){
+  if(!status) return '<span class="apollo-seq-badge pending">EN ATTENTE</span>';
+  return `<span class="apollo-seq-badge ${status}">${status.toUpperCase()}</span>`;
+}
+
+function renderApolloTable(){
+  const tbody = document.getElementById('apollo-contacts-tbody');
+  if(!tbody) return;
+  let enrolled=0,opens=0,clicks=0,replies=0,bounces=0;
+  const rows = APOLLO_CONTACTS_STATIC.map((c,i)=>{
+    const live = apolloLiveData[c.id] || {};
+    const st = live.sequenceStatus || null;
+    if(st && st!=='pending') enrolled++;
+    const o = live.opens||0, cl=live.clicks||0, rep=live.replied||false, bo=st==='bounced';
+    opens+=o; clicks+=cl; if(rep) replies++; if(bo) bounces++;
+    const replyCell = rep
+      ? '<span class="replied-dot"></span><span style="color:var(--success);font-family:var(--font-mono);font-size:10px">OUI</span>'
+      : '<span style="color:var(--ink-700);font-family:var(--font-mono);font-size:10px">—</span>';
+    return `<tr>
+      <td class="mono-s ink-700">${String(i+1).padStart(2,'0')}</td>
+      <td style="color:var(--ink-100)">${c.name}</td>
+      <td style="color:var(--ink-500)">${c.company}</td>
+      <td class="mono-s" style="color:var(--ink-700)">${c.email}</td>
+      <td>${seqBadge(st)}</td>
+      <td class="mono-s" style="color:${o>0?'var(--accent)':'var(--ink-700)'}">${o||'—'}</td>
+      <td class="mono-s" style="color:${cl>0?'var(--warn)':'var(--ink-700)'}">${cl||'—'}</td>
+      <td>${replyCell}</td>
+      <td><a href="https://app.apollo.io/#/contacts/${c.id}" target="_blank" rel="noopener" class="apollo-open-btn">↗ Apollo</a></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+  // Update KPIs
+  document.getElementById('ak-enrolled').textContent = enrolled||'0';
+  document.getElementById('ak-opens').textContent = opens||'—';
+  document.getElementById('ak-clicks').textContent = clicks||'—';
+  document.getElementById('ak-replies').textContent = replies||'—';
+  document.getElementById('ak-bounces').textContent = bounces||'—';
+}
+
+function renderApolloView(){
+  renderApolloTable();
+}
+
+async function syncApolloNow(){
+  const btn = document.getElementById('apollo-refresh-btn');
+  if(!btn) return;
+  btn.classList.add('loading');
+  btn.textContent = 'Sync en cours…';
+  try{
+    const res = await fetch('/api/cron/apollo-sync',{
+      headers:{'Authorization':'Bearer ' + (window.__CRON_SECRET||'')}
+    });
+    if(res.ok){
+      const data = await res.json();
+      // Merge live data
+      (data.contacts||[]).forEach(c=>{
+        apolloLiveData[c.apolloId]={
+          sequenceStatus:c.sequenceStatus,
+          opens:c.opens,
+          clicks:c.clicks,
+          replied:c.replied
+        };
+      });
+      renderApolloTable();
+      const ts = document.getElementById('apollo-sync-ts');
+      if(ts) ts.textContent='Dernière sync : '+new Date().toLocaleString('fr-FR')+' · '+data.updated+' mis à jour · '+data.repliesDetected+' nouveaux replies';
+      // Masquer la notice setup si des contacts sont enrollés
+      if(data.contacts && data.contacts.some(c=>c.sequenceStatus && c.sequenceStatus!=='pending')){
+        const notice = document.getElementById('apollo-setup-notice');
+        if(notice) notice.hidden=true;
+      }
+    }else{
+      alert('Sync échoué: '+res.status+'. Vérifiez que CRON_SECRET est configuré.');
+    }
+  }catch(e){
+    console.error('[ApolloSync]',e);
+    alert('Erreur réseau: '+e.message);
+  }finally{
+    btn.classList.remove('loading');
+    btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Sync Apollo';
+  }
+}
+
 function renderSourcesView(){
   const activeTab = document.querySelector('.source-tab[aria-selected="true"]')?.dataset.source || 'apollo';
   const content = document.getElementById('source-content');
@@ -2312,11 +2554,18 @@ async function renderConversationsView(){
     const stLabel = stateLabel(c.state);
     const lastLabel = CONV_LABELS[c.lastKind] || c.lastKind;
     const age = ageFromIso(c.lastAt);
-    const summary = c.lastSubject ? c.lastSubject.slice(0,50) : `${lastLabel} · ${stLabel}`;
+    // Enriched summary: prefer subject from events, fallback to client draft, then kind
+    const sendEvent = c.events.find(e => e.kind === 'SEND_SUCCESS' && e.derived?.subject);
+    const subject = sendEvent?.derived?.subject || c.lastSubject || '';
+    const client = state.clients.find(cl => cl.id === c.client_id);
+    const draftSubj = client?.draft?.subject || '';
+    const displaySubject = subject || draftSubj;
+    const summaryLine1 = displaySubject ? displaySubject.slice(0,60) : `${lastLabel} · ${stLabel}`;
+    const summaryLine2 = displaySubject ? `${lastLabel} · ${c.events.length} traces` : `${c.events.length} traces`;
     return `<div class="conv-item${convState.selectedId===c.client_id?' conv-active':''}" data-conv-id="${c.client_id}">
       <div class="conv-item-company">${esc(c.company)}</div>
-      <div class="conv-item-summary">${esc(summary)}</div>
-      <div class="conv-item-meta"><span>${esc(c.market)} · ${esc(stLabel)}</span><span>${age}</span></div>
+      <div class="conv-item-summary" style="color:var(--ink-300);letter-spacing:0.04em;text-transform:none;font-size:11px">${esc(summaryLine1)}</div>
+      <div class="conv-item-meta"><span>${esc(c.market)} · ${esc(stLabel)} · ${esc(summaryLine2)}</span><span>${age}</span></div>
     </div>`;
   }).join('');
 
@@ -2337,13 +2586,26 @@ function renderThread(clientId){
   const body = document.getElementById('conv-thread-body');
   if (!header || !body || !conv) return;
 
+  const client = state.clients.find(cl => cl.id === clientId);
   header.innerHTML = `<div class="conv-th-company">${esc(conv.company)}</div>
-    <div class="conv-th-meta">${esc(conv.domain)} · ${esc(conv.market)} · ${conv.events.length} traces</div>`;
+    <div class="conv-th-meta">${esc(conv.domain)} · ${esc(conv.market)} · ${esc(stateLabel(conv.state))} · ${conv.events.length} traces</div>`;
 
   // Sort events oldest first for thread view
   const sorted = [...conv.events].sort((a,b) => a.at.localeCompare(b.at));
 
-  body.innerHTML = sorted.map(e => {
+  // Draft context banner at top of thread
+  let draftBanner = '';
+  if (client?.draft?.subject) {
+    const draftBody = client.draft.body ? client.draft.body.slice(0,300).replace(/\n/g,' ') : '';
+    const gateLabel = client.draft.gateResult || '—';
+    draftBanner = `<div style="padding:12px 16px;margin-bottom:20px;border:1px solid var(--edge-soft);background:var(--glass-01)">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--ink-500);text-transform:uppercase;margin-bottom:8px">Brouillon actuel · gate ${esc(gateLabel)}</div>
+      <div style="font-family:var(--font-display);font-size:14px;color:var(--ink-100);margin-bottom:6px">${esc(client.draft.subject)}</div>
+      <div style="font-family:var(--font-body);font-size:12px;color:var(--ink-300);line-height:1.6">${esc(draftBody)}${draftBody.length >= 300 ? '…' : ''}</div>
+    </div>`;
+  }
+
+  body.innerHTML = draftBanner + sorted.map(e => {
     const dir = CONV_DIR[e.kind] || 'signal';
     const arrow = CONV_ARROWS[dir];
     const label = CONV_LABELS[e.kind] || e.kind;
@@ -2606,6 +2868,7 @@ function obsRenderJournalEnhanced(events) {
     if (filter === 'SENT') return ['SEND_SUCCESS','DELIVERED'].includes(e.kind);
     if (filter === 'WEBHOOK') return e.provider === 'resend';
     if (filter === 'BLOCK') return ['BOUNCE','COMPLAINED','UNSUBSCRIBED','SEND_FAIL'].includes(e.kind);
+    if (filter === 'OPERATOR') return ['DEFER','REJECT','REVIEW'].includes(e.kind);
     return true;
   });
   if (sub) sub.textContent = `${filtered.length} ÉVÉNEMENTS · 24H`;

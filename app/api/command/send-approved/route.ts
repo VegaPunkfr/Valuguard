@@ -72,17 +72,28 @@ export async function POST(req: NextRequest) {
   }
 
   // V6 Phase 1 — Guard L0 : refus d'envoi si autonomie désactivée
-  try {
-    const { createAdminSupabase: getDb } = await import('@/lib/supabase');
-    const db = getDb();
-    if (db) {
-      const { data: lvlRow } = await (db as any).from('bot_settings').select('value').eq('key', 'autonomy_level').maybeSingle();
+  // P0 FIX 2026-04-17 : fail-CLOSED. Si bot_settings indisponible → on REFUSE.
+  // L'ancien comportement fail-open permettait envoi en L0 si Supabase hoquette.
+  // Override explicite via env AUTONOMY_BYPASS=true pour scripts admin.
+  if (process.env.AUTONOMY_BYPASS !== 'true') {
+    try {
+      const { createAdminSupabase: getDb } = await import('@/lib/supabase');
+      const db = getDb();
+      if (!db) {
+        return NextResponse.json({ error: 'Envoi refusé : base de contrôle d\'autonomie inaccessible (fail-closed)' }, { status: 503 });
+      }
+      const { data: lvlRow, error: lvlErr } = await (db as any).from('bot_settings').select('value').eq('key', 'autonomy_level').maybeSingle();
+      if (lvlErr) {
+        return NextResponse.json({ error: 'Envoi refusé : lecture autonomy_level échouée (fail-closed)', detail: lvlErr.message }, { status: 503 });
+      }
       const lvl = lvlRow?.value ? parseInt(JSON.parse(lvlRow.value), 10) : 0;
       if (lvl === 0) {
         return NextResponse.json({ error: 'Envoi interdit : autonomie L0 (lecture seule)' }, { status: 403 });
       }
+    } catch (e) {
+      return NextResponse.json({ error: 'Envoi refusé : erreur autonomie (fail-closed)', detail: e instanceof Error ? e.message : 'unknown' }, { status: 503 });
     }
-  } catch (_) { /* si bot_settings inaccessible, on laisse passer (fail-open pour ne pas bloquer prod) */ }
+  }
 
   try {
     const body = await req.json();
@@ -183,10 +194,16 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from: `${senderName} <audits@ghost-tax.com>`,
         to: [to],
-        reply_to: 'audits@ghost-tax.com',
+        // reply_to centralisé : fallback vers Gmail perso Edith tant que
+        // audits@ghost-tax.com n'est pas confirmée accessible.
+        // Override via env REPLY_TO_EMAIL.
+        reply_to: process.env.REPLY_TO_EMAIL || 'contact@ghost-tax.com',
         subject: cleanSubject,
         html: htmlEmail,
         text: plaintextEmail,
+        // Tracking forcé — auparavant off, explique 1/819 DELIVERED traqué.
+        track_opens: process.env.TRACK_OPENS !== 'false',
+        track_clicks: process.env.TRACK_CLICKS !== 'false',
         tags: [
           { name: 'type', value: 'outreach' },
           { name: 'domain', value: (domain || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_') },

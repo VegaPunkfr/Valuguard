@@ -699,8 +699,11 @@ export async function runOrchestrator(): Promise<OrchestratorResult> {
             body: JSON.stringify({
               from: "Ghost Tax <reports@ghost-tax.com>",
               to: [action.to],
+              reply_to: process.env.REPLY_TO_EMAIL || "contact@ghost-tax.com",
               subject,
               html,
+              track_opens: process.env.TRACK_OPENS !== "false",
+              track_clicks: process.env.TRACK_CLICKS !== "false",
             }),
           });
 

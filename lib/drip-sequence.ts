@@ -84,14 +84,18 @@ interface LeadRow {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://ghost-tax.com";
 const MAX_EMAILS_PER_RUN = 50;
 
-/** Touch schedule: days after lead creation */
+/** Touch schedule: days after lead creation.
+ *  Touch 4 & 5 désactivés le 17 avril 2026 (final-notice + cost-of-delay math
+ *  détruisait la crédibilité CFO DACH — voir docs/AUDIT-OPUS-4.7.md). */
 const TOUCH_SCHEDULE_DAYS: Record<number, number> = {
   1: 0,   // immediate
   2: 3,   // Day 3
   3: 7,   // Day 7
-  4: 14,  // Day 14
-  5: 21,  // Day 21
+  // 4: 14,  // RETIRÉ — "exposure has grown" redondant
+  // 5: 21,  // RETIRÉ — "final notice: data expires" = manipulation
 };
+
+const MAX_ACTIVE_TOUCHES = 3;
 
 // ── Main Entry Point ──────────────────────────────────
 
@@ -119,15 +123,20 @@ export async function runDripSequence(): Promise<DripResult> {
 
   // ── Fetch eligible leads ──
   // Leads that: have email, not unsubscribed, not converted,
-  // drip_step < 5, next_send_at <= now
+  // drip_step < MAX_ACTIVE_TOUCHES, next_send_at <= now.
+  //
+  // Exclusion 17 avril 2026 : les leads source=apollo-v2-* sont gérés par
+  // la sequence native Apollo ("Ghost Tax — DACH UK NL Q2 2026") — ne pas
+  // les re-toucher via Resend pour éviter doublon.
   const { data: leads, error: fetchError } = await (db as any)
     .from("outreach_leads")
     .select("*")
     .eq("unsubscribed", false)
     .eq("converted", false)
     .in("status", ["active", "new"])
-    .lt("drip_step", 5)
+    .lt("drip_step", MAX_ACTIVE_TOUCHES)
     .lte("next_send_at", now)
+    .not("source", "ilike", "apollo-v2%")
     .order("next_send_at", { ascending: true })
     .limit(MAX_EMAILS_PER_RUN);
 
@@ -186,7 +195,7 @@ export async function runDripSequence(): Promise<DripResult> {
 
     // Determine next touch number (drip_step is 0-indexed, touch is 1-indexed)
     const nextTouch = (lead.drip_step + 1) as 1 | 2 | 3 | 4 | 5;
-    if (nextTouch > 5) {
+    if (nextTouch > MAX_ACTIVE_TOUCHES) {
       result.skipped++;
       continue;
     }
@@ -247,18 +256,25 @@ export async function runDripSequence(): Promise<DripResult> {
       });
 
       if (resendKey) {
+        const { buildResendPayload } = await import("./email-config");
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${resendKey}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            from: "Ghost Tax <reports@ghost-tax.com>",
-            to: [lead.email],
-            subject,
-            html,
-          }),
+          body: JSON.stringify(
+            buildResendPayload({
+              to: lead.email,
+              subject,
+              html,
+              tags: [
+                { name: "source", value: "drip" },
+                { name: "touch", value: String(nextTouch) },
+                { name: "domain", value: (lead.domain || "unknown").replace(/[^a-zA-Z0-9_-]/g, "_") },
+              ],
+            })
+          ),
         });
 
         if (!res.ok) {
@@ -475,7 +491,7 @@ const COPY = {
       bodyExtra: (_d: DripEmailData) =>
         `This is a preview based on publicly available signals. The full Decision Pack includes vendor-by-vendor analysis, negotiation playbooks, and a CFO-ready corrective protocol.`,
       cta: "Get the Full Decision Pack",
-      note: "Instant delivery. No call required.",
+      note: "Delivered within 48 hours.",
     },
     fr: {
       subject: (c: string) => `Résultats du scan de ${c}`,
@@ -489,7 +505,7 @@ const COPY = {
       bodyExtra: (_d: DripEmailData) =>
         `Ceci est un aperçu basé sur des signaux publiquement disponibles. Le Decision Pack complet inclut une analyse fournisseur par fournisseur, des protocoles de négociation et un plan correctif prêt pour le CFO.`,
       cta: "Obtenir le Decision Pack Complet",
-      note: "Livraison instantanée. Aucun appel requis.",
+      note: "Livré sous 48 heures.",
     },
     de: {
       subject: (c: string) => `Ihre ${c}-Scan-Ergebnisse sind bereit`,
@@ -503,7 +519,7 @@ const COPY = {
       bodyExtra: (_d: DripEmailData) =>
         `Dies ist eine Vorschau basierend auf öffentlich verfügbaren Signalen. Das vollständige Decision Pack enthält eine Anbieter-für-Anbieter-Analyse, Verhandlungsleitfäden und ein CFO-fertiges Korrekturprotokoll.`,
       cta: "Vollständiges Decision Pack erhalten",
-      note: "Sofortige Lieferung. Kein Anruf erforderlich.",
+      note: "Lieferung innerhalb von 48 Stunden.",
     },
   },
 
@@ -1107,18 +1123,24 @@ async function sendDripTouch1(params: {
     meta: null,
   });
 
+  const { buildResendPayload } = await import("./email-config");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${resendKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: "Ghost Tax <reports@ghost-tax.com>",
-      to: [email],
-      subject,
-      html,
-    }),
+    body: JSON.stringify(
+      buildResendPayload({
+        to: email,
+        subject,
+        html,
+        tags: [
+          { name: "source", value: "drip-touch1-immediate" },
+          { name: "domain", value: (domain || "unknown").replace(/[^a-zA-Z0-9_-]/g, "_") },
+        ],
+      })
+    ),
   });
 
   if (!res.ok) {

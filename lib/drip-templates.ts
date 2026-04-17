@@ -158,16 +158,18 @@ const T = {
     de: "Vollst\u00e4ndiges Decision Pack anfordern \u2014 490\u00a0\u20ac",
   },
 
-  // Touch 2
+  // Touch 2 — REWRITE 2026-04-17 : passé de cost-of-delay math (anti-pattern
+  // CFO DACH, noté 3/10 dans l'audit) à question ouverte qui invite réponse.
+  // Le subject + preheader doivent ouvrir un dialogue, pas générer de l'urgence.
   t2Subject: {
-    en: (c: string, daily: string) => `${c}: ${daily} EUR leaking every day you wait`,
-    fr: (c: string, daily: string) => `${c}\u00a0: ${daily} EUR de fuite chaque jour d'attente`,
-    de: (c: string, daily: string) => `${c}: ${daily} EUR Verlust an jedem Tag des Wartens`,
+    en: (c: string, _daily: string) => `Quick question on ${c}'s SaaS stack`,
+    fr: (c: string, _daily: string) => `Question rapide sur la stack SaaS de ${c}`,
+    de: (c: string, _daily: string) => `Kurze Frage zum SaaS-Stack von ${c}`,
   },
   t2Preheader: {
-    en: (leaked: string) => `Since your scan 3 days ago, an estimated ${leaked} EUR has leaked. The cost of inaction compounds.`,
-    fr: (leaked: string) => `Depuis votre scan il y a 3 jours, environ ${leaked} EUR se sont \u00e9vapor\u00e9s. Le co\u00fbt de l'inaction se compose.`,
-    de: (leaked: string) => `Seit Ihrem Scan vor 3 Tagen sind gesch\u00e4tzt ${leaked} EUR abgeflossen. Die Kosten des Nichthandelns wachsen.`,
+    en: (_leaked: string) => `One data point I'd like to cross-check before sharing anything useful.`,
+    fr: (_leaked: string) => `Une donn\u00e9e que je souhaiterais recouper avant toute recommandation utile.`,
+    de: (_leaked: string) => `Ein Datenpunkt, den ich gerne abgleichen w\u00fcrde, bevor ich Empfehlungen ausspreche.`,
   },
   t2CostLabel: {
     en: "THE COST OF WAITING",
@@ -183,9 +185,9 @@ const T = {
   t2MonthlyLabel: { en: "MONTHLY", fr: "MENSUEL", de: "MONATLICH" },
   t2AnnualLabel: { en: "ANNUAL", fr: "ANNUEL", de: "J\u00c4HRLICH" },
   t2Body: {
-    en: "Exposure does not grow linearly. It compounds through auto-renewals, shadow IT proliferation, and uncontrolled AI tool adoption. Every day without a corrective protocol is a day of accelerating loss.",
-    fr: "L'exposition ne cro\u00eet pas lin\u00e9airement. Elle se compose par les renouvellements automatiques, la prolif\u00e9ration du Shadow IT et l'adoption non contr\u00f4l\u00e9e d'outils IA. Chaque jour sans protocole correctif est un jour de perte acc\u00e9l\u00e9r\u00e9e.",
-    de: "Exposition w\u00e4chst nicht linear. Sie verst\u00e4rkt sich durch automatische Verl\u00e4ngerungen, Shadow-IT-Proliferation und unkontrollierte KI-Tool-Adoption. Jeder Tag ohne Korrekturprotokoll ist ein Tag beschleunigter Verluste.",
+    en: "Short follow-up on my previous note. I'm not going to push a pack on you — I'd rather ask one question and let you decide if this is worth a conversation.\n\nWhat's your current ratio of SaaS spend to headcount at your company? I'm mapping benchmarks across mid-market DACH/UK and I'm curious where you land.\n\nIf you reply with a rough number, I'll send back how you compare to similar orgs this quarter — no pitch attached.",
+    fr: "Petit suivi de mon message pr\u00e9c\u00e9dent. Je ne vais pas vous pousser un pack\u00a0\u2014 je pr\u00e9f\u00e8re poser une question et vous laisser juger si une conversation a du sens.\n\nQuel est votre ratio actuel de d\u00e9pense SaaS par collaborateur\u00a0? Je cartographie les benchmarks mid-market DACH/UK et je suis curieux de savoir o\u00f9 vous vous situez.\n\nR\u00e9pondez avec un ordre de grandeur\u00a0\u2014 je vous renverrai votre positionnement par rapport aux organisations similaires ce trimestre. Aucun pitch derri\u00e8re.",
+    de: "Kurze R\u00fcckfrage zu meiner vorherigen Nachricht. Ich dr\u00e4nge Ihnen kein Paket auf\u00a0\u2014 ich stelle lieber eine Frage und \u00fcberlasse Ihnen die Entscheidung, ob ein Gespr\u00e4ch Sinn ergibt.\n\nWie hoch ist aktuell Ihr Verh\u00e4ltnis SaaS-Ausgaben zu Mitarbeiterzahl\u00a0? Ich erstelle Benchmarks f\u00fcr den DACH/UK-Mittelstand und bin neugierig, wo Sie stehen.\n\nAntworten Sie mit einer Gr\u00f6\u00dfenordnung\u00a0\u2014 ich melde zur\u00fcck, wie Sie im Vergleich zu \u00e4hnlichen Organisationen dieses Quartal abschneiden. Ohne Pitch dahinter.",
   },
   t2Compare: {
     en: (daily: string) => `Your estimated daily exposure (<strong style="color:#DC2626">${daily} EUR</strong>) exceeds the cost of the complete Decision Pack (<strong style="color:#059669">$490</strong>). A single day of unaddressed exposure covers the cost of the full analysis.`,
@@ -193,9 +195,9 @@ const T = {
     de: (daily: string) => `Ihre gesch\u00e4tzte t\u00e4gliche Exposition (<strong style="color:#DC2626">${daily}\u00a0\u20ac</strong>) \u00fcbersteigt die Kosten des vollst\u00e4ndigen Decision Packs (<strong style="color:#059669">490\u00a0\u20ac</strong>). Ein einziger Tag unbehandelter Exposition deckt die Kosten der gesamten Analyse.`,
   },
   t2Cta: {
-    en: "Stop the Leak \u2014 Get Your Decision Pack",
-    fr: "Stopper la fuite \u2014 Obtenir votre Decision Pack",
-    de: "Verluste stoppen \u2014 Decision Pack anfordern",
+    en: "Reply with your SaaS-per-head ratio",
+    fr: "R\u00e9pondez avec votre ratio SaaS/collaborateur",
+    de: "Antworten Sie mit Ihrem SaaS/Mitarbeiter-Verh\u00e4ltnis",
   },
 
   // Touch 3
@@ -578,57 +580,52 @@ ${T.complianceText[l]}`;
 // ── Touch 2: The Cost of Waiting ─────────────────────────
 
 function buildTouch2(data: DripData): DripEmailResult {
-  const { locale: l, companyName, ghostTaxAnnual, exposureLowEur, exposureHighEur, scanDate, email, domain } = data;
+  // REWRITE 2026-04-17 : Touch 2 est devenu une question ouverte sans math
+  // agressive ni data table alarmistes. Objectif : déclencher une réponse
+  // courte, pas une compliance sous pression. Visée : 6-7/10 (vs 3/10 avant).
+  const { locale: l, companyName, email, domain } = data;
   const unsubUrl = buildUnsubscribeUrl(email);
-  const checkoutUrl = buildCheckoutUrl(domain, email);
 
-  const daily = dailyLeak(ghostTaxAnnual);
-  const daysElapsed = Math.max(3, daysSince(scanDate));
-  const leaked = accumulatedLeak(ghostTaxAnnual, scanDate, daysElapsed);
-  const monthlyLeak = Math.round(ghostTaxAnnual / 12);
+  const subject = T.t2Subject[l](companyName, "");
+  const preheader = T.t2Preheader[l]("");
 
-  const subject = T.t2Subject[l](companyName, fmtEur(Math.round(daily)));
-  const preheader = T.t2Preheader[l](fmtEur(leaked));
+  // Format simple — pas de data tables, pas de cost-of-delay, corps aéré.
+  const bodyParagraphs = T.t2Body[l]
+    .split("\n\n")
+    .map(
+      (p) =>
+        `<p style="font-size:14px;color:#1e293b;line-height:1.75;margin:0 0 18px 0">${p.replace(/\n/g, "<br>")}</p>`
+    )
+    .join("");
 
-  const html = emailWrapper(`
-    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 20px 0">
-      ${T.t2Body[l]}
+  const html = emailWrapper(
+    `
+    ${bodyParagraphs}
+
+    <p style="font-size:13px;color:#64748b;line-height:1.6;margin:24px 0 0 0;padding-top:18px;border-top:1px solid #e2e8f0">
+      ${T.t2Cta[l]} — ${
+        l === "fr"
+          ? "ou juste \u00ab pass \u00bb si ce n'est pas le moment."
+          : l === "de"
+            ? "oder einfach \u201Epass\u201C, wenn es nicht passt."
+            : "or just \"pass\" if now is not the moment."
+      }
     </p>
 
-    ${dataTable(T.t2CostLabel[l], "#DC2626",
-      metricRow(T.t2DailyLabel[l], `${fmtEur(Math.round(daily))} \u20ac`, "#DC2626", true) +
-      metricRow(T.t2MonthlyLabel[l], `${fmtEur(monthlyLeak)} \u20ac`, "#3b82f6", true) +
-      metricRow(T.t2AnnualLabel[l], `${fmtEurRange(exposureLowEur, exposureHighEur)} \u20ac`, "#DC2626", true)
-    )}
-
-    <!-- Leaked Since Scan -->
-    <div style="background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:2px solid #E2E8F0;border-radius:10px;padding:28px;margin:0 0 24px 0;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
-      <p style="font-size:9px;letter-spacing:0.14em;color:#DC2626;text-transform:uppercase;margin:0 0 10px 0;font-family:'Courier New',Courier,monospace">${T.t2SinceScanLabel[l](daysElapsed)}</p>
-      <p style="font-family:'Courier New',Courier,monospace;font-size:34px;font-weight:900;color:#DC2626;margin:0;letter-spacing:-0.01em">${fmtEur(leaked)} &euro;</p>
-    </div>
-
-    <p style="font-size:13px;color:#475569;line-height:1.7;margin:0 0 24px 0">
-      ${T.t2Compare[l](fmtEur(Math.round(daily)))}
+    <p style="font-size:12px;color:#94a3b8;line-height:1.6;margin:24px 0 0 0">
+      ${domain ? `— ref ${domain}` : ""}
     </p>
-
-    ${ctaButton(T.t2Cta[l], checkoutUrl)}
-    ${paymentTerms(l)}
-  `, preheader, unsubUrl, l);
+  `,
+    preheader,
+    unsubUrl,
+    l
+  );
 
   const text = `${T.t2Body[l]}
 
-${T.t2CostLabel[l]}:
-- ${T.t2DailyLabel[l]}: ${fmtEur(Math.round(daily))} EUR
-- ${T.t2MonthlyLabel[l]}: ${fmtEur(monthlyLeak)} EUR
-- ${T.t2AnnualLabel[l]}: ${fmtEurRange(exposureLowEur, exposureHighEur)} EUR
+${T.t2Cta[l]}${l === "fr" ? " — ou juste \u00ab pass \u00bb." : l === "de" ? " \u2014 oder einfach \u201Epass\u201C." : " \u2014 or just \"pass\"."}
 
-${stripTranslation(T.t2SinceScanLabel[l](daysElapsed))}: ${fmtEur(leaked)} EUR
-
-${stripHtml(T.t2Compare[l](fmtEur(Math.round(daily))))}
-
-${stripHtml(T.t2Cta[l])}: ${checkoutUrl}
-
-${T.oneTimePayment[l]} | ${T.reportIn48h[l]} | ${T.noCommitment[l]}
+${domain ? `\u2014 ref ${domain}` : ""}
 
 ---
 ${T.unsubText[l]}

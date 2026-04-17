@@ -2,7 +2,7 @@
   "name": "Ghost Tax Cockpit",
   "short_name": "Cockpit",
   "description": "Poste de commande Ghost Tax",
-  "start_url": "/cockpit-v4.html",
+  "start_url": "/cockpit-v6.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",

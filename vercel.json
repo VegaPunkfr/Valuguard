@@ -19,6 +19,14 @@
     {
       "path": "/api/cron/daily-brief",
       "schedule": "0 5 * * 1-5"
+    },
+    {
+      "path": "/api/cron/outbound-orchestrator",
+      "schedule": "0 8 * * 2-4"
+    },
+    {
+      "path": "/api/cron/apollo-sync",
+      "schedule": "15 6 * * *"
     }
   ]
 }

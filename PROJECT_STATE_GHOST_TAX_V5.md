@@ -551,9 +551,22 @@ Avant ça, V4 reste disponible, référencé explicitement dans les banners tran
 
 ---
 
-## 14. LOT 1 — OBS-0 + OBS-1 — REPO-WRITTEN (pas runtime-applied)
+## 14. LOT 1 — OBS-0 + OBS-1 — RUNTIME CLOSED (état 2026-04-16)
 
-**Statut au 2026-04-15** : couche observabilité P2 écrite intégralement dans le repo, NON appliquée en base, NON déployée. Fallback gracieux V5 en place : zéro régression tant que le runtime n'est pas fait.
+**Statut au 2026-04-16** : couche observabilité P2 **entièrement runtime-closed**. Migration appliquée, tables peuplées (796 bootstrap events), webhook Resend live en prod, secrets rotés. Gate évalué PARTIAL (attendu, orphan_rate 98% sur historique pré-tagging). Fallback gracieux V5 conservé pour les zones tant que données live < seuil.
+
+### Runtime actuel
+- `/api/strategy/active` → 200 + body doctrine 2026.16.0-seed.r2 ACTIVE
+- `/api/webhook/resend` déployé, signature svix vérifiée, `RESEND_WEBHOOK_SECRET` en env prod
+- `/api/outreach/events` → 200 authed, retourne bootstrap events
+- `/api/admin/outreach/gate-status` + `/orphans` → 401 sans auth (sécurisés)
+- Webhook Resend créé côté provider : `c62a7a55-6b94-4143-95e5-f81166c0fac0`
+- API key Resend rotée : ancienne `7f5e1976-…` révoquée
+- Bootstrap : 794 Resend + 2 internal_backfill · gate PARTIAL (coverage 1.0, orphan 0.98, resend_reconciliation 0.997, sent_without_event 0)
+
+### Runtime en attente
+- Premier event `ingest_mode='live'` (stimulus externe : prochain send Resend avec tags)
+- Phase CP7 pour ouvrir le tagging `{client_id, attempt_id, strategy_version}` dans `send-approved/route.ts`
 
 ### Fichiers créés (REPO-WRITTEN)
 - `supabase/migrations/20260416120000_outreach_events_v1.sql` — tables `outreach_events` (13 kinds), `outreach_ingest_events` (plomberie), `bootstrap_cursors`, triggers append-only, RLS, sentinelle `strategies('pre-doctrine','ROLLED_BACK')`
@@ -595,6 +608,40 @@ Avant ça, V4 reste disponible, référencé explicitement dans les banners tran
 - Badge unique M.01 `◉◐◯` + tooltip métriques
 - Append-only sur les 2 tables events (trigger + REVOKE)
 - Idempotence : `UNIQUE(provider, provider_event_id)` + `bootstrap_cursors`
+
+---
+
+---
+
+## 15. V5 — Passe de clôture Fellow (2026-04-16)
+
+Audit profond et fermeture consolidée sur `public/cockpit-v5.html`. Neuf faux finis identifiés et traités en une passe :
+
+| # | Faux fini | Fermeture appliquée |
+|---|---|---|
+| 1 | `btn-send-now` alert() | classe `.cta-pending` + tooltip CP7 + e.preventDefault() |
+| 2 | `btn-review` alert() | idem |
+| 3 | `btn-regen` sans listener | listener no-op + classe + tooltip |
+| 4 | `btn-change-angle` sans listener | listener no-op + classe + tooltip |
+| 5 | `btn-add-note` sans listener | listener no-op + classe + tooltip (OBS-2) |
+| 6 | `btn-edit-draft` toggle local | classe + tooltip "édition locale non persistée" |
+| 7 | `btn-pause` / `btn-revoke` sans persist | classe + tooltip "backlog G4 bot_mandates" |
+| 8 | `mb-doctrine-sub` date EXP. hardcodée | binding dynamique `state.strategy.expires_at` |
+| 9 | `focal-mode-label` hardcoded | calcul dynamique depuis horloge + refresh 60s |
+
+### Pattern unique `.cta-pending`
+Remplace tous les alert()/popup par un comportement homogène : bouton visuellement dimmé (ink-500, underline dashed), curseur `help`, tooltip natif explicatif, `e.preventDefault()`. Aucune fausse porte, aucune popup, aucun mensonge d'autorité visuelle.
+
+### Dette technique documentée (non closure-critical)
+- **CSS sédimenté** : 172 `!important` et 4 blocs legacy (`.live-ops`, `.queue-item` l.543, `.clients-row`, `.journal-line`) coexistent avec la refonte Cowork. Marqueur `CSS LEGACY — dette technique` inséré pour futur ripout. Aucun impact runtime.
+- **`stamp-mini` "RATIFIÉ · ◉ ACTIVE"** : texte fixe typographique doctrinal, acceptable.
+
+### Invariants préservés
+- V4 MD5 strictement inchangé
+- Tous IDs DOM, data-attrs, hooks OBS-1, raccourcis clavier, topologie, fallback gracieux, signatures render*
+- Aucune nouvelle feature, aucun nouveau scope, aucun redesign
+
+**Closure critique V5 = COMPLÈTE au sens produit.** L'opérateur découvre en 3 secondes : zones fermées (DIFFÉRER, REJETER, search, filtres, auth, mandate lecture, doctrine, reserve, drawer lecture, journal, timeline OBS-1, badge fiabilité), zones transitionnelles marquées (Sources adapters V4, Send/Review/Regen/Change-Angle/Add-Note/Pause/Revoke avec tooltip Phase CPx). Aucune zone ne ment sur son rang.
 
 ---
 

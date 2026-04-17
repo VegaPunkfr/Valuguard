@@ -94,8 +94,11 @@ export async function GET(request: NextRequest) {
           body: JSON.stringify({
             from: "Ghost Tax <reports@ghost-tax.com>",
             to: [row.email],
+            reply_to: process.env.REPLY_TO_EMAIL || "contact@ghost-tax.com",
             subject,
             html,
+            track_opens: process.env.TRACK_OPENS !== "false",
+            track_clicks: process.env.TRACK_CLICKS !== "false",
           }),
         });
 

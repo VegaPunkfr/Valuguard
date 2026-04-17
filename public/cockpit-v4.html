@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Ghost Tax — Poste de commande V4</title>
 <!--
   ══════════════════════════════════════════════════════════════════
@@ -711,7 +711,258 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 .tape-intent{font-family:var(--mono);font-size:10px;color:var(--violet);flex-shrink:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tape-metric-bar{height:3px;border-radius:2px;background:var(--bd);margin-top:4px;overflow:hidden}
 .tape-metric-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+
+/* ══════════════════════════════════════════════════════════════════
+   XXX. MOBILE — content-first, cockpit opérable sur téléphone
+   Desktop préservé au-dessus de 900px.
+   ══════════════════════════════════════════════════════════════════ */
+/* Desktop safety: mob-tabs invisible hors mobile */
+.mob-tabs{display:none}
+
+@media (min-width:901px) and (max-width:1200px){
+  :root{--src-w:220px}
+  .cockpit-grid{grid-template-columns:var(--src-w) 1fr 280px}
+}
+@media (max-width:900px){
+  :root{
+    --topbar-h:52px;
+    --sidebar-w:0px;
+    --src-w:100%;
+    --bottom-nav-h:62px;
+  }
+  html,body{overflow:auto;-webkit-text-size-adjust:100%;font-size:14px}
+  body{overscroll-behavior-y:contain}
+  #gl-canvas{display:none !important}
+
+  /* TOPBAR */
+  .topbar{position:sticky;top:0;z-index:200;height:auto;min-height:var(--topbar-h);flex-wrap:wrap}
+  .tb-logo{padding:0 12px;height:var(--topbar-h);flex-shrink:0}
+  .tb-stats{order:3;width:100%;flex-basis:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;border-top:1px solid var(--bd);scrollbar-width:none}
+  .tb-stats::-webkit-scrollbar{display:none}
+  .tb-stat{padding:8px 14px;min-height:44px;justify-content:center}
+  .ts-val{font-size:15px}
+  .ts-lbl{font-size:8px}
+  .tb-right{order:2;margin-left:auto;padding:0 10px;gap:6px;height:var(--topbar-h);flex-shrink:0;border-left:none}
+  #live-clock{display:none}
+  .tb-right .mode-toggle{display:none}
+  #btn-prospecter{padding:10px 12px;font-size:10px;min-height:40px}
+
+  /* APP BODY stack vertical */
+  .app-body{flex-direction:column;height:auto;min-height:calc(100vh - var(--topbar-h));padding-bottom:calc(var(--bottom-nav-h) + env(safe-area-inset-bottom,0px))}
+
+  /* SIDEBAR → bottom nav */
+  .sidebar{
+    position:fixed;left:0;right:0;bottom:0;top:auto;
+    width:100%;height:var(--bottom-nav-h);
+    flex-direction:row;padding:4px 6px;gap:0;
+    border-right:none;border-top:1px solid var(--bds);
+    background:var(--graphite);z-index:300;
+    justify-content:space-around;align-items:center;
+    box-shadow:0 -2px 16px hsla(0,0%,0%,.6);
+    padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
+  }
+  .sidebar .nav-sep{display:none}
+  .sidebar .nav-item[data-view="revenue"],
+  .sidebar .nav-item[data-view="intel"],
+  .sidebar .nav-item[data-view="tape"],
+  .sidebar .nav-item[data-view="sent"],
+  .sidebar .nav-item[data-view="sprint"],
+  .sidebar .nav-item[data-view="settings"]{display:none}
+  .sidebar > div[style*="flex:1"]{display:none}
+  .sidebar .nav-item{
+    flex:1;max-width:80px;width:auto;
+    min-height:52px;height:52px;
+    border-radius:10px;border-left:none !important;
+    padding:4px 0;
+  }
+  .sidebar .nav-item .nav-label{opacity:1;font-size:8px;margin-top:3px}
+  .sidebar .nav-item::after{display:none}
+  .sidebar .nav-item svg{width:20px;height:20px}
+
+  /* MAIN */
+  .main{overflow:visible;height:auto;flex:1 1 auto;width:100%;max-width:100vw}
+  .view-panel{height:auto;min-height:calc(100vh - var(--topbar-h) - var(--bottom-nav-h));overflow:visible;width:100%}
+  .view-panel.visible{flex-direction:column}
+  .view-panel > *{max-width:100%}
+
+  /* BRIEF : stack */
+  #view-brief{background:var(--obsidian)}
+  #view-brief > div{display:flex !important;flex-direction:column;grid-template-columns:none !important;height:auto !important}
+  #view-brief > div > div{overflow:visible !important;height:auto !important}
+  #brief-sidebar{border-left:none !important;border-top:1px solid var(--bd)}
+  .brief-panel{padding:16px}
+  .brief-title{font-size:22px}
+  .brief-card{padding:14px;margin-bottom:10px}
+  .brief-card:hover{transform:none}
+  .bc-btns{flex-wrap:wrap;gap:8px}
+  .bc-btns .btn{flex:1 1 auto;min-height:44px}
+
+  /* COCKPIT : segmented + une zone à la fois */
+  #view-cockpit{flex-direction:column}
+  .cockpit-grid{grid-template-columns:1fr;grid-template-areas:"source" "detail" "actions";height:auto;display:flex;flex-direction:column}
+  .src-panel,.detail-panel,.act-panel{
+    grid-area:unset;border-right:none;border-left:none;
+    border-bottom:1px solid var(--bd);
+    min-height:calc(100vh - var(--topbar-h) - var(--bottom-nav-h) - 48px);
+    width:100%;max-width:100vw;
+  }
+  .mob-tabs{
+    display:flex;position:sticky;top:var(--topbar-h);z-index:150;
+    background:var(--graphite);border-bottom:1px solid var(--bds);
+  }
+  .mob-tab{
+    flex:1;padding:14px 8px;text-align:center;
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    color:var(--t3);cursor:pointer;border:none;background:none;
+    border-bottom:2px solid transparent;min-height:48px;
+  }
+  .mob-tab.active{color:var(--bronze-hi);border-bottom-color:var(--bronze)}
+  body.mob-tab-source #view-cockpit .detail-panel,
+  body.mob-tab-source #view-cockpit .act-panel{display:none}
+  body.mob-tab-detail #view-cockpit .src-panel,
+  body.mob-tab-detail #view-cockpit .act-panel{display:none}
+  body.mob-tab-actions #view-cockpit .src-panel,
+  body.mob-tab-actions #view-cockpit .detail-panel{display:none}
+
+  .lead-row{padding:14px;min-height:64px}
+  .lead-co{font-size:13px}
+  .lead-exp{font-size:12px}
+  .src-head{padding:12px}
+  .src-search input{font-size:14px !important}
+  .src-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .src-tabs::-webkit-scrollbar{display:none}
+  .src-tab{padding:10px 12px;min-height:44px}
+
+  /* Detail densité */
+  .dh{padding:16px}
+  .dh-name{font-size:20px}
+  .dh-icon{width:38px;height:38px}
+  .d-section{padding:14px 16px}
+  .d-metric{padding:10px 12px;min-height:44px}
+  .d-metric-label,.d-metric-val{font-size:12px}
+
+  /* APOLLO stack */
+  #view-apollo{flex-direction:column}
+  #view-apollo > div{flex-direction:column !important;height:auto !important;width:100%}
+  .apo-search-panel{width:100% !important;border-right:none !important;border-bottom:1px solid var(--bd) !important}
+
+  /* SEQUENCES stack */
+  #view-sequences{flex-direction:column}
+  #view-sequences > div{grid-template-columns:1fr !important;display:flex !important;flex-direction:column;height:auto !important;width:100%}
+  .seq-list-panel,.seq-detail-panel,#seq-analytics-panel{border-right:none !important;border-left:none !important;border-bottom:1px solid var(--bd) !important;max-height:none !important;width:100% !important}
+  .seq-detail-panel{padding:16px}
+  .seq-grid{grid-template-columns:1fr !important;height:auto !important}
+
+  /* HEADLINE STRIPS : wrap 2 colonnes */
+  .hl-strip{flex-wrap:wrap}
+  .hl-cell{flex:1 1 50%;min-width:50%;border-bottom:1px solid var(--bd);padding:10px 12px}
+  .hl-val{font-size:18px}
+
+  /* LINKEDIN stack */
+  #view-linkedin{flex-direction:column}
+  .li-view{grid-template-columns:1fr !important;display:flex !important;flex-direction:column;height:auto !important;width:100%}
+  .li-col{border-left:none !important;border-right:none !important;border-bottom:1px solid var(--bd) !important;max-height:none !important;width:100% !important}
+
+  /* REVENUE / INTEL / SETTINGS */
+  #view-revenue,#view-intel,#view-settings{overflow-y:visible !important;height:auto}
+  #revenue-view{grid-template-columns:1fr !important;height:auto !important;display:flex !important;flex-direction:column}
+  #intel-view{grid-template-columns:1fr !important;height:auto !important;display:flex !important;flex-direction:column}
+  .settings-grid{grid-template-columns:1fr !important;padding:16px;gap:12px;height:auto !important}
+
+  /* TAPE / SENT stack */
+  #view-tape,#view-sent{flex-direction:column}
+  #view-tape > div,#view-sent > div{height:auto !important;width:100%}
+
+  /* STATS BAR wrap */
+  .stats-bar{flex-wrap:wrap;gap:10px 14px;padding:10px 14px}
+
+  /* EV GRID 2 col mobile */
+  .ev-grid{grid-template-columns:repeat(2,1fr) !important}
+
+  /* BOUTONS tap targets */
+  .btn{min-height:44px;padding:12px 16px;font-size:11px}
+
+  /* Anti-zoom iOS sur inputs */
+  input,textarea,select{font-size:16px !important}
+  .src-search input{font-size:14px !important}
+
+  /* Focus visibles */
+  button:focus-visible,.btn:focus-visible,.nav-item:focus-visible,.mob-tab:focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+
+  /* Anti-débordement */
+  .detail-panel,.src-panel,.act-panel,.view-panel,.main{max-width:100vw}
+  img,svg,video,canvas{max-width:100%}
+  pre,code{white-space:pre-wrap;word-break:break-word}
+
+  /* Hover: transformer en feedback tactile actif (pas supprimer) */
+  .brief-card:hover{transform:none}
+  .lead-row:active{background:hsla(30,40%,48%,.08)}
+  .nav-item:active{background:hsla(30,40%,48%,.12);transform:scale(.95)}
+
+  /* Tap targets manquants identifiés par a11y reviewer */
+  .fmt-pill{min-height:44px;padding:10px 8px}
+  .ri-check{width:28px;height:28px;min-width:28px}
+  .ev-card{padding:14px 10px;min-height:48px}
+  .mode-btn{padding:10px 14px;min-height:40px}
+  .seq-card{padding:16px;min-height:56px}
+
+  /* CLOSURE: sys-strip 5 cells → 2+2+1 rows on mobile */
+  .sys-strip{flex-wrap:wrap}
+  .sys-cell{flex:1 1 calc(50% - 1px);min-width:calc(50% - 1px);padding:10px 12px;border-bottom:1px solid var(--bd)}
+  .sys-cell:nth-child(2n){border-right:none}
+  .sys-cell:nth-child(n+5){border-bottom:none}
+
+  /* P1-audit: approval-card overflow on mobile */
+  .approval-card{width:auto;max-width:calc(100vw - 32px);padding:16px}
+
+  /* P1-audit: revenue + intel orphan border-right en stacked mobile */
+  #revenue-view > div,#intel-view > div{border-right:none !important}
+
+  /* HARDENING: sent-hl 4 cells → wrap 2×2 */
+  .sent-hl{flex-wrap:wrap}
+  .sent-hl-cell{flex:1 1 50%;min-width:50%;border-bottom:1px solid var(--bd)}
+
+  /* HARDENING: act-row-head grid → mobile stack (sent emails view) */
+  .act-row-head{
+    grid-template-columns:14px 1fr auto !important;
+    grid-template-rows:auto auto;
+    gap:4px 8px !important;
+  }
+  .act-row-head .badge,.act-row-head .badge-db,.act-row-head .badge-local{grid-row:2;grid-column:2}
+  .act-row-head .sys-row-time{grid-row:1;grid-column:3}
+  .act-row-subject{padding-left:22px}
+
+  /* HARDENING: sys-row grid → mobile compact */
+  .sys-row{
+    grid-template-columns:14px 1fr auto auto !important;
+    gap:4px 6px !important;
+    padding:8px 16px !important;
+    min-height:44px;align-items:center;
+  }
+
+  /* HARDENING: sent-filter touch targets */
+  .sent-filter{min-height:36px;padding:8px 12px}
+
+  /* SPRINT: mobile stack */
+  #view-sprint > div > div:last-child{flex-direction:column !important}
+  #sprint-queue-panel{width:100% !important;max-height:50vh;border-right:none !important;border-bottom:1px solid var(--bd) !important}
+
+  /* HARDENING: inline small buttons (apollo results, seq queue) */
+  .btn[style*="padding:4px"],
+  .btn[style*="padding:2px"]{
+    min-height:36px !important;
+    padding:8px 12px !important;
+    font-size:11px !important;
+  }
+}
 </style>
+<link rel="manifest" href="/cockpit-manifest.json">
+<meta name="theme-color" content="#010101">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cockpit">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
 
@@ -740,6 +991,7 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
   <div class="tb-right">
     <div id="live-clock" style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--t2);white-space:nowrap"></div>
     <div style="display:flex;align-items:center;gap:4px"><div class="sync-dot" id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--green)"></div><span id="sync-text" style="font-family:var(--mono);font-size:10px;color:var(--t3);white-space:nowrap">Sync Apollo</span></div>
+    <button id="freshness-badge" onclick="forceRefreshNow()" title="Forcer la revalidation" style="font-family:var(--mono);font-size:10px;color:var(--cyan);background:transparent;border:1px solid hsla(174,100%,41%,.2);padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap"></button>
     <button class="btn" onclick="toggleBrief()" title="Brief (B)">Brief</button>
 
     <button class="btn primary" id="btn-prospecter" onclick="showView('apollo')">+ Prospecter</button>
@@ -773,6 +1025,10 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
     <div class="nav-item" data-view="linkedin" data-key="4" onclick="showView('linkedin')" title="LinkedIn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
       <span class="nav-label">LI</span>
+    </div>
+    <div class="nav-item" data-view="sprint" data-key="S" onclick="showView('sprint')" title="Revenue Sprint">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span class="nav-label">SPRINT</span>
     </div>
     <div class="nav-sep"></div>
     <div class="nav-item" data-view="revenue" data-key="5" onclick="showView('revenue')" title="Chiffre d'affaires">
@@ -812,6 +1068,11 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
 
     <!-- VIEW: COCKPIT -->
     <div class="view-panel" id="view-cockpit">
+      <div class="mob-tabs">
+        <button class="mob-tab active" type="button" data-mob-tab="source" onclick="if(window.setMobCockpitTab)setMobCockpitTab('source')">Leads</button>
+        <button class="mob-tab" type="button" data-mob-tab="detail" onclick="if(window.setMobCockpitTab)setMobCockpitTab('detail')">Détail</button>
+        <button class="mob-tab" type="button" data-mob-tab="actions" onclick="if(window.setMobCockpitTab)setMobCockpitTab('actions')">Actions</button>
+      </div>
       <div class="cockpit-grid">
         <div class="src-panel">
           <div class="src-head">
@@ -975,6 +1236,65 @@ html,body{height:100%;overflow:hidden;background:var(--obsidian);color:var(--t1)
       </div>
     </div>
 
+    <div class="view-panel" id="view-sprint" style="overflow:hidden;background:var(--obsidian)">
+      <div style="display:flex;flex-direction:column;height:100%;width:100%">
+        <!-- Headline strip -->
+        <div class="hl-strip" id="sprint-headline">
+          <div class="hl-cell"><div class="hl-val" id="sprint-hl-total">0</div><div class="hl-lbl">Comptes</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sprint-hl-ready" style="color:var(--green)">0</div><div class="hl-lbl">Ready</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sprint-hl-draft" style="color:var(--cyan)">0</div><div class="hl-lbl">En draft</div></div>
+          <div class="hl-cell"><div class="hl-val" id="sprint-hl-score" style="color:var(--bronze-hi)">—</div><div class="hl-lbl">Score moyen</div></div>
+        </div>
+        <!-- Market lane tabs + queue + detail -->
+        <div style="display:flex;flex:1;overflow:hidden">
+          <!-- Left: Market lanes + queue -->
+          <div id="sprint-queue-panel" style="width:340px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--graphite);overflow:hidden">
+            <!-- Market tabs -->
+            <div style="display:flex;border-bottom:1px solid var(--bd);padding:4px 8px;gap:2px" id="sprint-market-tabs">
+              <div class="src-tab active" onclick="setSprintMarket('ALL',this)">TOUS</div>
+              <div class="src-tab" onclick="setSprintMarket('UK',this)">🇬🇧 UK</div>
+              <div class="src-tab" onclick="setSprintMarket('US',this)">🇺🇸 US</div>
+              <div class="src-tab" onclick="setSprintMarket('IE',this)">🇮🇪 IE</div>
+            </div>
+            <!-- Bot Control -->
+            <div id="sprint-bot-control" style="padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--obsidian)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <span style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.1em">BOT ORCHESTRATOR</span>
+                <span id="bot-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--t4)"></span>
+              </div>
+              <div style="display:flex;gap:4px;margin-bottom:6px">
+                <button class="btn" onclick="setBotLevel(0)" id="bot-l0" style="flex:1;font-size:8px;padding:4px;min-height:28px">L0 Research</button>
+                <button class="btn" onclick="setBotLevel(1)" id="bot-l1" style="flex:1;font-size:8px;padding:4px;min-height:28px">L1 Review</button>
+                <button class="btn" onclick="setBotLevel(2)" id="bot-l2" style="flex:1;font-size:8px;padding:4px;min-height:28px">L2 Auto</button>
+              </div>
+              <div id="bot-lanes" style="font:400 9px var(--mono);color:var(--t3);line-height:1.8"></div>
+              <div id="bot-next-window" style="font:400 9px var(--mono);color:var(--cyan);margin-top:4px"></div>
+            </div>
+            <!-- Import buttons -->
+            <div style="padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;gap:6px;align-items:center">
+              <div style="flex:1">
+                <button class="btn primary" onclick="sprintImportApollo()" style="width:100%;font-size:10px" id="sprint-import-btn">⟳ Explorer Apollo Basic</button>
+                <div style="font:400 8px var(--mono);color:var(--t4);margin-top:3px;text-align:center">données limitées · exploration uniquement</div>
+              </div>
+              <button class="btn" onclick="sprintAddManual()" style="flex:0 0 auto;font-size:10px" title="Ajouter un compte manuellement">+ Manuel</button>
+              <button class="btn" onclick="triggerBotRun()" style="flex:0 0 auto;font-size:10px;color:var(--cyan)" id="bot-run-btn" title="Déclencher le bot maintenant">▶ Bot</button>
+            </div>
+            <!-- Stats bar -->
+            <div class="stats-bar" id="sprint-stats-bar"></div>
+            <!-- Queue list -->
+            <div id="sprint-queue" style="flex:1;overflow-y:auto"></div>
+          </div>
+          <!-- Right: Detail + Draft workspace -->
+          <div id="sprint-detail-panel" style="flex:1;overflow-y:auto;background:var(--obsidian);padding:0">
+            <div id="sprint-detail-empty" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-family:var(--mono);font-size:12px;letter-spacing:.1em">
+              Sélectionnez un compte dans la file
+            </div>
+            <div id="sprint-detail-content" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1034,6 +1354,92 @@ function getCommandKey(){
 }
 function apiHeaders(){return{'Content-Type':'application/json','x-command-key':getCommandKey()}}
 
+// ══════════════════════════════════════════════════════════════════
+// DATA FRESHNESS CONTRACT — TTL store + revalidation hooks
+// Phase 0 instrumentation + Phase 1 store + Phase 2 hooks + Phase 3 invalidation + Phase 4 badge
+// ══════════════════════════════════════════════════════════════════
+const DataStore={
+  _e:new Map(), _debug:false, _listeners:new Set(),
+  mark(k,ttl){this._e.set(k,{at:Date.now(),ttl:ttl||30000,inflight:null});this._emit()},
+  isFresh(k){const e=this._e.get(k);return !!(e&&e.at&&(Date.now()-e.at<e.ttl))},
+  age(k){const e=this._e.get(k);return e&&e.at?Date.now()-e.at:Infinity},
+  invalidate(k){if(k==null){this._e.clear()}else{this._e.delete(k)}this._emit()},
+  onChange(cb){this._listeners.add(cb);return()=>this._listeners.delete(cb)},
+  _emit(){this._listeners.forEach(f=>{try{f()}catch(_){}})},
+  async guard(k,fetcher,opts){
+    const ttl=(opts&&opts.ttl)||30000, force=!!(opts&&opts.force);
+    const e=this._e.get(k);
+    if(!force&&e&&e.at&&(Date.now()-e.at<e.ttl)){if(this._debug)console.log(`[DATA] skip key=${k} age=${Date.now()-e.at}ms`);return false}
+    if(e&&e.inflight){if(this._debug)console.log(`[DATA] dedup key=${k}`);await e.inflight;return false}
+    const reason=force?'force':(e?'stale':'cold');
+    if(this._debug)console.log(`[DATA] fetch key=${k} reason=${reason}`);
+    const p=Promise.resolve().then(fetcher);
+    this._e.set(k,{at:e?e.at:0,ttl,inflight:p});
+    try{await p;this._e.set(k,{at:Date.now(),ttl,inflight:null});this._emit();return true}
+    catch(err){const cur=this._e.get(k);if(cur)cur.inflight=null;throw err}
+  }
+};
+window.DataStore=DataStore;
+
+async function revalidateCurrentView(reason){
+  if(document.hidden)return;
+  const v=(typeof currentView!=='undefined')?currentView:null;
+  if(!v)return;
+  const force=(reason==='focus'||reason==='visibility'||reason==='view-enter'||reason==='mutation');
+  try{
+    if(v==='cockpit'||v==='brief'){
+      await DataStore.guard('prospects',async()=>{prospects.length=0;prospectsLoaded=false;await loadProspectsFromRecon()},{ttl:30000,force});
+      if(typeof renderLeads==='function')renderLeads();
+      if(v==='brief'&&typeof renderBrief==='function')renderBrief();
+    }
+    if(v==='sprint'){
+      await DataStore.guard('sprint',async()=>{await reloadSprintFromServer()},{ttl:30000,force});
+      if(typeof renderBotControl==='function')renderBotControl();
+      if(typeof renderSprintHeadline==='function')renderSprintHeadline();
+      if(typeof renderSprintQueue==='function')renderSprintQueue();
+    }
+    if(v==='linkedin'){
+      await DataStore.guard('linkedin',async()=>{liLoaded=false;await initLinkedIn()},{ttl:120000,force});
+    }
+    if(v==='tape'){
+      await DataStore.guard('tape-counts',async()=>{
+        try{const c=await fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()}).then(r=>r.json());
+          const s=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val};
+          s('tape-hl-sessions',c.sessions||0);s('tape-hl-entities',c.people||0);
+          s('tape-hl-companies',c.companies||0);s('tape-hl-thesis',c.thesis||0);
+        }catch(_){}
+      },{ttl:60000,force});
+    }
+    if(v==='sent'&&typeof renderSentEmails==='function')renderSentEmails();
+  }catch(e){console.warn('[DATA] revalidate',v,e)}
+}
+window.revalidateCurrentView=revalidateCurrentView;
+
+// Phase 2 — global listeners (idempotent, installed once)
+if(!window.__freshnessHooksInstalled){
+  window.__freshnessHooksInstalled=true;
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)revalidateCurrentView('visibility')});
+  window.addEventListener('focus',()=>revalidateCurrentView('focus'));
+  window.addEventListener('online',()=>revalidateCurrentView('online'));
+  // Badge tick — refresh age label every 10s
+  setInterval(()=>{try{updateFreshnessBadge()}catch(_){}},10000);
+}
+
+function updateFreshnessBadge(){
+  const el=document.getElementById('freshness-badge');if(!el)return;
+  const v=(typeof currentView!=='undefined')?currentView:'';
+  const keyMap={cockpit:'prospects',brief:'prospects',sprint:'sprint',linkedin:'linkedin',tape:'tape-counts'};
+  const key=keyMap[v];
+  if(!key){el.textContent='';el.title='';return}
+  const age=DataStore.age(key);
+  if(!isFinite(age)){el.textContent='MAJ ·';el.title='Jamais chargé';return}
+  const sec=Math.round(age/1000);
+  const label=sec<60?sec+'s':Math.round(sec/60)+'min';
+  el.textContent='MAJ '+label;
+  el.title=`Dernière sync ${v} · clic pour forcer`;
+}
+window.forceRefreshNow=()=>revalidateCurrentView('manual-force');
+
 // ── COLORS ──
 const SRC_COLORS={scan:'hsl(174,100%,41%)',stripe:'hsl(155,100%,39%)',apollo:'hsl(258,58%,57%)',gmail:'hsl(40,90%,47%)',linkedin:'hsl(217,91%,60%)',calendly:'hsl(168,76%,42%)'};
 const STAGE_LABELS=['Scan','Exposition','Tension','Paiement','Suivi'];
@@ -1043,7 +1449,8 @@ let prospects=[];
 let prospectsLoaded=false;
 
 async function loadProspectsFromRecon(){
-  if(prospectsLoaded)return;
+  if(prospectsLoaded&&DataStore.isFresh('prospects'))return;
+  prospects.length=0;
   try{
     // Single server-side assembled endpoint — no client-side joins
     const res=await fetch('/api/command/recon-ledger?type=prospects_send_ready',{headers:apiHeaders()});
@@ -1086,6 +1493,7 @@ async function loadProspectsFromRecon(){
       });
     });
     prospectsLoaded=true;
+    DataStore.mark('prospects',30000);
     // Load DB totals for topbar
     try{
       const cRes=await fetch('/api/command/recon-ledger?type=counts',{headers:apiHeaders()});
@@ -1246,18 +1654,51 @@ function forgeMessage(p,channel,signalType){
   // ── EMAIL: 50-80 words. Multi-signal. Burstiness. P.S. ──
 
   // Line 1: Signal-first opener (short, punchy — burstiness)
-  const openers={
-    FUNDING:{en:`${p.co} just raised.`,de:`${p.co} hat gerade eine Runde geschlossen.`,fr:`${p.co} vient de lever.`,nl:`${p.co} heeft net funding opgehaald.`},
-    HIRING_IT:{en:`${p.co} is hiring in finance.`,de:`${p.co} stellt im Finanzbereich ein.`,fr:`${p.co} recrute en finance.`,nl:`${p.co} werft aan in finance.`},
-    COST_CUTTING:{en:`${p.co} is restructuring.`,de:`${p.co} restrukturiert.`,fr:`${p.co} restructure.`,nl:`${p.co} herstructureert.`},
-    NEW_EXEC:{en:`New CFO at ${p.co}.`,de:`Neuer CFO bei ${p.co}.`,fr:`Nouveau CFO chez ${p.co}.`,nl:`Nieuwe CFO bij ${p.co}.`},
-    M_AND_A:{en:`${p.co} just got acquired.`,de:`${p.co} wurde gerade übernommen.`,fr:`${p.co} vient d'être racheté.`,nl:`${p.co} is net overgenomen.`},
-    RENEWAL:{en:`${p.co}'s Salesforce renewal is coming up.`,de:`Die Salesforce-Verlängerung von ${p.co} steht an.`,fr:`Le renouvellement Salesforce de ${p.co} approche.`,nl:`De Salesforce-verlenging van ${p.co} nadert.`},
-    COMPLIANCE:{en:`${p.co} is going through DORA compliance.`,de:`${p.co} durchläuft ein DORA-Audit.`,fr:`${p.co} est en audit DORA.`,nl:`${p.co} doorloopt een DORA-audit.`},
-    CLOUD_MIGRATION:{en:`${p.co} is migrating clouds.`,de:`${p.co} migriert die Cloud.`,fr:`${p.co} migre vers le cloud.`,nl:`${p.co} migreert naar de cloud.`},
-    SAAS_COMPLAINTS:{en:`I saw your CFO's post about cloud costs.`,de:`Ich habe den Post Ihres CFO zu Cloud-Kosten gesehen.`,fr:`J'ai vu le post de votre CFO sur les coûts cloud.`,nl:`Ik zag de post van uw CFO over cloudkosten.`},
+  // 3 variants per signal, selected by p._openerVariant (0/1/2, default 0)
+  const v=p._openerVariant||0;
+  const openerBank={
+    FUNDING:[
+      {en:`${p.co} just raised.`,de:`${p.co} hat gerade eine Runde geschlossen.`,fr:`${p.co} vient de lever.`,nl:`${p.co} heeft net funding opgehaald.`},
+      {en:`Fresh capital at ${p.co}.`,de:`Frisches Kapital bei ${p.co}.`,fr:`Capital frais chez ${p.co}.`,nl:`Vers kapitaal bij ${p.co}.`},
+      {en:`${p.co} closed a round.`,de:`${p.co} hat eine Finanzierungsrunde abgeschlossen.`,fr:`${p.co} a bouclé un tour de table.`,nl:`${p.co} heeft een ronde afgesloten.`}
+    ],
+    HIRING_IT:[
+      {en:`${p.co} is hiring in finance.`,de:`${p.co} stellt im Finanzbereich ein.`,fr:`${p.co} recrute en finance.`,nl:`${p.co} werft aan in finance.`},
+      {en:`${p.co} is growing its finance team.`,de:`${p.co} baut das Finanzteam aus.`,fr:`${p.co} renforce son équipe finance.`,nl:`${p.co} breidt het financeteam uit.`},
+      {en:`I noticed ${p.co} has open finance roles.`,de:`Mir ist aufgefallen, dass ${p.co} offene Stellen im Finanzbereich hat.`,fr:`J'ai vu que ${p.co} recrute en finance.`,nl:`Ik zag dat ${p.co} financefuncties openstaan heeft.`}
+    ],
+    COST_CUTTING:[
+      {en:`${p.co} is restructuring.`,de:`${p.co} restrukturiert.`,fr:`${p.co} restructure.`,nl:`${p.co} herstructureert.`},
+      {en:`${p.co} is streamlining operations.`,de:`${p.co} optimiert die Betriebsstruktur.`,fr:`${p.co} rationalise ses opérations.`,nl:`${p.co} optimaliseert de bedrijfsstructuur.`},
+      {en:`Headcount changes at ${p.co}.`,de:`Personalveränderungen bei ${p.co}.`,fr:`Mouvements d'effectifs chez ${p.co}.`,nl:`Personeelswijzigingen bij ${p.co}.`}
+    ],
+    NEW_EXEC:[
+      {en:`New CFO at ${p.co}.`,de:`Neuer CFO bei ${p.co}.`,fr:`Nouveau CFO chez ${p.co}.`,nl:`Nieuwe CFO bij ${p.co}.`},
+      {en:`${p.co} has a new finance leader.`,de:`${p.co} hat eine neue Finanzleitung.`,fr:`${p.co} a un nouveau directeur financier.`,nl:`${p.co} heeft een nieuwe financieel directeur.`},
+      {en:`Leadership change at ${p.co}.`,de:`Führungswechsel bei ${p.co}.`,fr:`Changement de direction chez ${p.co}.`,nl:`Leiderschapswisseling bij ${p.co}.`}
+    ],
+    M_AND_A:[
+      {en:`${p.co} just got acquired.`,de:`${p.co} wurde gerade übernommen.`,fr:`${p.co} vient d'être racheté.`,nl:`${p.co} is net overgenomen.`},
+      {en:`${p.co} completed an acquisition.`,de:`${p.co} hat eine Übernahme abgeschlossen.`,fr:`${p.co} a finalisé une acquisition.`,nl:`${p.co} heeft een overname afgerond.`},
+      {en:`Two companies merging at ${p.co}.`,de:`Zwei Unternehmen fusionieren bei ${p.co}.`,fr:`Fusion en cours chez ${p.co}.`,nl:`Twee bedrijven fuseren bij ${p.co}.`}
+    ],
+    RENEWAL:[
+      {en:`${p.co}'s Salesforce renewal is coming up.`,de:`Die Salesforce-Verlängerung von ${p.co} steht an.`,fr:`Le renouvellement Salesforce de ${p.co} approche.`,nl:`De Salesforce-verlenging van ${p.co} nadert.`}
+    ],
+    COMPLIANCE:[
+      {en:`${p.co} is going through DORA compliance.`,de:`${p.co} durchläuft ein DORA-Audit.`,fr:`${p.co} est en audit DORA.`,nl:`${p.co} doorloopt een DORA-audit.`},
+      {en:`Compliance pressure is building at ${p.co}.`,de:`Der Compliance-Druck bei ${p.co} steigt.`,fr:`La pression compliance augmente chez ${p.co}.`,nl:`De compliance-druk bij ${p.co} neemt toe.`}
+    ],
+    CLOUD_MIGRATION:[
+      {en:`${p.co} is migrating clouds.`,de:`${p.co} migriert die Cloud.`,fr:`${p.co} migre vers le cloud.`,nl:`${p.co} migreert naar de cloud.`}
+    ],
+    SAAS_COMPLAINTS:[
+      {en:`I saw your CFO's post about cloud costs.`,de:`Ich habe den Post Ihres CFO zu Cloud-Kosten gesehen.`,fr:`J'ai vu le post de votre CFO sur les coûts cloud.`,nl:`Ik zag de post van uw CFO over cloudkosten.`}
+    ],
   };
-  const opener=(openers[signalType]||{})[p.lang]||(openers[signalType]||{}).en||`${p.co} is growing fast.`;
+  const openerVariants=openerBank[signalType]||openerBank.HIRING_IT;
+  const selectedOpener=openerVariants[v%openerVariants.length]||openerVariants[0];
+  const opener=selectedOpener[p.lang]||selectedOpener.en||`${p.co} is growing fast.`;
 
   // Line 2-3: Why it matters (longer — burstiness contrast)
   const consequences={
@@ -1341,6 +1782,137 @@ function critiqueMessage(msg,p){
   const score=checks.filter(c=>c.pass).length;
   const grade=score>=8?'SOLIDE':score>=6?'CORRECT':'À REVOIR';
   return{checks,score,total:checks.length,grade};
+}
+
+// ══════════════════════════════════════════════════════════════════
+// QUALITY GATE — BLOCKING LAYER (replaces advisory critiqueMessage for send decisions)
+// ══════════════════════════════════════════════════════════════════
+
+function normalizeText(text){
+  if(!text)return '';
+  return text
+    .replace(/Ã¤/g,'ä').replace(/Ã¶/g,'ö').replace(/Ã¼/g,'ü')
+    .replace(/Ã„/g,'Ä').replace(/Ã–/g,'Ö').replace(/Ãœ/g,'Ü')
+    .replace(/ÃŸ/g,'ß').replace(/â‚¬/g,'€')
+    .replace(/Ã©/g,'é').replace(/Ã¨/g,'è').replace(/Ã /g,'à')
+    .replace(/\uFFFD/g,'');
+}
+
+function qualityGate(subject,body,prospect,mode){
+  subject=normalizeText(subject||'');
+  body=normalizeText(body||'');
+  const lower=body.toLowerCase();
+  const subLower=subject.toLowerCase();
+  const words=body.split(/\s+/).filter(w=>w).length;
+  const checks=[];
+  const hardBlockers=[];
+  const regenerateHints=[];
+
+  function addCheck(category,label,pass,severity,detail){
+    checks.push({category,label,pass,severity,detail});
+    if(!pass&&severity==='HARD_BLOCK')hardBlockers.push(label);
+    if(!pass&&severity==='REGENERATE')regenerateHints.push(detail||label);
+  }
+
+  // ── A. TECHNICAL INTEGRITY ──
+  const corruptRx=/\uFFFD|\\uFFFD|ï¿½|Ã¤|Ã¶|Ã¼|Ã©|Ã¨|Ã |ÃŸ|Ã„|Ã–|Ãœ/;
+  addCheck('technical','CORRUPT_CHARS',!corruptRx.test(body)&&!corruptRx.test(subject),'HARD_BLOCK','Caractères corrompus détectés');
+  addCheck('technical','EMPTY_SUBJECT',subject.length>=5,'HARD_BLOCK','Sujet vide ou trop court');
+  addCheck('technical','EMPTY_BODY',body.length>=20,'HARD_BLOCK','Corps vide ou trop court');
+  const placeholderRx=/\{\{|(\$\{(?!.*\}))|\[NAME\]|\[COMPANY\]|\bundefined\b|\bnull\b/;
+  addCheck('technical','UNRESOLVED_PLACEHOLDER',!placeholderRx.test(body),'HARD_BLOCK','Placeholder non résolu dans le message');
+  const brokenLinkRx=/https?:\/\/(undefined|null)/;
+  addCheck('technical','MALFORMED_LINK',!brokenLinkRx.test(body),'WARN','Lien malformé détecté');
+
+  // ── B. LINGUISTIC QUALITY ──
+  const lang=prospect?.lang||'en';
+  const langMarkers={
+    de:['ich','und','der','die','das','nicht','für','bei','mit','auch','ein','den','dem'],
+    en:['the','and','you','your','that','this','with','have','from','been','are','was','not'],
+    fr:['les','des','que','une','pour','dans','est','pas','avec','qui','sur','son','ont'],
+    nl:['het','van','een','dat','met','voor','niet','aan','ook','als','maar','nog','wel']
+  };
+  const markers=langMarkers[lang]||langMarkers.en;
+  const markerCount=markers.filter(m=>lower.includes(m)).length;
+  addCheck('linguistic','WRONG_LANGUAGE',markerCount>=3,'HARD_BLOCK',`Langue attendue: ${lang}, seulement ${markerCount} marqueurs trouvés`);
+
+  addCheck('linguistic','TOO_SHORT',words>=40,'REGENERATE',`Trop court: ${words} mots (min 40)`);
+  addCheck('linguistic','TOO_LONG',words<=150,'REGENERATE',`Trop long: ${words} mots (max 150)`);
+
+  const trimmed=body.trim();
+  addCheck('linguistic','NO_CTA',/\?\s*$/.test(trimmed),'REGENERATE','Le message ne finit pas par une question');
+
+  const aiHits=AI_BLACKLIST.filter(phrase=>lower.includes(phrase));
+  addCheck('linguistic','AI_BLACKLIST',aiHits.length===0,'REGENERATE',`Phrase IA détectée: "${aiHits[0]||''}"`);
+
+  // Repetition: same 4+ word phrase appears twice
+  const fourGrams=[];
+  const bodyWords=body.split(/\s+/);
+  for(let i=0;i<=bodyWords.length-4;i++){fourGrams.push(bodyWords.slice(i,i+4).join(' ').toLowerCase())}
+  const seen=new Set();let hasRepeat=false;
+  for(const g of fourGrams){if(seen.has(g)){hasRepeat=true;break}seen.add(g)}
+  addCheck('linguistic','REPETITION',!hasRepeat,'REGENERATE','Phrase de 4+ mots répétée');
+
+  // ── C. BUSINESS CREDIBILITY ──
+  const coName=prospect?.co||'';
+  addCheck('business','NO_COMPANY_NAME',coName&&lower.includes(coName.toLowerCase()),'HARD_BLOCK',`Nom d'entreprise "${coName}" absent du message`);
+
+  const hasIndustry=prospect?.industry&&lower.includes((prospect.industry.split('·')[0]||'').trim().toLowerCase());
+  const hasSize=prospect?.size&&lower.includes(prospect.size.toLowerCase());
+  const hasContactName=prospect?.contact?.name&&lower.includes(prospect.contact.name.split(' ')[0].toLowerCase());
+  const hasCompany=coName&&lower.includes(coName.toLowerCase());
+  const personalized=hasIndustry||hasSize||hasContactName||hasCompany;
+  addCheck('business','NO_PERSONALIZATION',personalized,'HARD_BLOCK','Aucune personnalisation (industrie, taille, contact, ou entreprise)');
+
+  const bigClaimRx=/[\d.,]+\s*(millions?|M)\s*(EUR|€|\$|£)/i;
+  const hedgeRx=/i['']ve seen|typically|ich habe gesehen|j['']ai vu|en moyenne|usually|erfahrungsgemäß/i;
+  const hasBigClaim=bigClaimRx.test(body);
+  const hasHedge=hedgeRx.test(body);
+  addCheck('business','UNDEFENDED_CLAIM',!(hasBigClaim&&!hasHedge),'REGENERATE','Chiffre > 1M sans langage de nuance');
+
+  const signalWords=['hiring','funding','restructur','renewal','migration','compliance','acquisition','merger','layoff','cost.?cut','saas.?spend','cloud','audit','dora','einstell','finanzier','restruktur','verlänger','übernahm'];
+  const hasSignal=signalWords.some(w=>new RegExp(w,'i').test(body));
+  addCheck('business','NO_SIGNAL',hasSignal,'REGENERATE','Aucun signal business référencé');
+
+  // ── D. GHOST TAX COMPLIANCE ──
+  const spamWords=['guaranteed','exclusive offer','limited time','act now','free trial','no obligation','100% guaranteed'];
+  const spamHits=spamWords.filter(w=>lower.includes(w));
+  addCheck('compliance','SPAM_WORDS',spamHits.length===0,'HARD_BLOCK',`Mot spam détecté: "${spamHits[0]||''}"`);
+
+  const hasPS=/p\.s\./i.test(body);
+  const isDACH=lang==='de';
+  addCheck('compliance','NO_PS',!(isDACH&&!hasPS),'REGENERATE','P.S. manquant (requis pour DACH)');
+
+  const hypeWords=['revolutionary','game-changing','incredible','amazing','unbelievable'];
+  const hypeHits=hypeWords.filter(w=>lower.includes(w));
+  addCheck('compliance','HYPE_LANGUAGE',hypeHits.length===0,'REGENERATE',`Langage hype: "${hypeHits[0]||''}"`);
+
+  const corpVoice=['our analysis','our platform','our solution','we offer'];
+  const corpHits=corpVoice.filter(w=>lower.includes(w));
+  addCheck('compliance','CORPORATE_VOICE',corpHits.length===0,'REGENERATE',`Voix corporate: "${corpHits[0]||''}"`);
+
+  // ── SCORING ──
+  function catScore(cat){
+    const catChecks=checks.filter(c=>c.category===cat);
+    if(!catChecks.length)return 100;
+    const passed=catChecks.filter(c=>c.pass).length;
+    return Math.round((passed/catChecks.length)*100);
+  }
+  const scores={technical:catScore('technical'),linguistic:catScore('linguistic'),business:catScore('business'),compliance:catScore('compliance')};
+
+  // ── DECISION ENGINE ──
+  let decision;
+  if(hardBlockers.length>0) decision='BLOCK';
+  else if(scores.technical<60) decision='BLOCK';
+  else if(scores.linguistic<50) decision='REGENERATE';
+  else if(scores.business<50) decision='REGENERATE';
+  else if(scores.compliance<70) decision='REGENERATE';
+  else if(mode==='internal_test') decision='PASS_DRAFT_ONLY';
+  else decision='PASS_SEND';
+
+  const auditLog=`[QG] ${decision} | T:${scores.technical} L:${scores.linguistic} B:${scores.business} C:${scores.compliance} | ${hardBlockers.length?'BLOCKERS:'+hardBlockers.join(',')+' | ':''}${prospect?.co||'?'} → ${prospect?.contact?.email||'?'}`;
+
+  return{decision,scores,checks,hardBlockers,regenerateHints,auditLog};
 }
 
 function getProspectSignals(p){
@@ -1747,7 +2319,7 @@ function openSendSurface(id){
   overlay.id='send-overlay';
   overlay.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center';
   overlay.innerHTML=`
-    <div style="width:680px;max-height:85vh;background:var(--graphite);border:1px solid var(--bd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+    <div style="width:680px;max-width:calc(100vw - 32px);max-height:85vh;background:var(--graphite);border:1px solid var(--bd);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
       <div style="padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
         <span style="font:700 13px var(--body);color:var(--t1)">Surface d'envoi — ${sanitize(p.co)}</span>
         <button onclick="document.getElementById('send-overlay').remove()" style="background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer">✕</button>
@@ -1779,9 +2351,9 @@ function openSendSurface(id){
         <div style="font:500 11px var(--mono);color:var(--cyan);margin-bottom:16px">${sanitize(p._status||'discovered')}</div>
       </div>
       <div style="padding:14px 20px;border-top:1px solid var(--bd);display:flex;gap:8px">
-        <button onclick="copySendEmail(${p.id})" style="flex:1;padding:8px;background:hsla(174,100%,41%,.1);border:1px solid hsla(174,100%,41%,.2);border-radius:5px;color:var(--cyan);font:700 11px var(--mono);cursor:pointer">Copier le message</button>
-        <button onclick="sendEmailDirect(${p.id})" style="flex:1;padding:8px;background:hsla(155,100%,39%,.15);border:1px solid hsla(155,100%,39%,.3);border-radius:5px;color:var(--green);font:700 11px var(--mono);cursor:pointer">Envoyer via Resend</button>
-        <button onclick="document.getElementById('send-overlay').remove()" style="padding:8px 16px;background:transparent;border:1px solid var(--bd);border-radius:5px;color:var(--t3);font:400 11px var(--mono);cursor:pointer">Fermer</button>
+        <button onclick="copySendEmail(${p.id})" style="flex:1;padding:12px 8px;min-height:44px;background:hsla(174,100%,41%,.1);border:1px solid hsla(174,100%,41%,.2);border-radius:5px;color:var(--cyan);font:700 11px var(--mono);cursor:pointer">Copier le message</button>
+        <button onclick="sendEmailDirect(${p.id})" style="flex:1;padding:12px 8px;min-height:44px;background:hsla(155,100%,39%,.15);border:1px solid hsla(155,100%,39%,.3);border-radius:5px;color:var(--green);font:700 11px var(--mono);cursor:pointer">Envoyer via Resend</button>
+        <button onclick="document.getElementById('send-overlay').remove()" style="padding:12px 16px;min-height:44px;background:transparent;border:1px solid var(--bd);border-radius:5px;color:var(--t3);font:400 11px var(--mono);cursor:pointer">Fermer</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -1800,9 +2372,21 @@ function copySendEmail(id){
 async function sendEmailDirect(id){
   const p=prospects.find(x=>x.id===id);if(!p||!p.emailDraft||!p.contact.email)return;
   const btn=document.querySelectorAll('#send-overlay button')[1];
+  // ── Quality Gate ──
+  const gateSubject=normalizeText(p.emailDraft.subject);
+  const gateBody=normalizeText(p.emailDraft.body);
+  const gate=qualityGate(gateSubject,gateBody,p,'outreach');
+  if(gate.decision==='BLOCK'){
+    if(btn){btn.textContent='\u2717 BLOQU\u00c9: '+gate.hardBlockers[0];btn.style.color='var(--red)'}
+    console.error('[QualityGate] BLOCK:',gate.auditLog);return;
+  }
+  if(gate.decision==='REGENERATE'){
+    if(btn){btn.textContent='\u21BB '+gate.regenerateHints[0];btn.style.color='var(--gold)'}
+    console.warn('[QualityGate] REGENERATE:',gate.auditLog);return;
+  }
   if(btn){btn.textContent='⏳ Envoi...';btn.disabled=true}
   try{
-    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:p.emailDraft.subject,textBody:p.emailDraft.body,domain:p.contact.email.split('@')[1],prospectId:String(p._reconEntityId||p.id),fromName:'Jean-Etienne'})});
+    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:gateSubject,textBody:gateBody,domain:p.contact.email.split('@')[1],prospectId:String(p._reconEntityId||p.id),fromName:'Jean-Etienne'})});
     if(res.ok){
       const data=await res.json();
       if(btn){btn.textContent='✓ Envoyé';btn.style.background='hsla(155,100%,39%,.3)'}
@@ -2003,13 +2587,25 @@ async function sendMsg(id){
   const msgEl=document.getElementById('msg-preview');
   const body=msgEl?.innerText||msgEl?.textContent||'';
   if(activeChan==='email'&&p.contact.email){
+    const sendSubject=normalizeText((msgEl?.dataset?.subject)||(p.co+' — Ghost Tax'));
+    const sendBody=normalizeText(body);
+    // ── Quality Gate ──
+    const gate=qualityGate(sendSubject,sendBody,p,'outreach');
+    if(gate.decision==='BLOCK'){
+      btn.textContent='\u2717 BLOQU\u00c9: '+gate.hardBlockers[0];btn.style.color='var(--red)';
+      console.error('[QualityGate] BLOCK:',gate.auditLog);return;
+    }
+    if(gate.decision==='REGENERATE'){
+      btn.textContent='\u21BB '+gate.regenerateHints[0];btn.style.color='var(--gold)';
+      console.warn('[QualityGate] REGENERATE:',gate.auditLog);return;
+    }
     btn.textContent='⏳ Envoi...';btn.style.opacity='.6';
     try{
-      const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:(msgEl?.dataset?.subject)||(p.co+' — Ghost Tax'),textBody:body,domain:p.domain||'',prospectId:String(id)})});
+      const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:sendSubject,textBody:sendBody,domain:p.domain||'',prospectId:String(id)})});
       if(res.ok){
         const data=await res.json().catch(()=>({}));
         btn.textContent='✓ Envoyé à '+p.contact.email;btn.style.background='hsla(155,100%,39%,.1)';btn.style.color='var(--green)';p.seqStep=Math.min(p.seqStep+1,3);
-        saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:(msgEl?.dataset?.subject)||(p.co+' — Ghost Tax'),body:body,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:'W1',channel:'email'});
+        saveSentEmail({to:p.contact.email,company:p.co,contact:p.contact.name,subject:sendSubject,body:sendBody,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),status:'sent',messageId:data.messageId||'',wave:'W1',channel:'email'});
       }
       else{btn.textContent='✗ Erreur envoi';btn.style.color='var(--red)'}
     }catch(e){btn.textContent='✗ Erreur réseau';btn.style.color='var(--red)'}
@@ -2058,7 +2654,11 @@ function showView(v){
   if(v==='intel')renderIntelView();
   if(v==='settings')renderSettings();
   if(v==='sent')renderSentEmails();
+  if(v==='sprint')renderRevenueSprint();
   if(v==='tape')initReconLedger();
+  // Phase 2 — revalidate data on every view entry
+  revalidateCurrentView('view-enter');
+  updateFreshnessBadge();
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2557,7 +3157,7 @@ function queueSelect(co){const p=prospects.find(x=>x.co===co);if(p){showView('co
 // LINKEDIN ACQUISITION ENGINE v2
 // ══════════════════════════════════════════════════════════════════
 async function initLinkedIn(){
-  if(liLoaded){renderLinkedIn();return}
+  if(liLoaded&&DataStore.isFresh('linkedin')){renderLinkedIn();return}
   const loadEl=document.getElementById('li-loading');
   if(loadEl)loadEl.style.display='flex';
   try{
@@ -2571,7 +3171,7 @@ async function initLinkedIn(){
   if(!liWins.length)liWins=[{company_name:'Scale-up Fintech',ghost_tax_annual:127000,headcount:150,industry:'Fintech',country:'France'},{company_name:'SaaS RH Leader',ghost_tax_annual:89000,headcount:320,industry:'RH Tech',country:'France'},{company_name:'E-commerce Mid',ghost_tax_annual:54000,headcount:210,industry:'E-commerce',country:'Belgique'},{company_name:'InsurTech Series B',ghost_tax_annual:71000,headcount:180,industry:'Assurance',country:'France'}];
   if(!liSignals.length)liSignals=[{company_name:'Pennylane',industry:'Fintech',headcount:320,exposure_low_eur:180000,exposure_high_eur:520000,geo_market:'FR',intent_score:94},{company_name:'Mollie',industry:'Payments',headcount:750,exposure_low_eur:390000,exposure_high_eur:1100000,geo_market:'NL',intent_score:88},{company_name:'Spendesk',industry:'FinOps',headcount:540,exposure_low_eur:280000,exposure_high_eur:800000,geo_market:'FR',intent_score:82}];
   liCalendar=_buildCalendar();liVisitors=_buildVisitors();liRoutineState=_buildRoutine();
-  liLoaded=true;if(loadEl)loadEl.style.display='none';renderLinkedIn();
+  liLoaded=true;DataStore.mark('linkedin',120000);if(loadEl)loadEl.style.display='none';renderLinkedIn();
 }
 
 function _buildCalendar(){
@@ -2972,6 +3572,7 @@ function showApprovalOverlay(action,idx){
     <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:12px">
       ${critique.checks.map(c=>`<span style="font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:2px;background:${c.pass?'hsla(155,100%,39%,.06)':'hsla(352,75%,55%,.06)'};color:${c.pass?'var(--green)':'var(--red)'};border:1px solid ${c.pass?'hsla(155,100%,39%,.12)':'hsla(352,75%,55%,.12)'}">${c.pass?'✓':'✗'} ${c.label}</span>`).join('')}
     </div>
+    ${(()=>{const gate=qualityGate(p.co+' — Ghost Tax',msg,p,'outreach');const gateColors={PASS_SEND:'var(--green)',PASS_DRAFT_ONLY:'var(--cyan)',REGENERATE:'var(--gold)',BLOCK:'var(--red)'};const gc=gateColors[gate.decision]||'var(--t3)';return`<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:6px 8px;border-radius:4px;background:${gc}08;border:1px solid ${gc}20"><span style="font:700 9px var(--mono);padding:2px 6px;border-radius:3px;background:${gc}15;color:${gc}">${gate.decision}</span><span style="font:400 9px var(--mono);color:var(--t3)">T:${gate.scores.technical} L:${gate.scores.linguistic} B:${gate.scores.business} C:${gate.scores.compliance}</span>${gate.hardBlockers.length?`<span style="font:400 9px var(--mono);color:var(--red);margin-left:auto">${gate.hardBlockers[0]}</span>`:''}${gate.regenerateHints.length&&gate.decision==='REGENERATE'?`<span style="font:400 9px var(--mono);color:var(--gold);margin-left:auto">${gate.regenerateHints[0]}</span>`:''}</div>`})()}
     <div style="display:flex;gap:8px">
       <button class="btn primary" style="flex:1" onclick="confirmApproval(${idx})">Approuver & Envoyer</button>
       <button class="btn" onclick="closeApprovalOverlay()">Annuler</button>
@@ -2983,11 +3584,23 @@ function showApprovalOverlay(action,idx){
 async function confirmApproval(idx){
   const a=briefActions[idx];if(!a)return;
   const p=a.lead;const btn=event.target;
+  const msgEl=document.getElementById('approval-msg');
+  const rawBody=msgEl?.innerText||'';
+  const approvalSubject=normalizeText(p.co+' — Ghost Tax');
+  const approvalBody=normalizeText(rawBody);
+  // ── Quality Gate ──
+  const gate=qualityGate(approvalSubject,approvalBody,p,'outreach');
+  if(gate.decision==='BLOCK'){
+    btn.textContent='\u2717 BLOQU\u00c9: '+gate.hardBlockers[0];btn.style.color='var(--red)';btn.style.opacity='1';
+    console.error('[QualityGate] BLOCK:',gate.auditLog);return;
+  }
+  if(gate.decision==='REGENERATE'){
+    btn.textContent='\u21BB '+gate.regenerateHints[0];btn.style.color='var(--gold)';btn.style.opacity='1';
+    console.warn('[QualityGate] REGENERATE:',gate.auditLog);return;
+  }
   btn.textContent='⏳ Envoi...';btn.style.opacity='.6';
   try{
-    const msgEl=document.getElementById('approval-msg');
-    const body=msgEl?.innerText||'';
-    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:p.co+' — Ghost Tax',textBody:body,domain:p.domain||'',prospectId:String(p.id)})});
+    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:approvalSubject,textBody:approvalBody,domain:p.domain||'',prospectId:String(p.id)})});
     if(res.ok){p.seqStep=Math.min(p.seqStep+1,3);briefApproved++;btn.textContent='✓ Envoyé !';btn.style.color='var(--green)';setTimeout(()=>{closeApprovalOverlay();renderBrief()},1000)}
     else{btn.textContent='✗ Erreur';btn.style.color='var(--red)';btn.style.opacity='1'}
   }catch(e){btn.textContent='✗ Réseau';btn.style.color='var(--red)';btn.style.opacity='1'}
@@ -3015,8 +3628,14 @@ async function runAutonomousPipeline(){
     const p=prospects.find(x=>x.co===q.co);if(!p)continue;
     try{
       const pSignals=getProspectSignals(p);
-      const msg=forgeMessage(p,'email',pSignals[0]?.type||'HIRING_IT');
-      const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:p.co+' — Ghost Tax',textBody:msg,domain:p.domain||'',prospectId:String(p.id)})});
+      const msg=normalizeText(forgeMessage(p,'email',pSignals[0]?.type||'HIRING_IT'));
+      const autoSubject=normalizeText(p.co+' — Ghost Tax');
+      // ── Quality Gate ──
+      const gate=qualityGate(autoSubject,msg,p,'outreach');
+      if(gate.decision==='BLOCK'||gate.decision==='REGENERATE'){
+        console.warn('[QualityGate][Auto]',gate.decision,gate.auditLog);continue;
+      }
+      const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),body:JSON.stringify({to:p.contact.email,subject:autoSubject,textBody:msg,domain:p.domain||'',prospectId:String(p.id)})});
       if(res.ok){p.seqStep=Math.min(p.seqStep+1,3);sent++}
     }catch(e){console.error('Auto pipeline error:',e)}
   }
@@ -3480,6 +4099,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='5')showView('revenue');
   else if(k==='6')showView('intel');
   else if(k==='7')showView('tape');
+  else if(k==='S'||k==='s')showView('sprint');
   else if(k==='8')showView('sent');
   else if(k==='b'||k==='B')toggleBrief();
   else if(k===',')showView('settings');
@@ -3611,6 +4231,625 @@ function timeAgo(iso){
 }
 
 // ══════════════════════════════════════════════════════════════════
+// REVENUE SPRINT — Apollo-Native GTM Operating System
+// ══════════════════════════════════════════════════════════════════
+let sprintAccounts=[
+  {id:'sprint-mcp-001',market:'UK',company:'Bloom & Wild',domain:'bloomandwild.com',headcount:260,industry:'E-commerce / Retail',revenue:'\u00a3150M',contact:{name:'Dominique',title:'Chief Financial Officer',email:'dominique@bloomandwild.com'},signals:[{type:'M_AND_A',confidence:'HIGH',detail:'3 acquisitions (Bloomon, Bergamotte) \u2014 stacks multiples en cours de fusion',tier:1},{type:'HIRING_IT',confidence:'MEDIUM',detail:'42 engineers, tech-heavy operations',tier:2}],primarySignal:'M_AND_A',signalConfidence:'HIGH',angle:'M_AND_A',asset:'Executive Memo Preview',score:0,scoringFactors:{},status:'NEW',nextAction:'Qualifier le signal',draft:null,source:'apollo_mcp',dataQuality:'RICH',techStack:['Shopify','AWS','Segment','Braze'],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()},
+  {id:'sprint-mcp-002',market:'UK',company:'TerraPay',domain:'terrapay.com',headcount:750,industry:'Cross-border Payments',revenue:'\u00a3202M',contact:{name:'Ganapathy',title:'Chief Financial Officer',email:'ganapathy@terrapay.com'},signals:[{type:'FUNDING',confidence:'HIGH',detail:'Recent funding \u2014 fintech payments en expansion globale rapide',tier:1},{type:'CLOUD_MIGRATION',confidence:'LOW',detail:'Multi-region infra probable',tier:3}],primarySignal:'FUNDING',signalConfidence:'HIGH',angle:'FUNDING',asset:'Executive Memo Preview',score:0,scoringFactors:{},status:'NEW',nextAction:'Qualifier le signal',draft:null,source:'apollo_mcp',dataQuality:'RICH',techStack:['AWS','Salesforce','Jira'],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()},
+  {id:'sprint-mcp-003',market:'UK',company:'Abcam',domain:'abcam.com',headcount:1800,industry:'Life Sciences Research',revenue:'\u00a3434M',contact:{name:'Melanie',title:'VP Finance, CFO',email:'melanie@abcam.com'},signals:[{type:'M_AND_A',confidence:'HIGH',detail:'Acquired by Danaher 2023 \u2014 stack integration in progress',tier:1},{type:'COMPLIANCE',confidence:'MEDIUM',detail:'LSE-listed pre-acquisition, regulatory reporting',tier:2}],primarySignal:'M_AND_A',signalConfidence:'HIGH',angle:'M_AND_A',asset:'Executive Memo Preview',score:0,scoringFactors:{},status:'NEW',nextAction:'Qualifier le signal',draft:null,source:'apollo_mcp',dataQuality:'RICH',techStack:['Salesforce','SAP','AWS','Workday'],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()},
+  {id:'sprint-mcp-004',market:'UK',company:'myPOS',domain:'mypos.com',headcount:1200,industry:'Financial Services / Fintech',revenue:'\u00a391M',contact:{name:'David',title:'Head of Finance \u2014 CFO',email:'david@mypos.com'},signals:[{type:'HIRING_IT',confidence:'MEDIUM',detail:'Fintech 1200 sal. \u2014 CFO dual-role finance + IT oversight',tier:2}],primarySignal:'HIRING_IT',signalConfidence:'MEDIUM',angle:'HIRING_IT',asset:'Executive Memo Preview',score:0,scoringFactors:{},status:'NEW',nextAction:'Qualifier le signal',draft:null,source:'apollo_mcp',dataQuality:'RICH',techStack:['AWS','Slack','Jira','Zendesk'],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()},
+  {id:'sprint-mcp-005',market:'UK',company:'Lucy Electric',domain:'lucyelectric.com',headcount:1400,industry:'Electrical Manufacturing',revenue:'\u00a3261M',contact:{name:'Jagadish',title:'CFO & Director',email:'jagadish@lucyelectric.com'},signals:[{type:'HIRING_IT',confidence:'MEDIUM',detail:'Industrial mid-market 1400 sal. \u2014 growing IT layer',tier:2},{type:'COMPLIANCE',confidence:'LOW',detail:'Manufacturing compliance requirements',tier:3}],primarySignal:'HIRING_IT',signalConfidence:'MEDIUM',angle:'COMPLIANCE',asset:'Executive Memo Preview',score:0,scoringFactors:{},status:'NEW',nextAction:'Qualifier le signal',draft:null,source:'apollo_mcp',dataQuality:'RICH',techStack:['SAP','Azure','Jira'],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()}
+];
+let sprintActiveId=null;
+let sprintMarketFilter='ALL';
+
+function setSprintMarket(m,btn){
+  sprintMarketFilter=m;
+  document.querySelectorAll('#sprint-market-tabs .src-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderSprintQueue();
+}
+
+function sprintScore(a){
+  let s=0;const reasons=[];let alert='';
+  // Signal strength 30%
+  const sigW={HIGH:30,MEDIUM:20,LOW:10};
+  const sigPts=sigW[a.signalConfidence]||0;s+=sigPts;
+  if(sigPts>=20)reasons.push(a.primarySignal.replace(/_/g,' '));
+  if(a.signalConfidence==='LOW')alert='Signal faible';
+  // Market fit 20%
+  const mktW={UK:20,US:18,IE:15};s+=mktW[a.market]||10;
+  // Decision maker 15%
+  const title=(a.contact.title||'').toLowerCase();
+  let contactTier='absent';
+  if(/cfo|chief financial|cio|chief information|cto|chief technology|chief procurement/.test(title)){s+=15;contactTier='priority';reasons.push(a.contact.title.split(/[,&]/)[0].trim())}
+  else if(/vp.*(finance|it|tech|procurement|operations)|vice president.*(finance|it|tech)|head of.*(finance|it|tech|procurement|operations)/.test(title)){s+=12;contactTier='acceptable';reasons.push(a.contact.title.split(/[,&]/)[0].trim())}
+  else if(/director/.test(title)&&/finance|it|tech|procurement|operations/.test(title)){s+=10;contactTier='acceptable'}
+  else if(/director|manager/.test(title)){s+=3;contactTier='weak';if(!alert)alert='Contact hors cible GT'}
+  else{contactTier='absent';if(!alert)alert='Contact inconnu'}
+  // Headcount 10%
+  if(a.headcount>=200&&a.headcount<=2000)s+=10;
+  else if(a.headcount>=100)s+=7;
+  else if(a.headcount>=2000)s+=5;
+  else s+=3;
+  // Asset 10%
+  if(a.asset)s+=10;
+  // Tech stack 10%
+  if(a.techStack&&a.techStack.length>2){s+=10;if(reasons.length<2)reasons.push(a.techStack.length+' outils')}
+  else if(a.techStack&&a.techStack.length>0)s+=5;
+  // Recency 5%
+  const age=(Date.now()-new Date(a.importedAt).getTime())/3600000;
+  if(age<24)s+=5;else if(age<72)s+=3;else s+=1;
+  // Data quality tier
+  const hasEmail=!!(a.contact&&a.contact.email&&a.contact.email.includes('@'));
+  const hasDomain=!!(a.domain&&a.domain.length>3);
+  const hasSignalT1T2=a.signals&&a.signals.some(sg=>(sg.tier||4)<=2);
+  if(hasEmail&&hasDomain&&hasSignalT1T2){a.dataQuality='RICH'}
+  else if(hasEmail||hasDomain){a.dataQuality='PARTIAL';if(s>60)s=60;if(!alert)alert='Données partielles'}
+  else{a.dataQuality='MINIMAL';s=Math.min(s,30);alert='Données insuffisantes'}
+  // Source-aware caps
+  if(a.source==='apollo_api'&&a.dataQuality!=='RICH'){s=Math.min(s,60);if(!alert)alert='API Basic — données limitées'}
+  if(a.source==='manual'&&!hasEmail){s=Math.min(s,30);if(!alert)alert='Manuel — à enrichir'}
+  // Store readable metadata
+  a.scoreReasons=reasons.slice(0,2);
+  a.scoreAlert=alert;
+  a.contactTier=contactTier;
+  // Reason-to-contact layer
+  const sigDetail=a.signals&&a.signals[0]?a.signals[0].detail:'ICP match';
+  a.whyNow=a.signalConfidence==='HIGH'?sigDetail:a.signalConfidence==='MEDIUM'?sigDetail+' (signal moyen)':'Pas de signal temporel fort';
+  a.whyThisContact=contactTier==='priority'?(a.contact.title||'')+' — décideur budget IT/SaaS':contactTier==='acceptable'?(a.contact.title||'')+' — influence sur les achats':'Contact à confirmer';
+  a.whyGhostTax=a.headcount>=200?'Entreprise '+a.headcount+' sal. en '+a.industry+' — exposition SaaS probable':'Profil à vérifier — taille limitée';
+  return Math.min(100,s);
+}
+
+function sprintSignalFromApollo(company){
+  const signals=[];
+  // Tier 1 — primary exploitable (HIGH confidence)
+  if(company.fundingRound||company.latestFunding)signals.push({type:'FUNDING',confidence:'HIGH',detail:'Funding round detected',tier:1});
+  if(company.recentAcquisition||company.acquired)signals.push({type:'M_AND_A',confidence:'HIGH',detail:'Acquisition detected',tier:1});
+  if(company.newExec||company.executiveChange)signals.push({type:'NEW_EXEC',confidence:'HIGH',detail:'New C-level executive',tier:1});
+  if(company.headcountGrowth&&company.headcountGrowth<-10)signals.push({type:'COST_CUTTING',confidence:'HIGH',detail:'Headcount down '+Math.abs(company.headcountGrowth)+'%',tier:1});
+  // Tier 2 — secondary useful (MEDIUM confidence)
+  if(company.isHiring||company.jobPostings>5)signals.push({type:'HIRING_IT',confidence:'MEDIUM',detail:(company.jobPostings||'?')+' open roles in finance/IT',tier:2});
+  if(company.headcountGrowth&&company.headcountGrowth<-5&&company.headcountGrowth>=-10)signals.push({type:'COST_CUTTING',confidence:'MEDIUM',detail:'Headcount declining '+Math.abs(company.headcountGrowth)+'%',tier:2});
+  if(company.buyingIntent||company.intentStrength)signals.push({type:'HIRING_IT',confidence:'MEDIUM',detail:'Apollo buying intent detected — investigating IT/finance tools',tier:2});
+  // Tier 3 — weak, never alone (LOW confidence)
+  if(company.techStack&&company.techStack.length>12)signals.push({type:'CLOUD_MIGRATION',confidence:'LOW',detail:'Large stack ('+company.techStack.length+' tools) — inferred',tier:3});
+  // Fallback: ICP match only — Tier 4, no auto-draft
+  if(signals.length===0)signals.push({type:'HIRING_IT',confidence:'LOW',detail:'ICP match only — no verified signal',tier:4});
+  // Sort by tier (best first)
+  signals.sort((a,b)=>a.tier-b.tier);
+  return signals;
+}
+
+function sprintAngleFromSignal(signalType){
+  return SIGNAL_ANGLES[signalType]?signalType:'HIRING_IT';
+}
+
+async function sprintImportApollo(){
+  const btn=document.getElementById('sprint-import-btn');
+  btn.textContent='⟳ Recherche Apollo...';btn.style.opacity='.6';
+  window._sprintSignalCount={};
+  const market=sprintMarketFilter==='ALL'?'UK':sprintMarketFilter;
+  const countryMap={UK:'United Kingdom',US:'United States',IE:'Ireland'};
+  try{
+    // Use the existing Apollo sync endpoint
+    const res=await fetch('/api/command/apollo-sync',{
+      method:'POST',headers:apiHeaders(),
+      body:JSON.stringify({filters:{countries:[countryMap[market]||'United Kingdom'],minEmployees:100,maxEmployees:5000},limit:10})
+    });
+    if(!res.ok){
+      let errMsg='Erreur '+res.status;
+      try{const errData=await res.json();errMsg=errData.error||errMsg}catch(_){}
+      if(res.status===401)errMsg='Auth: clé cockpit invalide';
+      else if(res.status===429)errMsg='Rate limit — attendre 1 min';
+      else if(res.status===500)errMsg=errMsg.includes('APOLLO_API_KEY')?'APOLLO_API_KEY absente sur Vercel':errMsg;
+      else if(res.status===502)errMsg='Apollo API erreur — vérifier la clé Apollo';
+      btn.textContent='✗ '+errMsg;btn.style.color='var(--red)';btn.style.opacity='1';
+      console.error('[Sprint] Import failed:',res.status,errMsg);
+      setTimeout(()=>{btn.textContent='⟳ Explorer Apollo Basic';btn.style.color=''},8000);
+      return;
+    }
+    let data;
+    try{data=await res.json()}catch(_){btn.textContent='✗ Réponse JSON invalide';btn.style.color='var(--red)';btn.style.opacity='1';return}
+    const results=Array.isArray(data.prospects)?data.prospects:Array.isArray(data.results)?data.results:[];
+    // Filter out empty/unusable results (Apollo Basic returns obfuscated data)
+    const usable=results.filter(r=>(r.company&&r.company!=='Unknown')||(r.domain&&r.domain.length>3));
+    if(!usable.length){
+      btn.textContent=results.length?'Apollo: données partielles (plan Basic) — utiliser Claude Code MCP':'0 résultats — changer filtres/marché';
+      btn.style.color='var(--gold)';btn.style.opacity='1';
+      console.warn('[Sprint] Apollo returned',results.length,'results but',usable.length,'usable. Plan Basic limits data. Use Claude Code MCP Apollo tools instead.',data);
+      setTimeout(()=>{btn.textContent='⟳ Explorer Apollo Basic';btn.style.color=''},8000);
+      return;
+    }
+    let added=0;
+    results.forEach(r=>{
+      if(sprintAccounts.find(a=>a.domain===r.domain))return;
+      const signals=sprintSignalFromApollo(r);
+      const primary=signals[0];
+      const account={
+        id:'sprint-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+        market:market,
+        company:r.company||r.domain,
+        domain:r.domain||'',
+        headcount:r.headcount||r.estimated_num_employees||0,
+        industry:r.industry||'Technology',
+        revenue:r.revenue||'—',
+        contact:{name:r.contactName||r.financeLead?.name||'—',title:r.contactTitle||r.financeLead?.title||'CFO',email:r.contactEmail||r.financeLead?.email||r.email||''},
+        signals:signals,
+        primarySignal:primary.type,
+        signalConfidence:primary.confidence,
+        angle:sprintAngleFromSignal(primary.type),
+        asset:'Executive Memo Preview',
+        score:0,
+        scoringFactors:{},
+        status:'NEW',
+        nextAction:'Qualifier le signal',
+        draft:null,
+        source:'apollo_api',
+        techStack:r.techStack||r.tech_stack||[],
+        importedAt:new Date().toISOString(),
+        lastActionAt:new Date().toISOString()
+      };
+      account.score=sprintScore(account);
+      // Hard blockers
+      if(!account.contact.email)account.score=0;
+      if(account.headcount<50)account.score=0;
+      if(primary.confidence==='LOW'&&signals.length===1)account.nextAction='Signal faible — vérifier manuellement';
+      sprintAccounts.push(account);
+      added++;
+      // Auto-draft: 5 hard conditions all required
+      const _t=(account.contact.title||'').toLowerCase();
+      const isGTDecisionMaker=/cfo|chief financial|cio|chief information|cto|chief technology|chief procurement/i.test(_t)
+        ||/vp.*(finance|it|technology|procurement|operations)|vice president.*(finance|it|technology)/i.test(_t)
+        ||/head of.*(finance|it|technology|procurement|operations)/i.test(_t)
+        ||(/director/i.test(_t)&&/finance|it|technology|procurement|operations/i.test(_t));
+      const canAutoDraft=account.score>=60
+        &&account.contact.email
+        &&account.signalConfidence!=='LOW'
+        &&(account.signals[0]?.tier||4)<=2
+        &&isGTDecisionMaker
+        &&account.dataQuality==='RICH';
+      if(canAutoDraft){
+        // Draft diversity: select opener variant by company name hash
+        const _hash=account.company.split('').reduce((h,c)=>((h<<5)-h)+c.charCodeAt(0),0);
+        const _variant=Math.abs(_hash)%3;
+        const draftSignal=account.primarySignal;
+        const p={co:account.company,flag:account.market==='UK'?'🇬🇧':account.market==='US'?'🇺🇸':'🇮🇪',contact:account.contact,industry:account.industry,size:account.headcount+' sal.',exp:'€200K–€500K',tech:account.techStack||[],lang:'en',heat:account.score,_openerVariant:_variant};
+        const msg=forgeMessage(p,'email',draftSignal);
+        const subj=account.company+' — '+(SIGNAL_ANGLES[account.angle]?.label||'SaaS Exposure');
+        const gate=qualityGate(subj,msg,p,'outreach');
+        if(gate.decision!=='BLOCK'){
+          account.draft={subject:subj,body:msg,gateResult:gate.decision+' (T:'+gate.scores.technical+' L:'+gate.scores.linguistic+' B:'+gate.scores.business+' C:'+gate.scores.compliance+')'};
+          account.status='DRAFT_REVIEW';
+          account.nextAction='Relire et promouvoir en READY';
+        }
+      }else if(account.score>0&&account.signalConfidence==='LOW'){
+        account.nextAction='Signal faible — enrichir ou rejeter';
+      }else if(account.score>0&&account.contactTier==='absent'){
+        account.nextAction='Trouver le décideur via Apollo';
+      }
+    });
+    const drafted=sprintAccounts.filter(a=>a.status==='DRAFT_REVIEW').length;
+    if(added===0){btn.textContent='0 nouveaux — changer filtres';btn.style.color='var(--gold)'}
+    else if(drafted===0){btn.textContent=added+' importés · 0 draftés (signaux faibles)';btn.style.color='var(--gold)'}
+    else{btn.textContent='✓ '+added+' importés · '+drafted+' draftés';btn.style.color='var(--green)'}
+    btn.style.opacity='1';
+    sprintAccounts.sort((a,b)=>b.score-a.score);
+    renderSprintQueue();renderSprintHeadline();
+    setTimeout(()=>{btn.textContent='⟳ Explorer Apollo Basic';btn.style.color='';},5000);
+  }catch(e){
+    btn.textContent='✗ Réseau';btn.style.color='var(--red)';btn.style.opacity='1';
+    console.error('Sprint import error:',e);
+  }
+}
+
+function sprintAddManual(){
+  const company=prompt('Nom de l\'entreprise :');if(!company)return;
+  const domain=prompt('Domaine (ex: company.com) :');if(!domain)return;
+  const contactName=prompt('Nom du contact :');
+  const contactTitle=prompt('Titre (ex: CFO, VP Finance) :')||'CFO';
+  const contactEmail=prompt('Email :');
+  const market=sprintMarketFilter==='ALL'?'UK':sprintMarketFilter;
+  if(sprintAccounts.find(a=>a.domain===domain)){alert('Ce domaine existe déjà dans Sprint.');return}
+  const account={
+    id:'sprint-manual-'+Date.now(),market:market,company:company,domain:domain,headcount:0,
+    industry:'',revenue:'—',
+    contact:{name:contactName||'—',title:contactTitle,email:contactEmail||''},
+    signals:[{type:'HIRING_IT',confidence:'LOW',detail:'Import manuel — signal à vérifier',tier:4}],
+    primarySignal:'HIRING_IT',signalConfidence:'LOW',
+    angle:'HIRING_IT',asset:'Executive Memo Preview',score:0,scoringFactors:{},
+    status:'NEW',nextAction:'Enrichir via Apollo ou Claude Code',draft:null,source:'manual',
+    techStack:[],importedAt:new Date().toISOString(),lastActionAt:new Date().toISOString()
+  };
+  account.score=sprintScore(account);
+  sprintAccounts.push(account);
+  sprintAccounts.sort((a,b)=>b.score-a.score);
+  renderSprintQueue();renderSprintHeadline();
+}
+
+function renderSprintHeadline(){
+  const total=sprintAccounts.length;
+  const ready=sprintAccounts.filter(a=>a.status==='READY').length;
+  const draft=sprintAccounts.filter(a=>a.status==='DRAFT_REVIEW').length;
+  const avgScore=total?Math.round(sprintAccounts.reduce((s,a)=>s+a.score,0)/total):0;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('sprint-hl-total',total);set('sprint-hl-ready',ready);
+  set('sprint-hl-draft',draft);set('sprint-hl-score',avgScore||'—');
+}
+
+function renderSprintQueue(){
+  const filtered=sprintMarketFilter==='ALL'?sprintAccounts:sprintAccounts.filter(a=>a.market===sprintMarketFilter);
+  const el=document.getElementById('sprint-queue');
+  if(!filtered.length){
+    el.innerHTML='<div style="padding:24px 16px;font:400 11px var(--mono);color:var(--t3);line-height:1.8">'+
+      '<div style="font:700 12px var(--mono);color:var(--t2);margin-bottom:12px">File vide</div>'+
+      '<div>1. Cliquez <strong>Explorer Apollo Basic</strong> ci-dessus</div>'+
+      '<div>2. Si peu de résultats : changez de marché (UK → US → IE)</div>'+
+      '<div>3. Si signaux faibles : essayez les filtres Apollo :</div>'+
+      '<div style="padding:8px 12px;margin:8px 0;border-left:2px solid var(--cyan);color:var(--t2)">'+
+        '• Funding Round &lt; 12 mois<br>'+
+        '• Job Postings &gt; 5 (finance/IT)<br>'+
+        '• Headcount 200-2000<br>'+
+        '• Tech: Salesforce, AWS, Jira'+
+      '</div>'+
+      '<div style="color:var(--t4);margin-top:8px">Si Apollo ne retourne rien d\'exploitable → session terminée. Mieux vaut 0 que du bruit.</div>'+
+    '</div>';
+    return;
+  }
+  // Stats
+  const statsEl=document.getElementById('sprint-stats-bar');
+  if(statsEl){
+    const pill=(l,v,c)=>'<div class="stats-pill"><span class="stats-pill-val" style="color:'+c+'">'+v+'</span><span class="stats-pill-lbl">'+l+'</span></div>';
+    statsEl.innerHTML=pill('Total',filtered.length,'var(--t1)')+pill('Qualifiés',filtered.filter(a=>a.status!=='NEW'&&a.status!=='REJECTED').length,'var(--green)')+pill('Score moy.',Math.round(filtered.reduce((s,a)=>s+a.score,0)/filtered.length),'var(--cyan)');
+  }
+  el.innerHTML=filtered.map(a=>{
+    const sigColor={FUNDING:'var(--green)',HIRING_IT:'var(--blue)',COST_CUTTING:'var(--red)',NEW_EXEC:'var(--violet)',M_AND_A:'var(--red)',RENEWAL:'var(--bronze-hi)',COMPLIANCE:'var(--gold)',CLOUD_MIGRATION:'var(--cyan)',SAAS_COMPLAINTS:'var(--gold)'}[a.primarySignal]||'var(--t3)';
+    const statusColor={NEW:'var(--t3)',QUALIFIED:'var(--cyan)',DRAFT_REVIEW:'var(--gold)',READY:'var(--green)',SENT:'var(--green)',REJECTED:'var(--red)',DEFERRED:'var(--t4)'}[a.status]||'var(--t3)';
+    const mktFlag={UK:'🇬🇧',US:'🇺🇸',IE:'🇮🇪'}[a.market]||'🌍';
+    return '<div class="lead-row'+(a.id===sprintActiveId?' active':'')+'" onclick="selectSprintAccount(\''+a.id+'\')">'+
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:36px">'+
+        '<span style="font:800 14px var(--mono);color:'+sigColor+'">'+a.score+'</span>'+
+        '<span style="font:600 7px var(--mono);color:var(--t4)">'+a.market+'</span>'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+(a.dataQuality==='RICH'?'var(--green)':a.dataQuality==='PARTIAL'?'var(--gold)':'var(--red)')+'" title="Data: '+a.dataQuality+'"></span>'+
+      '</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div class="lead-co">'+mktFlag+' '+sanitize(a.company)+'</div>'+
+        '<div class="lead-meta">'+
+          '<span style="font:700 9px var(--mono);color:'+sigColor+';letter-spacing:.04em">'+(a.scoreReasons||[]).join(' · ')+'</span>'+
+          '<span style="font:400 9px var(--mono);color:'+statusColor+'">'+a.status+'</span>'+
+          (a.scoreAlert?'<span style="font:700 8px var(--mono);color:var(--red)">⚠ '+sanitize(a.scoreAlert)+'</span>':'')+
+        '</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font:600 10px var(--mono);color:var(--t2)">'+sanitize(a.contact.name.split(' ')[0])+'</div>'+
+        '<div style="font:400 9px var(--mono);color:var(--t4)">'+sanitize(a.contact.title.substring(0,15))+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function selectSprintAccount(id){
+  sprintActiveId=id;
+  renderSprintQueue();
+  const a=sprintAccounts.find(x=>x.id===id);
+  if(!a)return;
+  document.getElementById('sprint-detail-empty').style.display='none';
+  const dc=document.getElementById('sprint-detail-content');
+  dc.style.display='block';
+  const sigColor={FUNDING:'var(--green)',HIRING_IT:'var(--blue)',COST_CUTTING:'var(--red)',NEW_EXEC:'var(--violet)',M_AND_A:'var(--red)',RENEWAL:'var(--bronze-hi)',COMPLIANCE:'var(--gold)',CLOUD_MIGRATION:'var(--cyan)',SAAS_COMPLAINTS:'var(--gold)'}[a.primarySignal]||'var(--t3)';
+  const confColor={HIGH:'var(--green)',MEDIUM:'var(--gold)',LOW:'var(--red)'}[a.signalConfidence]||'var(--t3)';
+  const assets=['Executive Memo Preview','SaaS Audit One-Pager','Diagnostic Method Note','Industry Benchmark'];
+
+  dc.innerHTML=
+    // Header
+    '<div class="dh">'+
+      '<div style="margin-bottom:10px"><button class="btn" onclick="deselectSprintAccount()">← File</button></div>'+
+      '<div class="dh-top">'+
+        '<div class="dh-icon" style="border-color:'+sigColor+'30;color:'+sigColor+'">'+sanitize(a.company.substring(0,2).toUpperCase())+'</div>'+
+        '<div><div class="dh-name">'+sanitize(a.company)+'</div>'+
+          '<div class="dh-sub"><span>'+sanitize(a.industry)+'</span><span style="opacity:.3">·</span><span>'+a.headcount+' sal.</span><span style="opacity:.3">·</span><span>'+a.market+'</span></div>'+
+        '</div>'+
+        '<div style="margin-left:auto;text-align:center"><div style="font:800 24px var(--disp);color:'+sigColor+'">'+a.score+'</div><div style="font:700 8px var(--mono);color:var(--t4)">SCORE</div></div>'+
+      '</div>'+
+    '</div>'+
+    // Signal Intelligence
+    '<div class="d-section">'+
+      '<div class="d-section-title">Signal Intelligence</div>'+
+      '<div class="d-grid">'+
+        '<div class="d-metric"><span class="d-metric-label">Signal principal</span><span class="d-metric-val" style="color:'+sigColor+'">'+a.primarySignal.replace(/_/g,' ')+'</span></div>'+
+        '<div class="d-metric"><span class="d-metric-label">Confiance</span><span class="d-metric-val" style="color:'+confColor+'">'+a.signalConfidence+'</span></div>'+
+        '<div class="d-metric"><span class="d-metric-label">Angle recommandé</span><span class="d-metric-val">'+(SIGNAL_ANGLES[a.angle]?.label||a.angle)+'</span></div>'+
+        '<div class="d-metric"><span class="d-metric-label">Contact</span><span class="d-metric-val" style="color:var(--cyan)">'+sanitize(a.contact.name)+' · '+sanitize(a.contact.title)+'</span></div>'+
+        '<div class="d-metric"><span class="d-metric-label">Email</span><span class="d-metric-val" style="font-size:10px">'+sanitize(a.contact.email||'—')+'</span></div>'+
+        (a.techStack&&a.techStack.length?'<div class="d-metric"><span class="d-metric-label">Stack</span><span class="d-metric-val" style="font-size:10px">'+a.techStack.slice(0,4).map(sanitize).join(', ')+'</span></div>':'')+
+      '</div>'+
+      a.signals.map(s=>'<div style="margin-top:6px;padding:6px 10px;border-radius:4px;background:hsla(0,0%,100%,.02);font:400 10px var(--mono);color:var(--t2)"><span style="color:'+sigColor+';font-weight:700">'+s.type.replace(/_/g,' ')+'</span> · '+sanitize(s.detail)+' · <span style="color:'+confColor+'">'+s.confidence+'</span></div>').join('')+
+      '<div style="margin-top:12px;padding:10px;border-radius:6px;border:1px solid var(--bd);background:hsla(174,100%,41%,.03)">'+
+        '<div style="font:700 9px var(--mono);color:var(--cyan);letter-spacing:.08em;margin-bottom:6px">POURQUOI CE COMPTE</div>'+
+        '<div style="font:400 10px var(--mono);color:var(--t2);margin-bottom:3px"><span style="color:var(--t3)">Now:</span> '+sanitize(a.whyNow||'—')+'</div>'+
+        '<div style="font:400 10px var(--mono);color:var(--t2);margin-bottom:3px"><span style="color:var(--t3)">Contact:</span> '+sanitize(a.whyThisContact||'—')+'</div>'+
+        '<div style="font:400 10px var(--mono);color:var(--t2)"><span style="color:var(--t3)">Ghost Tax:</span> '+sanitize(a.whyGhostTax||'—')+'</div>'+
+      '</div>'+
+    '</div>'+
+    // Proof Asset
+    '<div class="d-section">'+
+      '<div class="d-section-title">Proof Asset</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">'+
+        assets.map(asset=>'<div onclick="assignSprintAsset(\''+a.id+'\',\''+asset+'\')" style="padding:8px 12px;border-radius:6px;border:1px solid '+(a.asset===asset?'var(--cyan)':'var(--bd)')+';background:'+(a.asset===asset?'hsla(174,100%,41%,.06)':'transparent')+';cursor:pointer;font:500 10px var(--mono);color:'+(a.asset===asset?'var(--cyan)':'var(--t2)')+';transition:all .15s">'+
+          (a.asset===asset?'✓ ':'')+asset+'</div>').join('')+
+      '</div>'+
+      (!a.asset?'<div style="margin-top:8px;font:700 10px var(--mono);color:var(--red)">⚠ Aucun asset sélectionné — draft bloqué</div>':'')+
+    '</div>'+
+    // Draft Workspace
+    '<div class="d-section">'+
+      '<div class="d-section-title">Draft Workspace</div>'+
+      (a.asset?
+        (a.draft?
+          '<div style="margin-bottom:8px;font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em">OBJET</div>'+
+          '<div style="font:500 12px var(--body);color:var(--t1);margin-bottom:12px">'+sanitize(a.draft.subject)+'</div>'+
+          '<div style="font:700 9px var(--mono);color:var(--t3);letter-spacing:.08em;margin-bottom:4px">MESSAGE</div>'+
+          '<pre style="font:400 11px var(--mono);color:var(--t2);white-space:pre-wrap;line-height:1.6;background:rgba(0,0,0,.2);padding:12px;border-radius:6px;max-height:200px;overflow-y:auto">'+sanitize(a.draft.body)+'</pre>'+
+          '<div style="margin-top:8px;font:700 9px var(--mono);color:var(--t3)">Quality Gate: <span style="color:var(--green)">'+sanitize(a.draft.gateResult)+'</span></div>'
+        :
+          '<button class="btn primary" onclick="generateSprintDraft(\''+a.id+'\')" style="width:100%">Générer le draft interne</button>'
+        )
+      :
+        '<div style="padding:16px;text-align:center;font:400 11px var(--mono);color:var(--t4)">Sélectionnez un proof asset ci-dessus pour débloquer le draft.</div>'
+      )+
+    '</div>'+
+    // Actions
+    '<div class="d-section">'+
+      '<div class="d-section-title">Actions</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
+        (a.status==='DRAFT_REVIEW'&&a.draft?'<button class="btn primary" onclick="promoteSprintReady(\''+a.id+'\')">Promouvoir → READY</button>':'')+
+        (a.status==='READY'?'<button class="btn primary" onclick="sprintSendToReview(\''+a.id+'\')">Envoyer en review interne</button>':'')+
+        '<button class="btn" onclick="sprintDefer(\''+a.id+'\')">Différer</button>'+
+        '<button class="btn danger" onclick="sprintReject(\''+a.id+'\')">Rejeter</button>'+
+      '</div>'+
+      '<div style="margin-top:10px;font:600 10px var(--mono);color:var(--t3)">Next action: <span style="color:var(--cyan)">'+sanitize(a.nextAction)+'</span></div>'+
+      '<div style="font:400 9px var(--mono);color:var(--t4);margin-top:4px">'+a.status+' · '+a.source+' · <span style="color:'+(a.dataQuality==='RICH'?'var(--green)':a.dataQuality==='PARTIAL'?'var(--gold)':'var(--red)')+'">'+a.dataQuality+'</span> · '+relativeDate(a.importedAt)+'</div>'+
+      (a.dataQuality!=='RICH'?'<div style="margin-top:6px;padding:8px 10px;border-radius:4px;border:1px solid var(--gold);background:hsla(40,90%,47%,.04);font:400 10px var(--mono);color:var(--gold)">⚠ Données '+(a.source==='apollo_api'?'Apollo Basic limitées — utiliser Claude Code MCP pour enrichir':'manuelles — à vérifier')+(a.dataQuality==='MINIMAL'?' · Auto-draft bloqué':'')+'</div>':'')+
+    '</div>';
+}
+
+function deselectSprintAccount(){
+  sprintActiveId=null;
+  document.getElementById('sprint-detail-empty').style.display='';
+  document.getElementById('sprint-detail-content').style.display='none';
+  renderSprintQueue();
+}
+
+// ── ACKNOWLEDGED SERVER PERSISTENCE ────────────────────────
+async function persistSprintAccount(a){
+  const payload={account:{
+    id:a.id,market:a.market,company:a.company,domain:a.domain,headcount:a.headcount,
+    industry:a.industry,revenue:a.revenue,
+    contactName:a.contact?.name,contactTitle:a.contact?.title,contactEmail:a.contact?.email,
+    signals:a.signals,primarySignal:a.primarySignal,signalConfidence:a.signalConfidence,
+    angle:a.angle,asset:a.asset,score:a.score,
+    dataQuality:a.dataQuality,source:a.source,status:a.status,nextAction:a.nextAction,
+    draftSubject:a.draft?.subject||null,draftBody:a.draft?.body||null,draftGateResult:a.draft?.gateResult||null,
+    techStack:a.techStack,whyNow:a.whyNow,whyThisContact:a.whyThisContact,whyGhostTax:a.whyGhostTax,
+    scoreReasons:a.scoreReasons,scoreAlert:a.scoreAlert,contactTier:a.contactTier
+  }};
+  try{
+    const res=await fetch('/api/command/sprint',{method:'POST',headers:apiHeaders(),body:JSON.stringify(payload)});
+    if(!res.ok){console.error('[Sprint] Server rejected persist for',a.company,res.status);return false}
+    DataStore.invalidate('sprint');
+    return true;
+  }catch(e){console.error('[Sprint] Network error persisting',a.company,e);return false}
+}
+
+async function reloadSprintFromServer(){
+  try{
+    const res=await fetch('/api/command/sprint',{headers:apiHeaders()});
+    if(!res.ok)return;
+    const data=await res.json();
+    if(data.accounts&&data.accounts.length){
+      sprintAccounts=data.accounts.map(a=>({
+        id:a.id,market:a.market,company:a.company,domain:a.domain,
+        headcount:a.headcount,industry:a.industry,revenue:a.revenue,
+        contact:{name:a.contact_name,title:a.contact_title,email:a.contact_email},
+        signals:a.signals||[],primarySignal:a.primary_signal,signalConfidence:a.signal_confidence,
+        angle:a.angle,asset:a.asset,score:a.score,
+        dataQuality:a.data_quality,source:a.source,status:a.status,
+        nextAction:a.next_action,
+        draft:a.draft_body?{subject:a.draft_subject,body:a.draft_body,gateResult:a.draft_gate_result}:null,
+        techStack:a.tech_stack||[],whyNow:a.why_now,whyThisContact:a.why_this_contact,whyGhostTax:a.why_ghost_tax,
+        scoreReasons:a.score_reasons||[],scoreAlert:a.score_alert,contactTier:a.contact_tier,
+        importedAt:a.imported_at,lastActionAt:a.last_action_at
+      }));
+    }
+    if(data.settings?.autonomy_level!==undefined)botLevel=parseInt(data.settings.autonomy_level,10)||0;
+  }catch(e){console.warn('[Sprint] Reload from server failed:',e)}
+}
+
+async function assignSprintAsset(id,asset){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a)return;
+  const prev={asset:a.asset,status:a.status,nextAction:a.nextAction,draft:a.draft};
+  a.asset=a.asset===asset?null:asset;
+  a.score=sprintScore(a);
+  if(a.asset&&a.status==='NEW'){a.status='DRAFT_REVIEW';a.nextAction='Générer le draft';}
+  if(!a.asset&&a.draft){a.draft=null;a.status='NEW';a.nextAction='Sélectionner un asset';}
+  const ok=await persistSprintAccount(a);
+  if(!ok){a.asset=prev.asset;a.status=prev.status;a.nextAction=prev.nextAction;a.draft=prev.draft;alert('Erreur serveur — action annulée')}
+  selectSprintAccount(id);renderSprintHeadline();
+}
+
+async function generateSprintDraft(id){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a||!a.asset)return;
+  const p={co:a.company,flag:a.market==='UK'?'🇬🇧':a.market==='US'?'🇺🇸':'🇮🇪',contact:a.contact,industry:a.industry,size:a.headcount+' sal.',exp:'€200K–€500K',tech:a.techStack||[],lang:a.market==='US'?'en':'en',heat:a.score};
+  const msg=forgeMessage(p,'email',a.primarySignal);
+  const subject=a.company+' — '+(SIGNAL_ANGLES[a.angle]?.label||'SaaS Exposure');
+  const gate=qualityGate(subject,msg,p,'outreach');
+  a.draft={subject:subject,body:msg,gateResult:gate.decision+' (T:'+gate.scores.technical+' L:'+gate.scores.linguistic+' B:'+gate.scores.business+' C:'+gate.scores.compliance+')'};
+  a.status='DRAFT_REVIEW';
+  a.nextAction=gate.decision==='BLOCK'?'Draft bloqué — régénérer':'Relire et promouvoir en READY';
+  a.lastActionAt=new Date().toISOString();
+  const ok=await persistSprintAccount(a);
+  if(!ok){a.draft=null;alert('Erreur serveur — draft non persisté')}
+  selectSprintAccount(id);renderSprintHeadline();
+}
+
+async function promoteSprintReady(id){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a||!a.draft)return;
+  if(!a.asset){alert('Asset obligatoire');return}
+  if(!a.contact.email){alert('Email contact manquant');return}
+  if(a.signalConfidence==='LOW'&&!confirm('Signal LOW confidence. Promouvoir quand même ?'))return;
+  const prevStatus=a.status;
+  a.status='READY';
+  a.nextAction='Envoyer en review interne ou attendre le bot';
+  a.lastActionAt=new Date().toISOString();
+  const ok=await persistSprintAccount(a);
+  if(!ok){a.status=prevStatus;alert('Erreur serveur — promotion annulée')}
+  selectSprintAccount(id);renderSprintHeadline();
+}
+
+async function sprintSendToReview(id){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a||!a.draft||a.status!=='READY')return;
+  try{
+    const res=await fetch('/api/command/send-approved',{method:'POST',headers:apiHeaders(),
+      body:JSON.stringify({to:'j.helene@outlook.fr',subject:'[REVIEW] '+a.draft.subject,textBody:a.draft.body,domain:a.domain,prospectId:a.id,fromName:'Ghost Tax',lang:'en'})});
+    if(res.ok){
+      a.status='SENT';a.nextAction='Review interne envoyée';a.lastActionAt=new Date().toISOString();
+      await persistSprintAccount(a);
+      await reloadSprintFromServer();
+      selectSprintAccount(id);renderSprintHeadline();
+    }else{alert('Envoi échoué — '+res.status)}
+  }catch(e){console.error('Sprint send error:',e);alert('Erreur réseau')}
+}
+
+async function sprintDefer(id){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a)return;
+  const prev=a.status;
+  a.status='DEFERRED';a.nextAction='Revoir plus tard';a.lastActionAt=new Date().toISOString();
+  const ok=await persistSprintAccount(a);
+  if(!ok){a.status=prev;alert('Erreur serveur — defer annulé')}
+  sprintAccounts.sort((a,b)=>b.score-a.score);
+  deselectSprintAccount();renderSprintHeadline();
+}
+
+async function sprintReject(id){
+  const a=sprintAccounts.find(x=>x.id===id);if(!a)return;
+  const prev={status:a.status,score:a.score};
+  a.status='REJECTED';a.score=0;a.nextAction='Rejeté';a.lastActionAt=new Date().toISOString();
+  const ok=await persistSprintAccount(a);
+  if(!ok){a.status=prev.status;a.score=prev.score;alert('Erreur serveur — rejet annulé')}
+  sprintAccounts.sort((a,b)=>b.score-a.score);
+  deselectSprintAccount();renderSprintHeadline();
+}
+
+// ── BOT ORCHESTRATOR CONTROL ──────────────────────────────
+let botLevel=0; // 0=research, 1=review, 2=auto
+const BOT_POLICIES={
+  UK:{auto:true,offset:1,primary:[9,11],secondary:[14,16],cap:5,days:[2,3,4]},
+  US:{auto:true,offset:-4,primary:[9,11],secondary:[14,16],cap:5,days:[2,3,4]},
+  IE:{auto:true,offset:1,primary:[9,11],secondary:[14,16],cap:3,days:[2,3,4]},
+  DE:{auto:false,offset:2,primary:[9,11],secondary:[14,16],cap:0,days:[2,3,4]}
+};
+
+async function triggerBotRun(){
+  const btn=document.getElementById('bot-run-btn');
+  if(!btn)return;
+  btn.textContent='⟳ ...';btn.style.opacity='.6';
+  try{
+    const res=await fetch('/api/cron/outbound-orchestrator',{headers:{'Authorization':'Bearer '+getCommandKey(),'x-command-key':getCommandKey()}});
+    const data=await res.json();
+    const s=data.sent?.length||0;const b=data.blocked?.length||0;
+    btn.textContent=s>0?'✓ '+s+' envoyés':b>0?'⚠ '+b+' bloqués':'— idle';
+    btn.style.color=s>0?'var(--green)':b>0?'var(--gold)':'var(--t3)';
+    btn.style.opacity='1';
+    if(data.log)console.log('[Bot]',data.log.join('\n'));
+    setTimeout(()=>{btn.textContent='▶ Bot';btn.style.color='var(--cyan)'},5000);
+  }catch(e){
+    btn.textContent='✗ erreur';btn.style.color='var(--red)';btn.style.opacity='1';
+    console.error('[Bot] trigger failed:',e);
+    setTimeout(()=>{btn.textContent='▶ Bot';btn.style.color='var(--cyan)'},5000);
+  }
+}
+
+function setBotLevel(level){
+  botLevel=level;
+  renderBotControl();
+  fetch('/api/command/sprint',{method:'POST',headers:apiHeaders(),body:JSON.stringify({setting:'autonomy_level',value:level})})
+    .then(r=>{if(!r.ok)console.error('[Bot] Failed to persist level')})
+    .catch(e=>console.error('[Bot] Persist error:',e));
+}
+
+function renderBotControl(){
+  const level=botLevel;
+  ['bot-l0','bot-l1','bot-l2'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){el.className=i===level?'btn primary':'btn'}
+  });
+  const dot=document.getElementById('bot-status-dot');
+  if(dot)dot.style.background=level===0?'var(--t4)':level===1?'var(--gold)':'var(--green)';
+
+  const lanesEl=document.getElementById('bot-lanes');
+  if(lanesEl){
+    const lines=Object.entries(BOT_POLICIES).map(([mkt,p])=>{
+      const localH=(new Date().getUTCHours()+p.offset+24)%24;
+      const inWindow=(localH>=p.primary[0]&&localH<p.primary[1])||(localH>=p.secondary[0]&&localH<p.secondary[1]);
+      const dayOk=p.days.includes(new Date().getUTCDay());
+      const canSend=p.auto&&level>=2&&inWindow&&dayOk;
+      const status=!p.auto?'<span style="color:var(--red)">REVIEW</span>':
+        canSend?'<span style="color:var(--green)">AUTO</span>':
+        level<2?'<span style="color:var(--gold)">L'+(level)+'</span>':
+        !dayOk?'<span style="color:var(--t4)">OFF DAY</span>':
+        '<span style="color:var(--t4)">HORS FENÊTRE</span>';
+      const flag={UK:'🇬🇧',US:'🇺🇸',IE:'🇮🇪',DE:'🇩🇪'}[mkt]||'';
+      return flag+' '+mkt+': '+status+' · '+localH+'h local · cap '+p.cap;
+    });
+    lanesEl.innerHTML=lines.join('<br>');
+  }
+
+  const nextEl=document.getElementById('bot-next-window');
+  if(nextEl){
+    if(level<2){nextEl.textContent=level===0?'Mode research — aucun envoi':'Mode review — validation manuelle requise';return}
+    // Find next send window across all auto markets
+    const now=new Date();
+    let nextSend='Aucune fenêtre active';
+    for(const [mkt,p] of Object.entries(BOT_POLICIES)){
+      if(!p.auto)continue;
+      const localH=(now.getUTCHours()+p.offset+24)%24;
+      if(localH>=p.primary[0]&&localH<p.primary[1]&&p.days.includes(now.getUTCDay())){
+        nextSend='Fenêtre '+mkt+' active maintenant ('+localH+'h-'+p.primary[1]+'h local)';break;
+      }
+      if(localH>=p.secondary[0]&&localH<p.secondary[1]&&p.days.includes(now.getUTCDay())){
+        nextSend='Fenêtre secondaire '+mkt+' ('+localH+'h-'+p.secondary[1]+'h local)';break;
+      }
+    }
+    nextEl.textContent=nextSend;
+  }
+}
+
+// Init bot level from localStorage
+// botLevel loaded from Supabase in renderRevenueSprint()
+
+async function renderRevenueSprint(){
+  renderBotControl();
+  if(!DataStore.isFresh('sprint')){
+    await reloadSprintFromServer();
+    DataStore.mark('sprint',30000);
+    console.log('[Sprint] Loaded',sprintAccounts.length,'accounts from Supabase, bot L'+botLevel);
+  }
+  // Score pre-loaded accounts on first render
+  sprintAccounts.forEach(a=>{if(a.score===0&&a.status!=='REJECTED')a.score=sprintScore(a)});
+  sprintAccounts.sort((a,b)=>b.score-a.score);
+  // Auto-kill deferred > 7 days
+  const now=Date.now();
+  sprintAccounts.forEach(a=>{
+    if(a.status==='DEFERRED'&&(now-new Date(a.lastActionAt||a.importedAt).getTime())>7*86400000){
+      a.status='REJECTED';a.score=0;a.nextAction='Auto-rejeté (>7j différé)';
+    }
+  });
+  renderBotControl();
+  renderSprintHeadline();
+  renderSprintQueue();
+}
+
+// ══════════════════════════════════════════════════════════════════
 // INIT — EVERYTHING STARTS HERE
 // ══════════════════════════════════════════════════════════════════
 (async function init(){
@@ -3624,11 +4863,46 @@ function timeAgo(iso){
   showView('brief');
   renderDashboardWidgets();
   renderActionWidgets();
-  initWebGL();
+  if(!window.matchMedia('(max-width: 900px)').matches)initWebGL();
   // Sync live data (async — UI renders immediately with demo data, then updates)
   syncLiveData();
   // Re-sync every 5 minutes
   setInterval(syncLiveData,300000);
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE — segmented control cockpit + auto-swap sur selection lead
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+  var mq=window.matchMedia('(max-width: 900px)');
+  function isMobile(){return mq.matches}
+  window.setMobCockpitTab=function(tab){
+    document.body.classList.remove('mob-tab-source','mob-tab-detail','mob-tab-actions');
+    document.body.classList.add('mob-tab-'+tab);
+    document.querySelectorAll('.mob-tab').forEach(function(b){
+      b.classList.toggle('active',b.dataset.mobTab===tab);
+    });
+  };
+  function initMobile(){
+    if(isMobile()&&!/mob-tab-/.test(document.body.className)){
+      window.setMobCockpitTab('source');
+    }
+  }
+  try{
+    if(typeof window.selectLead==='function'){
+      var _sel=window.selectLead;
+      window.selectLead=function(id){_sel(id);if(isMobile())window.setMobCockpitTab('detail')};
+    }
+    if(typeof window.deselectLead==='function'){
+      var _des=window.deselectLead;
+      window.deselectLead=function(){_des();if(isMobile())window.setMobCockpitTab('source')};
+    }
+  }catch(e){}
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initMobile);
+  }else{initMobile()}
+  if(mq.addEventListener)mq.addEventListener('change',initMobile);
 })();
 </script>
 </body>

@@ -17,16 +17,24 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   // Auth check
   const cookieKey = request.cookies.get('gt-command-key')?.value;
+  const authHeader = request.headers.get('authorization') || '';
+  const bearerKey = authHeader.toLowerCase().startsWith('bearer ')
+    ? authHeader.slice(7).trim()
+    : null;
+  // DEPRECATED — query string support conservé 30j pour rollout, à retirer
+  // ensuite. P0 fix 2026-04-17 : secrets ne doivent jamais transiter en URL
+  // (browser history, proxies, access logs).
   const queryKey = request.nextUrl.searchParams.get('key');
   const secret = process.env.COMMAND_SECRET;
 
-  // Allow if authenticated via cookie or key (or no secret configured)
-  if (secret && cookieKey !== secret && queryKey !== secret) {
-    // Also allow from same origin without key
-    const referer = request.headers.get('referer') || '';
-    if (!referer.includes('command.ghost-tax.com') && !referer.includes('localhost') && !referer.includes('valuguard-cockpit.vercel.app')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!secret) {
+    return NextResponse.json({ error: 'COMMAND_SECRET not configured' }, { status: 503 });
+  }
+  if (cookieKey !== secret && bearerKey !== secret && queryKey !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (queryKey === secret && cookieKey !== secret && bearerKey !== secret) {
+    console.warn('[sync] DEPRECATED: COMMAND_SECRET reçu en query string. Migrer vers cookie ou Authorization: Bearer header.');
   }
 
   try {

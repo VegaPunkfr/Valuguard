@@ -150,8 +150,11 @@ async function sendViaResend(
       body: JSON.stringify({
         from: "Ghost Tax <audits@ghost-tax.com>",
         to: [to],
+        reply_to: process.env.REPLY_TO_EMAIL || "contact@ghost-tax.com",
         subject,
         text: textBody,
+        track_opens: process.env.TRACK_OPENS !== "false",
+        track_clicks: process.env.TRACK_CLICKS !== "false",
         tags: [
           { name: "campaign", value: "sniper-audit" },
           { name: "domain", value: domain },
