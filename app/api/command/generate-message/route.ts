@@ -23,7 +23,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { detectLanguage, detectTone, getPrice } from '@/lib/outreach/culture-rules';
+import {
+  detectLanguage,
+  detectTone,
+  getPrice,
+  getPriceLabel,
+  getSignalAngle,
+  pickSignalAngle,
+  type SignalLang,
+} from '@/lib/outreach/culture-rules';
 import { qualityGate, type GateResult } from '@/lib/outreach/quality-gate';
 
 export const runtime = 'nodejs';
@@ -39,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { prospect, scan, channel, sequenceStep, daysSinceLastContact } = body;
+    const { prospect, scan, channel, sequenceStep, daysSinceLastContact, useForgeStack } = body;
 
     if (!prospect?.firstName || !prospect?.company || !prospect?.domain) {
       return NextResponse.json({ error: 'Missing prospect data' }, { status: 400 });
@@ -48,12 +56,56 @@ export async function POST(req: NextRequest) {
     const language = detectLanguage(prospect.country);
     const tone = detectTone(prospect.country, prospect.headcount, prospect.industry);
     const price = getPrice(prospect.country);
+    const priceLabel = getPriceLabel(prospect.country);
     const maxWords = channel === 'linkedin_dm' ? 120 : 180;
+
+    // Langue ISO utilisée pour signal angles (en/de/fr/nl)
+    const langCode: SignalLang =
+      language === 'German' ? 'de' : language === 'French' ? 'fr' : prospect.country === 'NL' || prospect.country === 'BE' ? 'nl' : 'en';
 
     // Build signals text
     const signalsText = scan?.signals?.slice(0, 3).map((s: any, i: number) =>
       `  ${i + 1}. ${s.label} (${s.impactLow?.toLocaleString()}-${s.impactHigh?.toLocaleString()} EUR/yr) — ${s.evidenceClass}`
     ).join('\n') || '  No specific signals available';
+
+    // ── FORGE STACK (J2) — signal-first opener injection ──
+    // Si useForgeStack=true, on sélectionne un angle signal et on pré-rédige
+    // l'opener + la consequence dans la langue cible. Haiku doit les REUTILISER
+    // tels quels, pas les reformuler.
+    let forgeBlock = '';
+    if (useForgeStack === true) {
+      const primarySignal: string | undefined = scan?.signals?.[0]?.label;
+      const allSignalLabels: string[] = (scan?.signals || []).map((s: any) => s?.label || '').filter(Boolean);
+      const angleType = pickSignalAngle(primarySignal, allSignalLabels);
+      // variant dérivé du sequenceStep pour rotation (M1→0, M3→1, M4→2)
+      const variantMap: Record<string, number> = { M1: 0, M2: 0, M3: 1, M4: 2, M5: 0 };
+      const variant = variantMap[sequenceStep as string] ?? 0;
+      const angle = getSignalAngle(angleType, langCode, variant);
+
+      // Interpolation simple ${co} ${industry} ${expShort} ${priceLabel}
+      const expShort = scan?.exposureHigh
+        ? `€${Math.round((scan.exposureHigh || 0) / 1000)}K`
+        : '€100K+';
+      const interpolate = (t: string): string =>
+        t
+          .replace(/\$\{co\}/g, prospect.company)
+          .replace(/\$\{industry\}/g, prospect.industry || 'tech')
+          .replace(/\$\{expShort\}/g, expShort)
+          .replace(/\$\{priceLabel\}/g, priceLabel);
+
+      const opener = interpolate(angle.opener);
+      const consequence = interpolate(angle.consequence);
+      const cta = interpolate(angle.cta);
+
+      forgeBlock = `\nFORGE STACK ACTIVE (signal-first):
+ANGLE DETECTED: ${angle.label} (${angleType})
+OPENER (REUSE VERBATIM as sentence 1): "${opener}"
+CONSEQUENCE (REUSE VERBATIM as sentence 2-3, adjust minor grammar only): "${consequence}"
+CTA (REUSE VERBATIM before signoff): "${cta}"
+
+HARD CONSTRAINT: the generated message MUST start with the OPENER text above, word for word. Do NOT paraphrase, do NOT translate, do NOT add a greeting before it.
+`;
+    }
 
     // Sequence-specific instructions
     let seqInstructions = '';
@@ -91,7 +143,7 @@ LINK: ghost-tax.com/intel?domain=${prospect.domain}
 
 SEQUENCE: ${sequenceStep}
 ${seqInstructions}
-
+${forgeBlock}
 ${channel === 'email' || channel === 'email_followup' ? 'Start with "Subject:" or "Betreff:" line. Subject MUST contain the domain and a number.' : 'No subject line. Start directly with the hook.'}
 
 RULES:
@@ -143,13 +195,15 @@ RULES:
     }
 
     // ── QUALITY GATE — 4 layers blocking ──
-    const langCode = language === 'German' ? 'de' : language === 'French' ? 'fr' : 'en';
+    // Note: langCode déjà calculé plus haut (SignalLang : en|de|fr|nl).
+    // Quality gate accepte un subset (en|de|fr) — nl tombera dans le fallback 'en' côté gate, comportement accepté.
+    const gateLang: 'en' | 'de' | 'fr' = langCode === 'de' ? 'de' : langCode === 'fr' ? 'fr' : 'en';
     const gate: GateResult = qualityGate(
       subject,
       messageBody,
       {
         co: prospect.company,
-        lang: langCode,
+        lang: gateLang,
         industry: prospect.industry,
         size: prospect.headcount ? String(prospect.headcount) : undefined,
         contact: {

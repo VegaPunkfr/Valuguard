@@ -137,6 +137,156 @@ if (typeof window !== 'undefined') {
   window.flagToCountry = flagToCountry;
 }
 
+// ───────────────────────────────────────────────────────────────────
+// Smart Scheduling (miroir lib/outreach/send-window.ts)
+// Port V4 L1534-1547 + L2275-2291, étendu timezone-aware + cooldown.
+// ───────────────────────────────────────────────────────────────────
+
+const COUNTRY_TIMEZONES = {
+  DE: 'Europe/Berlin', AT: 'Europe/Berlin',
+  UK: 'Europe/London',
+  NL: 'Europe/Amsterdam', BE: 'Europe/Amsterdam',
+  US: 'America/New_York',
+  CH: 'Europe/Zurich',
+  IT: 'Europe/Rome',
+  FR: 'Europe/Paris'
+};
+
+const HOLIDAYS_BY_COUNTRY = {
+  DE: ['2026-01-01','2026-04-03','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-10-03','2026-12-25','2026-12-26'],
+  AT: ['2026-01-01','2026-04-03','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-10-03','2026-12-25','2026-12-26'],
+  UK: ['2026-01-01','2026-04-03','2026-04-06','2026-05-04','2026-05-25','2026-08-31','2026-12-25','2026-12-28'],
+  US: ['2026-01-01','2026-01-19','2026-02-16','2026-05-25','2026-07-03','2026-09-07','2026-11-26','2026-12-25'],
+  NL: ['2026-01-01','2026-04-03','2026-04-06','2026-04-27','2026-05-05','2026-05-14','2026-05-25','2026-12-25','2026-12-26'],
+  BE: ['2026-01-01','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-07-21','2026-08-15','2026-11-01','2026-11-11','2026-12-25'],
+  FR: ['2026-01-01','2026-04-06','2026-05-01','2026-05-08','2026-05-14','2026-05-25','2026-07-14','2026-08-15','2026-11-01','2026-11-11','2026-12-25'],
+  CH: ['2026-01-01','2026-01-02','2026-04-03','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-08-01','2026-12-25','2026-12-26'],
+  IT: ['2026-01-01','2026-01-06','2026-04-06','2026-04-25','2026-05-01','2026-06-02','2026-08-15','2026-11-01','2026-12-08','2026-12-25','2026-12-26']
+};
+
+const DOMAIN_COOLDOWN_DAYS = 3;
+const BUSINESS_HOUR_START = 8;
+const BUSINESS_HOUR_END = 19;
+
+function sw_normalizeMarket(code) {
+  if (!code) return 'FR';
+  const up = String(code).toUpperCase().trim();
+  if (up === 'GB') return 'UK';
+  if (['DE','AT','UK','NL','BE','US','CH','IT','FR'].includes(up)) return up;
+  return 'FR';
+}
+
+function sw_resolveCountry(p) {
+  if (!p) return 'FR';
+  if (p.flag) return flagToCountry(p.flag);
+  if (p.market) return sw_normalizeMarket(p.market);
+  if (p.country) return sw_normalizeMarket(p.country);
+  return 'FR';
+}
+
+function sw_getLocalParts(country, date) {
+  const tz = COUNTRY_TIMEZONES[country] || 'Europe/Paris';
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour12: false,
+    hour: '2-digit', weekday: 'short',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  });
+  const parts = fmt.formatToParts(date);
+  let hour = 0, year = '1970', month = '01', day = '01', weekday = 'Mon';
+  for (const p of parts) {
+    if (p.type === 'hour') hour = parseInt(p.value, 10) || 0;
+    else if (p.type === 'year') year = p.value;
+    else if (p.type === 'month') month = p.value;
+    else if (p.type === 'day') day = p.value;
+    else if (p.type === 'weekday') weekday = p.value;
+  }
+  if (hour === 24) hour = 0;
+  const wmap = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
+  return { hour, day: wmap[weekday] ?? 1, isoDate: `${year}-${month}-${day}` };
+}
+
+export function isBusinessHours(country, date = new Date()) {
+  const c = sw_normalizeMarket(country);
+  const { hour } = sw_getLocalParts(c, date);
+  return hour >= BUSINESS_HOUR_START && hour <= BUSINESS_HOUR_END;
+}
+
+export function isWeekend(country, date = new Date()) {
+  const c = sw_normalizeMarket(country);
+  const { day } = sw_getLocalParts(c, date);
+  return day === 0 || day === 6;
+}
+
+export function isHoliday(country, date = new Date()) {
+  const c = sw_normalizeMarket(country);
+  const { isoDate } = sw_getLocalParts(c, date);
+  return (HOLIDAYS_BY_COUNTRY[c] || []).includes(isoDate);
+}
+
+export function isNonWorkDay(country, date = new Date()) {
+  return isWeekend(country, date) || isHoliday(country, date);
+}
+
+export function canSendToProspect(prospect, now = new Date()) {
+  const country = sw_resolveCountry(prospect);
+  const { hour, day } = sw_getLocalParts(country, now);
+  const businessHours = hour >= BUSINESS_HOUR_START && hour <= BUSINESS_HOUR_END;
+  const weekend = day === 0 || day === 6;
+  const holiday = isHoliday(country, now);
+
+  let cooldownActive = false;
+  let cooldownDaysLeft = 0;
+  if (prospect && prospect.lastSendAt) {
+    const last = prospect.lastSendAt instanceof Date
+      ? prospect.lastSendAt : new Date(prospect.lastSendAt);
+    if (!isNaN(last.getTime())) {
+      const diffDays = (now.getTime() - last.getTime()) / 86400000;
+      if (diffDays < DOMAIN_COOLDOWN_DAYS) {
+        cooldownActive = true;
+        cooldownDaysLeft = Math.ceil(DOMAIN_COOLDOWN_DAYS - diffDays);
+      }
+    }
+  }
+
+  let reason = null, canSend = true;
+  if (weekend) { canSend = false; reason = 'Week-end → lundi'; }
+  else if (holiday) { canSend = false; reason = `Férié ${country}`; }
+  else if (!businessHours) { canSend = false; reason = `Hors heures (${hour}h ${country})`; }
+  else if (cooldownActive) { canSend = false; reason = `Cooldown domaine — ${cooldownDaysLeft}j`; }
+
+  return {
+    canSend, deferred: !canSend, reason, country,
+    localHour: hour, localDay: day,
+    isBusinessHours: businessHours,
+    isWeekend: weekend, isHoliday: holiday,
+    cooldownActive, cooldownDaysLeft
+  };
+}
+
+export function getSmartQueue(leads, now = new Date()) {
+  const annotated = (leads || []).map(l => ({ ...l, _check: canSendToProspect(l, now) }));
+  return {
+    ready: annotated.filter(l => l._check.canSend),
+    deferred: annotated.filter(l => !l._check.canSend),
+    all: annotated
+  };
+}
+
+export function formatLocalTime(country, date = new Date()) {
+  const c = sw_normalizeMarket(country);
+  const { hour } = sw_getLocalParts(c, date);
+  return `${hour}h ${c}`;
+}
+
+// Exposition globale pour scripts non-module (cockpit-v6.html inline)
+if (typeof window !== 'undefined') {
+  window.SendWindow = {
+    isBusinessHours, isWeekend, isHoliday, isNonWorkDay,
+    canSendToProspect, getSmartQueue, formatLocalTime,
+    COUNTRY_TIMEZONES, HOLIDAYS_BY_COUNTRY
+  };
+}
+
 const TECH_COLORS = {
   salesforce:'#00A1E0',sap:'#0070F2','microsoft 365':'#0078D4',m365:'#0078D4',
   slack:'#4A154B',jira:'#0052CC',okta:'#007DC1',aws:'#FF9900',azure:'#0089D6',

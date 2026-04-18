@@ -1290,6 +1290,9 @@ a.tb-brand:hover{opacity:0.8}
 <!-- Message Forge — chargement AVANT le monolithe pour exposer window.MessageForge -->
 <script src="/cockpit/modules/message-forge.js"></script>
 
+<!-- Smart Scheduling (J3) — expose window.SendWindow via ES module -->
+<script type="module" src="/cockpit/recon-utils.js"></script>
+
 <script>
 /* ══════════════════════════════════════════════════════════════════
    1. Auto-injection des fiducials
@@ -1355,7 +1358,7 @@ const state = {
   mandate: null,
   currentView: 'command',
   currentClientId: null,
-  filters: { state:'ALL', market:'ALL', search:'', journal:'ALL' },
+  filters: { state:'ALL', market:'ALL', search:'', journal:'ALL', queueShowDeferred:false },
   freshness: { lastFetchMs: 0 },
   loading: false,
   lastError: null,
@@ -1469,9 +1472,17 @@ function adaptSprintRow(row){
 
 function deriveMandate(settings){
   const lvlRaw = settings?.autonomy_level;
-  const lvl = typeof lvlRaw === 'string' ? parseInt(lvlRaw,10) : (lvlRaw ?? 0);
+  let lvl = typeof lvlRaw === 'string' ? parseInt(lvlRaw,10) : (lvlRaw ?? null);
+  if (lvl == null || isNaN(lvl)) {
+    // J6 — fallback sur cache localStorage si settings pas encore chargé
+    try {
+      const cached = localStorage.getItem('gt_cockpit_mandate_level');
+      if (cached != null) lvl = parseInt(cached, 10) || 0;
+    } catch(_) {}
+    if (lvl == null || isNaN(lvl)) lvl = 0;
+  }
   return {
-    level: isNaN(lvl) ? 0 : lvl,
+    level: lvl,
     markets: { active:['UK','US','IE'], review:['DE'] },
     caps: { UK:5, US:5, IE:3 },
     windows: '09-11 · 14-16 local',
@@ -1647,34 +1658,81 @@ function renderQueue(){
   const sub = document.getElementById('queue-sub');
   const ready = state.clients.filter(c => c.state === 'READY');
   const inflight = state.clients.filter(c => c.state === 'SCHEDULED');
-  const upcoming = ready.sort((a,b) => (b.score||0) - (a.score||0)).slice(0,6);
 
-  sub.innerHTML = `<span class="status-dot ${inflight.length?'status-dot-accent':'status-dot-idle'}" style="width:5px;height:5px"></span> ${inflight.length} EN COURS · ${ready.length} PRÊTS`;
+  // Smart Scheduling (J3) — partitionner ready par fenêtre d'envoi locale
+  const SW = (typeof window !== 'undefined' && window.SendWindow) || null;
+  const now = new Date();
+  const annotate = (c) => {
+    if (!SW) return { client: c, check: null };
+    const check = SW.canSendToProspect({
+      market: c.market,
+      lastSendAt: c.lastActionAt || null,
+      domain: c.domain
+    }, now);
+    return { client: c, check };
+  };
+  const readyAnnotated = ready.map(annotate);
+  const readyInWindow = readyAnnotated.filter(x => !x.check || x.check.canSend);
+  const readyDeferred = readyAnnotated.filter(x => x.check && !x.check.canSend);
+  const showDeferred = !!state.filters.queueShowDeferred;
+
+  const sortByScore = (arr) => arr.slice().sort((a,b) => (b.client.score||0) - (a.client.score||0));
+  const upcoming = sortByScore(readyInWindow).slice(0,6);
+  const deferredList = sortByScore(readyDeferred).slice(0,6);
+
+  const deferredCount = readyDeferred.length;
+  sub.innerHTML = `<span class="status-dot ${inflight.length?'status-dot-accent':'status-dot-idle'}" style="width:5px;height:5px"></span> ${inflight.length} EN COURS · ${readyInWindow.length} PRÊTS${deferredCount ? ` · <span style="color:var(--gold,#e0a828)">${deferredCount} HORS FENÊTRE</span>` : ''}`;
 
   if (ready.length === 0 && inflight.length === 0) {
     body.innerHTML = `<div class="empty-state"><div class="empty-state-title">FILE VIDE</div><div class="empty-state-sub">Aucun client à l'état PRÊT ou PLANIFIÉ. Injecter des cibles via Sources ou promouvoir des brouillons existants.</div></div>`;
     return;
   }
 
-  const mkItem = (c, status) => `
+  const mkItem = (c, status, check) => {
+    const badge = (check && !check.canSend)
+      ? `<span class="qi-defer-badge" title="${esc(check.reason || 'hors fenêtre')}" style="margin-left:6px;padding:1px 5px;border-radius:3px;font:600 9px var(--font-mono);background:hsla(40,90%,47%,.12);border:1px solid hsla(40,90%,47%,.28);color:var(--gold,#e0a828);letter-spacing:.04em;white-space:nowrap">⏸ ${esc(check.reason || 'hors fenêtre')}</span>`
+      : (check && check.canSend)
+        ? `<span class="qi-local-time" title="Heure locale prospect" style="margin-left:6px;font:500 10px var(--font-mono);color:var(--ink-500);letter-spacing:.05em">${esc(String(check.localHour).padStart(2,'0'))}h</span>`
+        : '';
+    return `
     <div class="queue-item" data-status="${status}" data-id="${c.id}" tabindex="0">
       <span class="qi-dot"></span>
       <span class="qi-time">${status === 'inflight' ? 'MAINT' : '—'}</span>
       <span class="qi-company">${esc(c.company)}</span>
       <span class="qi-market">${marketFlag(c.market)}</span>
+      ${badge}
     </div>
   `;
+  };
+
+  const toggleHtml = (deferredCount > 0)
+    ? `<div class="queue-toggle-row" style="padding:6px 14px;border-bottom:1px solid var(--edge-faint,rgba(255,255,255,.05));display:flex;align-items:center;gap:8px">
+         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font:500 10px var(--font-mono);color:var(--ink-500);letter-spacing:.08em">
+           <input type="checkbox" id="queue-show-deferred" ${showDeferred ? 'checked' : ''} style="cursor:pointer"/>
+           <span>AFFICHER ${deferredCount} HORS FENÊTRE</span>
+         </label>
+       </div>`
+    : '';
 
   body.innerHTML = `
+    ${toggleHtml}
     <div class="queue-body">
-      ${inflight.length ? `<div class="queue-group"><div class="group-label">EN COURS</div>${inflight.map(c=>mkItem(c,'inflight')).join('')}</div>` : ''}
-      ${upcoming.length ? `<div class="queue-group"><div class="group-label">À SUIVRE · MEILLEUR SCORE</div>${upcoming.map(c=>mkItem(c,'upcoming')).join('')}</div>` : ''}
+      ${inflight.length ? `<div class="queue-group"><div class="group-label">EN COURS</div>${inflight.map(c=>mkItem(c,'inflight',null)).join('')}</div>` : ''}
+      ${upcoming.length ? `<div class="queue-group"><div class="group-label">À SUIVRE · MEILLEUR SCORE</div>${upcoming.map(x=>mkItem(x.client,'upcoming',x.check)).join('')}</div>` : ''}
+      ${(showDeferred && deferredList.length) ? `<div class="queue-group" data-group="deferred"><div class="group-label" style="color:var(--gold,#e0a828)">HORS FENÊTRE · EN ATTENTE</div>${deferredList.map(x=>mkItem(x.client,'deferred',x.check)).join('')}</div>` : ''}
     </div>
   `;
   body.querySelectorAll('.queue-item').forEach(el => {
     el.addEventListener('click', ()=> openDrawer(el.dataset.id));
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(el.dataset.id); } });
   });
+  const toggle = body.querySelector('#queue-show-deferred');
+  if (toggle) {
+    toggle.addEventListener('change', (e) => {
+      state.filters.queueShowDeferred = e.target.checked;
+      renderQueue();
+    });
+  }
 }
 
 function renderExceptions(){
@@ -1782,6 +1840,53 @@ function renderReserve(){
   `;
 }
 
+/**
+ * J6 — Calcule l'état moteur (5 valeurs possibles) à partir du state global.
+ * Retour: { key, label, reason, cls, icon }
+ *   key  : identifiant technique (SANS_MANDAT | EN_PAUSE | PRET_A_AGIR | EN_ATTENTE | FILE_VIDE | SANS_STRATEGIE)
+ *   cls  : classe CSS à appliquer ('engine-ok' | 'engine-warn' | 'engine-dim')
+ *   icon : glyphe ASCII unicode safe
+ */
+function computeEngineState(st){
+  const m = st?.mandate;
+  const s = st?.strategy;
+  const cs = st?.clients || [];
+  const lvl = m?.level ?? 0;
+  const counts = {};
+  cs.forEach(c => { counts[c.state] = (counts[c.state]||0)+1; });
+  const ready = counts['READY']||0;
+  const sched = counts['SCHEDULED']||0;
+  const sent = counts['SENT']||0;
+  const draft = counts['DRAFT_REVIEW']||0;
+  const deferred = counts['DEFERRED']||0;
+
+  // Fenêtre d'envoi active (Tue-Thu 9:30-11:30 / 14:00-16:00 local, approx UTC)
+  const now = new Date();
+  const dow = now.getUTCDay(); // 0=dim .. 6=sam
+  const hourUtc = now.getUTCHours();
+  const inActiveDay = dow >= 2 && dow <= 4; // mar mer jeu
+  const inWindow = inActiveDay && ((hourUtc >= 7 && hourUtc < 10) || (hourUtc >= 12 && hourUtc < 15));
+
+  if (!s) return { key:'SANS_STRATEGIE', label:'SANS STRATÉGIE', reason:'doctrine non insérée en base', cls:'engine-warn', icon:'⏸' };
+  if (!m || lvl === 0) return { key:'SANS_MANDAT', label:'SANS MANDAT', reason:'niveau d\'autonomie L0 — aucune action autorisée', cls:'engine-dim', icon:'⏸' };
+  if (m.paused) return { key:'EN_PAUSE', label:'EN PAUSE', reason:'pause opérateur locale', cls:'engine-warn', icon:'⏸' };
+  if (ready + sched === 0 && draft === 0) return { key:'FILE_VIDE', label:'FILE VIDE', reason:`${sent} envoyé(s), ${deferred} différé(s) — aucun client prêt`, cls:'engine-dim', icon:'○' };
+  if (ready + sched === 0 && draft > 0) return { key:'EN_ATTENTE', label:'EN ATTENTE', reason:`${draft} brouillon(s) en revue — aucun READY`, cls:'engine-warn', icon:'◷' };
+  if (!inWindow) return { key:'EN_ATTENTE', label:'EN ATTENTE', reason:`${ready+sched} client(s) prêt(s) — hors fenêtre d'envoi`, cls:'engine-warn', icon:'◷' };
+  return { key:'PRET_A_AGIR', label:'PRÊT À AGIR', reason:`${ready+sched} client(s) en file · fenêtre ouverte`, cls:'engine-ok', icon:'▶' };
+}
+
+/**
+ * J6 — Cache mandate level en localStorage pour éviter le flash au reload.
+ */
+const LS_MANDATE_KEY = 'gt_cockpit_mandate_level';
+function cacheMandateLevel(lvl){
+  try { localStorage.setItem(LS_MANDATE_KEY, String(lvl|0)); } catch(_){}
+}
+function readCachedMandateLevel(){
+  try { const v = localStorage.getItem(LS_MANDATE_KEY); return v == null ? null : (parseInt(v,10) || 0); } catch(_){ return null; }
+}
+
 function renderEngine(){
   const body = document.getElementById('engine-body');
   if (!body) return;
@@ -1789,6 +1894,7 @@ function renderEngine(){
   const s = state.strategy;
   const cs = state.clients;
   const lvl = m?.level ?? 0;
+  cacheMandateLevel(lvl);
   const lvlLabels = {0:'DÉSACTIVÉ',1:'ENVOI AUTOMATIQUE SOUS MANDAT',2:'PROSPECTION + ENVOI',3:'AUTONOMIE COMPLÈTE'};
 
   // Queue breakdown
@@ -1803,18 +1909,12 @@ function renderEngine(){
   const replied = counts['REPLIED']||0;
   const rejected = counts['REJECTED']||0;
 
-  // Engine state
-  let engineState, engineReason;
-  if (!s) { engineState = 'SANS STRATÉGIE'; engineReason = 'doctrine non insérée en base'; }
-  else if (!m || lvl === 0) { engineState = 'SANS MANDAT'; engineReason = 'niveau d\'autonomie L0 — aucune action autorisée'; }
-  else if (m.paused) { engineState = 'EN PAUSE'; engineReason = 'pause opérateur locale'; }
-  else if (ready + sched > 0) { engineState = 'PRÊT À AGIR'; engineReason = `${ready+sched} client(s) en file`; }
-  else if (draft > 0) { engineState = 'EN ATTENTE'; engineReason = `${draft} brouillon(s) en revue — aucun READY`; }
-  else { engineState = 'FILE VIDE'; engineReason = `${sent} envoyé(s), ${deferred} différé(s) — aucun client prêt`; }
-
-  const stateClass = engineState === 'PRÊT À AGIR' ? 'engine-ok' :
-                     engineState === 'FILE VIDE' || engineState === 'EN ATTENTE' ? 'engine-dim' :
-                     'engine-warn';
+  // J6 — Engine state via computeEngineState (5 surfaces de raisonnement)
+  const eng = computeEngineState(state);
+  const engineState = eng.label;
+  const engineReason = eng.reason;
+  const stateClass = eng.cls;
+  const engineIcon = eng.icon;
 
   // Markets from strategy body or mandate
   const mkts = s?.body?.markets || {};
@@ -1847,7 +1947,14 @@ function renderEngine(){
   else if (draft > 0) prochain = `revue de ${draft} brouillon(s) requise avant promotion READY`;
   else prochain = 'aucun — file vide · import ou promotion nécessaire';
 
-  const lvlOptions = [0,1,2,3].map(n => `<option value="${n}"${n===lvl?' selected':''}>${n===0?'Off':n===1?'L1 · envoi sous mandat':n===2?'L2 · prospection + envoi':'L3 · autonomie complète'}</option>`).join('');
+  // J6 — Labels dropdown honnêtes (français, pas de jargon)
+  const lvlLabelsDropdown = {
+    0: 'L0 · Suspendu — aucune action',
+    1: 'L1 · Supervisé — je valide chaque envoi',
+    2: 'L2 · Prospection auto — je valide les envois',
+    3: 'L3 · Autonome complet — pas d\'intervention'
+  };
+  const lvlOptions = [0,1,2,3].map(n => `<option value="${n}"${n===lvl?' selected':''}>${lvlLabelsDropdown[n]}</option>`).join('');
 
   body.innerHTML = `
   <div style="display:flex;flex-direction:column;gap:16px">
@@ -1859,8 +1966,9 @@ function renderEngine(){
     </div>
 
     <dl class="engine-grid">
-      <dt>Situation</dt><dd><span class="${stateClass}">${esc(engineState)}</span></dd>
+      <dt>Situation</dt><dd><span class="${stateClass}" aria-label="État moteur ${esc(engineState)}"><span aria-hidden="true" style="margin-right:6px;display:inline-block;min-width:12px">${engineIcon}</span>${esc(engineState)}</span></dd>
       <dt>Raison</dt><dd>${esc(engineReason)}</dd>
+      <dt>Fenêtre</dt><dd><span class="engine-val">${esc(windows)}</span> · ${esc(days)}</dd>
       <dt>Prochain</dt><dd>${esc(prochain)}</dd>
       <dt>Dernière exéc.</dt><dd>${esc(lastRun)} · ${sent} envoyés au total</dd>
     </dl>
@@ -1869,7 +1977,6 @@ function renderEngine(){
 
     <dl class="engine-grid">
       <dt>Marchés</dt><dd>${marketHtml || '—'}</dd>
-      <dt>Jours actifs</dt><dd>${esc(days)} · ${esc(windows)}</dd>
       <dt>Limites</dt><dd>${esc(caps)}</dd>
     </dl>
     <div class="engine-dim" style="font-size:10px;letter-spacing:0.16em">Marchés et cadence imposés par la doctrine active — non modifiables ici.</div>
