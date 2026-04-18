@@ -494,6 +494,16 @@ a.tb-brand:hover{opacity:0.8}
 .drw-exec-btn.exec-primary{color:var(--ink-100);border-bottom-color:var(--accent)}
 .drw-exec-btn.exec-primary:hover{color:var(--ink-100)}
 
+/* ── Gate badge (Message Forge · merge Tier S) ── */
+.gate-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:var(--r-1);background:var(--glass-02);border:1px solid var(--edge-soft);font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase}
+.gate-badge-pass{color:var(--success);border-color:rgba(46,196,130,0.3)}
+.gate-badge-draft{color:var(--accent);border-color:rgba(138,148,168,0.3)}
+.gate-badge-regen{color:var(--warn);border-color:rgba(232,177,73,0.3)}
+.gate-badge-block{color:var(--alert);border-color:rgba(216,85,85,0.3)}
+.gate-hints-list{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.gate-hints-list li{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-500);padding-left:10px;position:relative}
+.gate-hints-list li::before{content:"▸";position:absolute;left:0;color:var(--ink-700)}
+
 /* ── MODULE CONVERSATIONS — split 40/60 ── */
 .conversations-view{padding:0!important;display:flex!important;height:calc(100vh - 220px)}
 .conv-layout{display:grid;grid-template-columns:40% 60%;width:100%;height:100%}
@@ -1276,6 +1286,9 @@ a.tb-brand:hover{opacity:0.8}
     <button class="btn-primary" id="auth-submit">RATIFIER  →</button>
   </div>
 </div>
+
+<!-- Message Forge — chargement AVANT le monolithe pour exposer window.MessageForge -->
+<script src="/cockpit/modules/message-forge.js"></script>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════
@@ -2333,7 +2346,19 @@ function renderDrawer(c){
     db.textContent = '— aucun brouillon généré —';
   }
   const gate = document.getElementById('drw-draft-gate');
-  if (gate) gate.textContent = c.draft?.gateResult || '—';
+  if (gate) {
+    const gRes = c.draft?.gateResult || '';
+    const gFull = c.draft?.gate || null;
+    let cls = 'gate-badge';
+    let label = gRes || '—';
+    if (gRes === 'PASS_SEND') { cls += ' gate-badge-pass'; label = 'PASS · ENVOI'; }
+    else if (gRes === 'PASS_DRAFT_ONLY') { cls += ' gate-badge-draft'; label = 'PASS · BROUILLON'; }
+    else if (gRes === 'REGENERATE') { cls += ' gate-badge-regen'; label = 'REGÉNÉRER'; }
+    else if (gRes === 'BLOCK') { cls += ' gate-badge-block'; label = 'BLOC'; }
+    const hints = Array.isArray(gFull?.regenerateHints) ? gFull.regenerateHints : [];
+    const hintsHtml = hints.length ? `<ul class="gate-hints-list">${hints.slice(0,4).map(h=>`<li>${esc(String(h))}</li>`).join('')}</ul>` : '';
+    gate.innerHTML = `<span class="${cls}">${esc(label)}</span>${hintsHtml}`;
+  }
   const dmeta = document.getElementById('drw-draft-meta');
   if (dmeta) dmeta.innerHTML = c.draft ? `
     <span>CANAL <span class="ink-300">email</span></span><span class="sep">·</span>
@@ -2408,14 +2433,18 @@ function renderDrawer(c){
   if (execDiv) {
     const lvl = state.mandate?.level ?? 0;
     const hasDraft = !!(c.draft?.subject && c.draft?.body);
-    const gatePass = c.draft?.gateResult?.startsWith('PASS');
+    const gatePass = c.draft?.gateResult === 'PASS_SEND';
     const isSendable = (c.state === 'READY' || c.state === 'SCHEDULED') && hasDraft && gatePass && lvl >= 1;
     const canRegen = hasDraft || c.state === 'NEW' || c.state === 'DRAFT_REVIEW';
     const canEdit = hasDraft;
+    const canForge = canRegen; // FORGER = regénération avec Message Forge stack (V4 signal-first)
 
     const btns = [];
     if (isSendable && lvl === 1) {
       btns.push(`<button class="drw-exec-btn exec-primary" data-exec="send">APPROUVER L'ENVOI</button>`);
+    }
+    if (canForge) {
+      btns.push(`<button class="drw-exec-btn" data-exec="forge">FORGER</button>`);
     }
     if (canRegen) {
       btns.push(`<button class="drw-exec-btn" data-exec="regen">REGÉNÉRER</button>`);
@@ -2450,6 +2479,14 @@ function renderDrawer(c){
               body: { prospectId: c.id, company: c.company, domain: c.domain, market: c.market, signal: c.primarySignal, angle: c.angle, contactName: c.contact.name, contactTitle: c.contact.title }
             });
             flashToast('Brouillon regénéré · ' + c.company);
+            await fetchSprint();
+            renderDrawer(state.clients.find(x => x.id === c.id) || c);
+          } else if (action === 'forge') {
+            await api('/api/command/generate-message', {
+              method: 'POST',
+              body: { prospectId: c.id, company: c.company, domain: c.domain, market: c.market, signal: c.primarySignal, angle: c.angle, contactName: c.contact.name, contactTitle: c.contact.title, useForgeStack: true }
+            });
+            flashToast('Brouillon forgé · ' + c.company);
             await fetchSprint();
             renderDrawer(state.clients.find(x => x.id === c.id) || c);
           } else if (action === 'edit') {

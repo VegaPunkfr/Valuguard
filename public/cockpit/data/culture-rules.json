@@ -1,0 +1,72 @@
+{
+  "DE": {
+    "label": "Allemagne",
+    "tone": "Formel + data. Pas de small talk.",
+    "rules": [
+      "Prénom, pas de Sehr geehrte/r (trop formel pour cold, pas assez pour le vouvoiement)",
+      "Phrase 1 = signal. Phrase 2 = chiffre. Phrase 3 = \"Interessant?\"",
+      "DACH reply rate = 20% (2x la moyenne). C'est ton meilleur marché.",
+      "P.S. obligatoire — référencer un détail stack ou un signal secondaire",
+      "Mentionner DORA/BaFin si compliance signal dispo",
+      "50-80 mots. Les cadres DACH lisent sur mobile."
+    ],
+    "maxSentences": 5,
+    "priceLabel": "590€"
+  },
+  "UK": {
+    "label": "Royaume-Uni",
+    "tone": "Understatement. Jamais assertif.",
+    "rules": [
+      "\"it appears\" > \"we found\". \"might be worth\" > \"you should\"",
+      "Phrase courte. Puis une plus longue qui explique. Burstiness.",
+      "Les britanniques détectent le hard sell en 0.5s — toujours finir par question",
+      "Ne jamais dire \"save money\" — dire \"might be worth a look\"",
+      "Référencer fintech regulation / post-Tesco compliance si pertinent",
+      "50-70 mots. Shorter = more British."
+    ],
+    "maxSentences": 4,
+    "priceLabel": "£490"
+  },
+  "US": {
+    "label": "États-Unis",
+    "tone": "Direct. Lead avec le $. ROI first.",
+    "rules": [
+      "Phrase 1 = signal + company name. Rien d'autre.",
+      "Phrase 2 = \"I've seen companies like yours...\" (social proof)",
+      "Phrase 3 = chiffre concret (pas de range vague)",
+      "CTA = \"worth a look?\" PAS \"book a demo\" (142% de reply en plus)",
+      "P.S. avec detail stack ou LinkedIn post récent",
+      "50-80 mots. Americans scan, they don't read."
+    ],
+    "maxSentences": 4,
+    "priceLabel": "$490"
+  },
+  "NL": {
+    "label": "Pays-Bas",
+    "tone": "Ultra-direct. Pas de bullshit. Prix visible.",
+    "rules": [
+      "Les néerlandais veulent : fait, conséquence, prix, CTA. 4 phrases.",
+      "Transparence totale — mettre le prix DANS l'email",
+      "Pas de superlatifs. Pas de \"amazing\". Pas de \"incredible\".",
+      "Structure : \"X happens. Y costs Z. I fix it for €490. Interested?\"",
+      "Le marché NL est petit — chaque contact compte",
+      "40-60 mots. Le plus court d'Europe."
+    ],
+    "maxSentences": 4,
+    "priceLabel": "€490"
+  },
+  "FR": {
+    "label": "France",
+    "tone": "Observateur. Question, pas pitch.",
+    "rules": [
+      "Commencer par une observation partagée, pas \"j'ai analysé votre stack\"",
+      "\"J'ai remarqué\" > \"Notre analyse montre\" (voix personnelle)",
+      "Les français répondent aux questions, pas aux assertions",
+      "P.S. = détail personnel ou sectoriel (French Tech, BPI)",
+      "Vouvoiement mais ton décontracté — \"vous\" pas \"Monsieur\"",
+      "50-80 mots. La concision impressionne en France."
+    ],
+    "maxSentences": 5,
+    "priceLabel": "490€"
+  }
+}

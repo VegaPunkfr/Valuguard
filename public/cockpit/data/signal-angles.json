@@ -1,0 +1,268 @@
+{
+  "FUNDING": {
+    "angle": "post_funding_sprawl",
+    "label": "Post-Funding Sprawl",
+    "openers": {
+      "en": [
+        "${co} just raised.",
+        "Fresh capital at ${co}.",
+        "${co} closed a round."
+      ],
+      "de": [
+        "${co} hat gerade eine Runde geschlossen.",
+        "Frisches Kapital bei ${co}.",
+        "${co} hat eine Finanzierungsrunde abgeschlossen."
+      ],
+      "fr": [
+        "${co} vient de lever.",
+        "Capital frais chez ${co}.",
+        "${co} a bouclé un tour de table."
+      ],
+      "nl": [
+        "${co} heeft net funding opgehaald.",
+        "Vers kapitaal bij ${co}.",
+        "${co} heeft een ronde afgesloten."
+      ]
+    },
+    "consequences": {
+      "en": "I've seen this pattern before — when headcount doubles in 18 months, 15-25% of SaaS budget becomes invisible spend that nobody owns.",
+      "de": "Ich habe dieses Muster schon gesehen — wenn sich die Belegschaft in 18 Monaten verdoppelt, werden 15-25% des SaaS-Budgets zu unsichtbaren Ausgaben.",
+      "fr": "J'ai déjà vu ce schéma — quand les effectifs doublent en 18 mois, 15 à 25% du budget SaaS devient de la dépense invisible que personne ne pilote.",
+      "nl": "Ik heb dit patroon eerder gezien — bij snelle groei wordt 15-25% van het SaaS-budget onzichtbare uitgaven."
+    }
+  },
+  "HIRING_IT": {
+    "angle": "finance_hiring_gap",
+    "label": "Finance Hiring Gap",
+    "openers": {
+      "en": [
+        "${co} is hiring in finance.",
+        "${co} is growing its finance team.",
+        "I noticed ${co} has open finance roles."
+      ],
+      "de": [
+        "${co} stellt im Finanzbereich ein.",
+        "${co} baut das Finanzteam aus.",
+        "Mir ist aufgefallen, dass ${co} offene Stellen im Finanzbereich hat."
+      ],
+      "fr": [
+        "${co} recrute en finance.",
+        "${co} renforce son équipe finance.",
+        "J'ai vu que ${co} recrute en finance."
+      ],
+      "nl": [
+        "${co} werft aan in finance.",
+        "${co} breidt het financeteam uit.",
+        "Ik zag dat ${co} financefuncties openstaan heeft."
+      ]
+    },
+    "consequences": {
+      "en": "That usually means the current structure is stretched. I've seen companies in ${industry} leak ${expShort} annually just from orphaned licenses and duplicate tools that nobody audits.",
+      "de": "Das bedeutet meist, dass die aktuelle Struktur unter Druck steht. Ich habe gesehen, wie Unternehmen in ${industry} jährlich ${expShort} durch verwaiste Lizenzen verlieren.",
+      "fr": "Ça veut généralement dire que la structure est sous tension. J'ai vu des entreprises en ${industry} perdre ${expShort}/an juste en licences orphelines et doublons que personne n'audite.",
+      "nl": "Dat betekent meestal dat de structuur onder druk staat. Ik heb bedrijven in ${industry} ${expShort} per jaar zien verliezen aan zombie-licenties."
+    }
+  },
+  "COST_CUTTING": {
+    "angle": "post_restructuring_zombies",
+    "label": "Post-Restructuring Zombies",
+    "openers": {
+      "en": [
+        "${co} is restructuring.",
+        "${co} is streamlining operations.",
+        "Headcount changes at ${co}."
+      ],
+      "de": [
+        "${co} restrukturiert.",
+        "${co} optimiert die Betriebsstruktur.",
+        "Personalveränderungen bei ${co}."
+      ],
+      "fr": [
+        "${co} restructure.",
+        "${co} rationalise ses opérations.",
+        "Mouvements d'effectifs chez ${co}."
+      ],
+      "nl": [
+        "${co} herstructureert.",
+        "${co} optimaliseert de bedrijfsstructuur.",
+        "Personeelswijzigingen bij ${co}."
+      ]
+    },
+    "consequences": {
+      "en": "When 15% of staff leaves, their SaaS subscriptions don't. I've seen companies discover ${expShort} in ghost spend within weeks of a restructuring.",
+      "de": "Wenn 15% der Belegschaft geht, bleiben ihre SaaS-Abos. Ich habe erlebt, wie Unternehmen nach Restrukturierungen ${expShort} an Geisterausgaben finden.",
+      "fr": "Quand 15% des effectifs partent, leurs abonnements SaaS restent. J'ai vu des entreprises découvrir ${expShort} de dépenses fantômes dans les semaines qui suivent.",
+      "nl": "Als 15% van het personeel vertrekt, blijven hun SaaS-abonnementen. Ik heb bedrijven ${expShort} aan spookuitgaven zien ontdekken."
+    }
+  },
+  "NEW_EXEC": {
+    "angle": "new_cfo_audit",
+    "label": "New CFO Audit Window",
+    "openers": {
+      "en": [
+        "New CFO at ${co}.",
+        "${co} has a new finance leader.",
+        "Leadership change at ${co}."
+      ],
+      "de": [
+        "Neuer CFO bei ${co}.",
+        "${co} hat eine neue Finanzleitung.",
+        "Führungswechsel bei ${co}."
+      ],
+      "fr": [
+        "Nouveau CFO chez ${co}.",
+        "${co} a un nouveau directeur financier.",
+        "Changement de direction chez ${co}."
+      ],
+      "nl": [
+        "Nieuwe CFO bij ${co}.",
+        "${co} heeft een nieuwe financieel directeur.",
+        "Leiderschapswisseling bij ${co}."
+      ]
+    },
+    "consequences": {
+      "en": "First 90 days, every new CFO hunts quick wins. I've run these scans for ${industry} companies your size — the average recovery is 18-27% of SaaS spend.",
+      "de": "In den ersten 90 Tagen sucht jeder neue CFO Quick Wins. Ich habe solche Scans für ${industry}-Unternehmen Ihrer Größe durchgeführt — durchschnittlich 18-27% Einsparung.",
+      "fr": "Les 90 premiers jours, tout nouveau CFO cherche des quick wins. J'ai fait ces scans pour des boîtes de ${industry} de votre taille — récupération moyenne de 18 à 27%.",
+      "nl": "Elke nieuwe CFO zoekt quick wins in de eerste 90 dagen. Ik heb deze scans gedaan voor ${industry}-bedrijven van uw omvang — gemiddeld 18-27% besparing."
+    }
+  },
+  "M_AND_A": {
+    "angle": "post_acquisition_overlap",
+    "label": "Post-Acquisition Overlap",
+    "openers": {
+      "en": [
+        "${co} just got acquired.",
+        "${co} completed an acquisition.",
+        "Two companies merging at ${co}."
+      ],
+      "de": [
+        "${co} wurde gerade übernommen.",
+        "${co} hat eine Übernahme abgeschlossen.",
+        "Zwei Unternehmen fusionieren bei ${co}."
+      ],
+      "fr": [
+        "${co} vient d'être racheté.",
+        "${co} a finalisé une acquisition.",
+        "Fusion en cours chez ${co}."
+      ],
+      "nl": [
+        "${co} is net overgenomen.",
+        "${co} heeft een overname afgerond.",
+        "Twee bedrijven fuseren bij ${co}."
+      ]
+    },
+    "consequences": {
+      "en": "Two SaaS stacks merging means duplicate CRMs, duplicate analytics, duplicate monitoring — all paying full price. I've seen post-acquisition cleanups recover ${expShort} in the first quarter alone.",
+      "de": "Zwei SaaS-Stacks die zusammengeführt werden: doppelte CRMs, doppelte Analytics, doppelte Monitoring — alle zum vollen Preis. Ich habe erlebt, wie Post-Acquisition-Cleanups ${expShort} im ersten Quartal einsparen.",
+      "fr": "Deux stacks SaaS qui fusionnent : CRM en double, analytics en double, monitoring en double — tout au prix fort. J'ai vu des nettoyages post-acquisition récupérer ${expShort} au premier trimestre.",
+      "nl": "Twee SaaS-stacks samenvoegen: dubbele CRM's, dubbele analytics, alles tegen volle prijs. Ik heb post-acquisitie opruimacties ${expShort} zien opleveren in het eerste kwartaal."
+    }
+  },
+  "SAAS_COMPLAINTS": {
+    "angle": "public_pain_signal",
+    "label": "Public Pain Signal",
+    "openers": {
+      "en": [
+        "I saw your CFO's post about cloud costs."
+      ],
+      "de": [
+        "Ich habe den Post Ihres CFO zu Cloud-Kosten gesehen."
+      ],
+      "fr": [
+        "J'ai vu le post de votre CFO sur les coûts cloud."
+      ],
+      "nl": [
+        "Ik zag de post van uw CFO over cloudkosten."
+      ]
+    },
+    "consequences": {
+      "en": "That pain is real. The problem isn't overspending — it's spending on things nobody uses anymore. I've scanned companies in ${industry} and the invisible waste is typically 15-25% of total SaaS budget.",
+      "de": "Dieses Problem ist real. Es geht nicht um zu hohe Ausgaben — sondern um Ausgaben für Dinge, die niemand mehr nutzt. In ${industry}-Unternehmen liegt der unsichtbare Waste typischerweise bei 15-25% des SaaS-Budgets.",
+      "fr": "Cette douleur est réelle. Le problème n'est pas de trop dépenser — c'est de dépenser pour des choses que plus personne n'utilise. J'ai scanné des boîtes en ${industry} et le gaspillage invisible tourne à 15-25% du budget SaaS.",
+      "nl": "Die pijn is echt. Het probleem is niet te veel uitgeven — het is uitgeven aan dingen die niemand meer gebruikt. In ${industry} is de onzichtbare verspilling typisch 15-25% van het SaaS-budget."
+    }
+  },
+  "RENEWAL": {
+    "angle": "renewal_leverage",
+    "label": "Renewal Leverage Window",
+    "openers": {
+      "en": [
+        "${co}'s Salesforce renewal is coming up."
+      ],
+      "de": [
+        "Die Salesforce-Verlängerung von ${co} steht an."
+      ],
+      "fr": [
+        "Le renouvellement Salesforce de ${co} approche."
+      ],
+      "nl": [
+        "De Salesforce-verlenging van ${co} nadert."
+      ]
+    },
+    "consequences": {
+      "en": "Without a benchmark scan before renewal, you're negotiating blind. I've seen ${industry} companies save 15-30% just by having an independent audit to bring to the table.",
+      "de": "Ohne Benchmark-Scan vor der Verlängerung verhandeln Sie blind. Ich habe erlebt, wie ${industry}-Unternehmen 15-30% sparen, indem sie ein unabhängiges Audit in die Verhandlung einbringen.",
+      "fr": "Sans scan benchmark avant le renouvellement, vous négociez à l'aveugle. J'ai vu des entreprises en ${industry} économiser 15-30% juste en arrivant avec un audit indépendant.",
+      "nl": "Zonder benchmark-scan voor verlenging onderhandelt u blind. Ik heb ${industry}-bedrijven 15-30% zien besparen door een onafhankelijk audit mee te nemen naar de onderhandeling."
+    }
+  },
+  "COMPLIANCE": {
+    "angle": "compliance_visibility",
+    "label": "Compliance Needs Visibility",
+    "openers": {
+      "en": [
+        "${co} is going through DORA compliance.",
+        "Compliance pressure is building at ${co}."
+      ],
+      "de": [
+        "${co} durchläuft ein DORA-Audit.",
+        "Der Compliance-Druck bei ${co} steigt."
+      ],
+      "fr": [
+        "${co} est en audit DORA.",
+        "La pression compliance augmente chez ${co}."
+      ],
+      "nl": [
+        "${co} doorloopt een DORA-audit.",
+        "De compliance-druk bij ${co} neemt toe."
+      ]
+    },
+    "consequences": {
+      "en": "Compliance auditors ask \"what software do you run?\" and most companies can't answer accurately. I've done these inventories for ${industry} firms — the gap between what they think they run and reality is usually 30-40%.",
+      "de": "Compliance-Prüfer fragen \"welche Software nutzen Sie?\" und die meisten Unternehmen können das nicht genau beantworten. Bei ${industry}-Firmen liegt die Lücke zwischen Annahme und Realität typischerweise bei 30-40%.",
+      "fr": "Les auditeurs compliance demandent \"quel logiciel utilisez-vous ?\" et la plupart des entreprises ne savent pas répondre précisément. J'ai fait ces inventaires en ${industry} — l'écart entre ce qu'on croit utiliser et la réalité est généralement de 30-40%.",
+      "nl": "Compliance-auditors vragen \"welke software draait u?\" en de meeste bedrijven kunnen niet accuraat antwoorden. Bij ${industry}-bedrijven is het gat tussen verwachting en realiteit typisch 30-40%."
+    }
+  },
+  "CLOUD_MIGRATION": {
+    "angle": "migration_doubles",
+    "label": "Migration Duplicates",
+    "openers": {
+      "en": [
+        "${co} is migrating clouds."
+      ],
+      "de": [
+        "${co} migriert die Cloud."
+      ],
+      "fr": [
+        "${co} migre vers le cloud."
+      ],
+      "nl": [
+        "${co} migreert naar de cloud."
+      ]
+    },
+    "consequences": {
+      "en": "During migration, you pay for both stacks — old and new. I've seen this dual-billing period cost ${industry} companies ${expShort} in 6-12 months of overlap that nobody tracks.",
+      "de": "Während der Migration zahlen Sie für beide Stacks — alt und neu. Ich habe erlebt, wie diese Doppelabrechnung ${industry}-Unternehmen ${expShort} in 6-12 Monaten Überlappung kostet.",
+      "fr": "Pendant la migration, vous payez les deux stacks — ancien et nouveau. J'ai vu cette double facturation coûter aux entreprises de ${industry} ${expShort} en 6-12 mois de chevauchement que personne ne suit.",
+      "nl": "Tijdens migratie betaalt u voor beide stacks — oud en nieuw. Ik heb gezien hoe deze dubbele facturering ${industry}-bedrijven ${expShort} kost in 6-12 maanden overlap."
+    }
+  },
+  "_ctas": {
+    "en": "I can run a diagnostic in 48h — ${priceLabel}. Worth a look?",
+    "de": "Ich kann in 48h einen Diagnostic durchführen — ${priceLabel}. Interessant?",
+    "fr": "Je peux poser un diagnostic en 48h — ${priceLabel}. Ça vaut le coup d'œil ?",
+    "nl": "Ik kan in 48u een diagnose uitvoeren — ${priceLabel}. Interessant?"
+  }
+}

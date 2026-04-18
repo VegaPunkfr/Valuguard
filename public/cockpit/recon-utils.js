@@ -121,6 +121,22 @@ export function countryFlag(countryName) {
   return COUNTRY_FLAGS[countryName.toLowerCase().trim()] || '🏳️';
 }
 
+// Mapping emoji drapeau → code pays (miroir V4 L1546, requis par MessageForge)
+export function flagToCountry(f) {
+  return f === '🇩🇪' || f === '🇦🇹' ? 'DE'
+    : f === '🇬🇧' ? 'UK'
+    : f === '🇳🇱' ? 'NL'
+    : f === '🇺🇸' ? 'US'
+    : f === '🇨🇭' ? 'CH'
+    : f === '🇮🇹' ? 'IT'
+    : 'FR';
+}
+
+// Exposition globale pour les scripts non-module (cockpit-v6.html legacy)
+if (typeof window !== 'undefined') {
+  window.flagToCountry = flagToCountry;
+}
+
 const TECH_COLORS = {
   salesforce:'#00A1E0',sap:'#0070F2','microsoft 365':'#0078D4',m365:'#0078D4',
   slack:'#4A154B',jira:'#0052CC',okta:'#007DC1',aws:'#FF9900',azure:'#0089D6',

@@ -3,8 +3,8 @@
  *
  * POST /api/command/generate-message
  *
- * Generates a personalized outreach message using Claude Haiku.
- * This MUST run server-side because it uses the Anthropic API key.
+ * Generates a personalized outreach message using Claude Haiku, then
+ * runs the Quality Gate (4 layers) before returning the draft.
  *
  * Body: {
  *   prospect: { firstName, lastName, title, company, domain, country, headcount?, industry?, signals? }
@@ -12,41 +12,22 @@
  *   channel: "email" | "linkedin_dm"
  *   sequenceStep: "M1" | "M2" | "M3" | "M4" | "M5"
  *   daysSinceLastContact?: number
+ *   useForgeStack?: boolean  // forge-driven regen hint (informatif)
  * }
  *
- * Returns: { subject?, body, language, wordCount, confidenceScore }
+ * Returns: {
+ *   subject?, body, language, wordCount, confidenceScore, channel, sequenceStep, price,
+ *   gateResult: string (legacy, dérivé de gate.decision),
+ *   gate: { decision, scores, hardBlockers, regenerateHints, auditLog }
+ * }
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { detectLanguage, detectTone, getPrice } from '@/lib/outreach/culture-rules';
+import { qualityGate, type GateResult } from '@/lib/outreach/quality-gate';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
-
-// ── Cultural profiles (inlined for server-side) ─────────
-
-function detectLanguage(country: string, headcount?: number, industry?: string): string {
-  const c = country?.toUpperCase();
-  if (['DE', 'AT', 'CH'].includes(c)) return 'German';
-  if (['NL', 'BE'].includes(c)) return 'English'; // Dutch B2B in English
-  return 'English';
-}
-
-function detectTone(country: string, headcount?: number, industry?: string): string {
-  const c = country?.toUpperCase();
-  if (c === 'DE' || c === 'AT') {
-    const isStartup = (headcount && headcount < 300) && industry && /tech|saas|software|fintech/i.test(industry);
-    return isStartup
-      ? 'Semi-formal, founder-to-founder. Fast, no corporate padding. Sie form unless very informal LinkedIn.'
-      : 'Formal, data-first. Sie form. Precise numbers. No fluff, no superlatives. Germans trust methodology.';
-  }
-  if (c === 'NL' || c === 'BE') return 'Ultra-direct, zero fluff. Get to the point in the first sentence. Dutch hate wasted words.';
-  if (c === 'UK' || c === 'GB') return 'Polite but not servile. British understatement: "might be worth a look" > "you MUST see this".';
-  return 'Confident, benefit-driven. ROI explicit. Social proof matters.';
-}
-
-function getPrice(country: string): number {
-  return ['DE', 'AT', 'CH'].includes(country?.toUpperCase()) ? 590 : 490;
-}
 
 // ── Main handler ────────────────────────────────────────
 
@@ -64,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing prospect data' }, { status: 400 });
     }
 
-    const language = detectLanguage(prospect.country, prospect.headcount, prospect.industry);
+    const language = detectLanguage(prospect.country);
     const tone = detectTone(prospect.country, prospect.headcount, prospect.industry);
     const price = getPrice(prospect.country);
     const maxWords = channel === 'linkedin_dm' ? 120 : 180;
@@ -143,7 +124,7 @@ RULES:
     }
 
     const data = await res.json();
-    const rawMessage = data.content?.[0]?.text || '';
+    const rawMessage: string = data.content?.[0]?.text || '';
 
     // Parse subject for emails
     let subject: string | undefined;
@@ -161,6 +142,27 @@ RULES:
       }
     }
 
+    // ── QUALITY GATE — 4 layers blocking ──
+    const langCode = language === 'German' ? 'de' : language === 'French' ? 'fr' : 'en';
+    const gate: GateResult = qualityGate(
+      subject,
+      messageBody,
+      {
+        co: prospect.company,
+        lang: langCode,
+        industry: prospect.industry,
+        size: prospect.headcount ? String(prospect.headcount) : undefined,
+        contact: {
+          name: `${prospect.firstName}${prospect.lastName ? ' ' + prospect.lastName : ''}`,
+          email: prospect.email,
+        },
+      },
+      'standard',
+    );
+
+    // Legacy string for retro-compat (V6 cockpit lit gateResult.startsWith('PASS') à plusieurs endroits)
+    const gateResult = gate.decision;
+
     return NextResponse.json({
       subject,
       body: messageBody,
@@ -173,11 +175,19 @@ RULES:
         (prospect.headcount ? 5 : 0) +
         (scan?.signals?.length || 0) * 5 +
         (prospect.signals?.length || 0) * 5,
-        100
+        100,
       ),
       channel,
       sequenceStep,
       price,
+      gateResult,
+      gate: {
+        decision: gate.decision,
+        scores: gate.scores,
+        hardBlockers: gate.hardBlockers,
+        regenerateHints: gate.regenerateHints,
+        auditLog: gate.auditLog,
+      },
     });
   } catch (err) {
     return NextResponse.json(
