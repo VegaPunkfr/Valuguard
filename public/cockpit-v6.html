@@ -63,6 +63,15 @@ hr{border:none}
 .tb-fresh .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
 .tb-palette,.tb-settings{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--edge-faint);border-radius:var(--r-1);background:var(--glass-01);color:var(--ink-500);transition:all var(--dur-quick) var(--ease-out-quart)}
 .tb-palette:hover,.tb-settings:hover{color:var(--ink-300);border-color:var(--edge-soft);background:var(--glass-02)}
+/* J4 — LIVE realtime indicator */
+.tb-live{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-500);border:1px solid var(--edge-faint);border-radius:var(--r-1);background:var(--glass-01);user-select:none;cursor:help}
+.tb-live .tb-live-dot{width:6px;height:6px;border-radius:50%;background:#555;transition:background var(--dur-quick) var(--ease-out-quart)}
+.tb-live[data-status="open"] .tb-live-dot{background:var(--success,#3fb950);box-shadow:0 0 6px rgba(63,185,80,0.55);animation:gtLivePulse 2.4s ease-in-out infinite}
+.tb-live[data-status="open"]{color:var(--ink-300)}
+.tb-live[data-status="connecting"] .tb-live-dot{background:#d29922;animation:gtLivePulse 1s ease-in-out infinite}
+.tb-live[data-status="error"] .tb-live-dot{background:#f85149}
+.tb-live[data-status="error"]{color:#f85149;border-color:rgba(248,81,73,0.35)}
+@keyframes gtLivePulse{0%,100%{opacity:1}50%{opacity:0.35}}
 
 /* ══════════════════ MANDATE BAR (L10N width tweaks) ══════════════════ */
 .mandate-bar{position:sticky;top:48px;z-index:40;height:72px;display:flex;align-items:stretch;padding:0 24px;background:var(--glass-02);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);border-bottom:1px solid var(--edge-soft)}
@@ -504,6 +513,68 @@ a.tb-brand:hover{opacity:0.8}
 .gate-hints-list li{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--ink-500);padding-left:10px;position:relative}
 .gate-hints-list li::before{content:"▸";position:absolute;left:0;color:var(--ink-700)}
 
+/* ── MODULE BRIEF DU JOUR (J5 · CEO 10-min view) ── */
+.brief-view{padding:24px 32px 48px;display:flex;flex-direction:column;gap:20px}
+.brief-layout{display:grid;grid-template-columns:1fr;gap:20px;max-width:1200px;margin:0 auto;width:100%}
+.brief-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:16px 20px;border:1px solid var(--edge-soft);border-radius:var(--r-1);background:var(--glass-02)}
+.brief-header-left{display:flex;flex-direction:column;gap:4px}
+.brief-coord{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-700);text-transform:uppercase}
+.brief-title{font-family:var(--font-display),var(--font-mono);font-size:22px;line-height:28px;letter-spacing:0.04em;color:var(--ink-100);font-weight:500;margin:0}
+.brief-sub{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;color:var(--ink-500);text-transform:uppercase}
+.brief-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.brief-mode-toggle{display:inline-flex;border:1px solid var(--edge-soft);border-radius:var(--r-1);overflow:hidden;background:var(--glass-01)}
+.brief-mode-toggle[data-disabled="true"]{opacity:0.5;pointer-events:none}
+.brief-mode-btn{padding:6px 14px;background:none;border:none;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-500);cursor:pointer;transition:color var(--dur-quick),background var(--dur-quick)}
+.brief-mode-btn[aria-pressed="true"]{color:var(--ink-100);background:var(--glass-02)}
+.brief-mode-btn:hover{color:var(--ink-300)}
+.brief-mode-btn:first-child{border-right:1px solid var(--edge-soft)}
+.brief-mode-source{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--ink-700);text-transform:uppercase}
+
+.brief-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--edge-soft);border:1px solid var(--edge-soft);border-radius:var(--r-1);overflow:hidden}
+.brief-kpi{display:flex;flex-direction:column;gap:6px;padding:16px 20px;background:var(--carbon-900)}
+.brief-kpi dt{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-700);text-transform:uppercase;margin:0}
+.brief-kpi dd{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--ink-100);margin:0;line-height:1}
+
+.brief-linkedin,.brief-hot,.brief-cost-of-delay{border:1px solid var(--edge-soft);border-radius:var(--r-1);background:var(--glass-02);padding:0;display:flex;flex-direction:column}
+.brief-section-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--edge-faint)}
+.brief-section-head .coord{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;color:var(--ink-700);text-transform:uppercase}
+.brief-section-title{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.14em;color:var(--ink-300);text-transform:uppercase;margin:0;flex:1}
+.brief-section-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-500);text-transform:uppercase}
+
+.brief-linkedin-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.brief-linkedin-text{font-family:var(--font-mono);font-size:13px;line-height:1.6;color:var(--ink-100);white-space:pre-wrap;margin:0;padding:16px;background:var(--glass-01);border:1px solid var(--edge-faint);border-radius:var(--r-1);max-height:360px;overflow-y:auto}
+.brief-linkedin-actions{display:flex;gap:12px}
+.brief-copy,.brief-regen{padding:8px 16px;background:none;border:1px solid var(--edge-soft);border-radius:var(--r-1);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.14em;color:var(--ink-300);text-transform:uppercase;cursor:pointer;transition:all var(--dur-quick)}
+.brief-copy{color:var(--accent);border-color:var(--accent)}
+.brief-copy:hover{background:rgba(95,212,224,0.08)}
+.brief-regen:hover{color:var(--ink-100);border-color:var(--edge-strong)}
+
+.brief-hot-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.brief-hot-list .brief-empty{padding:20px;font-family:var(--font-mono);font-size:11px;color:var(--ink-700);text-align:center;letter-spacing:0.08em}
+.brief-hot-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--edge-faint);transition:background var(--dur-quick)}
+.brief-hot-row:last-child{border-bottom:none}
+.brief-hot-row:hover{background:var(--glass-01)}
+.brief-hot-heat{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;font-weight:700;border:2px solid var(--edge-soft);color:var(--ink-300)}
+.brief-hot-heat[data-heat="fire"]{color:var(--alert);border-color:var(--alert)}
+.brief-hot-heat[data-heat="warm"]{color:var(--warn);border-color:var(--warn)}
+.brief-hot-heat[data-heat="cool"]{color:var(--accent);border-color:var(--accent)}
+.brief-hot-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.brief-hot-name{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--ink-100);letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brief-hot-meta{font-family:var(--font-mono);font-size:10px;color:var(--ink-500);letter-spacing:0.08em}
+.brief-hot-reason{font-family:var(--font-mono);font-size:10px;color:var(--ink-700);letter-spacing:0.04em;margin-top:2px}
+.brief-hot-actions{display:flex;gap:8px;flex-shrink:0}
+.brief-hot-btn{padding:6px 12px;background:none;border:1px solid var(--edge-soft);border-radius:var(--r-1);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.14em;color:var(--ink-500);text-transform:uppercase;cursor:pointer;transition:all var(--dur-quick)}
+.brief-hot-btn:hover{color:var(--ink-100);border-color:var(--edge-strong)}
+.brief-hot-btn.primary{color:var(--accent);border-color:var(--accent)}
+.brief-hot-btn.primary:hover{background:rgba(95,212,224,0.08)}
+
+.brief-cost-of-delay{border-color:rgba(242,113,85,0.3)}
+.brief-cod-body{padding:16px 20px;font-family:var(--font-mono);font-size:13px;color:var(--ink-300);line-height:1.6}
+.brief-cod-amount{font-size:20px;font-weight:700;color:var(--alert);letter-spacing:0.02em}
+.brief-cod-muted{color:var(--ink-500);font-size:11px}
+
+@media (max-width:900px){.brief-kpis{grid-template-columns:repeat(2,1fr)}.brief-header{flex-direction:column;gap:12px}.brief-header-right{align-items:flex-start}}
+
 /* ── MODULE CONVERSATIONS — split 40/60 ── */
 .conversations-view{padding:0!important;display:flex!important;height:calc(100vh - 220px)}
 .conv-layout{display:grid;grid-template-columns:40% 60%;width:100%;height:100%}
@@ -866,8 +937,14 @@ a.tb-brand:hover{opacity:0.8}
     <button class="tb-tab" data-tab="conversations">Conversations</button>
     <button class="tb-tab" data-tab="sources">Sources</button>
     <button class="tb-tab" data-tab="apollo">Apollo Sync</button>
+    <button class="tb-tab" data-tab="brief">Brief du jour</button>
   </nav>
   <div class="tb-right">
+    <!-- J4 — LIVE indicator (Supabase realtime) -->
+    <span class="tb-live" id="gt-live-indicator" data-status="off" title="Realtime : non initialisé" aria-label="Indicateur realtime">
+      <span class="tb-live-dot"></span>
+      <span class="tb-live-label">LIVE</span>
+    </span>
     <button class="tb-fresh" id="freshness-badge" title="Forcer la revalidation">
       <span class="dot" id="fresh-dot"></span>
       <span id="freshness-label">—</span>
@@ -1161,6 +1238,56 @@ a.tb-brand:hover{opacity:0.8}
   </div>
 </main>
 
+<!-- ═══ VIEW : BRIEF DU JOUR (J5 — Morning Brief CEO 10-min) ═══ -->
+<main class="view brief-view" id="view-brief" role="main" hidden>
+  <div class="brief-layout">
+    <header class="brief-header">
+      <div class="brief-header-left">
+        <div class="brief-coord">B.01</div>
+        <h1 class="brief-title" id="brief-date">—</h1>
+        <div class="brief-sub" id="brief-dur">— · 10 min</div>
+      </div>
+      <div class="brief-header-right">
+        <div class="brief-mode-toggle" id="brief-mode-toggle" data-mode="assisted" aria-label="Bascule niveau d'autonomie">
+          <button class="brief-mode-btn" data-brief-mode="assisted" aria-pressed="true">ASSISTÉ</button>
+          <button class="brief-mode-btn" data-brief-mode="autonomous" aria-pressed="false">AUTONOME</button>
+        </div>
+        <div class="brief-mode-source" id="brief-mode-source">L1 · SUPERVISÉ</div>
+      </div>
+    </header>
+
+    <section class="brief-kpis" id="brief-kpis">
+      <div class="brief-kpi"><dt>EXPOSITION TOTALE</dt><dd id="brief-kpi-exposure">—</dd></div>
+      <div class="brief-kpi"><dt>HOT (SCORE ≥ 80)</dt><dd id="brief-kpi-hot">—</dd></div>
+      <div class="brief-kpi"><dt>TAUX DE RÉPONSE</dt><dd id="brief-kpi-reply">—</dd></div>
+      <div class="brief-kpi"><dt>FILE EN ATTENTE</dt><dd id="brief-kpi-queue">—</dd></div>
+    </section>
+
+    <section class="brief-linkedin">
+      <div class="brief-section-head"><span class="coord">B.02</span><h2 class="brief-section-title">POST DU JOUR</h2><span class="brief-section-sub" id="brief-linkedin-format">—</span></div>
+      <div class="brief-linkedin-body">
+        <pre class="brief-linkedin-text" id="brief-linkedin-text">—</pre>
+        <div class="brief-linkedin-actions">
+          <button class="brief-copy" id="brief-copy-btn">COPIER POUR LINKEDIN</button>
+          <button class="brief-regen" id="brief-regen-btn">RÉGÉNÉRER</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="brief-hot">
+      <div class="brief-section-head"><span class="coord">B.03</span><h2 class="brief-section-title">TOP 5 À ACTIVER</h2><span class="brief-section-sub" id="brief-hot-count">—</span></div>
+      <ol class="brief-hot-list" id="brief-hot-list">
+        <li class="brief-empty">Aucun prospect prêt.</li>
+      </ol>
+    </section>
+
+    <section class="brief-cost-of-delay" id="brief-cod">
+      <div class="brief-section-head"><span class="coord">B.04</span><h2 class="brief-section-title">COÛT DU DÉLAI</h2></div>
+      <div class="brief-cod-body" id="brief-cod-body">—</div>
+    </section>
+  </div>
+</main>
+
 </div><!-- /view-root -->
 
 <!-- ══════ FICHE CLIENT ══════ -->
@@ -1289,6 +1416,9 @@ a.tb-brand:hover{opacity:0.8}
 
 <!-- Message Forge — chargement AVANT le monolithe pour exposer window.MessageForge -->
 <script src="/cockpit/modules/message-forge.js"></script>
+
+<!-- Supabase Realtime (J4) — expose window.GhostRealtime, chargé AVANT bootstrap -->
+<script src="/cockpit/modules/supabase-realtime.js"></script>
 
 <!-- Smart Scheduling (J3) — expose window.SendWindow via ES module -->
 <script type="module" src="/cockpit/recon-utils.js"></script>
@@ -1531,6 +1661,7 @@ function showView(view){
   if (view === 'sources') renderSourcesView();
   if (view === 'command') renderCommandView();
   if (view === 'apollo') renderApolloView();
+  if (view === 'brief') renderBriefView();
 }
 
 document.querySelectorAll('.tb-tab').forEach(t => {
@@ -1651,6 +1782,373 @@ function renderBrief(){
     <button class="link-ghost" data-action="go-clients">VOIR LES CLIENTS ↗</button>
   `;
   body.querySelectorAll('[data-action="go-clients"]').forEach(b => b.addEventListener('click',()=>showView('clients')));
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   J5 — BRIEF DU JOUR (CEO 10-min view)
+   ══════════════════════════════════════════════════════════════════ */
+const BRIEF_LINKEDIN_FORMATS = ['Chiffre Choc', 'Histoire Client', 'Prise de Position'];
+// Cycle hebdo : Lun/Jeu = chiffre choc | Mar/Ven = histoire client | Mer/Sam = prise de position | Dim = repos
+// getDay(): 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
+const BRIEF_FORMAT_BY_DAY = { 0:0, 1:0, 2:1, 3:2, 4:0, 5:1, 6:2 };
+
+function briefFormatLabel(date){
+  const idx = BRIEF_FORMAT_BY_DAY[(date || new Date()).getDay()] ?? 0;
+  return BRIEF_LINKEDIN_FORMATS[idx];
+}
+
+function briefDateStr(date){
+  const d = date || new Date();
+  const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function briefParseExposure(val){
+  if (val == null) return 0;
+  if (typeof val === 'number') return val;
+  const digits = String(val).replace(/[^0-9]/g,'');
+  return digits ? parseInt(digits, 10) : 0;
+}
+
+// Exposition dérivée depuis un client V6 adapté (pas de champ exp direct — on synthétise depuis headcount + market)
+function briefEstimateExposure(client){
+  // baseline 400€/mois/employé · 15% exposition ghost SaaS · 12 mois
+  const hc = typeof client?.headcount === 'number' ? client.headcount : parseInt(String(client?.headcount||'100').replace(/[^0-9]/g,''),10) || 100;
+  const market = (client?.market || '').toUpperCase();
+  const ppl = market === 'DE' || market === 'CH' ? 440 : 400;
+  return Math.round(hc * ppl * 0.15 * 12);
+}
+
+function briefHotTier(score){
+  if (score >= 85) return 'fire';
+  if (score >= 70) return 'warm';
+  return 'cool';
+}
+
+function briefComputeReason(client){
+  const bits = [];
+  if (client.primarySignal && client.primarySignal !== '—') bits.push(client.primarySignal);
+  if (client.industry && client.industry !== '—') bits.push(client.industry);
+  if (client.headcount) bits.push(`${client.headcount} pers.`);
+  return bits.slice(0,3).join(' · ') || 'Signal prioritaire';
+}
+
+function renderBriefKpis(){
+  const clients = (state && state.clients) || [];
+  const totalExp = clients.reduce((s,c) => s + briefEstimateExposure(c), 0);
+  const hotCount = clients.filter(c => (c.score || 0) >= 80).length;
+  const sent = clients.filter(c => c.state === 'SENT').length;
+  const replied = clients.filter(c => c.state === 'REPLIED').length;
+  const queue = clients.filter(c => c.state === 'READY' || c.state === 'SCHEDULED' || c.state === 'DRAFT_REVIEW').length;
+  const replyRate = sent > 0 ? Math.round((replied / sent) * 100) : 0;
+
+  const fmt = (n) => n >= 1_000_000 ? (n/1_000_000).toFixed(1)+'M€' : n >= 1_000 ? Math.round(n/1_000)+'k€' : n+'€';
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('brief-kpi-exposure', fmt(totalExp));
+  set('brief-kpi-hot', String(hotCount));
+  set('brief-kpi-reply', replyRate + '%');
+  set('brief-kpi-queue', String(queue));
+}
+
+function generateLinkedInPost(date){
+  const d = date || new Date();
+  const fmt = briefFormatLabel(d);
+  const clients = (state && state.clients) || [];
+  const hot = clients.filter(c => (c.score||0) >= 75).sort((a,b)=>(b.score||0)-(a.score||0))[0];
+  const totalExp = clients.reduce((s,c) => s + briefEstimateExposure(c), 0);
+  const fmtE = (n) => n >= 1_000_000 ? (n/1_000_000).toFixed(1)+'M€' : n >= 1_000 ? Math.round(n/1_000)+'k€' : n+'€';
+
+  // Ghost Realtime vault_sessions (si dispo) — signal qu'une session réelle a été scannée aujourd'hui
+  const hasRealtime = typeof window !== 'undefined' && !!window.GhostRealtime;
+
+  if (fmt === 'Chiffre Choc') {
+    return [
+      `${clients.length || 'Plusieurs'} entreprises scannées cette semaine.`,
+      ``,
+      `Exposition SaaS cumulée détectée : ${fmtE(totalExp || 1_800_000)}.`,
+      `Moyenne par boîte : ${fmtE(Math.round((totalExp || 1_800_000)/(clients.length || 12)))}.`,
+      ``,
+      `Ce n'est pas de la négligence.`,
+      `C'est que personne n'a la vue d'ensemble :`,
+      `— le CFO voit les factures`,
+      `— l'IT voit les outils`,
+      `— le Procurement voit les contrats`,
+      `— personne ne voit l'intersection`,
+      ``,
+      `Scan Ghost Tax : 48h. Rapport CFO-ready.`,
+      ``,
+      `#SaaS #FinOps #CFO #GhostTax`
+    ].join('\n');
+  }
+
+  if (fmt === 'Histoire Client') {
+    const target = hot || { company: 'Une scale-up fintech 250 personnes', industry:'SaaS', headcount:250 };
+    const exp = briefEstimateExposure(target);
+    return [
+      `${target.company}.`,
+      ``,
+      `${target.headcount || '250'} personnes. ${target.industry || 'Scale-up tech'}.`,
+      `Scan Ghost Tax terminé en 48h.`,
+      ``,
+      `Trouvé : ${fmtE(exp || 240_000)} d'exposition SaaS cachée.`,
+      `— ${Math.round((exp||240_000)*0.4/1000)}k€ de doublons d'outils`,
+      `— ${Math.round((exp||240_000)*0.35/1000)}k€ de licences dormantes`,
+      `— ${Math.round((exp||240_000)*0.25/1000)}k€ de renouvellements auto sans benchmark`,
+      ``,
+      `Récupération estimée première année : ${fmtE(Math.round((exp||240_000)*0.6))}.`,
+      ``,
+      `Le CFO a validé le Decision Pack en 72h.`,
+      ``,
+      hasRealtime ? `Sessions live en cours sur le cockpit.` : `Prochain scan dispo cette semaine.`,
+      ``,
+      `#GhostTax #SaaSOptimization #Finance`
+    ].join('\n');
+  }
+
+  // Prise de Position
+  return [
+    `Une opinion impopulaire :`,
+    ``,
+    `Les Big 4 facturent 180k€ pour un audit SaaS qui prend 6 mois.`,
+    `Pendant ces 6 mois, votre exposition grossit de 12% (inflation SaaS 2026).`,
+    ``,
+    `Math brutale :`,
+    `— Audit Big 4 : 180k€ + 6 mois d'attente`,
+    `— Coût du délai sur ${fmtE(totalExp || 2_000_000)} d'exposition : ${fmtE(Math.round((totalExp||2_000_000)*0.06))}`,
+    `— Total caché : ${fmtE(180_000 + Math.round((totalExp||2_000_000)*0.06))}`,
+    ``,
+    `Ghost Tax : 490€, livré en 48h.`,
+    `Pas en 6 mois.`,
+    `Pas 180k€.`,
+    ``,
+    `La vitesse est la nouvelle défense du CFO.`,
+    ``,
+    `#FinOps #CFO #GhostTax`
+  ].join('\n');
+}
+
+function computeCostOfDelay(){
+  const clients = (state && state.clients) || [];
+  const queue = clients.filter(c => c.state === 'READY' || c.state === 'DRAFT_REVIEW');
+  if (queue.length === 0) return { queue:0, daily:0, text:'File vide — aucun coût de délai.' };
+
+  const avgExp = queue.reduce((s,c) => s + briefEstimateExposure(c), 0) / queue.length;
+  // SaaS inflation 12%/an ≈ 0.033%/jour
+  const dailyRate = 0.12 / 365;
+  const dailyLossPerProspect = avgExp * dailyRate;
+  const totalDaily = dailyLossPerProspect * queue.length;
+  return {
+    queue: queue.length,
+    daily: Math.round(totalDaily),
+    avg: Math.round(avgExp),
+    perProspect: Math.round(dailyLossPerProspect),
+  };
+}
+
+function copyLinkedInToClipboard(){
+  const el = document.getElementById('brief-linkedin-text');
+  const text = el ? el.textContent : '';
+  if (!text || text === '—') return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => { if (typeof flashToast === 'function') flashToast('Post LinkedIn copié'); },
+      () => { if (typeof flashToast === 'function') flashToast('Échec de la copie', true); }
+    );
+  } else {
+    // Fallback
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (typeof flashToast === 'function') flashToast('Post LinkedIn copié');
+    } catch(_) {}
+  }
+}
+
+function renderBriefHotList(){
+  const list = document.getElementById('brief-hot-list');
+  const countEl = document.getElementById('brief-hot-count');
+  if (!list) return;
+  const clients = (state && state.clients) || [];
+  const candidates = clients
+    .filter(c => c.state === 'READY' || c.state === 'DRAFT_REVIEW')
+    .sort((a,b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 5);
+
+  if (countEl) countEl.textContent = `${candidates.length} / 5`;
+
+  if (candidates.length === 0) {
+    list.innerHTML = '<li class="brief-empty">Aucun prospect prêt à activer.</li>';
+    return;
+  }
+
+  list.innerHTML = candidates.map(c => {
+    const heat = briefHotTier(c.score || 0);
+    const exp = briefEstimateExposure(c);
+    const expStr = exp >= 1000 ? Math.round(exp/1000)+'k€' : exp+'€';
+    const reason = briefComputeReason(c);
+    const safeId = String(c.id || '').replace(/"/g,'&quot;');
+    const name = (c.contact?.name && c.contact.name !== '—') ? c.contact.name : (c.contact?.title || 'Contact');
+    const isDraft = c.state === 'DRAFT_REVIEW' && c.draft;
+    return `<li class="brief-hot-row" data-id="${safeId}">
+      <div class="brief-hot-heat" data-heat="${heat}">${c.score || 0}</div>
+      <div class="brief-hot-info">
+        <div class="brief-hot-name">${esc(c.company || '—')} · ${esc(name)}</div>
+        <div class="brief-hot-meta">${esc(c.market || '—')} · ${expStr} exposition · ${esc(c.state)}</div>
+        <div class="brief-hot-reason">${esc(reason)}</div>
+      </div>
+      <div class="brief-hot-actions">
+        <button class="brief-hot-btn" data-brief-action="open" data-id="${safeId}">OUVRIR</button>
+        <button class="brief-hot-btn primary" data-brief-action="${isDraft ? 'approve' : 'forge'}" data-id="${safeId}">${isDraft ? 'APPROUVER' : 'FORGER'}</button>
+      </div>
+    </li>`;
+  }).join('');
+
+  list.querySelectorAll('[data-brief-action]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const action = e.currentTarget.getAttribute('data-brief-action');
+      const id = e.currentTarget.getAttribute('data-id');
+      const client = clients.find(x => String(x.id) === String(id));
+      if (!client) return;
+      if (action === 'open') {
+        state.currentClientId = client.id;
+        if (typeof openDrawer === 'function') openDrawer(client.id);
+        showView('clients');
+      } else if (action === 'forge' || action === 'approve') {
+        state.currentClientId = client.id;
+        showView('clients');
+        setTimeout(() => { if (typeof openDrawer === 'function') openDrawer(client.id); }, 80);
+      }
+    });
+  });
+}
+
+function renderBriefCostOfDelay(){
+  const el = document.getElementById('brief-cod-body');
+  if (!el) return;
+  const cod = computeCostOfDelay();
+  if (cod.queue === 0) {
+    el.innerHTML = `<span class="brief-cod-muted">${cod.text}</span>`;
+    return;
+  }
+  el.innerHTML = `
+    <div><span class="brief-cod-amount">${cod.daily.toLocaleString('fr-FR')} €</span> perdus chaque jour de retard</div>
+    <div class="brief-cod-muted" style="margin-top:8px">
+      ${cod.queue} prospect${cod.queue>1?'s':''} en attente · exposition moyenne ${cod.avg.toLocaleString('fr-FR')} €
+      · inflation SaaS 12%/an appliquée (≈ ${cod.perProspect.toLocaleString('fr-FR')} €/jour/prospect)
+    </div>
+  `;
+}
+
+function syncBriefModeToggle(){
+  const toggle = document.getElementById('brief-mode-toggle');
+  const src = document.getElementById('brief-mode-source');
+  if (!toggle) return;
+  const level = (state && state.mandate && typeof state.mandate.level === 'number') ? state.mandate.level : 0;
+  // L0 = désactivé · L1 = ASSISTÉ · L2 ou L3 = AUTONOME
+  const mode = level >= 2 ? 'autonomous' : 'assisted';
+  toggle.setAttribute('data-mode', mode);
+  toggle.setAttribute('data-disabled', level === 0 ? 'true' : 'false');
+  toggle.querySelectorAll('.brief-mode-btn').forEach(b => {
+    const pressed = b.getAttribute('data-brief-mode') === mode;
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+  });
+  if (src) {
+    const labels = { 0:'L0 · INACTIF', 1:'L1 · SUPERVISÉ', 2:'L2 · AUTONOME', 3:'L3 · AUTONOME+' };
+    src.textContent = labels[level] || 'L? · —';
+  }
+}
+
+async function handleBriefModeClick(e){
+  const btn = e.currentTarget;
+  const toggle = document.getElementById('brief-mode-toggle');
+  if (!toggle || toggle.getAttribute('data-disabled') === 'true') return;
+  const requested = btn.getAttribute('data-brief-mode');
+  const currentLevel = (state && state.mandate && typeof state.mandate.level === 'number') ? state.mandate.level : 0;
+  if (currentLevel === 0) return;
+  let newLevel = currentLevel;
+  if (requested === 'autonomous' && currentLevel < 2) newLevel = 2;
+  else if (requested === 'assisted' && currentLevel >= 2) newLevel = 1;
+  if (newLevel === currentLevel) return;
+
+  toggle.setAttribute('data-disabled', 'true');
+  try {
+    if (typeof api === 'function') {
+      await api('/api/command/sprint', { method:'POST', body:{ setting:'autonomy_level', value:newLevel }});
+      if (typeof fetchSprint === 'function') await fetchSprint();
+    } else if (state && state.mandate) {
+      state.mandate.level = newLevel;
+    }
+    try { localStorage.setItem('gt_cockpit_mandate_level', String(newLevel)); } catch(_) {}
+    syncBriefModeToggle();
+    if (typeof renderCommandView === 'function') renderCommandView();
+    if (typeof flashToast === 'function') flashToast('Autonomie → L' + newLevel);
+  } catch(err) {
+    if (typeof flashToast === 'function') flashToast('Échec : ' + (err && err.message || 'erreur'), true);
+  }
+  toggle.setAttribute('data-disabled', 'false');
+}
+
+function renderBriefView(){
+  const now = new Date();
+  const dateEl = document.getElementById('brief-date');
+  const durEl = document.getElementById('brief-dur');
+  const fmtEl = document.getElementById('brief-linkedin-format');
+  const txtEl = document.getElementById('brief-linkedin-text');
+
+  if (dateEl) dateEl.textContent = briefDateStr(now);
+  if (durEl) durEl.textContent = 'Brief CEO · 10 min';
+  if (fmtEl) fmtEl.textContent = briefFormatLabel(now);
+  if (txtEl) txtEl.textContent = generateLinkedInPost(now);
+
+  renderBriefKpis();
+  renderBriefHotList();
+  renderBriefCostOfDelay();
+  syncBriefModeToggle();
+
+  // Wire buttons (idempotent — re-bind every render is fine)
+  const copyBtn = document.getElementById('brief-copy-btn');
+  if (copyBtn && !copyBtn.__wired) {
+    copyBtn.addEventListener('click', copyLinkedInToClipboard);
+    copyBtn.__wired = true;
+  }
+  const regenBtn = document.getElementById('brief-regen-btn');
+  if (regenBtn && !regenBtn.__wired) {
+    regenBtn.addEventListener('click', () => {
+      // cycle to next format for demo purposes
+      const el = document.getElementById('brief-linkedin-text');
+      if (!el) return;
+      const futureDay = (new Date().getDay() + 1) % 7;
+      const fake = new Date(); fake.setDate(fake.getDate() + 1);
+      const fmt = document.getElementById('brief-linkedin-format');
+      if (fmt) fmt.textContent = briefFormatLabel(fake);
+      el.textContent = generateLinkedInPost(fake);
+    });
+    regenBtn.__wired = true;
+  }
+  const toggle = document.getElementById('brief-mode-toggle');
+  if (toggle && !toggle.__wired) {
+    toggle.querySelectorAll('.brief-mode-btn').forEach(b => b.addEventListener('click', handleBriefModeClick));
+    toggle.__wired = true;
+  }
+}
+
+// Expose helpers pour test runtime Node / introspection
+if (typeof window !== 'undefined') {
+  window.__ghostBrief = {
+    generateLinkedInPost,
+    computeCostOfDelay,
+    briefFormatLabel,
+    briefDateStr,
+    briefEstimateExposure,
+    briefHotTier,
+    renderBriefView,
+  };
 }
 
 function renderQueue(){
@@ -2936,11 +3434,81 @@ async function bootstrap(){
     updateFreshnessLabel();
     // V6 Phase 1 : autonomy guard check at boot
     checkAutonomyGuardAsync();
+    // J4 — bootstrap Supabase realtime (non-bloquant, fail-gracieux)
+    initRealtimeLive();
   } catch(e) {
     if (e.message === 'unauthorized') return;
     console.error('Échec du démarrage :', e);
     flashToast('ÉCHEC DU DÉMARRAGE', true);
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   J4 — Supabase realtime integration (outreach_leads, osint_prospects, vault_sessions)
+   ══════════════════════════════════════════════════════════════════ */
+function updateLiveIndicator(status){
+  const el = document.getElementById('gt-live-indicator');
+  if (!el) return;
+  const map = { OPEN:'open', CONNECTING:'connecting', ERROR:'error', CLOSED:'off', NOT_INITIALIZED:'off' };
+  const ds = map[status] || 'off';
+  el.setAttribute('data-status', ds);
+  const last = (window.GhostRealtime && window.GhostRealtime.lastActivity && window.GhostRealtime.lastActivity()) || null;
+  let tt = 'Realtime : ' + status;
+  if (last) {
+    const ago = Math.round((Date.now() - last) / 1000);
+    tt += ' · dernière activité il y a ' + ago + 's';
+  }
+  el.setAttribute('title', tt);
+}
+setInterval(function(){
+  if (window.GhostRealtime) updateLiveIndicator(window.GhostRealtime.status());
+}, 5000);
+
+function initRealtimeLive(){
+  if (!window.GhostRealtime) {
+    console.warn('[V6] GhostRealtime absent — skipping realtime init');
+    return;
+  }
+  window.GhostRealtime.onEvent(function(ev){
+    if (ev.type === 'status') updateLiveIndicator(ev.status);
+  });
+  updateLiveIndicator('CONNECTING');
+  window.GhostRealtime.init().then(function(){
+    updateLiveIndicator('OPEN');
+    // Subscribe to outreach_leads → invalider state.clients + refetch sprint
+    window.GhostRealtime.subscribe('outreach_leads', function(payload){
+      // Debounce : si déjà un refetch en cours, skip
+      if (state._realtimeRefetchPending) return;
+      state._realtimeRefetchPending = true;
+      setTimeout(function(){
+        state._realtimeRefetchPending = false;
+        fetchSprint().then(function(){
+          if (typeof renderCommandView === 'function') renderCommandView();
+        }).catch(function(e){ console.debug('[realtime] refetch failed', e); });
+      }, 500);
+    });
+    // Subscribe to osint_prospects → INSERT uniquement, ajout pipeline
+    window.GhostRealtime.subscribe('osint_prospects', function(payload){
+      if (payload && payload.eventType === 'INSERT') {
+        if (typeof flashToast === 'function') {
+          const name = (payload.new && (payload.new.company_name || payload.new.domain)) || 'prospect';
+          flashToast('Nouveau prospect · ' + name, false);
+        }
+      }
+    });
+    // Subscribe to vault_sessions → toast nouvelle session
+    window.GhostRealtime.subscribe('vault_sessions', function(payload){
+      if (payload && payload.eventType === 'INSERT') {
+        if (typeof flashToast === 'function') {
+          const company = (payload.new && (payload.new.company_name || payload.new.email || 'entité')) || 'entité';
+          flashToast('Nouvelle session intel · ' + company, false);
+        }
+      }
+    });
+  }).catch(function(e){
+    console.warn('[V6] Realtime init failed — cockpit fonctionne en mode polling manuel', e);
+    updateLiveIndicator('ERROR');
+  });
 }
 async function checkAutonomyGuardAsync(){
   try {
